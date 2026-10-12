@@ -1,0 +1,28 @@
+{
+  "archive_roundtrip": {
+    "archive_bytes": 572559891,
+    "archive_sha256": "a332e3d1d68515e88e0c7ab04c6d40486dd5583d06b61a6a2f0ec5b3a3e4cdad",
+    "every_member_sha256_matched": true,
+    "files": 46454
+  },
+  "checked_at": "2026-10-12T02:20:16.897292+00:00",
+  "frozen_regression": {
+    "source_files": 347,
+    "source_unchanged": true,
+    "tests_reused": 476,
+    "verification": "artifacts/reviews/m3-switch-screen/verification.json"
+  },
+  "production_screen_status": "audit-running; no completion or learning result claimed",
+  "secret_scan": {
+    "files": 68123,
+    "literal_key_patterns": [
+      "PEM private key",
+      "GitHub token",
+      "OpenAI token",
+      "AWS access key ID",
+      "Slack token"
+    ],
+    "matches": 0,
+    "scope": "Git candidates and all existing run files before adding backup-only metadata; not a claim to detect every possible secret"
+  }
+}

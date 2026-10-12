@@ -14,7 +14,7 @@ contains `pokemon-runs-20261012.tar.zst` and `SHA256SUMS`. The
 [file inventory](artifacts/repository-backups/runs-20261012.json) records every
 relative path, byte count and SHA-256. The archive contains all 46,454 files then
 present under `artifacts/runs`: 3,786,388,912 uncompressed bytes, stored in a
-1,051,760,828-byte archive. Every archived file was independently decompressed and
+572,559,891-byte archive. Every archived file was independently decompressed and
 hashed against that inventory before upload.
 
 The snapshot was taken on October 12, 2026, from 02:13:10 to 02:13:25 UTC. The
@@ -39,7 +39,7 @@ mkdir -p /tmp/pokemon-run-backup
 gh release download snapshot-2026-10-12 --repo mfflanag1/pokemon-rl \
   --dir /tmp/pokemon-run-backup
 (cd /tmp/pokemon-run-backup && shasum -a 256 -c SHA256SUMS)
-zstd -dc /tmp/pokemon-run-backup/pokemon-runs-20261012.tar.zst | tar -xf -
+zstd -dc --long=29 /tmp/pokemon-run-backup/pokemon-runs-20261012.tar.zst | tar -xf -
 ```
 
 Extract only into a fresh clone so an old snapshot cannot overwrite newer results.

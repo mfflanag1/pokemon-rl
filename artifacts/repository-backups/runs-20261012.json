@@ -1,9 +1,11 @@
 {
   "archive": {
-    "bytes": 1051760828,
+    "bytes": 572559891,
     "name": "pokemon-runs-20261012.tar.zst",
-    "sha256": "c61d0fc3f66e5d5273996cbcd6c6170667a133378a15c29e521976a69731f593"
+    "sha256": "a332e3d1d68515e88e0c7ab04c6d40486dd5583d06b61a6a2f0ec5b3a3e4cdad",
+    "zstd_decoder_window_log": 29
   },
+  "archive_verified_at": "2026-10-12T02:20:16.897292+00:00",
   "completed_at": "2026-10-12T02:13:25.955974+00:00",
   "file_count": 46454,
   "files": {
