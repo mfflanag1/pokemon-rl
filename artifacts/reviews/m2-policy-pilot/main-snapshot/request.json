@@ -1,0 +1,23 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the NEW restricted-policy development pilot before production. Focus on implementation correctness and consequential claim risks: real pinned Showdown adapter, private player-view-only inference, fixed 3-seed/3-checkpoint/3-opponent/1000-pair plan, paired bootstrap alpha family of six score/improvement bounds, exact binary actor/key consistency between live collection and full tape audit, final reservation/predecessor preservation, checkpoint/report/evidence sealer. Existing Python learner, reducer and binary sampler are sealed tested dependencies; this milestone adds only a development evaluation and cannot close full G2/G3. Actor is linear row-independent. Both moves have same damage; damage-greedy breaks tie by higher priority. Two seat games share a Showdown seed but diverging actions do not imply coupled chance events. Tests run so far: new Node adapter 3 pass; prefix reconstruction and actor boundary 4 pass. Statistics helper is independently delegated with opposite-model QA; its contract averages seats first, resamples same pair indexes for candidate/baseline, has finite JSON outputs and ValueError rejection. No production result has been observed. Identify concrete blocking bugs or invalid statistical claims, not optional architecture expansion. No tools available; report omissions/uncertainty explicitly.",
+  "files_sha256": {
+    "contracts/pilot-v1/plan.json": "bd4f10bd6fdb6fb96689860122c6a7875fd95642fdebf297de08fb10181c437c",
+    "packages/pilot/worker.mjs": "a36ed4802cba205ffd5f66f8d8a892df90f3fc1689a1c24e40877a1d974c8a10",
+    "python/pokemon_pilot/inference.py": "f1f054aa5f7c914e21e013e4cd09ceb9e22a7692fe8a32ab41ea35ad3fbe574f",
+    "python/pokemon_pilot/campaign.py": "45f8cb9c263c986d815d006b6e750dbad3fe5eb83744680e42461a75a5076390",
+    "python/pokemon_pilot/provenance.py": "4807debe63c990813bf391d451d6d5c4442b07a43707ef867f2a9efc942bd81d",
+    "scripts/seal-policy-pilot.py": "88bba346b35299e71db9c7f94343cf23041ef9aeca6aeb6c83ad96cebe026680",
+    "tests/pilot/worker.test.mjs": "0fb815614d139e6cd3fb5730326f4056157a5f5ab8ed0e4dd27195755d182596",
+    "tests/pilot/test_inference.py": "47de743e75b3c23edd7ffe0fafaa63da67b897a4213ab55be11974beaae77aa9",
+    "tests/pilot/test_evidence.py": "17ab9123fff893b6991e13acc15d5d3fbf838545d22423ff50fcf75cf57ce30b",
+    "python/pokemon_binary/policy.py": "9d1d6a0cfab0636e418a165c5915331226e6c016d413d0c6327e5ff4192dc9d9",
+    "python/pokemon_jax_learner/model.py": "2ce02061d9932bbbab287833be5302aa1f50d58dbdcb8344933045b033500b6e",
+    "python/pokemon_jax/views.py": "e4452df2515b500a1989c5fd2d8e84d55d3d3a6260add28fc51fb34c8c74b98b"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

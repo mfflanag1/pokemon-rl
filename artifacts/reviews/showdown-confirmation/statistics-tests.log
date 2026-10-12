@@ -1,0 +1,15 @@
+✔ coordinator literal fixture checks all three metric orientations and shared pair indices (1.925083ms)
+✔ constant-pair known answer passes all conditions without treating games as independent (1.626792ms)
+✔ boundaries use strict lower comparisons and an inclusive direct point floor (0.779125ms)
+✔ an opponent-specific regression cannot be hidden by direct strength (0.146083ms)
+✔ input order does not change output and inputs are not mutated (0.222792ms)
+✔ missing, duplicate, reversed and invalid pair grids fail before resampling (0.427459ms)
+✔ invalid statistical options fail explicitly (0.162459ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 80.924791

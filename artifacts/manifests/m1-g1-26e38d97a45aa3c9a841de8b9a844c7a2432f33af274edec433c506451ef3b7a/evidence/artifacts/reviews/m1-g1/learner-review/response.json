@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 125315,
+  "stop_reason": "end_turn",
+  "session_id": "a21c2459-9de6-420b-bae9-0db1cb091b4f",
+  "total_cost_usd": 0.8955900000000001,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 23491,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 8515,
+    "output_tokens_details": {
+      "thinking_tokens": 7068
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23491,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 8515,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 23491,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 23491
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 8515,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 23491,
+      "webSearchRequests": 0,
+      "costUSD": 0.8955900000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 7068,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: no blocking findings in reviewed scope; several low-severity gaps.** Most important: the delayed canary's two perspectives share no outcome, so it cannot detect a zero-sum \"opponent reward = \u2212own reward\" assumption the gate text implies it guards against.\n\n## Findings\n\n**1. Low (research validity) \u2014 `trainer.py:60-77`, `ACCEPTANCE_GATES.md:42`.** The \"delayed\" task is two independent delayed bandits sharing a tape; rewards at positions 3 and 5 depend only on each player's own root choice. A sign-flip of p2's reward would be caught, but a bug deriving p2's reward from p1's outcome (the actual sign-inversion hazard) has no observable consequence here because there is no shared winner. Claim \"learns both perspectives without winner/loser sign inversion\" is only partially evidenced. Verification: add a canary where one terminal event produces per-player rewards that are not negatives of each other (e.g., both +1, or asymmetric magnitudes) and assert both perspectives learn.\n\n**2. Low (gate coverage) \u2014 `trainer.py:45-86`, `core.py:40-41`.** Buffer cuts never occur in the trainer (whole episodes, `bootstrap` always zeros). The gate \"rollout truncation bootstraps from the correct perspective\" is exercised only by the hand case in `test_core.py:9`, where the caller supplies the bootstrap; `linked_gae` cannot verify whose value it is. Acceptable for G1 scope, but the claim should be labeled \"caller-supplied; untested end-to-end\".\n\n**3. Low (missing assertion) \u2014 `trainer.py:96-102`, `tests/`.** No trainer-level test asserts `diagnostics[0]['max_ratio_error'] <= 1e-5` on the first minibatch of the first epoch (frozen behavior == learner at update start). `test_same_policy_ratios` covers `core` only. Cheap to add.\n\n**4. Low (recovery robustness) \u2014 `checkpoint.py:61-65`.** `temp.open('xb')` means a stale `.partial` from an interrupted write makes every subsequent `save` to that path raise `FileExistsError` (not a `ValueError` via `require`). `test_resume.py:62` only asserts the partial exists. After rollback recovery, the resumed job cannot checkpoint to the same path without manual cleanup. Suggest explicit detection with a clear message or documented operator step.\n\n**5. Info (semantics, not error) \u2014 `trainer.py:94`, `core.py:84`.** With 384 delayed decisions and minibatch 256, the second minibatch has 128 rows; `ppo_loss_grad` averages per minibatch, so those samples receive 2\u00d7 per-sample weight. Standard PPO quirk; \"mean clipped loss\" is per-minibatch. Checkpoint step accounting at `checkpoint.py:99` correctly uses ceil.\n\n**Verified by inspection (no issues):** active-set logic `core.py:89` matches \u2202min(rA, clip(r)A) for both signs; entropy gradient `p(logp+H)` sign/coef correct; masked rows get exactly zero probability and zero gradient; terminal forbids bootstrap; forward-link and same-trajectory checks; Adam bias correction and first-step test (\u00b1lr\u00b7sign) correct; sampler cannot select zero-probability actions; stale-buffer and phase gating; checksum/provenance/counter consistency on load. Both hand GAE cases recompute correctly (second: deltas .16, .24, .6 \u2192 A .3895, .51, .6).\n\n## Scope limitations\n\n- No executed tests or canary outputs in packet; the 3-seed \u226599% result is unverified.\n- Central-difference test tolerance (5e-5 at \u03b5=.002 in FP32) is tight; cannot confirm it passes.\n- Checkpoint exactness is same-runtime only, as declared; cross-platform not reviewed.\n- No simulator/Pok\u00e9mon components; review limited to tabular learner.\n\n## Verdict\n\n**Findings (low severity only).** No analytic-gradient, GAE, mask, frozen-behavior, or checkpoint correctness errors identified. Gaps are in evidence coverage (items 1\u20133) and recovery ergonomics (item 4).",
+  "ttft_ms": 105325,
+  "type": "result",
+  "duration_ms": 125352,
+  "uuid": "a601766e-4876-40f4-b1e4-37ca1f060d01",
+  "ttft_stream_ms": 2399,
+  "time_to_request_ms": 33,
+  "first_content_frame_ms": 2399,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

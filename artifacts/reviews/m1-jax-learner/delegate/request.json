@@ -1,0 +1,40 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Implement the JAX autodiff numerical core exactly specified in contracts/jax-learner-v1/core.md. You own only python/pokemon_jax_learner/core.py. Other work is ongoing on model/collector/campaign; do not change other files or revert anyone. Read the sealed NumPy core and supplied parity tests. Do not recursively delegate. No new dependencies.",
+  "criteria": "Implement all specified APIs and host rejection checks; numerical math uses JAX autodiff/JIT; supplied checks pass; inclusive PPO clip boundary semantics and finite masked gradients; Adam update/state parity; only owned file changed.",
+  "owned": [
+    "python/pokemon_jax_learner/core.py"
+  ],
+  "checks": [
+    [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/jax-learner",
+      "-p",
+      "test_core.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/jax-learner-v1/core.md": "6e9ca76ece62511b90064ec8ea241ddf39cdb0afa0beda7cb0e02d0ddca224b8",
+    "python/pokemon_learner/core.py": "db814827cd5a80957a54bf629c048979e370f5c14529bde4580722d2aee1adde",
+    "python/pokemon_learner/__init__.py": "5070128702692556479c080ff959ba40e1e7421417c212f8f4a2dacf1dbecccc",
+    "python/pokemon_jax_learner/__init__.py": "8582070d68847c641e165cbf273f515a72c40747d5f15285a592ad84f2be7212",
+    "tests/jax-learner/test_core.py": "b1729a292351a71cdbd7e3fea9fc44915fdbebdd01afe0fba8f8cdee94d85f6e"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "c508f99b18fb71c0ac9bc04ed6f79b6acad87701",
+  "created_at": "2026-10-10T22:00:04.420636+00:00",
+  "test_run": false
+}

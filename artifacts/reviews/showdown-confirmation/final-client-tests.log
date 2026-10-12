@@ -1,0 +1,30 @@
+✔ the first scheduled network action uses tactical revealed-ability handling (187.009875ms)
+✔ synchronous initial socket messages enter the tactical wrapper before queued processing (5.618167ms)
+✔ the tactical factory fails closed if a room is replaced by a baseline reducer (25.54575ms)
+✔ reconnection reconstructs rich history exactly rather than carrying stale memory (44.729ms)
+✔ rebuilds history, submits an uncommitted current request once, cancels old timer (126.8185ms)
+✔ accepted pending choice is not replayed; next fresh request can act (68.526708ms)
+✔ an unsent action is reconsidered from the server request, not a local sent marker (42.82ms)
+✔ wait and completed battles restore without submitting; terminal emits once (82.237292ms)
+✔ missing history is fatal and does not retry the protocol error (17.811208ms)
+✔ request rollback, seat changes, and truncated public history fail before any action (238.3735ms)
+✔ missing rooms and silent rejoin responses fail on a bounded recovery deadline (107.131833ms)
+✔ retry budget spans successful reconnects; stale socket messages are ignored (42.575833ms)
+✔ initial transport outage retries and shutdown cancels delayed recovery (99.099125ms)
+✔ each remote connection gets fresh authentication; permanent login errors do not retry (38.680375ms)
+✔ pending restoration prevents accepting or initiating another challenge (51.128291ms)
+✔ stateful policies and invalid or unbounded recovery configuration are rejected (0.176458ms)
+✔ multiple pending rooms restore separately before session readiness (49.111458ms)
+✔ invalid choices remain fatal rather than reconnecting into another action (37.378458ms)
+✔ a send during the close handshake reconnects and does not count an unsent decision (95.587083ms)
+✔ closing during authenticated rejoin retries through the transport classifier (54.299ms)
+✔ a second disconnect after history but before the request retains the old resume floor (63.38875ms)
+✔ same-turn forced-switch request remains actionable after a committed restoration (50.346792ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1799.7915

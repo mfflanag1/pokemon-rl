@@ -1,0 +1,14 @@
+{
+  "status": "pass",
+  "receipt_content_hash": "b4a2649a09870be52d0725ea0a25994c13581da183a434a7a96c4d5482b2117d",
+  "source_files": 308,
+  "evidence_files": 824,
+  "live_and_archive_hash_checks": 2264,
+  "canonical_receipt_verified": true,
+  "repeat_seal_identical": true,
+  "repeat_sealer": {
+    "status": "complete-development-panel",
+    "hash": "b4a2649a09870be52d0725ea0a25994c13581da183a434a7a96c4d5482b2117d",
+    "tests": 338
+  }
+}

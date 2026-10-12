@@ -1,0 +1,21 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new four-action categorical learner for concrete correctness defects: exact dyadic conditional sampler vs stored/PPO log likelihood, gradient masking, same-player GAE across replacement waits, terminal vs capped-game bootstrap, observation-only actor, fixed-budget counter linkage, completed-update checkpoint exact replay and rollback. CPU FP32 only, three seeds x64 updates x32 games engineering smoke; no strength claim. Sealed binary policy and generic Adam imported unchanged. Snapshot-only review: flag verified issues separately from missing context. Mechanics review already done separately; pinned Showdown uses ceil(100*hp/maxhp) so prior speculative hp/maximum*100 finding was disproved by source. Focus on learner code and tests in this packet.",
+  "files_sha256": {
+    "contracts/switch-engine-v1/plan.json": "336775382719b2b922cdd297789f08e48ea897be7721b3ad201b9fe50d2a1311",
+    "contracts/switch-engine-v1/README.md": "b82644096b3cf36825b6b186ce738c4f8d613065148f95b6155be7ae76a99002",
+    "python/pokemon_switch_engine/policy.py": "c968507124aee248e65845e725914e86a5132fd45d8512b9d4cbe2577fd3c50c",
+    "python/pokemon_switch_engine/learner.py": "2fe2c17e881afb2e4c9d2fef97ace522a2b7e440086777bc9d0d1fad5b6652c9",
+    "python/pokemon_switch_engine/checkpoint.py": "0499997b06168f81daa39f6c39c275f2938f5ed0a723b1e12eba755cd5f9c006",
+    "python/pokemon_switch_engine/chance.py": "673501677150f0cab1ba01393ff5c62d28853830103689b52a7c1f67a97ca746",
+    "python/pokemon_switch_engine/engine.py": "2fca205868d3b36e764d73a1ddff494191554e0c666604f4167694bc985e0a25",
+    "python/pokemon_binary/policy.py": "9d1d6a0cfab0636e418a165c5915331226e6c016d413d0c6327e5ff4192dc9d9",
+    "python/pokemon_fixed/math.py": "2442da19684ece79e9aa11c0287ba722f2b31178b0ef67faa681b23c898e86fb",
+    "tests/switch-engine/test_learner.py": "334855b3037352df37344ff3aa66114f751e5fd27d864e13353015f425ba6bdc"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

@@ -1,0 +1,25 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Received simulator team
++ actual - expected
+
++ '|soakteam|Sudowoodo||ChoiceBand|RockHead|WoodHammer,Earthquake,SuckerPunch,HeadSmash|Serious|85,85,85,85,85,85|M|||94|,,,,,Rock]Seviper||ChoiceScarf|Infiltrator|GunkShot,Flamethrower,GigaDrain,Switcheroo|Serious|85,85,85,85,85,85|F|||93|,,,,,Fire]Flareon||ToxicOrb|Guts|QuickAttack,Facade,Trailblaze,FlareBlitz|Serious|85,85,85,85,85,85|M|||90|,,,,,Normal]Iron Jugulis||ChoiceSpecs|QuarkDrive|Hurricane,EarthPower,DarkPulse,FireBlast|Serious|85,,85,85,85,85|N|,0,,,,||77|,,,,,Ground]Rillaboom||ChoiceBand|GrassySurge|KnockOff,WoodHammer,GrassyGlide,Uturn|Serious|85,85,85,85,85,85|M|||79|,,,,,Grass]Manaphy||Leftovers|Hydration|EnergyBall,IceBeam,HydroPump,TailGlow|Serious|85,,85,85,85,85|N|,0,,,,||78|,,,,,Water'
+- '|soakteam|Sudowoodo||ChoiceBand|RockHead|WoodHammer,Earthquake,SuckerPunch,HeadSmash||85,85,85,85,85,85|M|||94|,,,,,Rock]Seviper||ChoiceScarf|Infiltrator|GunkShot,Flamethrower,GigaDrain,Switcheroo||85,85,85,85,85,85|F|||93|,,,,,Fire]Flareon||ToxicOrb|Guts|QuickAttack,Facade,Trailblaze,FlareBlitz||85,85,85,85,85,85|M|||90|,,,,,Normal]Iron Jugulis||ChoiceSpecs|QuarkDrive|Hurricane,EarthPower,DarkPulse,FireBlast||85,,85,85,85,85|N|,0,,,,||77|,,,,,Ground]Rillaboom||ChoiceBand|GrassySurge|KnockOff,WoodHammer,GrassyGlide,Uturn||85,85,85,85,85,85|M|||79|,,,,,Grass]Manaphy||Leftovers|Hydration|EnergyBall,IceBeam,HydroPump,TailGlow||85,,85,85,85,85|N|,0,,,,||78|,,,,,Water'
+
+    at WireAudit.check (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/audit.mjs:64:20)
+    at audit (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/audit.mjs:203:13)
+    at file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/audit.mjs:213:30
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:655:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '|soakteam|Sudowoodo||ChoiceBand|RockHead|WoodHammer,Earthquake,SuckerPunch,HeadSmash|Serious|85,85,85,85,85,85|M|||94|,,,,,Rock]Seviper||ChoiceScarf|Infiltrator|GunkShot,Flamethrower,GigaDrain,Switcheroo|Serious|85,85,85,85,85,85|F|||93|,,,,,Fire]Flareon||ToxicOrb|Guts|QuickAttack,Facade,Trailblaze,FlareBlitz|Serious|85,85,85,85,85,85|M|||90|,,,,,Normal]Iron Jugulis||ChoiceSpecs|QuarkDrive|Hurricane,EarthPower,DarkPulse,FireBlast|Serious|85,,85,85,85,85|N|,0,,,,||77|,,,,,Ground]Rillaboom||ChoiceBand|GrassySurge|KnockOff,WoodHammer,GrassyGlide,Uturn|Serious|85,85,85,85,85,85|M|||79|,,,,,Grass]Manaphy||Leftovers|Hydration|EnergyBall,IceBeam,HydroPump,TailGlow|Serious|85,,85,85,85,85|N|,0,,,,||78|,,,,,Water',
+  expected: '|soakteam|Sudowoodo||ChoiceBand|RockHead|WoodHammer,Earthquake,SuckerPunch,HeadSmash||85,85,85,85,85,85|M|||94|,,,,,Rock]Seviper||ChoiceScarf|Infiltrator|GunkShot,Flamethrower,GigaDrain,Switcheroo||85,85,85,85,85,85|F|||93|,,,,,Fire]Flareon||ToxicOrb|Guts|QuickAttack,Facade,Trailblaze,FlareBlitz||85,85,85,85,85,85|M|||90|,,,,,Normal]Iron Jugulis||ChoiceSpecs|QuarkDrive|Hurricane,EarthPower,DarkPulse,FireBlast||85,,85,85,85,85|N|,0,,,,||77|,,,,,Ground]Rillaboom||ChoiceBand|GrassySurge|KnockOff,WoodHammer,GrassyGlide,Uturn||85,85,85,85,85,85|M|||79|,,,,,Grass]Manaphy||Leftovers|Hydration|EnergyBall,IceBeam,HydroPump,TailGlow||85,,85,85,85,85|N|,0,,,,||78|,,,,,Water',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v25.6.1

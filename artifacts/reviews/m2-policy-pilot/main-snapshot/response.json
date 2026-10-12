@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 158506,
+  "stop_reason": "end_turn",
+  "session_id": "06a1a837-7b52-4eab-9f20-5a99d1a162fa",
+  "total_cost_usd": 1.1712099999999999,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 30907,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 11061,
+    "output_tokens_details": {
+      "thinking_tokens": 9573
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 30907,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 11061,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 30907,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 30907
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 11061,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 30907,
+      "webSearchRequests": 0,
+      "costUSD": 1.1712099999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 9573,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: no blocking findings in reviewed scope.** Most important observation: the audit's \"exact replay\" (`campaign.py:117`) is a strict float-equality check across two separate XLA/JIT sessions; it is correct but makes the whole run invalid on any platform-level FP drift (e.g., sealing on a different CPU). Documented as intended (\"implementation failure invalidates that run\"), so not a bug \u2014 flagged as a consequential risk.\n\n## Findings\n\n**1. Medium \u2014 Tape-audit strictness vs. portability (campaign.py:117, seal-policy-pilot.py:53\u201354).**\n`a==r['decisions'][turn]` compares `value`, `behavior_logp`, `quick_attack_probability` bit-for-bit, and the sealer re-runs `analyze` and requires equality with the persisted report. Correct for same-host sealing; no tolerance or host binding is recorded. Verification: run `seal-policy-pilot.py --audit-smoke` on the exact host/JAX build used for collection and record that constraint in the receipt.\n\n**2. Low \u2014 Final-roster check skipped on loop exhaustion (campaign.py:71\u201380).**\nIf all 4 steps execute, `frame` from the last `step` is used without re-asserting `[f['id']...]==ids`; a roster mismatch would surface as `KeyError` rather than a `require` message. Fails safe, but diagnostics are poorer. Suggest moving the roster `require` after the loop as well.\n\n**3. Low \u2014 `verify_record` does not check terminal turn equals decision count (campaign.py:95\u2013103).**\nA tape with a dropped *last* decision fails via `IndexError` at line 100 (hit turn > `len(decisions)`), not a `ValueError`. Still invalidates the run; add `reduced[0]['header'][0]==len(decisions)` for clarity.\n\n**4. Low \u2014 Hard-coded regression expectations (seal-policy-pilot.py:21, 67).**\n`SUITES` and `node_pass_count(log)==68` must match the actual suite. Only 7 of the new tests are reported run; no evidence in the packet that a full `npm-test.log` with these counts exists. Not a correctness bug; the seal simply won't complete until produced.\n\n**5. Info \u2014 Statistics usage consistent with plan.**\nFamily of six = 3 seeds \u00d7 2 adjusted lower bounds; `alpha/6` passed per seed (campaign.py:147\u2013148); `mean>=0.6` is a point criterion, not an inferential bound. Diagnostics use nominal alpha and are labelled as such. With 4096 replicates the adjusted tail holds ~17 replicates (two-sided) \u2014 coarse but acceptable; already disclaimed in `interpretation`.\n\n**Verified as correct (reasoning only):** actor/key addressing (`seed, opponent, pair, seat, turn, role`; random-opponent domain `0x52414e44` disjoint from sampler `DOMAIN`); candidate row = `2*i+seat`; actions ordered `[p1,p2]` matching `history` actor encoding from p1's view; worker alternates commit order with `>p${first+1}`/`>p${2-first}` (both branches correct); views unchanged after first commitment; `admit`-gated teams; smoke/dev seed namespaces disjoint; candidate/baseline pairing shares mechanics seed and random-opponent keys across checkpoints.\n\n## Scope limitations\n- `statistics.py`, `provenance` dependencies (`sealed`, `checked_file`, `soak_admission`), `Runner/Executables`, `PlayerProjection`, `engine.mjs` (`checkSeed`, `describe`) not in packet. In particular, whether `'sodium,'+sha256hex` (64 hex) is accepted by `checkSeed`/Showdown's SodiumRNG is unverified here (Showdown pads to 64 hex, so likely fine, and the m1 soak presumably used the same convention).\n- Cannot confirm `|turn|` precedes `|request|` in the player channel beyond the passing prefix test on the fixture.\n- No production or smoke run output observed.\n\n## Verdict\n**No blocking findings in reviewed scope.** Items 1\u20134 are robustness/clarity issues; none invalidates implementation correctness or the stated statistical claims. Recommend producing a smoke run plus `--audit-smoke` seal on the collection host before the development run.",
+  "ttft_ms": 138327,
+  "type": "result",
+  "duration_ms": 158601,
+  "uuid": "cf25440b-db3e-4b04-ab7a-fb120eb4608c",
+  "ttft_stream_ms": 2839,
+  "time_to_request_ms": 81,
+  "first_content_frame_ms": 2840,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

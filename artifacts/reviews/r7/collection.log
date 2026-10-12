@@ -1,0 +1,10 @@
+{"stage":"reserved","split":"train","attempts":70,"accepted":64,"rejected":{"other_partition":6,"duplicate_or_exposed":0,"seed_overlap":0},"elapsed_ms":154}
+{"stage":"reserved","split":"development","attempts":538,"accepted":32,"rejected":{"other_partition":506,"duplicate_or_exposed":0,"seed_overlap":0},"elapsed_ms":657}
+{"stage":"reserved","split":"final","attempts":2473,"accepted":128,"rejected":{"other_partition":2345,"duplicate_or_exposed":0,"seed_overlap":0},"elapsed_ms":2902}
+{"stage":"episodes","completed":16,"requested":96}
+{"stage":"episodes","completed":32,"requested":96}
+{"stage":"episodes","completed":48,"requested":96}
+{"stage":"episodes","completed":64,"requested":96}
+{"stage":"episodes","completed":80,"requested":96}
+{"stage":"episodes","completed":96,"requested":96}
+{"status":"complete","episodes":96,"elapsed_ms":27391}

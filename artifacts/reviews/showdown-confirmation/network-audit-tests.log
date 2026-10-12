@@ -1,0 +1,12 @@
+✔ actual tactical local-server trace reconstructs all six games and seven losses (200.240417ms)
+✔ wire audit rejects altered tactical memory and reported choices (15.861416ms)
+✔ wire audit rejects resubmission of a server-confirmed accepted action (14.529666ms)
+✔ wire audit rejects changed counters, terminals and policy identity (24.372916ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 551.606209

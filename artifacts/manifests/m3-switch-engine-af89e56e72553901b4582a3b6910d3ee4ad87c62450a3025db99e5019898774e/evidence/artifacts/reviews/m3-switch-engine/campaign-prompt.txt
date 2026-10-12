@@ -1,0 +1,826 @@
+Task and review objective:
+Review admission/evidence integrity for the new M3 engineering smoke campaign and sealer. Find concrete bugs allowing a false completion, source/runtime drift, wrong budget or non-original checkpoint replay. Production plan is 10000 fresh Showdown games BEFORE three seeds x64 updates x32 capped games. Sealed predecessor source immutable except six current docs/registry files, source-bound regression required. New evidence replay verifies saved conditional trajectories, effective final tie shuffle, actual unpatched passivity controls, hidden-info tests, and six original-next-update checkpoint fingerprints. Check substantive fixes from prior mechanics review: pinned Showdown source actually uses Math.ceil(100 * hp / maxhp), so rejected speculative opposite-order HP finding; mapping returns damage factor85..100. Snapshot review only; do not assume unprovided dependency flaws. Learner math is being separately reviewed. Flag code-supported admission/evidence gaps.
+
+
+FILE scripts/seal-switch-engine.py
+1: """Admission, replay audit and immutable receipt for the M3 engineering smoke."""
+2: import argparse
+3: import json
+4: from pathlib import Path
+5: import re
+6: import runpy
+7: import sys
+8: import numpy as np
+9: 
+10: ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'python'))
+11: from pokemon_learner.checkpoint import digest,file_hash,wire
+12: from pokemon_switch.provenance import CURRENT
+13: from pokemon_switch_engine import checkpoint,learner,parity
+14: from pokemon_switch_engine.campaign import record
+15: from pokemon_switch_engine.scalar import require
+16: 
+17: previous=runpy.run_path(str(ROOT/'scripts/seal-showdown-soak.py'))
+18: read,write_once=[previous[k] for k in ('read','write_once')]
+19: REVIEW=ROOT/'artifacts/reviews/m3-switch-engine'
+20: 
+21: 
+22: def admission():
+23:     checks=0
+24:     for name,key in [('showdown-soak','predecessor_receipt'),('m3-switch-reference','reference_receipt')]:
+25:         path=ROOT/f'artifacts/reports/{name}.json';prior=read(path);h=learner.PLAN[key]
+26:         require(prior['content_hash']==h==digest({k:v for k,v in prior.items() if k!='content_hash'}),'Predecessor receipt')
+27:         archive=ROOT/'artifacts/manifests'/f'{name}-{h}'
+28:         require((archive/'receipt.json').read_bytes()==path.read_bytes(),'Predecessor archive receipt')
+29:         for kind,field in [('source','source_files'),('evidence','evidence_files')]:
+30:             for name,expected in prior[field].items():
+31:                 require(file_hash(archive/kind/name)==expected,'Archived predecessor drift: '+name);checks+=1
+32:                 if name not in CURRENT:require(file_hash(ROOT/name)==expected,'Live predecessor drift: '+name);checks+=1
+33:     inherited=previous['admission']()
+34:     return {'format':'switch-engine-admission-1','predecessor_hash_checks':checks,
+35:         'inherited_runtime':inherited['inherited_runtime'],'runtime':checkpoint.runtime(),'source_files':checkpoint.sources()}
+36: 
+37: 
+38: def audit_learning(directory):
+39:     folder=directory/'learner';report=read(folder/'report.json');require(report['status']=='complete' and report['plan']==learner.PLAN,'Learner completion/plan')
+40:     for key in ('public_server_used','final_evaluation_used','strength_evaluated','prime_used'):require(report[key] is False,'Scope')
+41:     require(report['parity_sha256']==file_hash(directory/'reference/parity.json'),'Parity before learner binding')
+42:     require([r['seed'] for r in report['seeds']]==learner.CONFIG['seeds'],'Seed grid')
+43:     totals={'updates':0,'games':0,'decisions':0,'terminal':0,'truncated':0,'original_next_update':0,'rollback':0,'checkpoints':0}
+44:     for run in report['seeds']:
+45:         seed=run['seed'];require(run['file']==f'seed-{seed}/report.json' and file_hash(folder/run['file'])==run['sha256'],'Seed evidence')
+46:         data=read(folder/run['file']);base=folder/f'seed-{seed}';rows=data['records']
+47:         require(data['seed']==seed and len(rows)==64,'Fixed update budget')
+48:         prior=checkpoint.fingerprint(learner.start(seed))
+49:         for i,row in enumerate(rows,1):
+50:             require(row['update']==i and row['optimizer_step']==2*i and row['next_game']==32*i and row['before']==prior,'Update counter/fingerprint chain')
+51:             require(type(row['decisions']) is int and 0<row['decisions']<=896 and sum(row['actions'])==row['decisions'],'Decision accounting')
+52:             require(row['terminal']+row['truncated']==32 and min(row['terminal'],row['truncated'],*row['actions'])>=0,'Game accounting')
+53:             metrics=row['metrics'];require(set(metrics)=={'loss','actor_loss','value_loss','entropy','clip_fraction','approx_kl','gradient_norm'},'Metrics schema')
+54:             require(all(np.asarray(v).shape==(2,) and np.isfinite(v).all() for v in metrics.values()),'Finite epoch metrics')
+55:             require(checkpoint.fingerprint({k:np.asarray(v,np.float32) for k,v in metrics.items()})==row['metrics_sha256'],'Metrics fingerprint')
+56:             prior=row['after'];totals['updates']+=1;totals['games']+=32
+57:             for key in ('decisions','terminal','truncated'):totals[key]+=row[key]
+58:         require([c['update'] for c in data['checkpoints']]==[0,32,64],'Checkpoint grid')
+59:         for c in data['checkpoints']:
+60:             i=c['update'];require(c['file']==f'checkpoint-{i:03d}.json' and file_hash(base/c['file'])==c['sha256'],'Checkpoint file')
+61:             state=checkpoint.load(base/c['file'],seed)
+62:             require(int(state.version)==i and checkpoint.fingerprint(state)==c['state']==(rows[i]['before'] if i<64 else rows[-1]['after']),'Checkpoint boundary')
+63:             totals['checkpoints']+=1
+64:             if i<64:
+65:                 repeated=record(state,checkpoint.transaction(state,seed));require(repeated==rows[i],'Original-next-update fresh replay')
+66:                 require(data['original_next_update'][i//32]=={'checkpoint_update':i,'original_next_update':rows[i],'status':'exact'},'Saved replay audit')
+67:                 totals['original_next_update']+=1
+68:         require(len(data['original_next_update'])==2 and len(data['rollback'])==2,'Audit count')
+69:         for r,stage in zip(data['rollback'],('collect','update')):
+70:             require(r=={'update':32,'stage':stage,'state':rows[32]['before']},'Rollback record')
+71:             state=checkpoint.load(base/'checkpoint-032.json',seed);h=checkpoint.fingerprint(state)
+72:             try:checkpoint.transaction(state,seed,fault=stage)
+73:             except RuntimeError as error:require('Injected' in str(error),'Rollback error')
+74:             else:raise ValueError('Expected rollback failure')
+75:             require(checkpoint.fingerprint(state)==h,'Rollback mutation');totals['rollback']+=1
+76:     require(report['updates']==totals['updates']==192 and report['training_games']==totals['games']==6144
+77:             and report['decisions']==totals['decisions'] and report['original_next_update_audits']==totals['original_next_update']==6
+78:             and report['rollback_audits']==totals['rollback']==6 and report['checkpoint_load_audits']==totals['checkpoints']==9,'Learner totals')
+79:     return totals
+80: 
+81: 
+82: def seal(directory):
+83:     directory=Path(directory).resolve();require(directory.is_relative_to(ROOT/'artifacts/runs'),'Run path')
+84:     now=admission();require(not (directory/'failure.json').exists(),'Failed run cannot seal')
+85:     registration=read(directory/'preregistration.json');report=read(directory/'report.json')
+86:     require(registration=={'plan':learner.PLAN,'admission':now} and report['admission']==now and report['status']=='complete','Frozen source/runtime')
+87:     require(report['parity_sha256']==file_hash(directory/'reference/parity.json') and report['learner_sha256']==file_hash(directory/'learner/report.json'),'Report binding')
+88:     parity_report=parity.audit(directory/'reference',write=False)
+89:     require(read(directory/'reference/plan.json')['smoke'] is False and parity_report==read(directory/'reference/parity.json') and parity_report['fresh']['games']==10000,'Fresh complete parity')
+90:     totals=audit_learning(directory)
+91:     v=read(REVIEW/'verification.json');log=(REVIEW/'npm-test.log').read_text()
+92:     require(v['status']=='passed' and v['exit_code']==0 and v['sources_unchanged'] and v['source_files']==now['source_files']
+93:             and v['test_log_sha256']==file_hash(REVIEW/'npm-test.log'),'Source-bound regression')
+94:     node=re.search(r'ℹ pass (\d+)',log);suites=list(map(int,re.findall(r'Ran (\d+) tests? in',log)))
+95:     require(node and int(node[1])==237 and suites==[7,6,15,13,10,15,13,6,25,17,16,12,9,6,13,6,17] and log.count('\nOK\n')==len(suites),'Regression coverage')
+96:     for name in ('mechanics-review.md','learner-review.md','review-dispositions.md','corrected-verification.md'):
+97:         require((REVIEW/name).is_file(),'Missing review: '+name)
+98:     sources={**now['source_files'],**{str(p.relative_to(ROOT)):file_hash(p) for p in [ROOT/'README.md',*(ROOT/'docs').glob('*.md')]}}
+99:     evidence={f'artifacts/reports/{name}.json':file_hash(ROOT/f'artifacts/reports/{name}.json') for name in ('showdown-soak','m3-switch-reference')}
+100:     for folder in (directory,REVIEW):
+101:         evidence.update({str(p.relative_to(ROOT)):file_hash(p) for p in folder.rglob('*') if p.is_file()})
+102:     receipt={'format':'switch-engine-receipt-1','status':'complete-restricted-engineering-smoke','run':str(directory.relative_to(ROOT)),
+103:         'predecessor':learner.PLAN['predecessor_receipt'],'reference_receipt':learner.PLAN['reference_receipt'],'parity':parity_report,'learner':totals,
+104:         'tests':{'node':int(node[1]),'python':sum(suites)},'source_files':sources,'evidence_files':evidence,
+105:         'full_g2':'open','full_g3':'open','full_g4':'open','public_ladder_strength':'unqualified','sustained_qualification':'pending',
+106:         'final_evaluation_used':False,'prime_used':False}
+107:     receipt['content_hash']=digest(receipt);archive=ROOT/'artifacts/manifests'/('m3-switch-engine-'+receipt['content_hash'])
+108:     for kind,files in [('source',sources),('evidence',evidence)]:
+109:         for name,h in files.items():
+110:             require(file_hash(ROOT/name)==h,'Live drift');write_once(archive/kind/name,(ROOT/name).read_bytes());require(file_hash(archive/kind/name)==h,'Archive drift')
+111:     write_once(archive/'receipt.json',wire(receipt)+b'\n');write_once(ROOT/'artifacts/reports/m3-switch-engine.json',wire(receipt)+b'\n')
+112:     print(json.dumps({'status':receipt['status'],'hash':receipt['content_hash'],'parity':parity_report['fresh'],'learner':totals,'tests':receipt['tests']}))
+113: 
+114: 
+115: if __name__=='__main__':
+116:     p=argparse.ArgumentParser();p.add_argument('directory',nargs='?');p.add_argument('--admission',action='store_true');args=p.parse_args()
+117:     if args.admission:print(json.dumps(admission(),sort_keys=True))
+118:     elif args.directory:seal(args.directory)
+119:     else:p.error('Provide directory or --admission')
+120: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/campaign.py
+1: """Frozen-budget engineering smoke, gated on the complete fresh reference campaign."""
+2: import argparse
+3: import json
+4: from pathlib import Path
+5: import resource
+6: import runpy
+7: import subprocess
+8: import time
+9: import numpy as np
+10: from pokemon_learner.checkpoint import wire,file_hash
+11: from . import learner,checkpoint,parity
+12: from .scalar import require
+13: 
+14: ROOT=Path(__file__).resolve().parents[2]
+15: 
+16: 
+17: def write(path,value):
+18:     with Path(path).open('xb') as stream:stream.write(wire(value)+b'\n')
+19: 
+20: 
+21: def record(before,result):
+22:     after,buffer,final,metrics=result;valid=np.asarray(buffer.valid);actions=np.asarray(buffer.actions)
+23:     return {'update':int(after.version),'optimizer_step':int(after.step),'next_game':int(after.next_game),
+24:         'decisions':int(valid.sum()),'terminal':int((np.asarray(final.winner)!=-1).sum()),
+25:         'truncated':int((np.asarray(final.winner)==-1).sum()),
+26:         'actions':[int(np.sum(actions[valid]==a)) for a in range(4)],
+27:         'before':checkpoint.fingerprint(before),'after':checkpoint.fingerprint(after),
+28:         'buffer':checkpoint.fingerprint(buffer),'final':checkpoint.fingerprint(final),
+29:         'metrics_sha256':checkpoint.fingerprint(metrics),
+30:         'metrics':{k:np.asarray(v).tolist() for k,v in metrics.items()}}
+31: 
+32: 
+33: def train(directory):
+34:     directory=Path(directory);out=directory/'learner';out.mkdir()
+35:     saved=parity.read(directory/'reference/parity.json')
+36:     require(saved['status']=='pass' and saved['fresh']['games']==learner.PLAN['fresh_games'],'Parity before training')
+37:     start=time.monotonic();runs=[]
+38:     for seed in learner.CONFIG['seeds']:
+39:         folder=out/f'seed-{seed}';folder.mkdir();state=learner.start(seed);records=[];checks=[];checkpoints=[];rollback=[]
+40:         for update in range(learner.CONFIG['updates']):
+41:             if update in (0,32):
+42:                 file=f'checkpoint-{update:03d}.json';checkpoint.save(folder/file,state,seed)
+43:                 checkpoints.append({'update':update,'file':file,'sha256':file_hash(folder/file),'state':checkpoint.fingerprint(state)})
+44:                 if update==32:
+45:                     for stage in ('collect','update'):
+46:                         before=checkpoint.fingerprint(state)
+47:                         try:checkpoint.transaction(state,seed,fault=stage)
+48:                         except RuntimeError as error:require('Injected' in str(error),'Unexpected rollback error')
+49:                         else:raise ValueError('Fault did not fail')
+50:                         require(checkpoint.fingerprint(state)==before,'Rollback mutation')
+51:                         rollback.append({'update':update,'stage':stage,'state':before})
+52:             result=checkpoint.transaction(state,seed);row=record(state,result);records.append(row)
+53:             if update in (0,32):
+54:                 # row comes from the original in-memory state; restore only afterward.
+55:                 restored=checkpoint.load(folder/f'checkpoint-{update:03d}.json',seed)
+56:                 repeated=record(restored,checkpoint.transaction(restored,seed))
+57:                 require(row==repeated,'Original-next-update replay')
+58:                 checks.append({'checkpoint_update':update,'original_next_update':row,'status':'exact'})
+59:             state=result[0]
+60:             (directory/'progress.json').write_bytes(wire({'seed':seed,'updates':int(state.version),'total_updates':64})+b'\n')
+61:         file='checkpoint-064.json';checkpoint.save(folder/file,state,seed)
+62:         require(checkpoint.fingerprint(checkpoint.load(folder/file,seed))==checkpoint.fingerprint(state),'Final checkpoint replay')
+63:         checkpoints.append({'update':64,'file':file,'sha256':file_hash(folder/file),'state':checkpoint.fingerprint(state)})
+64:         report={'seed':seed,'records':records,'checkpoints':checkpoints,'original_next_update':checks,'rollback':rollback}
+65:         write(folder/'report.json',report);runs.append({'seed':seed,'file':f'seed-{seed}/report.json','sha256':file_hash(folder/'report.json')})
+66:     report={'status':'complete','plan':learner.PLAN,'seeds':runs,'updates':192,'training_games':6144,
+67:         'decisions':sum(sum(r['decisions'] for r in parity.read(out/run['file'])['records']) for run in runs),
+68:         'original_next_update_audits':6,'rollback_audits':6,'checkpoint_load_audits':9,
+69:         'elapsed_seconds':time.monotonic()-start,'peak_process_rss_bytes':resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+70:         'parity_sha256':file_hash(directory/'reference/parity.json'),
+71:         'public_server_used':False,'final_evaluation_used':False,'strength_evaluated':False,'prime_used':False}
+72:     write(out/'report.json',report);return report
+73: 
+74: 
+75: def main(directory):
+76:     directory=Path(directory).resolve();require(directory.is_relative_to(ROOT/'artifacts/runs'),'Run path');directory.mkdir()
+77:     sealer=runpy.run_path(str(ROOT/'scripts/seal-switch-engine.py'))
+78:     admission=sealer['admission']();write(directory/'preregistration.json',{'plan':learner.PLAN,'admission':admission})
+79:     try:
+80:         with (directory/'capture.log').open('xb') as log:
+81:             subprocess.run(['node','packages/switch-engine/reference.mjs',str(directory/'reference')],cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
+82:         parity.audit(directory/'reference')
+83:         require(sealer['admission']()==admission,'Source/runtime changed before learning')
+84:         report=train(directory)
+85:         require(sealer['admission']()==admission,'Source/runtime changed during campaign')
+86:         write(directory/'report.json',{'status':'complete','parity_sha256':file_hash(directory/'reference/parity.json'),
+87:               'learner_sha256':file_hash(directory/'learner/report.json'),'admission':admission})
+88:         print(json.dumps(report))
+89:     except BaseException as error:
+90:         write(directory/'failure.json',{'type':type(error).__name__,'message':str(error)});raise
+91: 
+92: 
+93: if __name__=='__main__':
+94:     parser=argparse.ArgumentParser();parser.add_argument('directory');main(parser.parse_args().directory)
+95: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/checkpoint.py
+1: """Atomic completed-update checkpoints; capped games are explicitly reset."""
+2: import json
+3: import os
+4: import platform
+5: import runpy
+6: import sys
+7: from pathlib import Path
+8: import jax
+9: import jaxlib
+10: import jax.numpy as jnp
+11: import numpy as np
+12: from pokemon_learner.checkpoint import wire,digest,array_wire,read_array
+13: from . import learner
+14: from .scalar import require
+15: 
+16: ROOT=Path(__file__).resolve().parents[2]
+17: 
+18: 
+19: def sources():return runpy.run_path(str(ROOT/'scripts/verify-fixed-loop.py'))['source_manifest']()
+20: 
+21: 
+22: def runtime():
+23:     require(jax.default_backend()=='cpu' and not jax.config.x64_enabled,'CPU FP32 runtime')
+24:     return {'python':sys.version,'jax':jax.__version__,'jaxlib':jaxlib.__version__,'numpy':np.__version__,
+25:             'platform':platform.platform(),'machine':platform.machine(),'byteorder':sys.byteorder,
+26:             'backend':jax.default_backend(),'x64':bool(jax.config.x64_enabled),'prng':str(jax.config.jax_default_prng_impl)}
+27: 
+28: 
+29: def validate(state):
+30:     require(type(state) is learner.Learner,'Learner schema')
+31:     shapes={'w':(323,32),'b':(32,),'pw':(32,4),'pb':(4,),'vw':(32,),'vb':()}
+32:     for table in state[:3]:
+33:         require(type(table) is dict and set(table)==set(shapes),'Parameter keys')
+34:         for key,value in table.items():
+35:             a=np.asarray(value);require(a.shape==shapes[key] and a.dtype==np.float32 and np.isfinite(a).all(),'Parameter schema/finite')
+36:     require(all(np.all(np.asarray(a)>=0) for a in state.v.values()),'Nonnegative second moments')
+37:     for a,dtype in zip(state[3:],(np.int32,np.int32,np.uint32)):
+38:         require(np.asarray(a).shape==() and np.asarray(a).dtype==dtype,'Counter schema')
+39:     step,version,next_game=map(int,state[3:])
+40:     require(0<=version<=learner.CONFIG['updates'] and step==version*learner.CONFIG['epochs']
+41:             and next_game==version*learner.BATCH,'Counter linkage')
+42: 
+43: 
+44: def fingerprint(tree):
+45:     leaves,structure=jax.tree.flatten(tree)
+46:     return digest({'structure':str(structure),'arrays':[{'shape':list(np.asarray(x).shape),'dtype':str(np.asarray(x).dtype),
+47:         'hex':np.asarray(x).tobytes().hex()} for x in leaves]})
+48: 
+49: 
+50: def body(state,seed):
+51:     validate(state);require(type(seed) is int and 0<=seed<2**32,'Seed')
+52:     return {'format':'switch-checkpoint-1','phase':'completed-update-capped-games','seed':seed,
+53:         'plan':learner.PLAN,'sources':sources(),'runtime':runtime(),
+54:         'tables':[{k:array_wire(np.asarray(v)) for k,v in t.items()} for t in state[:3]],
+55:         'counters':list(map(int,state[3:])),
+56:         'environment':{'live_games':0,'partial_buffer':None,'cutoff_games_reset':True}}
+57: 
+58: 
+59: def save(path,state,seed,*,interrupt=False):
+60:     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True);data=body(state,seed)
+61:     document={'body':data,'sha256':digest(data)};temp=path.with_name(path.name+'.partial')
+62:     with temp.open('xb') as stream:
+63:         stream.write(wire(document)+b'\n');stream.flush();os.fsync(stream.fileno())
+64:     if interrupt:raise RuntimeError('Injected interrupted checkpoint')
+65:     os.replace(temp,path);fd=os.open(path.parent,os.O_RDONLY)
+66:     try:os.fsync(fd)
+67:     finally:os.close(fd)
+68:     return document['sha256']
+69: 
+70: 
+71: def load(path,seed):
+72:     def pairs(items):
+73:         out={}
+74:         for k,v in items:
+75:             require(k not in out,'Duplicate checkpoint key');out[k]=v
+76:         return out
+77:     doc=json.loads(Path(path).read_bytes(),object_pairs_hook=pairs)
+78:     require(set(doc)=={'body','sha256'} and digest(doc['body'])==doc['sha256'],'Checkpoint checksum')
+79:     b=doc['body'];template=body(learner.start(seed),seed)
+80:     require(set(b)==set(template),'Checkpoint fields')
+81:     for key in set(template)-{'tables','counters'}:require(b[key]==template[key],'Checkpoint binding: '+key)
+82:     require(type(b['tables']) is list and len(b['tables'])==3,'Checkpoint tables')
+83:     require(type(b['counters']) is list and len(b['counters'])==3 and all(type(v) is int and 0<=v<=2**31-1 for v in b['counters']),'Counters')
+84:     shapes={k:np.asarray(v).shape for k,v in learner.start(seed).parameters.items()};tables=[]
+85:     for table in b['tables']:
+86:         require(set(table)==set(shapes),'Checkpoint keys')
+87:         tables.append({k:jnp.asarray(read_array(table[k],shape)) for k,shape in shapes.items()})
+88:     state=learner.Learner(*tables,jnp.int32(b['counters'][0]),jnp.int32(b['counters'][1]),jnp.uint32(b['counters'][2]))
+89:     validate(state);return state
+90: 
+91: 
+92: def transaction(state,seed,*,fault=None):
+93:     """Caller publishes the returned state only on success; no in-place mutation."""
+94:     validate(state);runtime()
+95:     require(int(state.version)<learner.CONFIG['updates'],'Fixed smoke budget exhausted')
+96:     require(type(seed) is int and 0<=seed<2**32,'Seed')
+97:     buffer,final=learner.collect(state.parameters,state.next_game,jnp.uint32(seed));jax.block_until_ready((buffer,final))
+98:     learner.validate_buffer(buffer,final)
+99:     if fault=='collect':raise RuntimeError('Injected collection rollback')
+100:     candidate,metrics=learner.update(state,buffer);jax.block_until_ready((candidate,metrics))
+101:     validate(candidate);require(all(np.isfinite(np.asarray(x)).all() for x in jax.tree.leaves(metrics)),'Finite metrics')
+102:     if fault=='update':raise RuntimeError('Injected update rollback')
+103:     return candidate,buffer,final,metrics
+104: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/parity.py
+1: """Independent scalar/JAX checks against passive real-Showdown evidence."""
+2: import argparse
+3: import gzip
+4: import hashlib
+5: import json
+6: from pathlib import Path
+7: import jax.numpy as jnp
+8: import numpy as np
+9: from . import scalar, engine
+10: from .views import encode
+11: from pokemon_learner.checkpoint import digest
+12: 
+13: ROOT=Path(__file__).resolve().parents[2]
+14: 
+15: 
+16: def read(path): return json.loads(Path(path).read_text())
+17: def packed(path): return json.loads(gzip.decompress(Path(path).read_bytes()))
+18: def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+19: 
+20: 
+21: def compare(actual, expected, label):
+22:     if actual != expected:
+23:         keys = [k for k in expected if actual.get(k) != expected[k]] if isinstance(expected,dict) else []
+24:         raise AssertionError(f'{label}: {keys}; actual={actual!r}; expected={expected!r}')
+25: 
+26: 
+27: def check_batch(cases):
+28:     ss=[scalar.initial(c['teams']) for c in cases]; js=engine.initial(np.array([c['teams'] for c in cases],np.int32))
+29:     counts={'games':len(cases),'frames':0,'player_views':0,'decisions':0,'replacement_frames':0,'truncated':0,'terminal':0,'events':0,'chance_draws':0}
+30:     for group in range(max(len(c['steps']) for c in cases)+1):
+31:         jviews=[engine.view_kernel(js,side) for side in range(2)]
+32:         actions=[];crit=[];roll=[];tie=[]
+33:         for i,c in enumerate(cases):
+34:             if group<=len(c['steps']):
+35:                 frame=c['initial'] if group==0 else c['steps'][group-1];reference=frame['state']
+36:                 compare(ss[i],reference,f'Scalar state game {c["id"]} group {group}')
+37:                 compare(engine.unpack(js,i),reference,f'JAX state game {c["id"]} group {group}')
+38:                 for side in range(2):
+39:                     actual=encode(frame['views'][side]);expected=scalar.view(ss[i],side)
+40:                     compare(actual,expected,f'Reference view game {c["id"]} group {group} side {side}')
+41:                     jview={k:np.asarray(v[i]).tolist() for k,v in jviews[side]._asdict().items()}
+42:                     compare(jview,actual,f'JAX view game {c["id"]} group {group} side {side}')
+43:                     counts['player_views']+=1
+44:                 counts['frames']+=1;counts['replacement_frames']+=int(reference['phase']==1)
+45:             if group<len(c['steps']):
+46:                 row=c['steps'][group];chance=row['chance'];actions.append(row['actions'])
+47:                 crit.append(chance['crit']);roll.append(chance['roll']);tie.append(chance['tie'])
+48:                 before=ss[i];ss[i],events=scalar.step(before,row['actions'],chance)
+49:                 compare(events,row['events'],f'Executed events {c["id"]}/{group}')
+50:                 move_sides=[e[1] for e in events if e[2]==1]
+51:                 for role in ('crit','roll'):
+52:                     ds=[d for d in row['draws'] if d['role']==role]
+53:                     compare(sorted(d['side'] for d in ds),sorted(move_sides),'Draw coverage')
+54:                     for d in ds: compare(chance[role][d['side']],d['result'],'Conditional chance binding')
+55:                 for d in row['draws']:
+56:                     scalar.require(d['role'] in ('crit','roll','tie'),'Chance role')
+57:                 ties=[d for d in row['draws'] if d['role']=='tie']
+58:                 speeds=[scalar.stats(scalar.SPECIES[before['species'][p][before['active'][p]]],bool(before['swift'][p][before['active'][p]]))[5] for p in (0,1)]
+59:                 tied=before['phase']==0 and (row['actions'][0]>=2)==(row['actions'][1]>=2) and speeds[0]==speeds[1]
+60:                 compare(bool(ties),tied,'Tie draw coverage')
+61:                 if ties:
+62:                     scalar.require(all(d['events_before']==0 for d in ties),'Tie after execution')
+63:                     # Gen9 re-sorts move ties before first execution; the final shuffle wins.
+64:                     compare(chance['tie'],ties[-1]['result'],'Effective tie outcome binding')
+65:                 counts['decisions']+=sum(a>=0 for a in row['actions']);counts['events']+=len(events)
+66:                 for d in row['draws']:
+67:                     value=d['word'];scalar.require(type(value) is int and 0<=value<2**32,'Raw word')
+68:                     expected=(value*24//2**32==0) if d['role']=='crit' else value//2**28 if d['role']=='roll' else d['order'][value//2**31]
+69:                     compare(d['result'],expected,'Chance mapping');counts['chance_draws']+=1
+70:             else:actions.append([-1,-1]);crit.append([False,False]);roll.append([0,0]);tie.append(0)
+71:         if group<max(len(c['steps']) for c in cases):
+72:             js,_=engine.step(js,np.array(actions,np.int32),engine.Chance(jnp.array(crit,bool),jnp.array(roll,jnp.int32),jnp.array(tie,jnp.int32)))
+73:     for c in cases:counts[c['outcome']]+=1
+74:     return counts
+75: 
+76: 
+77: def information_checks(bundle):
+78:     data=packed(bundle);initial={};after={};own={};reveals={};n=0
+79:     for c in data['information']['comparisons']:
+80:         values={k:encode(c[k+'_view']) for k in ('initial','after','opponent_own')};n+=3
+81:         for key,table,view in [('initial_key',initial,values['initial']),('after_key',after,values['after'])]:
+82:             if c[key] in table:compare(view,table[c[key]],'Hidden-state invariance')
+83:             else:table[c[key]]=view
+84:         fields=c['opponent'].split('_');key=(c['observer'],c['own'],fields[0].split('-')[0],fields[1])
+85:         own.setdefault(key,[]).append(values['opponent_own'])
+86:     scalar.require(all(len(v)==2 and v[0]!=v[1] for v in own.values()),'Own speed positive controls')
+87:     for c in data['information']['probes']:
+88:         a,b=encode(c['after']['view']),encode(c['reveal']['view']);n+=2
+89:         scalar.require(a!=b,'Reveal positive control')
+90:         fields=c['spec']['teams'][1-c['observer']].split('_')
+91:         key=(c['observer'],fields[0],fields[1].split('-')[1]);reveals.setdefault(key,[]).append((a,b))
+92:     scalar.require(all(len(v)==2 and v[0][0]==v[1][0] and v[0][1]!=v[1][1] for v in reveals.values()),'Distinct reserve reveals')
+93:     return {'encoded_views':n,'hidden_initial_equal':1152-len(initial),'hidden_after_equal':1152-len(after),
+94:             'own_speed_positive':len(own),'reserve_reveal_pairs':len(reveals)}
+95: 
+96: 
+97: def check_identity(c,plan):
+98:     i=c['id'];teams=[i%24,i//24%24]
+99:     namespace=plan['plan']['namespace'];suffix='smoke' if plan['smoke'] else 'fresh'
+100:     compare(c['teams'],teams,'Team schedule')
+101:     compare(c['spec'],{'teams':[scalar.ROSTER_IDS[t] for t in teams],
+102:         'seed':'sodium,'+digest(['pokemon-reference-r1',f'{namespace}/{suffix}/{i}'])},'Fresh seed/spec schedule')
+103:     for group,row in enumerate(c['steps']):
+104:         state=c['initial']['state'] if group==0 else c['steps'][group-1]['state']
+105:         actions=[]
+106:         for side,mask in enumerate(scalar.masks(state)):
+107:             legal=[a for a,ok in enumerate(mask) if ok];style=i%5
+108:             if not legal:a=-1
+109:             elif style==0:a=0 if 0 in legal else legal[0]
+110:             elif style==1:a=1 if 1 in legal else legal[0]
+111:             elif style==2:a=next((a for a in legal if a>=2),legal[0])
+112:             else:a=legal[int(digest([namespace,i,group,side])[:8],16)%len(legal)]
+113:             actions.append(a)
+114:         compare(row['actions'],actions,'Fresh action schedule')
+115: 
+116: 
+117: def audit(directory,*,write=True):
+118:     directory=Path(directory);report=read(directory/'report.json');plan=read(directory/'plan.json')
+119:     scalar.require(report['status']=='complete' and report['plan_sha256']==sha(directory/'plan.json'),'Capture binding')
+120:     scalar.require(report['count']==plan['count'] and report['legacy']==72,'Capture coverage')
+121:     compare(plan['plan'],read(ROOT/'contracts/switch-engine-v1/plan.json'),'Source plan')
+122:     scalar.require(type(plan['smoke']) is bool and plan['count']==(24 if plan['smoke'] else plan['plan']['fresh_games']), 'Planned count')
+123:     scalar.require(report['passivity']==min(plan['count'],plan['plan']['passivity_games']), 'Passivity coverage')
+124:     compare(sha(directory/'legacy.json.gz'),report['legacy_sha256'],'Legacy binding')
+125:     legacy=check_batch(packed(directory/'legacy.json.gz'));total=None;seen=0
+126:     for shard in report['shards']:
+127:         scalar.require(shard['first']==seen and sha(directory/shard['file'])==shard['sha256'],'Shard identity/hash')
+128:         cases=packed(directory/shard['file']);scalar.require(len(cases)==shard['count'],'Shard length')
+129:         scalar.require([c['id'] for c in cases]==list(range(seen,seen+len(cases))),'Case grid')
+130:         for c in cases:check_identity(c,plan)
+131:         counts=check_batch(cases);total=counts if total is None else {k:total[k]+v for k,v in counts.items()};seen+=len(cases)
+132:     scalar.require(seen==report['count'],'Complete reference campaign')
+133:     information=information_checks(ROOT/'artifacts/runs/m3-switch-reference-v1/original/fixtures.json.gz')
+134:     result={'status':'pass','legacy':legacy,'fresh':total,'information':information,'report_sha256':sha(directory/'report.json')}
+135:     if write:(directory/'parity.json').write_text(json.dumps(result,indent=2)+'\n')
+136:     return result
+137: 
+138: 
+139: if __name__=='__main__':
+140:     parser=argparse.ArgumentParser();parser.add_argument('directory');args=parser.parse_args();print(json.dumps(audit(args.directory)))
+141: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/switch-engine/reference.mjs
+1: // Passive instrumentation of the sealed oracle; never changes its random outcomes.
+2: import assert from 'node:assert/strict';
+3: import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+4: import {gzipSync,gunzipSync} from 'node:zlib';
+5: import {performance} from 'node:perf_hooks';
+6: import {pathToFileURL} from 'node:url';
+7: import {seedFor} from '../reference-node/engine.mjs';
+8: import {fileHash} from '../reference-node/provenance.mjs';
+9: import {canonical,hashJSON} from '../battle-contract/canonical.mjs';
+10: import {ROSTER,PROFILE,reference} from '../switch-reference/profile.mjs';
+11: import {Session,choices,audit} from '../switch-reference/session.mjs';
+12: import {mask} from '../switch-reference/actions.mjs';
+13: 
+14: const species=PROFILE.species.map(x=>x.id),member=p=>PROFILE.names.indexOf(p.name);
+15: export const PLAN=JSON.parse(readFileSync(new URL('../../contracts/switch-engine-v1/plan.json',import.meta.url)));
+16: 
+17: export function snapshot(session,history){
+18:   const frame=session.frame(),b=session.battle,ordered=b.sides.map(s=>PROFILE.names.map(n=>s.pokemon.find(p=>p.name===n)));
+19:   return {species:ordered.map(s=>s.map(p=>species.indexOf(p.species.id))),swift:ordered.map(s=>s.map(p=>Number(p.set.evs.spe===252))),
+20:     hp:ordered.map(s=>s.map(p=>p.hp)),pp:ordered.map(s=>s.map(p=>p.moveSlots.map(m=>m.pp))),active:b.sides.map(s=>member(s.active[0])),
+21:     phase:{joint_move:0,replacement:1,terminal:2}[frame.phase],turn:b.turn,group:session.group,
+22:     winner:frame.winner===null?-1:Number(frame.winner[1])-1,
+23:     seen:[0,1].map(side=>[0,1].map(m=>Number(m===0||history.some(e=>e[1]===side&&e[2]===0&&e[3]===m)))),history:structuredClone(history)};
+24: }
+25: 
+26: export async function battleCase(id,{instrument=true,smoke=false,spec:given,script,expected}={}){
+27:   const teamIDs=[id%24,Math.floor(id/24)%24];
+28:   const spec=given??{teams:teamIDs.map(i=>ROSTER[i].id),seed:seedFor(`${PLAN.namespace}/${smoke?'smoke':'fresh'}/${id}`)};
+29:   const s=new Session();let current=null,words=null,events=[],draws=[],history=[];
+30:   try{
+31:     await s.start(spec);const b=s.battle,initial={state:snapshot(s,history),views:s.views(),audit:audit(s)},steps=[];
+32:     const raw=b.prng.rng.next.bind(b.prng.rng),shuffle=b.prng.shuffle.bind(b.prng);
+33:     const random=b.random.bind(b),crit=b.randomChance.bind(b),getDamage=b.actions.getDamage.bind(b.actions),switchIn=b.actions.switchIn.bind(b.actions);
+34:     if(instrument)b.prng.rng.next=()=>{const word=raw();if(words)words.push(word);return word;};
+35:     const traced=(role,detail,fn)=>{
+36:       if(!instrument)return fn();assert.equal(words,null);words=[];
+37:       try{const result=fn();assert.equal(words.length,1,`Unexpected ${role} draws`);draws.push({role,...detail,word:words[0],result});return result;}
+38:       finally{words=null;}
+39:     };
+40:     b.randomChance=(n,d)=>current&&n===1&&d===24?traced('crit',{side:current.side},()=>crit(n,d)):crit(n,d);
+41:     b.random=(...args)=>{
+42:       const value=current&&args.length===1&&args[0]===16?traced('roll',{side:current.side},()=>random(...args)):random(...args);
+43:       if(current&&args.length===1&&args[0]===16)current.roll=value;return value;
+44:     };
+45:     b.prng.shuffle=(items,start=0,end=items.length)=>{
+46:       const segment=items.slice(start,end),a=segment[0],z=segment[1];
+47:       if(segment.length!==2||!a.pokemon||!z.pokemon||a.choice!==z.choice||!['move','switch','instaswitch'].includes(a.choice))return shuffle(items,start,end);
+48:       const order=segment.map(x=>x.pokemon.side.n);assert.deepEqual([...order].sort(),[0,1]);
+49:       return traced('tie',{order,events_before:events.length},()=>{shuffle(items,start,end);return items[start].pokemon.side.n;});
+50:     };
+51:     b.actions.getDamage=(source,target,move,...args)=>{
+52:       assert.equal(current,null);current={side:source.side.n};
+53:       try{
+54:         const amount=getDamage(source,target,move,...args),critical=target.getMoveHitData(move).crit;
+55:         assert(Number.isInteger(amount)&&amount>0&&typeof critical==='boolean'&&Number.isInteger(current.roll));
+56:         const slot=source.moveSlots.findIndex(m=>m.id===move.id);assert(slot>=0&&slot<2);
+57:         const row=[b.turn,source.side.n,1,member(source),species.indexOf(source.species.id),slot,member(target),Math.max(0,target.hp-amount),Number(critical)];
+58:         events.push({row,roll:current.roll,amount});history.push(row);return amount;
+59:       }finally{current=null;}
+60:     };
+61:     b.actions.switchIn=(pokemon,...args)=>{
+62:       const result=switchIn(pokemon,...args);assert(pokemon.isActive&&pokemon.hp>0);
+63:       const row=[b.turn,pokemon.side.n,0,member(pokemon),species.indexOf(pokemon.species.id),-1,member(pokemon),pokemon.hp,0];
+64:       events.push({row});history.push(row);return result;
+65:     };
+66:     if(expected)assert.deepEqual({frame:s.frame(),audit:audit(s)},expected[0]);
+67:     while(!b.ended&&!s.truncated()){
+68:       assert(steps.length<PLAN.max_groups);const frame=s.frame();events=[];draws=[];
+69:       const actions=frame.views.map((v,side)=>{
+70:         if(!frame.requested.includes(side))return -1;
+71:         if(script)return script[frame.group][side];
+72:         const legal=mask(v.request).flatMap((ok,i)=>ok?[i]:[]),style=id%5;
+73:         if(style===0)return legal.includes(0)?0:legal[0];
+74:         if(style===1)return legal.includes(1)?1:legal[0];
+75:         if(style===2)return legal.find(a=>a>=2)??legal[0];
+76:         return legal[parseInt(hashJSON([PLAN.namespace,id,frame.group,side]).slice(0,8),16)%legal.length];
+77:       });
+78:       await s.step(choices(frame,actions),(id+frame.group)%2);
+79:       assert(events.length>0&&events.length<=2);
+80:       const chance={crit:[false,false],roll:[0,0],tie:events[0].row[1]};
+81:       for(const e of events)if(e.row[2]===1){chance.crit[e.row[1]]=Boolean(e.row[8]);chance.roll[e.row[1]]=e.roll;}
+82:       if(instrument)for(const d of draws){
+83:         if(d.role==='crit')assert.equal(d.result,Math.floor(d.word*24/2**32)===0);
+84:         if(d.role==='roll')assert.equal(d.result,d.word>>>28);
+85:         if(d.role==='tie')assert.equal(d.result,d.order[d.word>>>31]);
+86:       }
+87:       if(expected)assert.deepEqual({frame:s.frame(),audit:audit(s)},expected[steps.length+1]);
+88:       steps.push({actions,chance,draws,events:events.map(e=>e.row),state:snapshot(s,history),views:s.views(),audit:audit(s)});
+89:     }
+90:     const result={id,spec,teams:spec.teams.map(t=>ROSTER.findIndex(r=>r.id===t)),initial,steps,
+91:       outcome:s.battle.ended?'terminal':'truncated'};
+92:     return result;
+93:   }finally{s.close();}
+94: }
+95: 
+96: export async function checkUnpatched(row){
+97:   const s=new Session();
+98:   try{
+99:     await s.start(row.spec);
+100:     assert.deepEqual(s.views(),row.initial.views);assert.deepEqual(audit(s),row.initial.audit);
+101:     for(const step of row.steps){
+102:       const frame=s.frame();await s.step(choices(frame,step.actions),(row.id+frame.group)%2);
+103:       assert.deepEqual(s.views(),step.views);assert.deepEqual(audit(s),step.audit);
+104:     }
+105:     assert.equal(s.battle.ended?'terminal':'truncated',row.outcome);
+106:   }finally{s.close();}
+107: }
+108: 
+109: export async function capture(directory,{smoke=false}={}){
+110:   mkdirSync(directory);const manifest=reference(),count=smoke?24:PLAN.fresh_games,started=performance.now();
+111:   const plan={plan:PLAN,smoke,count,reference:manifest};writeFileSync(`${directory}/plan.json`,JSON.stringify(plan)+'\n',{flag:'wx'});
+112:   const old=JSON.parse(gunzipSync(readFileSync('artifacts/runs/m3-switch-reference-v1/original/fixtures.json.gz'))),legacy=[];
+113:   for(const [id,c] of old.cases.entries()){
+114:     const script=c.snapshots.slice(0,-1).map((s,g)=>[0,1].map(side=>c.tape.find(d=>d.group===g&&d.side===`p${side+1}`)?.action??-1));
+115:     legacy.push(await battleCase(id,{spec:c.spec,script,expected:c.snapshots}));
+116:   }
+117:   writeFileSync(`${directory}/legacy.json.gz`,gzipSync(canonical(legacy)),{flag:'wx'});
+118:   let rows=[],shards=[];
+119:   for(let id=0;id<count;id++){
+120:     const row=await battleCase(id,{smoke});
+121:     if(id<PLAN.passivity_games){
+122:       await checkUnpatched(row);
+123:     }
+124:     rows.push(row);
+125:     if(rows.length===PLAN.shard_size||id+1===count){
+126:       const file=`cases-${String(shards.length).padStart(4,'0')}.json.gz`;writeFileSync(`${directory}/${file}`,gzipSync(canonical(rows)),{flag:'wx'});
+127:       shards.push({file,sha256:fileHash(`${directory}/${file}`),count:rows.length,first:id+1-rows.length});rows=[];
+128:       writeFileSync(`${directory}/progress.json`,JSON.stringify({completed:id+1,total:count}));
+129:     }
+130:   }
+131:   assert.deepEqual(reference(),manifest);
+132:   const report={status:'complete',plan_sha256:fileHash(`${directory}/plan.json`),count,shards,legacy:72,legacy_sha256:fileHash(`${directory}/legacy.json.gz`),passivity:Math.min(count,PLAN.passivity_games),elapsed_ms:performance.now()-started};
+133:   writeFileSync(`${directory}/report.json`,JSON.stringify(report)+'\n',{flag:'wx'});console.log(JSON.stringify(report));
+134: }
+135: if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await capture(process.argv[2],{smoke:process.argv.includes('--smoke')});
+136: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/switch-engine-v1/plan.json
+1: {
+2:   "version": "switch-engine-1",
+3:   "profile": "gen9-starter-pairs-v1",
+4:   "namespace": "m3-switch-engine-v1",
+5:   "reference_receipt": "1e484145df3e51b631e07d8192a01f1e35409e6ca3ec4df6b8aca0c51fe2bd34",
+6:   "predecessor_receipt": "1a72a14877ff0c17fbcfca5275edc7e6c9509396d01f898ea18709e18f043fdd",
+7:   "fresh_games": 10000,
+8:   "passivity_games": 24,
+9:   "shard_size": 100,
+10:   "max_turns": 12,
+11:   "max_groups": 14,
+12:   "history_capacity": 32,
+13:   "chance": "Semantic events indexed by game/group/seat. Crit and damage use the sealed exact Showdown uint32 maps; ties use an unbiased bit between tied seats. Accuracy has no misses in this profile. No sodium stream or raw draw schedule equivalence claim.",
+14:   "view": "Own private roster and exact stats/HP/PP; opponent seen species, last public percentage HP and active member; complete bounded public move/switch action history with observer-relative actors. No opponent speed variant, exact HP/PP, reserve species before reveal, RNG, winner label or opponent action commitment.",
+15:   "learner": {
+16:     "seeds": [
+17:       101,
+18:       211,
+19:       307
+20:     ],
+21:     "batch_games": 32,
+22:     "updates": 64,
+23:     "epochs": 2,
+24:     "learning_rate": 0.001,
+25:     "gamma": 1.0,
+26:     "lambda": 0.95,
+27:     "clip": 0.2,
+28:     "entropy": 0.01,
+29:     "value_coefficient": 0.5
+30:   },
+31:   "cutoff": "Finish faint replacements, then truncate at the fresh turn-13 joint boundary. Bootstrap each player's last transition with its own turn-13 value under the frozen collecting actor, never call a cutoff a draw. Reset the truncated game explicitly. Terminal rewards win1/loss0; no dense reward.",
+32:   "acceptance": "Zero scalar/JAX/reference state, event, mask and compact player-view divergences; existing information counterfactuals and positive reveal controls pass; finite categorical PPO updates, no masked samples, same-player GAE, exact supported checkpoint replay. No strength threshold or full G2/G3/G4 closure.",
+33:   "scope": "New additive CPU-only modules; sealed predecessors unchanged. No public server, final reserved data, GPU or Prime. Learner smoke starts only after simulator and information parity pass. A separate sustained qualification and learning-strength evaluation remain future gates.",
+34:   "categorical_policy": "Four leaves of a two-level binary tree. Each node uses the sealed FP32 rare mass floor 2^-24 and exact 64-bit word threshold; leaves are products of root/child conditional masses. Stored and PPO log probabilities sum those same logs. Independent words per node. No rounded CDF or straight-through quantizer."
+35: }
+36: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE scripts/seal-showdown-soak.py
+1: """Admission and immutable receipt for the frozen tactical client's local network soak."""
+2: import argparse
+3: import json
+4: import re
+5: import runpy
+6: import subprocess
+7: import sys
+8: from pathlib import Path
+9: 
+10: ROOT = Path(__file__).resolve().parents[1]
+11: sys.path.insert(0, str(ROOT / 'python'))
+12: from pokemon_learner.checkpoint import digest, file_hash, wire
+13: from pokemon_switch.provenance import CURRENT
+14: 
+15: previous = runpy.run_path(str(ROOT / 'scripts/seal-showdown-confirmation.py'))
+16: read, require, write_once, source_manifest = [previous[k] for k in ('read', 'require', 'write_once', 'source_manifest')]
+17: PREDECESSOR = '76af345f4105649497bc293bd47307d49c651ca06bf1f4935d487a9cfd82d8c9'
+18: REVIEW = ROOT / 'artifacts/reviews/showdown-soak'
+19: POOLS = ['showdown-panel-v1', 'showdown-panel-smoke-v1', 'showdown-confirmation-v1',
+20:          'showdown-confirmation-smoke-v1', 'showdown-tactical-network-v1', 'showdown-session-v1', 'playable-baseline-network-v2']
+21: NODE_TESTS = 237
+22: 
+23: 
+24: def admission():
+25:     path = ROOT / 'artifacts/reports/showdown-confirmation.json'
+26:     prior = read(path)
+27:     require(prior['content_hash'] == PREDECESSOR == digest({k: v for k, v in prior.items() if k != 'content_hash'}), 'Confirmation receipt')
+28:     require(prior['confirmation']['status'] == 'pass', 'Candidate confirmation')
+29:     archive = ROOT / 'artifacts/manifests' / ('showdown-confirmation-' + PREDECESSOR)
+30:     require((archive / 'receipt.json').read_bytes() == path.read_bytes(), 'Confirmation archive receipt')
+31:     count = 0
+32:     for kind, key in [('source', 'source_files'), ('evidence', 'evidence_files')]:
+33:         for name, expected in prior[key].items():
+34:             require(file_hash(archive / kind / name) == expected, 'Archived predecessor drift: ' + name); count += 1
+35:             if name not in CURRENT:
+36:                 require(file_hash(ROOT / name) == expected, 'Live predecessor drift: ' + name); count += 1
+37:     inherited = previous['admission']()
+38:     return {'format': 'showdown-soak-admission-1', 'predecessor': PREDECESSOR, 'predecessor_hash_checks': count,
+39:             'inherited_runtime': inherited['inherited_runtime'], 'source_files': source_manifest(),
+40:             'prior_pool_hashes': {f'artifacts/runs/{name}/teams.json': file_hash(ROOT / f'artifacts/runs/{name}/teams.json') for name in POOLS}}
+41: 
+42: 
+43: def seal(directory):
+44:     directory = Path(directory).resolve()
+45:     require(directory.is_relative_to(ROOT / 'artifacts/runs'), 'Run path')
+46:     now = admission()
+47:     registration, report, audit = [read(directory / name) for name in ('preregistration.json', 'report.json', 'audit.json')]
+48:     plan = read(ROOT / 'packages/showdown-soak/plan.json'); plan.pop('smoke'); plan['games'] = plan['sessions'] * plan['games_per_session']
+49:     require(not (directory / 'failure.json').exists(), 'Failed run cannot be sealed')
+50:     require(registration['admission'] == now and registration['plan'] == plan and registration['smoke'] is False, 'Frozen source/plan')
+51:     require(read(directory / 'progress.json') == {'completed': 1000, 'total': 1000}, 'Complete progress')
+52:     require(report['status'] == 'complete' and report['plan'] == plan and report['smoke'] is False and not report['failures']
+53:             and len(report['records']) == 1000, 'Complete campaign')
+54:     for key in ('training_performed', 'public_server_used', 'final_evaluation_used'):
+55:         require(report[key] is False, 'Scope: ' + key)
+56:     coverage = {'games': 1000, 'sessions': 20, 'rematches': 980, 'faults': 60, 'tactical_connections': 80,
+57:                 'baseline_connections': 20, 'tactical_p1': 500, 'tactical_p2': 500,
+58:                 'scenarios': {'normal': 940, 'before-choice': 20, 'lost-write': 20, 'accepted-choice': 20}}
+59:     require(report['expected'] == audit['coverage'] == coverage and audit['status'] == 'pass'
+60:             and audit['teams'] == 1000 and audit['final_teams_used'] == 0, 'Wire audit coverage')
+61:     require(file_hash(directory / 'server/dist/server/chat-plugins/soak-team.js') == file_hash(ROOT / 'packages/showdown-soak/team-receipt.cjs'), 'Local receipt endpoint source')
+62:     require(0 < audit['peak_client_rss'] <= plan['max_client_rss_mib'] * 2 ** 20, 'Client memory gate')
+63:     for i, record in enumerate(report['records']):
+64:         require(record['index'] == i and record['file'] == f'game-{i:04d}.json.gz', 'Complete game grid')
+65:         require(file_hash(directory / record['file']) == record['sha256'], 'Game evidence binding')
+66:     for key, name in [('report_sha256', 'report.json'), ('preregistration_sha256', 'preregistration.json'), ('teams_sha256', 'teams.json')]:
+67:         require(audit[key] == file_hash(directory / name), 'Audit binding: ' + name)
+68:     replayed = json.loads(subprocess.check_output(['node', str(ROOT / 'packages/showdown-soak/audit.mjs'), str(directory), '--check'], cwd=ROOT, text=True))
+69:     require(replayed == audit, 'Fresh wire audit differs from saved audit')
+70:     v = read(REVIEW / 'verification.json'); log = (REVIEW / 'npm-test.log').read_text()
+71:     require(v['status'] == 'passed' and v['exit_code'] == 0 and v['sources_unchanged'] and v['source_files'] == now['source_files']
+72:             and v['test_log_sha256'] == file_hash(REVIEW / 'npm-test.log'), 'Regression source binding')
+73:     node = re.search(r'ℹ pass (\d+)', log); suites = list(map(int, re.findall(r'Ran (\d+) tests? in', log)))
+74:     require(node and int(node[1]) == NODE_TESTS and suites == [7, 6, 15, 13, 10, 15, 13, 6, 25, 17, 16, 12, 9, 6, 13, 6]
+75:             and log.count('\nOK\n') == len(suites), 'Regression coverage')
+76:     for name in ('claude-review.md', 'review-dispositions.md', 'delegate-verification.md'):
+77:         require((REVIEW / name).is_file(), 'Review missing: ' + name)
+78:     sources = {**now['source_files'], **{str(p.relative_to(ROOT)): file_hash(p) for p in [ROOT / 'README.md', *(ROOT / 'docs').glob('*.md')]}}
+79:     evidence = {'artifacts/reports/showdown-confirmation.json': file_hash(ROOT / 'artifacts/reports/showdown-confirmation.json'), **now['prior_pool_hashes']}
+80:     for folder in (directory, REVIEW):
+81:         files = folder.rglob('*') if folder == REVIEW else folder.iterdir()
+82:         evidence.update({str(p.relative_to(ROOT)): file_hash(p) for p in files if p.is_file()})
+83:     for name in ('server/server.log', 'server/config/config.js', 'server/dist/config/custom-formats.js', 'server/dist/server/chat-plugins/soak-team.js'):
+84:         evidence[str((directory / name).relative_to(ROOT))] = file_hash(directory / name)
+85:     receipt = {'format': 'showdown-soak-receipt-1', 'status': 'complete-local-network-soak', 'predecessor': PREDECESSOR,
+86:                'run': str(directory.relative_to(ROOT)), 'audit': audit, 'tests': {'node': int(node[1]), 'python': sum(suites)},
+87:                'source_files': sources, 'evidence_files': evidence, 'full_g2': 'open', 'full_g3': 'open', 'full_g4': 'open',
+88:                'training_performed': False, 'public_server_tested': False, 'final_evaluation_used': False, 'prime_used': False}
+89:     receipt['content_hash'] = digest(receipt)
+90:     archive = ROOT / 'artifacts/manifests' / ('showdown-soak-' + receipt['content_hash'])
+91:     for kind, files in [('source', sources), ('evidence', evidence)]:
+92:         for name, expected in files.items():
+93:             require(file_hash(ROOT / name) == expected, 'Live drift: ' + name)
+94:             write_once(archive / kind / name, (ROOT / name).read_bytes())
+95:             require(file_hash(archive / kind / name) == expected, 'Archive drift: ' + name)
+96:     write_once(archive / 'receipt.json', wire(receipt) + b'\n')
+97:     write_once(ROOT / 'artifacts/reports/showdown-soak.json', wire(receipt) + b'\n')
+98:     print(json.dumps({'status': receipt['status'], 'hash': receipt['content_hash'], 'tests': int(node[1]) + sum(suites)}))
+99: 
+100: 
+101: if __name__ == '__main__':
+102:     p = argparse.ArgumentParser(); p.add_argument('directory', nargs='?'); p.add_argument('--admission', action='store_true'); args = p.parse_args()
+103:     if args.admission: print(json.dumps(admission(), sort_keys=True))
+104:     elif args.directory: seal(args.directory)
+105:     else: p.error('provide run directory or --admission')
+106: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE scripts/verify-fixed-loop.py
+1: """Run the complete regression and bind its log to the tested code/configuration.
+2: 
+3: Documentation and outputs are excluded; implementation, tests, contract fixtures,
+4: dependency locks and this verification script are included. The campaign separately
+5: checks dataset, predecessor and runtime provenance. A changed tree fails verification.
+6: """
+7: import argparse
+8: import hashlib
+9: import json
+10: from pathlib import Path
+11: import subprocess
+12: import sys
+13: 
+14: ROOT=Path(__file__).resolve().parents[1]
+15: 
+16: 
+17: def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+18: 
+19: 
+20: def source_manifest():
+21:     paths=[]
+22:     for directory in ('python','packages','contracts','scripts','tests','tools/mechanics-deps'):
+23:         paths.extend(p for p in (ROOT/directory).rglob('*') if p.is_file() and not {'node_modules','__pycache__'} & set(p.parts))
+24:     paths.extend(ROOT/p for p in ('package.json','package-lock.json','showdown.pin.json','requirements-contract.txt',
+25:                                   'requirements-learner.txt','requirements-jax.txt','.node-version','.gitignore'))
+26:     return {str(p.relative_to(ROOT)):sha(p) for p in sorted(set(paths))}
+27: 
+28: 
+29: def main(directory):
+30:     out=Path(directory).resolve()
+31:     if not out.is_relative_to(ROOT/'artifacts/reviews'):raise ValueError('Verification directory must be under artifacts/reviews')
+32:     out.mkdir(parents=True,exist_ok=True)
+33:     before=source_manifest();log=out/'npm-test.log'
+34:     # Preserve an earlier run; a new source-bound verification never silently erases it.
+35:     if log.exists():
+36:         previous=out/('npm-test-before-'+sha(log)[:16]+'.log')
+37:         if not previous.exists():previous.write_bytes(log.read_bytes())
+38:     with log.open('wb') as stream:
+39:         result=subprocess.run(['npm','test'],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT)
+40:     after=source_manifest();passed=result.returncode==0 and before==after
+41:     report={'format':'source-bound-regression-1','status':'passed' if passed else 'failed',
+42:             'command':['npm','test'],'exit_code':result.returncode,'python':sys.version,
+43:             'node':subprocess.check_output(['node','--version'],text=True).strip(),
+44:             'source_files':before,'sources_unchanged':before==after,'test_log_sha256':sha(log)}
+45:     if before!=after:report['changed_paths']=[p for p in sorted(set(before)|set(after)) if before.get(p)!=after.get(p)]
+46:     (out/'verification.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
+47:     print(json.dumps({'status':report['status'],'verification':str(out/'verification.json'),'sources':len(before)}))
+48:     if not passed:raise SystemExit(result.returncode or 1)
+49: 
+50: 
+51: if __name__=='__main__':
+52:     parser=argparse.ArgumentParser();parser.add_argument('directory');main(parser.parse_args().directory)
+53: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

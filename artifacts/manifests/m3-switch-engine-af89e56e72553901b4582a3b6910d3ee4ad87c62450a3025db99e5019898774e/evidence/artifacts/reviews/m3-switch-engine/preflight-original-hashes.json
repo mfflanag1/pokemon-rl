@@ -1,0 +1,70 @@
+{
+  "artifacts/runs/m3-switch-engine-preflight-v2/cases-0000.json.gz": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v2/cases-0000.json.gz",
+    "sha256": "b8cbb67fee73cc9f49b4880aff17e3b183bf456bc896072693368172ef1b94e0"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v2/legacy.json.gz": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v2/legacy.json.gz",
+    "sha256": "df19e4b0e419f0e0fb59ace824e0e850f36e5a1aee451bb2dd611778a9aabb24"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v2/parity.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v2/parity.json",
+    "sha256": "c9d9c2c546523837aac670fc51203178f0fcc8648a5086a949cd6016904ecc27"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v2/plan.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v2/plan.json",
+    "sha256": "dd6e1f247d4023b49159d0e5a45a71fe9c73c79d986680de8b18e132778304b7"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v2/progress.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v2/progress.json",
+    "sha256": "db32d7d3fafe59e18cd3f9efc83fb43469c9a691c1e47f22d9ed277690b6b4af"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v2/report.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v2/report.json",
+    "sha256": "64c2cd30f97e081bfea6794709f481b5be69c8e7333c95e1f3c7e2902dd4560e"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v3/cases-0000.json.gz": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v3/cases-0000.json.gz",
+    "sha256": "7e73d6d84ff4ff327401a60bf974909cf2cfc5509b45c409422c1bc3e00d1fe3"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v3/legacy.json.gz": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v3/legacy.json.gz",
+    "sha256": "09c6aa4e41265bba42c9d8bad5e322a8a9c096e1720207c41b6991aee68392f4"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v3/plan.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v3/plan.json",
+    "sha256": "75d2e3cee08d8ed75a3f347d8aa9fd26551235ff7097ac7c48389f41330d49ee"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v3/progress.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v3/progress.json",
+    "sha256": "db32d7d3fafe59e18cd3f9efc83fb43469c9a691c1e47f22d9ed277690b6b4af"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v3/report.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v3/report.json",
+    "sha256": "89b2da1b7a828b05e67a5c54f479ddb87bda3ddeaf9c3744201656d7a3789f33"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v4/cases-0000.json.gz": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v4/cases-0000.json.gz",
+    "sha256": "eff2f8625c7023fbf45498dfade1319780549ce280ec0c50164f9cd95e472dce"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v4/legacy.json.gz": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v4/legacy.json.gz",
+    "sha256": "888955edc00713152da1ed85aa2ababbdd75f5adb083bbf4be2678ac5f55e3dd"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v4/parity.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v4/parity.json",
+    "sha256": "1bdc7120a109a116e7a4da3ab4727510b66c3ddfad001559e2d664db9521d9ee"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v4/plan.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v4/plan.json",
+    "sha256": "75d2e3cee08d8ed75a3f347d8aa9fd26551235ff7097ac7c48389f41330d49ee"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v4/progress.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v4/progress.json",
+    "sha256": "db32d7d3fafe59e18cd3f9efc83fb43469c9a691c1e47f22d9ed277690b6b4af"
+  },
+  "artifacts/runs/m3-switch-engine-preflight-v4/report.json": {
+    "copy": "artifacts/reviews/m3-switch-engine/preflight-evidence/m3-switch-engine-preflight-v4/report.json",
+    "sha256": "88aa3e5c8c6c5bfa282b3595434416aef023797697469c1c22b976c68cc50138"
+  }
+}

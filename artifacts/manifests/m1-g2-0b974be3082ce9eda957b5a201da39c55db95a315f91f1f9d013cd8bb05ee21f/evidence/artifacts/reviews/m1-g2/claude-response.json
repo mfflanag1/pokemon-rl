@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 281688,
+  "stop_reason": "end_turn",
+  "session_id": "5de58b97-5445-4076-818a-0d3b4781145c",
+  "total_cost_usd": 1.5302600000000002,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 29242,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 18908,
+    "output_tokens_details": {
+      "thinking_tokens": 17289
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 29242,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 18908,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 29242,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 29242
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 18908,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 29242,
+      "webSearchRequests": 0,
+      "costUSD": 1.5302600000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 17289,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (low severity only; no correctness/leakage bug found in reviewed scope).** Most important: the Python admission's `provenance()` does not hash the test oracle or the profile, so the \"source drift\" gate cannot detect edits to what the JAX port is being checked against.\n\n## Findings\n\n**1. Low \u2014 Provenance omits oracle/profile/sealing code** (`campaign.py:23-26`)\n`provenance()` hashes `python/pokemon_jax/*.py`, `contracts/jax-slice-v1/*`, `reference.mjs`, `requirements-jax.txt`. It omits `python/pokemon_slice/engine.py` (the CPU oracle whose `damage`/`PROFILE` the port is compared to), `contracts/slice-v1/profile.json`, and `pokemon_reference`/`pokemon_learner` (`hash_json`, `wire`, `digest`, `verify_seal`). An edit to any of these changes results without changing `source_hashes`. `runtime` also omits `jax.config.x64_enabled`, which affects dtype promotion in `rollout` (`campaign.py:119`). Verification: add these paths to `provenance()`; record x64 flag.\n\n**2. Low \u2014 `validate_state` import-rejection is weaker than its docstring claims** (`engine.py:84-108`)\nTurn-sequence checks only enforce `t \u2208 {last_turn, last_turn+1}` and `t \u2264 turn`; a non-terminal turn with a single hit is not rejected. Example: history turns `[1,2,2,3]`, live, `turn=3`, `count=4` satisfies `count==2*(turn-1)` and all per-row checks if HP/PP replay consistently. Unreachable from the kernels, but the comment \"reject unsupported imported states\" overstates. Verification: construct such a state and call `step`; add \"each non-final turn has exactly two hits\" check.\n\n**3. Low \u2014 Family-size/power claim for the Showdown population** (`statistics.py:36-41`, `campaign.py:107`, `campaign.json:13-14`)\n`fresh_showdown_first_turn` is fed `turns=ones`, so 105 per-turn cells (turns 2\u20134) are vacuous (`size=0 \u2192 p=1`) yet counted in `family_test_count=1184`. Turn-1 cells exactly duplicate the global cells. With n\u22481000 (\u2248500 valid ties) and Bonferroni cutoff \u22488.4e-6, rare cells (e.g. `crit-both-tie`, p=1/1152, expected \u22480.4) cannot fail. \"passed\" is non-detection at very low power; the `scope` string says \"finite checks\" but not this. Verification: report per-cell minimum attainable p-value or achievable power; avoid implying 592 informative tests per population.\n\n**4. Low \u2014 Leakage tests are weaker than their names** (`test_engine.py:27-34, 64-68`; `campaign.py:56-58`)\n`test_cancel_does_not_reveal_choice` compares only seat 0's view; seat 1 (whose move was canceled) is the one whose own-PP/history could leak. `test_rng_and_future_cannot_change_current_view` cannot fail (views don't depend on `sample`). `compare_views` actor \"independence\" check rebuilds `PlayerView` from arrays just asserted equal \u2014 tautological. Verification: add seat-1 comparison in the cancel test.\n\n## Verified OK (reasoned from packet)\n- Damage: base 26/39 (atk 76, def 55), crit before roll, STAB `(x*6144+2047)//4096` round-half-down; matches oracle and Showdown order.\n- KO cancellation: second actor's PP/history/events masked by `live`; `turn` frozen at terminal; validate relations consistent with 7-hit bound.\n- Chance mapping: `LIMIT24=4294967280=\u230a2\u00b3\u00b2/24\u230b\u00b724` exact; `&15`, `&1` exact; Showdown roll `100-random(16)` \u2208 [85,100]; `random(16)` hook does not collide with `randomChance(1,24)`.\n- Reducer/engine agree on `hp_lost` capping, `seen` from executed moves, terminal masks, turn at terminal, padding -1.\n- Cell probabilities (1/384, 23/384, 1/48, 1/32, 530/576, 1/1152) and 583+9=592 count check out.\n\n## Scope limitations\nNot in packet: `pokemon_reference.*`, `pokemon_learner.checkpoint`, `reference-node/*.mjs`, `PlayerProjection`, the sealed reference JSONs, old campaign. Showdown PRNG bias (~2\u207b\u00b2\u2077) and `fold_in` collision behavior assumed negligible. I did not run tests.",
+  "ttft_ms": 259702,
+  "type": "result",
+  "duration_ms": 281725,
+  "uuid": "7eaa62f6-e156-485b-ab0f-2769e00fa133",
+  "ttft_stream_ms": 2607,
+  "time_to_request_ms": 36,
+  "first_content_frame_ms": 2608,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "error": "Command '['/opt/homebrew/bin/claude', '-p', '--model', 'claude-fable-5-1', '--safe-mode', '--restricted', '--strict-mcp-config', '--no-session-persistence', '--tools', 'Read,Glob,Grep,WebSearch,WebFetch', '--allowedTools', 'Read,Glob,Grep,WebSearch,WebFetch', '--permission-mode', 'dontAsk', '--output-format', 'json', '--system-prompt', 'You perform bounded subtasks with only the explicitly available tools. Never simulate tools or claim unexecuted checks. Do not delegate further. Follow the task scope and acceptance criteria.']' timed out after 600 seconds",
+  "elapsed_seconds": 600.02
+}

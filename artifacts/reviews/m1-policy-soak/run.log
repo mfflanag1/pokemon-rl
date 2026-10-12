@@ -1,0 +1,140 @@
+Compiling jit(<lambda>) with global shapes and types (ShapedArray(float32[3]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_threefry_seed) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_normal) with global shapes and types (ShapedArray(key<fry>[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(multiply) with global shapes and types (ShapedArray(float32[59,2]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(uint32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(int32[]), ShapedArray(int32[]), ShapedArray(uint32[]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(uint32[]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(int32[]), ShapedArray(int32[]), ShapedArray(uint32[]), ShapedArray(float32[512,59]), ShapedArray(bool[512,2]), ShapedArray(int32[512]), ShapedArray(float32[512]), ShapedArray(float32[512]), ShapedArray(float32[512]), ShapedArray(bool[512]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[59,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[59]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+{"phase": "soak", "mode": "qualification", "target_seconds": 7200, "started_at": "2026-10-11T12:05:19.914946+00:00", "pid": 1866}
+{"elapsed_seconds": 60.0, "cycles": 81941, "decisions": 32862346, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 120.0, "cycles": 163908, "decisions": 65735086, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 180.0, "cycles": 246470, "decisions": 98844748, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 240.0, "cycles": 329074, "decisions": 131973376, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 300.0, "cycles": 411391, "decisions": 164985568, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 360.0, "cycles": 493636, "decisions": 197967280, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 420.0, "cycles": 575947, "decisions": 230977866, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 480.0, "cycles": 658221, "decisions": 263974434, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 540.0, "cycles": 740366, "decisions": 296918518, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 600.0, "cycles": 822533, "decisions": 329867758, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 660.0, "cycles": 904825, "decisions": 362869120, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 720.0, "cycles": 985763, "decisions": 395329158, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 780.0, "cycles": 1066780, "decisions": 427820908, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 840.0, "cycles": 1149391, "decisions": 460947990, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 900.0, "cycles": 1232097, "decisions": 494116776, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 960.0, "cycles": 1314066, "decisions": 526987516, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1020.0, "cycles": 1396493, "decisions": 560042494, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1080.0, "cycles": 1479291, "decisions": 593249766, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1140.0, "cycles": 1563500, "decisions": 627023636, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1200.0, "cycles": 1646055, "decisions": 660133430, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1260.0, "cycles": 1728394, "decisions": 693154186, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1320.0, "cycles": 1810695, "decisions": 726156666, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1380.0, "cycles": 1888863, "decisions": 757505932, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1440.0, "cycles": 1968889, "decisions": 789601134, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1500.0, "cycles": 2046323, "decisions": 820656620, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1560.0, "cycles": 2125937, "decisions": 852584206, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1620.0, "cycles": 2205643, "decisions": 884551122, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1680.0, "cycles": 2284319, "decisions": 916102156, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1740.0, "cycles": 2360979, "decisions": 946845034, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1800.0, "cycles": 2431139, "decisions": 974980532, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1860.0, "cycles": 2480503, "decisions": 994777926, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1920.0, "cycles": 2520820, "decisions": 1010946856, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 1980.0, "cycles": 2574014, "decisions": 1032283660, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2040.0, "cycles": 2632264, "decisions": 1055642678, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2100.0, "cycles": 2702622, "decisions": 1083859280, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2160.0, "cycles": 2757198, "decisions": 1105746778, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2220.0, "cycles": 2808053, "decisions": 1126141540, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2280.0, "cycles": 2860329, "decisions": 1147107312, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2340.0, "cycles": 2917453, "decisions": 1170016800, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2400.0, "cycles": 2970538, "decisions": 1191306516, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2460.0, "cycles": 3020011, "decisions": 1211146952, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2520.0, "cycles": 3077128, "decisions": 1234054830, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2580.0, "cycles": 3137430, "decisions": 1258238768, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2640.0, "cycles": 3200058, "decisions": 1283354440, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2700.0, "cycles": 3261163, "decisions": 1307859566, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2760.0, "cycles": 3324330, "decisions": 1333191370, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2820.0, "cycles": 3388873, "decisions": 1359074030, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2880.0, "cycles": 3451113, "decisions": 1384033198, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 2940.0, "cycles": 3510953, "decisions": 1408030832, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3000.0, "cycles": 3573069, "decisions": 1432941674, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3060.0, "cycles": 3635168, "decisions": 1457847258, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3120.0, "cycles": 3697117, "decisions": 1482691526, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3180.0, "cycles": 3758124, "decisions": 1507156964, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3240.0, "cycles": 3815309, "decisions": 1530089550, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3300.0, "cycles": 3873250, "decisions": 1553328018, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3360.0, "cycles": 3928038, "decisions": 1575301384, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3420.0, "cycles": 3981667, "decisions": 1596809174, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3480.0, "cycles": 4039279, "decisions": 1619915768, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3540.0, "cycles": 4102181, "decisions": 1645141354, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3600.0, "cycles": 4176371, "decisions": 1674895270, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3660.0, "cycles": 4252822, "decisions": 1705554900, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3720.0, "cycles": 4328322, "decisions": 1735833148, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3780.0, "cycles": 4407354, "decisions": 1767526886, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3840.0, "cycles": 4487950, "decisions": 1799850786, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3900.0, "cycles": 4565041, "decisions": 1830767250, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 3960.0, "cycles": 4641251, "decisions": 1861332354, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4020.0, "cycles": 4720605, "decisions": 1893157394, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4080.0, "cycles": 4799377, "decisions": 1924748158, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4140.0, "cycles": 4878990, "decisions": 1956677208, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4200.0, "cycles": 4957488, "decisions": 1988160930, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4260.0, "cycles": 5035845, "decisions": 2019586864, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4320.0, "cycles": 5114704, "decisions": 2051211558, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4380.0, "cycles": 5195980, "decisions": 2083804738, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4440.0, "cycles": 5274614, "decisions": 2115337134, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4500.0, "cycles": 5353587, "decisions": 2147009286, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4560.0, "cycles": 5435302, "decisions": 2179779028, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4620.0, "cycles": 5517286, "decisions": 2212659390, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4680.0, "cycles": 5599121, "decisions": 2245477114, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4740.0, "cycles": 5680946, "decisions": 2278292282, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4800.0, "cycles": 5762898, "decisions": 2311158378, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4860.0, "cycles": 5844898, "decisions": 2344043606, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4920.0, "cycles": 5926990, "decisions": 2376966984, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 4980.0, "cycles": 6008801, "decisions": 2409777318, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5040.0, "cycles": 6090640, "decisions": 2442596158, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5100.0, "cycles": 6173268, "decisions": 2475734282, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5160.0, "cycles": 6254217, "decisions": 2508195098, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5220.0, "cycles": 6331148, "decisions": 2539048800, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5280.0, "cycles": 6410605, "decisions": 2570911802, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5340.0, "cycles": 6486244, "decisions": 2601245994, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5400.0, "cycles": 6561025, "decisions": 2631236552, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5460.0, "cycles": 6629125, "decisions": 2658547204, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5520.0, "cycles": 6697175, "decisions": 2685836450, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5580.0, "cycles": 6765013, "decisions": 2713043146, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5640.0, "cycles": 6830303, "decisions": 2739227438, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5700.0, "cycles": 6880246, "decisions": 2759257110, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5760.0, "cycles": 6900485, "decisions": 2767373280, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5820.07, "cycles": 6901778, "decisions": 2767891762, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5880.0, "cycles": 6910198, "decisions": 2771268174, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 5940.0, "cycles": 6931900, "decisions": 2779972476, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6000.0, "cycles": 6974309, "decisions": 2796983152, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6060.01, "cycles": 7011874, "decisions": 2812049712, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6120.0, "cycles": 7027928, "decisions": 2818487800, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6180.0, "cycles": 7048469, "decisions": 2826725992, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6240.0, "cycles": 7075360, "decisions": 2837511940, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6300.0, "cycles": 7107213, "decisions": 2850287050, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6360.0, "cycles": 7171849, "decisions": 2876206748, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6420.0, "cycles": 7230965, "decisions": 2899913830, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6480.0, "cycles": 7291233, "decisions": 2924083408, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6540.0, "cycles": 7354194, "decisions": 2949333502, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6600.0, "cycles": 7418499, "decisions": 2975121512, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6660.0, "cycles": 7486037, "decisions": 3002205470, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6720.0, "cycles": 7553723, "decisions": 3029349724, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6780.0, "cycles": 7621957, "decisions": 3056712598, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6840.0, "cycles": 7688362, "decisions": 3083342810, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6900.0, "cycles": 7756601, "decisions": 3110708306, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 6960.0, "cycles": 7831984, "decisions": 3140937386, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 7020.0, "cycles": 7912531, "decisions": 3173239846, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 7080.0, "cycles": 7994618, "decisions": 3206161604, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 7140.0, "cycles": 8076685, "decisions": 3239074466, "peak_rss_bytes": 496779264}
+{"elapsed_seconds": 7200.0, "cycles": 8158970, "decisions": 3272073210, "peak_rss_bytes": 496779264}
+{"status": "passed", "mode": "qualification", "report": "/Users/maxf/Documents/ChatGPT/Pokemon/artifacts/runs/m1-policy-soak-v1/report.json"}

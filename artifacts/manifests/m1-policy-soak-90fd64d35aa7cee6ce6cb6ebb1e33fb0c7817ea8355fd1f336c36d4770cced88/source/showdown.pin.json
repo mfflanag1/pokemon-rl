@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/smogon/pokemon-showdown.git",
+  "commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "package_lock_sha256": "fd89ae0129d1855edb63f9d23d99bf67bc894a3f5be882f8c486041d8662b702",
+  "format_id": "gen9randombattle",
+  "potd": "",
+  "selected_on": "2026-10-10"
+}

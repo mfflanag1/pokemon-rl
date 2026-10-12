@@ -1,0 +1,460 @@
+Showdown pin 942cda71d14bf0618bd57991708a2e2734b6daba; selected exact source ranges.
+
+sim/battle.ts SHA256 3eb941313832729ee043407c39ced894b4338301fed5d29a45ae8b36e49a09f2
+1379: 	}
+1380: 
+1381: 	makeRequest(type?: RequestState) {
+1382: 		if (type) {
+1383: 			this.requestState = type;
+1384: 			for (const side of this.sides) {
+1385: 				side.clearChoice();
+1386: 			}
+1387: 		} else {
+1388: 			type = this.requestState;
+1389: 		}
+1390: 
+1391: 		for (const side of this.sides) {
+1392: 			side.activeRequest = null;
+1393: 		}
+1394: 
+1395: 		if (type === 'teampreview') {
+1396: 			// `pickedTeamSize = 6` means the format wants the user to select
+1397: 			// the entire team order, unlike `pickedTeamSize = undefined` which
+1398: 			// will only ask the user to select their lead(s).
+1399: 			const pickedTeamSize = this.ruleTable.pickedTeamSize;
+1400: 			this.add(`teampreview${pickedTeamSize ? `|${pickedTeamSize}` : ''}`);
+1401: 		}
+1402: 
+1403: 		const requests = this.getRequests(type);
+1404: 		for (let i = 0; i < this.sides.length; i++) {
+1405: 			this.sides[i].activeRequest = requests[i];
+1406: 		}
+1407: 		this.sentRequests = false;
+1408: 
+1409: 		if (this.sides.every(side => side.isChoiceDone())) {
+1410: 			throw new Error(`Choices are done immediately after a request`);
+1411: 		}
+1412: 	}
+1413: 
+1414: 	clearRequest() {
+1415: 		this.requestState = '';
+1416: 		for (const side of this.sides) {
+1417: 			side.activeRequest = null;
+1418: 			side.clearChoice();
+1419: 		}
+1420: 	}
+1421: 
+1422: 	getRequests(type: RequestState) {
+1423: 		// default to no request
+1424: 		const requests: ChoiceRequest[] = Array(this.sides.length).fill(null);
+1425: 
+1426: 		switch (type) {
+1427: 		case 'switch':
+1428: 			for (let i = 0; i < this.sides.length; i++) {
+1429: 				const side = this.sides[i];
+1430: 				if (!side.pokemonLeft) continue;
+1431: 				const switchTable = side.active.map(pokemon => !!pokemon?.switchFlag);
+1432: 				if (switchTable.some(Boolean)) {
+1433: 					requests[i] = { forceSwitch: switchTable, side: side.getRequestData() };
+1434: 				}
+1435: 			}
+1436: 			break;
+1437: 
+1438: 		case 'teampreview':
+1439: 			for (let i = 0; i < this.sides.length; i++) {
+1440: 				const side = this.sides[i];
+1441: 				const maxChosenTeamSize = this.ruleTable.pickedTeamSize || undefined;
+1442: 				requests[i] = { teamPreview: true, maxChosenTeamSize, side: side.getRequestData() };
+1443: 			}
+1444: 			break;
+1445: 
+1446: 		default:
+1447: 			for (let i = 0; i < this.sides.length; i++) {
+1448: 				const side = this.sides[i];
+1449: 				if (!side.pokemonLeft) continue;
+1450: 				const activeData = side.active.map(pokemon => pokemon?.getMoveRequestData());
+1451: 				requests[i] = { active: activeData, side: side.getRequestData() };
+1452: 				if (side.allySide) {
+1453: 					(requests[i] as MoveRequest).ally = side.allySide.getRequestData(true);
+1454: 				}
+1455: 			}
+1456: 			break;
+1457: 		}
+1458: 
+1459: 		const multipleRequestsExist = requests.filter(Boolean).length >= 2;
+1460: 		for (let i = 0; i < this.sides.length; i++) {
+1461: 			if (requests[i]) {
+1462: 				if (!this.supportCancel || !multipleRequestsExist) requests[i].noCancel = true;
+1463: 			} else {
+1464: 				requests[i] = { wait: true, side: this.sides[i].getRequestData() };
+1465: 			}
+1466: 		}
+1467: 
+1468: 		return requests;
+1469: 	}
+1470: 
+1520: 	tie() {
+1521: 		return this.win();
+1522: 	}
+1523: 
+1524: 	win(side?: SideID | '' | Side | null) {
+1525: 		if (this.ended) return false;
+1526: 		if (side && typeof side === 'string') {
+1527: 			side = this.getSide(side);
+1528: 		} else if (!side || !this.sides.includes(side)) {
+1529: 			side = null;
+1530: 		}
+1531: 		this.winner = side ? side.name : '';
+1532: 
+1533: 		this.add('');
+1534: 		if (side?.allySide) {
+1535: 			this.add('win', side.name + ' & ' + side.allySide.name);
+1536: 		} else if (side) {
+1537: 			this.add('win', side.name);
+1538: 		} else {
+1539: 			this.add('tie');
+1540: 		}
+1541: 		this.ended = true;
+1542: 		this.requestState = '';
+1543: 		for (const s of this.sides) {
+1544: 			if (s) s.activeRequest = null;
+1545: 		}
+1546: 		return true;
+1547: 	}
+1548: 
+1549: 	lose(side: SideID | Side) {
+1550: 		if (typeof side === 'string') {
+2932: 	 *
+2933: 	 * If there is a mid-turn decision (like U-Turn), this will return
+2934: 	 * and be called again later to resume the turn.
+2935: 	 */
+2936: 	turnLoop() {
+2937: 		this.add('');
+2938: 		this.add('t:', Math.floor(Date.now() / 1000));
+2939: 		if (this.requestState) this.requestState = '';
+2940: 
+2941: 		if (!this.midTurn) {
+2942: 			this.queue.insertChoice({ choice: 'beforeTurn' });
+2943: 			this.queue.addChoice({ choice: 'residual' });
+2944: 			this.midTurn = true;
+2945: 		}
+2946: 
+2947: 		let action;
+2948: 		while ((action = this.queue.shift())) {
+2949: 			this.runAction(action);
+2950: 			if (this.requestState || this.ended) return;
+2951: 		}
+2952: 
+2953: 		this.endTurn();
+2954: 		this.midTurn = false;
+2955: 		this.queue.clear();
+2956: 	}
+2957: 
+2958: 	/**
+2959: 	 * Takes a choice string passed from the client. Starts the next
+2960: 	 * turn if all required choices have been made.
+2961: 	 */
+2962: 	choose(sideid: SideID, input: string) {
+2963: 		const side = this.getSide(sideid);
+2964: 
+2965: 		if (!side.choose(input)) {
+2966: 			if (!side.choice.error) {
+2967: 				side.emitChoiceError(`Unknown error for choice: ${input}. If you're not using a custom client, please report this as a bug.`);
+2968: 			}
+2969: 			return false;
+2970: 		}
+2971: 
+2972: 		if (!side.isChoiceDone()) {
+2973: 			side.emitChoiceError(`Incomplete choice: ${input} - missing other pokemon`);
+2974: 			return false;
+2975: 		}
+2976: 		if (this.allChoicesDone()) this.commitChoices();
+2977: 		return true;
+2978: 	}
+2979: 
+2980: 	/**
+2981: 	 * Convenience method for easily making choices.
+2982: 	 */
+2983: 	makeChoices(...inputs: string[]) {
+2984: 		if (inputs.length) {
+2985: 			for (const [i, input] of inputs.entries()) {
+2986: 				if (input) this.sides[i].choose(input);
+2987: 			}
+2988: 		} else {
+2989: 			for (const side of this.sides) {
+2990: 				side.autoChoose();
+2991: 			}
+2992: 		}
+2993: 		this.commitChoices();
+2994: 	}
+2995: 
+2996: 	commitChoices() {
+2997: 		this.updateSpeed();
+2998: 
+2999: 		// Sometimes you need to make switch choices mid-turn (e.g. U-turn,
+3000: 		// fainting). When this happens, the rest of the turn is saved (and not
+3001: 		// re-sorted), but the new switch choices are sorted and inserted before
+3002: 		// the rest of the turn.
+3003: 		const oldQueue = this.queue.list;
+3004: 		this.queue.clear();
+3005: 		if (!this.allChoicesDone()) throw new Error("Not all choices done");
+3006: 
+3007: 		for (const side of this.sides) {
+3008: 			const choice = side.getChoice();
+3009: 			if (choice) this.inputLog.push(`>${side.id} ${choice}`);
+3010: 		}
+3011: 		for (const side of this.sides) {
+3012: 			side.commitChoices();
+3013: 		}
+3014: 		this.clearRequest();
+3015: 
+3016: 		this.queue.sort();
+3017: 		this.queue.list.push(...oldQueue);
+3018: 
+3019: 		this.requestState = '';
+3020: 		for (const side of this.sides) {
+3021: 			side.activeRequest = null;
+3022: 		}
+3023: 
+3024: 		this.turnLoop();
+3025: 
+3026: 		// workaround for tests
+3027: 		if (this.log.length - this.sentLogPos > 500) this.sendUpdates();
+3028: 	}
+3029: 
+3030: 	undoChoice(sideid: SideID) {
+3031: 		const side = this.getSide(sideid);
+3032: 		if (!side.requestState) return;
+3033: 
+3034: 		if (side.choice.cantUndo) {
+3035: 			side.emitChoiceError(`Can't undo: A trapping/disabling effect would cause undo to leak information`);
+3036: 			return;
+3037: 		}
+3038: 
+3039: 		let updated = false;
+3040: 		if (side.requestState === 'move') {
+3041: 			for (const action of side.choice.actions) {
+3042: 				const pokemon = action.pokemon;
+3043: 				if (action.choice !== 'move' || !pokemon) continue;
+3044: 				if (side.updateRequestForPokemon(pokemon, req => side.updateDisabledRequest(pokemon, req))) {
+3045: 					updated = true;
+3046: 				}
+3047: 			}
+3048: 		}
+3049: 
+3050: 		side.clearChoice();
+3051: 
+3052: 		if (updated) side.emitRequest(side.activeRequest!, true);
+3053: 	}
+3054: 
+3055: 	/**
+3056: 	 * returns true if both decisions are complete
+3057: 	 */
+3058: 	allChoicesDone() {
+3059: 		let totalActions = 0;
+3060: 		for (const side of this.sides) {
+3061: 			if (side.isChoiceDone()) {
+3062: 				if (!this.supportCancel) side.choice.cantUndo = true;
+3063: 				totalActions++;
+3064: 			}
+3065: 		}
+3066: 		return totalActions >= this.sides.length;
+3067: 	}
+3068: 
+3069: 	hint(hint: string, once?: boolean, side?: Side) {
+3070: 		if (this.hints.has(side ? `${side.id}|${hint}` : hint)) return;
+3260: 	join(slot: SideID, name: string, avatar: string, team: PokemonSet[] | string | null) {
+3261: 		this.setPlayer(slot, { name, avatar, team });
+3262: 		return this.getSide(slot);
+3263: 	}
+3264: 
+3265: 	sendUpdates() {
+3266: 		if (this.sentLogPos >= this.log.length) return;
+3267: 		this.send('update', this.log.slice(this.sentLogPos));
+3268: 		if (!this.sentRequests) {
+3269: 			for (const side of this.sides) side.emitRequest();
+3270: 			this.sentRequests = true;
+3271: 		}
+3272: 		this.sentLogPos = this.log.length;
+3273: 
+3274: 		if (!this.sentEnd && this.ended) {
+3275: 			const log = {
+3276: 				winner: this.winner,
+3277: 				seed: this.prngSeed,
+3278: 				turns: this.turn,
+3279: 				p1: this.sides[0].name,
+3280: 				p2: this.sides[1].name,
+3281: 				p3: this.sides[2]?.name,
+3282: 				p4: this.sides[3]?.name,
+3283: 				p1team: this.sides[0].team,
+3284: 				p2team: this.sides[1].team,
+3285: 				p3team: this.sides[2]?.team,
+3286: 				p4team: this.sides[3]?.team,
+3287: 				score: [this.sides[0].pokemonLeft, this.sides[1].pokemonLeft],
+3288: 				inputLog: this.inputLog,
+3289: 			};
+3290: 			if (this.sides[2]) {
+3291: 				log.score.push(this.sides[2].pokemonLeft);
+3292: 			} else {
+3293: 				delete log.p3;
+3294: 				delete log.p3team;
+3295: 			}
+3296: 			if (this.sides[3]) {
+3297: 				log.score.push(this.sides[3].pokemonLeft);
+3298: 			} else {
+3299: 				delete log.p4;
+3300: 				delete log.p4team;
+3301: 			}
+3302: 			this.send('end', JSON.stringify(log));
+3303: 			this.sentEnd = true;
+3304: 		}
+3305: 	}
+3306: 
+3307: 	getSide(sideid: SideID): Side {
+3308: 		return this.sides[parseInt(sideid[1]) - 1];
+3309: 	}
+3310: 
+
+sim/side.ts SHA256 a18946aefe31018162956b1c708a9cce27bb33fe0f098cb58c44d8521d53b1f1
+519: 	}
+520: 
+521: 	emitRequest(update: ChoiceRequest = this.activeRequest!, updatedRequest = false) {
+522: 		if (updatedRequest) (this.activeRequest as MoveRequest | SwitchRequest).update = true;
+523: 		this.battle.send('sideupdate', `${this.id}\n|request|${JSON.stringify(update)}`);
+524: 		this.activeRequest = update;
+525: 	}
+526: 
+527: 	emitChoiceError(
+528: 		message: string, update?: { pokemon: Pokemon, update: (req: PokemonMoveRequestData) => boolean | void }
+529: 	) {
+530: 		this.choice.error = message;
+531: 		const updated = update ? this.updateRequestForPokemon(update.pokemon, update.update) : null;
+532: 		const type = `[${updated ? 'Unavailable' : 'Invalid'} choice]`;
+533: 		this.battle.send('sideupdate', `${this.id}\n|error|${type} ${message}`);
+534: 		if (updated) this.emitRequest(this.activeRequest!, true);
+535: 		if (this.battle.strictChoices) throw new Error(`${type} ${message}`);
+536: 		return false;
+537: 	}
+538: 
+539: 	isChoiceDone() {
+540: 		if (!this.requestState) return true;
+541: 		if (this.choice.forcedSwitchesLeft) return false;
+542: 
+543: 		if (this.requestState === 'teampreview') {
+544: 			return this.choice.actions.length >= this.pickedTeamSize();
+545: 		}
+546: 
+547: 		// current request is move/switch
+965: 		if (this.slotConditions[pokemon.position]['revivalblessing']) {
+966: 			if (!targetPokemon.fainted) {
+967: 				return this.emitChoiceError(`Can't switch: You have to pass to a fainted Pokémon`);
+968: 			}
+969: 			// Should always subtract, but stop at 0 to prevent errors.
+970: 			this.choice.forcedSwitchesLeft = this.battle.clampIntRange(this.choice.forcedSwitchesLeft - 1, 0);
+971: 			pokemon.switchFlag = false;
+972: 			this.choice.actions.push({
+973: 				choice: 'revivalblessing',
+974: 				pokemon,
+975: 				target: targetPokemon,
+976: 			});
+977: 			return true;
+978: 		}
+979: 
+980: 		if (targetPokemon.fainted) {
+981: 			return this.emitChoiceError(`Can't switch: You can't switch to a fainted Pokémon`);
+982: 		}
+983: 
+984: 		if (this.requestState === 'move') {
+985: 			if (pokemon.trapped) {
+986: 				return this.emitChoiceError(`Can't switch: The active Pokémon is trapped`, { pokemon, update: req => {
+987: 					let updated = false;
+988: 					if (req.maybeTrapped) {
+989: 						delete req.maybeTrapped;
+990: 						updated = true;
+991: 					}
+992: 					if (!req.trapped) {
+993: 						req.trapped = true;
+994: 						updated = true;
+995: 					}
+996: 					return updated;
+997: 				} });
+998: 			} else if (pokemon.maybeTrapped) {
+999: 				this.choice.cantUndo = true;
+1000: 			}
+1001: 		} else if (this.requestState === 'switch') {
+1002: 			if (!this.choice.forcedSwitchesLeft) {
+1003: 				throw new Error(`Player somehow switched too many Pokemon`);
+1004: 			}
+1005: 			this.choice.forcedSwitchesLeft--;
+1006: 		}
+1007: 
+1008: 		this.choice.switchIns.add(slot);
+1009: 
+1010: 		this.choice.actions.push({
+1011: 			choice: (this.requestState === 'switch' ? 'instaswitch' : 'switch'),
+1012: 			pokemon,
+1013: 			target: targetPokemon,
+1014: 		});
+1015: 
+1016: 		return true;
+1017: 	}
+1018: 
+1182: 		this.battle.queue.addChoice(this.choice.actions);
+1183: 	}
+1184: 
+1185: 	choose(input: string) {
+1186: 		if (!this.requestState) {
+1187: 			return this.emitChoiceError(
+1188: 				this.battle.ended ? `Can't do anything: The game is over` : `Can't do anything: It's not your turn`
+1189: 			);
+1190: 		}
+1191: 
+1192: 		if (this.choice.cantUndo) {
+1193: 			return this.emitChoiceError(`Can't undo: A trapping/disabling effect would cause undo to leak information`);
+1194: 		}
+1195: 
+1196: 		this.clearChoice();
+1197: 
+1198: 		const choiceStrings = (input.startsWith('team ') ? [input] : input.split(','));
+1199: 
+1200: 		if (choiceStrings.length > this.active.length) {
+
+sim/pokemon.ts SHA256 e36493e502858c7f7fa8e899f4b4439295fefa452f96c5017e974494f1c4a688
+1153: 	getSwitchRequestData(forAlly?: boolean): PokemonSwitchRequestData {
+1154: 		const entry: PokemonSwitchRequestData = {
+1155: 			ident: this.fullname,
+1156: 			details: this.details,
+1157: 			condition: this.getHealth().secret,
+1158: 			active: this.position < this.side.active.length,
+1159: 			stats: {
+1160: 				atk: this.baseStoredStats['atk'],
+1161: 				def: this.baseStoredStats['def'],
+1162: 				spa: this.baseStoredStats['spa'],
+1163: 				spd: this.baseStoredStats['spd'],
+1164: 				spe: this.baseStoredStats['spe'],
+1165: 			},
+1166: 			moves: this[forAlly ? 'baseMoves' : 'moves'].map(move => {
+1167: 				if (move === 'hiddenpower') {
+1168: 					return `${move}${toID(this.hpType)}${this.battle.gen < 6 ? '' : this.hpPower}` as ID;
+1169: 				}
+1170: 				if (move === 'frustration' || move === 'return') {
+1171: 					const basePowerCallback = this.battle.dex.moves.get(move).basePowerCallback as (pokemon: Pokemon) => number;
+1172: 					return `${move}${basePowerCallback(this)}` as ID;
+1173: 				}
+1174: 				return move as ID;
+1175: 			}),
+1176: 			baseAbility: this.baseAbility,
+1177: 			item: this.item,
+1178: 			pokeball: this.pokeball,
+1179: 		};
+1180: 		if (this.battle.gen > 6) entry.ability = this.ability;
+1181: 		if (this.battle.gen >= 9) {
+1182: 			entry.commanding = !!this.volatiles['commanding'] && !this.fainted;
+1183: 			entry.reviving = this.isActive && !!this.side.slotConditions[this.position]['revivalblessing'];
+1184: 		}
+1185: 		if (this.battle.gen === 9 && !this.battle.dex.currentMod.startsWith('champions')) {
+1186: 			entry.teraType = this.teraType;
+1187: 			entry.terastallized = this.terastallized || '';
+1188: 		}
+1189: 		return entry;
+1190: 	}

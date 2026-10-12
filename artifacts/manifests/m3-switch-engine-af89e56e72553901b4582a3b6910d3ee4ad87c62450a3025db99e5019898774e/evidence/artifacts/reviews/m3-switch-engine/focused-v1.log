@@ -1,0 +1,20 @@
+.....F...........
+======================================================================
+FAIL: test_fresh_and_sealed_parity (test_engine.EngineTests.test_fresh_and_sealed_parity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/tests/switch-engine/test_engine.py", line 38, in test_fresh_and_sealed_parity
+    report=parity.audit(out);self.assertEqual(report['legacy']['games'],72);self.assertEqual(report['fresh']['games'],24)
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_switch_engine/parity.py", line 118, in audit
+    legacy=check_batch(packed(directory/'legacy.json.gz'));total=None;seen=0
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_switch_engine/parity.py", line 57, in check_batch
+    if d['role']=='tie':compare(chance['tie'],d['result'],'Tie outcome binding')
+                        ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_switch_engine/parity.py", line 24, in compare
+    raise AssertionError(f'{label}: {keys}; actual={actual!r}; expected={expected!r}')
+AssertionError: Tie outcome binding: []; actual=0; expected=1
+
+----------------------------------------------------------------------
+Ran 17 tests in 13.460s
+
+FAILED (failures=1)

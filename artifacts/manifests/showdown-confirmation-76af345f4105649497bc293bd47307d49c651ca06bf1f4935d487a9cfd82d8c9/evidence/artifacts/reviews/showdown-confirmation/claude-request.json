@@ -1,0 +1,22 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review new tactical adapter, fresh confirmation plan and evidence sealing for consequential bugs before any production games. All predecessor sources immutable; client uses an instance-local room factory wrapper around sealed RecoveringBot.attempt/receive to instantiate exact frozen tactical-v1 view/policy. Check async ordering, history reconstruction, committed-action suppression, failed/stale socket handling, leakage and unintended baseline fallbacks. Confirmation plan fixed 1000 mirrored pairs per edge (12000 games), unchanged four policies, 3pp noninferiority tolerance vs random/damage and direct improvement, 3 nominal Bonferroni pair-bootstrap bounds (approximate, not finite-sample guaranteed). Independently delegated statistics has its own Codex QA pending. Check source/evidence bindings and fresh-team policy. Local network function tests planned regardless of statistical pass, no automatic replacement, no public or final data. Twenty adapter tests inherited/adapted from session plus two tactical-specific cases pass if confirmed in tool logs; reviewer has no execution tools. Focus actionable correctness, no recursive delegation.",
+  "files_sha256": {
+    "packages/showdown-confirmation/client.mjs": "52bd0e23096563a5c1d48ae91ef926ff287ebcc4f4dfe534387f7ad00f127747",
+    "packages/showdown-session/client.mjs": "27f24d3d33595ec7bcec40f2e502198dc66e894389b96dbec1034f1090c59311",
+    "packages/showdown-bot/client.mjs": "9cfbb0b85904953504399acf9e1c2643c6ad0bbc006b96d09b70eaadd5610c8c",
+    "packages/showdown-confirmation/plan.json": "22283496f6a4ecd41daddaa40e60fdfe8960da029807850f7fd4c51bdc12a1ac",
+    "packages/showdown-confirmation/teams.mjs": "c77ad9acda58323df03473e63aa5176b12639661ce41a762148e7f4e4f042a3c",
+    "packages/showdown-confirmation/campaign.mjs": "c7f4808c60a8a4fda500287ab59227a9922a7420a20d87a6fc58b8ccd4efbbda",
+    "packages/showdown-confirmation/audit.mjs": "e95477d176c921e1af5d2baf0ecfb14cb0c27c58ff6ff1e3f07c9ab097693993",
+    "packages/showdown-confirmation/report.mjs": "bb0ccb010394cdf2ffe0741039a7ba95d97f92dd3cb27625685ab678cc689500",
+    "scripts/seal-showdown-confirmation.py": "7d7543af34ffd1ec8aa6f977413f0b54c0ddb3d45005310449bc7127c6d9a952",
+    "scripts/verify-fixed-loop.py": "963e2bbab5a06a5763902ca280ad45bca9e22f5c6a3133b891994f8ae8dd2513",
+    "tests/showdown-confirmation/client.test.mjs": "33e037d43367f19cea1ceca56d32f265a46453c7859dad6c0a866f5bce576fb5"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

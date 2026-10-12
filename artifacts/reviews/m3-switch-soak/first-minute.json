@@ -1,0 +1,39 @@
+{
+  "actions": [
+    3880687,
+    1937844,
+    52705,
+    574692
+  ],
+  "counters": {
+    "next_game": 286400,
+    "optimizer_step": 17900,
+    "updates": 8950
+  },
+  "cycles": 8942,
+  "decisions": 6445928,
+  "elapsed_seconds": 60.00191087508574,
+  "games": 286144,
+  "maximum_host_gap_seconds": 0.07001399993896484,
+  "maximum_logp": 0.0,
+  "memory": {
+    "current_process_rss_bytes": 466092032,
+    "device_memory_stats": null,
+    "peak_process_rss_bytes": 473153536,
+    "rss_scope": "this process, including JAX runtime/compiler; system free memory not certified"
+  },
+  "minimum_logp": -12.647665023803711,
+  "recent_metrics": {
+    "actor_loss": -0.07502076774835587,
+    "approx_kl": 0.000200823531486094,
+    "clip_fraction": 0.0,
+    "entropy": 0.44629916548728943,
+    "gradient_norm": 0.1325669288635254,
+    "loss": -0.05912863463163376,
+    "value_loss": 0.04071024805307388
+  },
+  "scheduled_seconds": 60,
+  "terminal": 192910,
+  "truncated": 93234,
+  "unexpected_compilations": 0
+}

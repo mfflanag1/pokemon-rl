@@ -1,0 +1,25 @@
+{
+  "changes_after_main_snapshot": [
+    {
+      "path": "python/pokemon_pilot/campaign.py",
+      "reviewed_sha256": "45f8cb9c263c986d815d006b6e750dbad3fe5eb83744680e42461a75a5076390",
+      "current_sha256": "da039073607d84082931d4faa57b16c323a9bea410dd5f84135d56ce1c4bc315"
+    },
+    {
+      "path": "python/pokemon_pilot/provenance.py",
+      "reviewed_sha256": "4807debe63c990813bf391d451d6d5c4442b07a43707ef867f2a9efc942bd81d",
+      "current_sha256": "c3fd5d84c3302ef65041043809b948377011bdbf76f334f186b780b7856874dc"
+    },
+    {
+      "path": "scripts/seal-policy-pilot.py",
+      "reviewed_sha256": "88bba346b35299e71db9c7f94343cf23041ef9aeca6aeb6c83ad96cebe026680",
+      "current_sha256": "9db4f62eb89f819bbc3348741f4d17403a6414b565e901935cb13462323f1e12"
+    },
+    {
+      "path": "tests/pilot/test_evidence.py",
+      "reviewed_sha256": "17ab9123fff893b6991e13acc15d5d3fbf838545d22423ff50fcf75cf57ce30b",
+      "current_sha256": "edf641486aa3e69637e5311d154daf563ace75416cda86914caee49b7344023a"
+    }
+  ],
+  "interpretation": "Bounded repairs and source-bound regression described in review-dispositions.md; this is not a claim that changed files were reviewed byte-identically."
+}

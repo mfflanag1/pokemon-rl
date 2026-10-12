@@ -1,0 +1,157 @@
+{
+  "version": "r5-player-features-1",
+  "own_columns": [
+    "present",
+    "request_species",
+    "level",
+    "gender",
+    "hp",
+    "max_hp",
+    "hp_known",
+    "max_hp_known",
+    "fainted",
+    "status",
+    "active",
+    "base_ability",
+    "ability",
+    "item",
+    "tera_type",
+    "terastallized",
+    "reviving",
+    "base_atk",
+    "base_def",
+    "base_spa",
+    "base_spd",
+    "base_spe",
+    "move_0",
+    "move_1",
+    "move_2",
+    "move_3"
+  ],
+  "appearance_columns": [
+    "present",
+    "encounter",
+    "active",
+    "apparent_species",
+    "apparent_level",
+    "gender",
+    "shown_hp",
+    "shown_denominator",
+    "hp_known",
+    "hp_is_percent",
+    "fainted",
+    "status",
+    "last_seen_item",
+    "item_evidence_known",
+    "last_seen_ability",
+    "ability_evidence_known",
+    "last_used_move",
+    "last_used_move_known",
+    "revealed_tera",
+    "transformed",
+    "illusion_broken",
+    "appearance_changed",
+    "true_roster_slot_known",
+    "item_removed",
+    "entry_species",
+    "entry_level",
+    "ability_suppression_seen"
+  ],
+  "advertised_move_columns": [
+    "present",
+    "move",
+    "pp",
+    "max_pp",
+    "disabled",
+    "disabled_known",
+    "pp_known",
+    "max_pp_known"
+  ],
+  "action_columns": [
+    "kind",
+    "request_slot",
+    "subject_id",
+    "terastallize",
+    "admissible"
+  ],
+  "global_columns": [
+    "turn",
+    "move_phase",
+    "switch_phase",
+    "wait_phase",
+    "pass_control",
+    "request_count",
+    "trapped",
+    "trapped_known",
+    "maybe_trapped",
+    "maybe_trapped_known",
+    "can_tera",
+    "opponent_encounters",
+    "opponent_encounters_dropped",
+    "events_seen",
+    "events_dropped",
+    "unstructured_events",
+    "public_facts_dropped"
+  ],
+  "statuses": [
+    "<unknown>",
+    "<none>",
+    "brn",
+    "par",
+    "psn",
+    "tox",
+    "slp",
+    "frz",
+    "fnt"
+  ],
+  "shapes": {
+    "global": [
+      17
+    ],
+    "own": [
+      6,
+      26
+    ],
+    "own_public_active": [
+      27
+    ],
+    "opponent_appearances": [
+      6,
+      27
+    ],
+    "advertised_moves": [
+      4,
+      8
+    ],
+    "actions": [
+      14,
+      5
+    ],
+    "action_mask": [
+      14
+    ],
+    "event_bytes": [
+      64,
+      192
+    ],
+    "event_lengths": [
+      64
+    ],
+    "event_overflow": [
+      64
+    ],
+    "fact_bytes": [
+      32,
+      128
+    ],
+    "fact_lengths": [
+      32
+    ],
+    "fact_overflow": [
+      32
+    ]
+  },
+  "event_byte_encoding": "UTF-8 byte + 1; 0 padding. Truncation is explicit. Last 64 visible mechanical events.",
+  "opponent_memory": "Last six encounter segments, active/newest first; never inferred roster slots. Revelations are last-observed evidence.",
+  "public_facts": "Latest explicit weather and unmatched field/side start records; no inferred duration, layers or suppression."
+}

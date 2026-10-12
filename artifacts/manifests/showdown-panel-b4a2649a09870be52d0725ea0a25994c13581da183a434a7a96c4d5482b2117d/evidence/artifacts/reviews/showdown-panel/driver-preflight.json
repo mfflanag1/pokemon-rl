@@ -1,0 +1,22 @@
+[
+  {
+    "policies": [
+      "damage-v1",
+      "tactical-v1"
+    ],
+    "complete": true,
+    "decisions": 42,
+    "finite_latency": true,
+    "roundtrip": true
+  },
+  {
+    "policies": [
+      "tactical-v1",
+      "baseline-v1"
+    ],
+    "complete": true,
+    "decisions": 62,
+    "finite_latency": true,
+    "roundtrip": true
+  }
+]

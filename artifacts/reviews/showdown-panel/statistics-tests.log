@@ -1,0 +1,25 @@
+✔ exact 0 / 0.5 / 1 accounting, pair averaging, and edge order (3.224417ms)
+✔ mirror=1 scores are still from a's point of view and the pair is the resampling unit (3.562666ms)
+✔ a single pair always yields a degenerate interval equal to its pair score (0.300042ms)
+✔ two pairs at 0 and 1 give the full [0, 1] interval at the default sample count (3.292708ms)
+✔ all edges use the same resampled pair indices in every replicate (1.966041ms)
+✔ nontrivial bootstrap matches an independent re-derivation of the documented spec (1.394041ms)
+✔ mulberry32 seed 0 reproduces the frozen first 15 uint32 words (0.072583ms)
+✔ uniformIndex over the seed 0 stream reproduces the frozen indices for n = 3 (0.095208ms)
+✔ bootstrap known answer: pair scores [0, 0.5, 1], B = 5, seed 0 ⇒ interval [1/3, 2/3] (0.102042ms)
+✔ summaries are deterministic for a given seed and return fresh objects (23.706125ms)
+✔ mulberry32 is reproducible, uint32-valued, and seed-sensitive (0.394625ms)
+✔ uniformIndex rejects values at or above the unbiased limit (0.781291ms)
+✔ percentileInterval95 uses k = ceil(B/40): k-th smallest and k-th largest (0.905833ms)
+✔ records given in the reverse orientation are normalised with complemented scores (0.312792ms)
+✔ malformed grids are rejected (0.964792ms)
+✔ invalid options are rejected (0.460917ms)
+✔ inputs are not mutated (0.279458ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 128.178084

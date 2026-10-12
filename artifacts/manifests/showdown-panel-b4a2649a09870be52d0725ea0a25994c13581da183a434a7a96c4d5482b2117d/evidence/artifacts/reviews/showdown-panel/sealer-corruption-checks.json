@@ -1,0 +1,26 @@
+{
+  "status": "pass",
+  "cases": [
+    {
+      "case": "failure marker",
+      "rejected": true,
+      "reason": "Failed run cannot be sealed"
+    },
+    {
+      "case": "incomplete progress",
+      "rejected": true,
+      "reason": "Complete progress counters"
+    },
+    {
+      "case": "changed reported score",
+      "rejected": true,
+      "reason": "Audit binding: report.json"
+    },
+    {
+      "case": "changed frozen source",
+      "rejected": true,
+      "reason": "Frozen production source/plan"
+    }
+  ],
+  "receipt_written": false
+}

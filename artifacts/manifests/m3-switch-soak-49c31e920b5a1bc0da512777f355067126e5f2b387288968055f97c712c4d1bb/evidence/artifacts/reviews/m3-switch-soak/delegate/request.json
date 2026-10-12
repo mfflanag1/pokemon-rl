@@ -1,0 +1,37 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "codex",
+  "model": null,
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Implement python/pokemon_switch_soak/gates.py using preserved candidate artifacts/reviews/m3-switch-soak/gate-initial/gates.py as starting point. Correct both frozen-plan and smoke numeric constants to require non-boolean integers (equal floats must fail). Follow updated gate-task exactly, preserving explicit frozen scope. Own only new gates.py; do not delegate. Other files and source work belong to coordinator.",
+  "criteria": "All six tests pass including newly added float-plan negatives; task contract fulfilled; explicit scope remains frozen. Return concise actual check status.",
+  "owned": [
+    "python/pokemon_switch_soak/gates.py"
+  ],
+  "checks": [
+    [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/switch-soak",
+      "-p",
+      "test_gates.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/switch-soak-v1/gate-task.md": "efc33a22a6130ab798f0222fd89b8145f5417e10d77e477fdc079aa1e239d280",
+    "contracts/switch-soak-v1/plan.json": "e5f8f15f72b2f40a260fd22b214b599fa1247d4d1f7c9b8c97d4fc3bdf7dd6b1",
+    "tests/switch-soak/test_gates.py": "872c7387d5f5010617aa18240ab52c92af003a52f80545c854e5df54059e1214",
+    "artifacts/reviews/m3-switch-soak/gate-initial/gates.py": "3db5df38cea2d6bee752fecd6642fedc1f77c6816e42a2828443fb9877a1cf7a"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "codex-cli 0.151.0",
+  "base_commit": "e86dd6bc9ab876880b770adcf2669417543b09aa",
+  "created_at": "2026-10-11T22:34:17.495439+00:00",
+  "test_run": false
+}

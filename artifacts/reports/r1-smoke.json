@@ -1,0 +1,131 @@
+{
+  "status": "passed",
+  "scope": "R1 reference smoke; not accelerated-engine fidelity",
+  "manifest_id": "aec11e676501fb2bb95f8b2e4c1f2b5431fe3e5bf0899da289dd9e7141ec47f9",
+  "seed_label_pattern": "r1-smoke-{0..9}",
+  "episodes": [
+    {
+      "index": 0,
+      "winner": "Player 1",
+      "turns": 40,
+      "score": [
+        3,
+        0
+      ],
+      "decisions": 90,
+      "unavailable_rejections": 0,
+      "content_hash": "18f3026e8e179b4dd5d7558f1108c26d8b070c40174dd4c48dbf5a27dd8ca730"
+    },
+    {
+      "index": 1,
+      "winner": "Player 1",
+      "turns": 25,
+      "score": [
+        1,
+        0
+      ],
+      "decisions": 61,
+      "unavailable_rejections": 0,
+      "content_hash": "8d6a22e1c7b72c838a543bff587b30cee27a2065e761cfa7fe9bf3573c11f5e6"
+    },
+    {
+      "index": 2,
+      "winner": "Player 1",
+      "turns": 38,
+      "score": [
+        1,
+        0
+      ],
+      "decisions": 86,
+      "unavailable_rejections": 0,
+      "content_hash": "bdcc7fe63d91706262ebfe3aeff038ff407ae1695ee122d089cd049ac15d8caa"
+    },
+    {
+      "index": 3,
+      "winner": "Player 1",
+      "turns": 40,
+      "score": [
+        2,
+        0
+      ],
+      "decisions": 89,
+      "unavailable_rejections": 0,
+      "content_hash": "b677edff271f455e62af952347bdbdd9be30e518c7fab89376e6686761d05ef7"
+    },
+    {
+      "index": 4,
+      "winner": "Player 2",
+      "turns": 44,
+      "score": [
+        0,
+        2
+      ],
+      "decisions": 97,
+      "unavailable_rejections": 0,
+      "content_hash": "48cd37c7584d0058f6a22f475d1e11b8b86d7db1992e3038bdd89ebbd516ae58"
+    },
+    {
+      "index": 5,
+      "winner": "Player 1",
+      "turns": 30,
+      "score": [
+        1,
+        0
+      ],
+      "decisions": 71,
+      "unavailable_rejections": 0,
+      "content_hash": "a2deb0d34d9f9f6957873e9ddeb2be30a918d0f71b4adfb76b17167d0a8e7104"
+    },
+    {
+      "index": 6,
+      "winner": "Player 1",
+      "turns": 21,
+      "score": [
+        1,
+        0
+      ],
+      "decisions": 52,
+      "unavailable_rejections": 0,
+      "content_hash": "ee6cd7abe80ad45dab46e0e30e808678b5dd8b32194649277f75503905dbbe5e"
+    },
+    {
+      "index": 7,
+      "winner": "Player 1",
+      "turns": 47,
+      "score": [
+        1,
+        0
+      ],
+      "decisions": 105,
+      "unavailable_rejections": 0,
+      "content_hash": "9f6ce8fb99b86fa0e7912d0614f556db936556d9fccb77e0a90b086e8990f65a"
+    },
+    {
+      "index": 8,
+      "winner": "Player 2",
+      "turns": 52,
+      "score": [
+        0,
+        1
+      ],
+      "decisions": 118,
+      "unavailable_rejections": 2,
+      "content_hash": "f52884b791998c7c6465efe372c33a4233dc5519318cd31d87344f179d6da678"
+    },
+    {
+      "index": 9,
+      "winner": "Player 1",
+      "turns": 22,
+      "score": [
+        2,
+        0
+      ],
+      "decisions": 54,
+      "unavailable_rejections": 0,
+      "content_hash": "f600048976d2ddb9050ef0f94e7f2620bb77801e4228d6d643eb6bb4194ae9a7"
+    }
+  ],
+  "replay_count": 10,
+  "elapsed_seconds": 1.173878,
+  "output_directory": "artifacts/runs/r1-1791646696775"
+}

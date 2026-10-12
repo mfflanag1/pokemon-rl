@@ -1,0 +1,13 @@
+{
+  "changed": [
+    "python/pokemon_soak/gates.py"
+  ],
+  "outside_owned": [],
+  "symlinks": [],
+  "output_hashes": {
+    "contracts/soak-v1/plan.json": "7ade630a7a84ae68107138942b938c5675fa138f4b3552d2355dd15810ffe727",
+    "python/pokemon_soak/__init__.py": "788bc62ab5c0f9169d4d678ffc1d87e45c64c244f1e52c906187fcc95dde1b33",
+    "python/pokemon_soak/gates.py": "680195ccaa4962169a0f7f093f86ee0860724e77936686faba923433cb0bad84",
+    "tests/soak/test_gates.py": "6977129c3d8b0b046f92e7e922b75b9ff9fb866d36a57545f0458b2fdd8561c4"
+  }
+}

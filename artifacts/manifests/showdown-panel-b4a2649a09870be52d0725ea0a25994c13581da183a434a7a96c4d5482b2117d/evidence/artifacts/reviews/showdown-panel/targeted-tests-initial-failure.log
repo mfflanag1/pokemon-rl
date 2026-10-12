@@ -1,0 +1,36 @@
+✔ fresh official development panel reproduces every input, action, outcome and interval (963.4785ms)
+✔ replay rejects an altered actor-visible request (118.720833ms)
+✖ replay rejects altered mechanics seeds and policy seats (0.885625ms)
+✔ recount rejects a changed score even if the aggregate is left intact (474.515042ms)
+✔ recomputed pair bootstrap rejects a changed interval (481.409541ms)
+✔ regenerated development-team admission rejects a changed team (111.355959ms)
+✔ public damage proxies respond to observed stages, known items and defender typing (143.303166ms)
+✔ only revealed moves/items/abilities enter opponent memory; switches reset stat stages (0.87575ms)
+✔ Illusion reveal preserves observed moves and stages; public statuses and hazards update (0.330875ms)
+✔ selective stage clears, Psych Up and swaps follow pinned public events (0.115125ms)
+✔ entry cost is charged only when entering, and first-turn moves work for incoming mons (0.305416ms)
+✔ accuracy uses the 3-based combined stage and always-hit moves ignore stages (0.101791ms)
+✔ opponents honor masks, refrain from input mutation and choose legal Tera or forced switches (0.566375ms)
+✔ known ability immunity changes choice while unknown abilities stay explicit assumptions (0.105083ms)
+✔ the richer driver preserves the sealed baseline/random trajectories (21.141666ms)
+✔ both new policies have identical actual player inputs/actions under hidden-reserve mutation (2.017792ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 15
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6404.14575
+
+✖ failing tests:
+
+test at tests/showdown-panel/audit.test.mjs:37:1
+✖ replay rejects altered mechanics seeds and policy seats (0.885625ms)
+  TypeError: Cannot assign to read only property '0' of string 'sodium,fe11167486af71b6a4993f2660ca7f81a376265a9ce788960ae80f5e2065b33c'
+      at file:///Users/maxf/Documents/ChatGPT/Pokemon/tests/showdown-panel/audit.test.mjs:38:64
+      at rejectsChange (file:///Users/maxf/Documents/ChatGPT/Pokemon/tests/showdown-panel/audit.test.mjs:28:3)
+      at TestContext.<anonymous> (file:///Users/maxf/Documents/ChatGPT/Pokemon/tests/showdown-panel/audit.test.mjs:38:9)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)

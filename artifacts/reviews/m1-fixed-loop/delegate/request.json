@@ -1,0 +1,40 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Implement only python/pokemon_fixed/math.py for the frozen fixed-loop plan. You are not alone: do not modify other files or revert others edits; no recursive delegation. API: masked_loss(logits, values, mask, actions, old_logp, advantages, returns, valid, clip=.2, value_coef=.5, entropy_coef=.01) returns (loss, metrics) exactly the seven reference metrics. Same inclusive PPO clip subgradient as sealed core, valid-row means, max over valid rows; all-invalid returns zero metrics and gradients. Sanitize ALL invalid row inputs before arithmetic, allowing NaN and action -1 padding. Pure JAX differentiable jit compatible, no host checks within kernels. API bias_correction(step) returns FP32 pair with exact NumPy host-rounded reference scalars for positive int32 step, using first 20000 steps as precomputed constant table and ones thereafter. API adam_step(parameters, gradients, m, v, step, lr=.003, max_norm=1.) returns (new_parameters,new_m,new_v,new_step,preclip_norm); pure functional jit compatible; step increments by 1; can reuse sealed _adam_kernel. Empty-minibatch skip occurs in caller. Include clear API docs, do not change sealed reference files or tests.",
+  "criteria": "Pass all provided tests without modifying them. Preserve reference mean loss inclusive clipping derivative and FP32 optimizer recipe. Invalid padded rows contribute neither values nor gradients even with NaNs; all-invalid yields zeros. Functional state supports lax.scan, no NumPy evaluation of traced data. Exact late-step bias scalars. Only declared file changes.",
+  "owned": [
+    "python/pokemon_fixed/math.py"
+  ],
+  "checks": [
+    [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/fixed-loop",
+      "-p",
+      "test_math.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/fixed-loop-v1/plan.json": "fb9de93cb7e18338fcb2a4341904d949a0ddb6a1e1bd8910f5d749f767c0ed1c",
+    "python/pokemon_fixed/__init__.py": "5ce0e28d586286386e2c6d9a1dbcc859b74c1b9bca35b6de0272f539c9520b27",
+    "python/pokemon_jax_learner/__init__.py": "8582070d68847c641e165cbf273f515a72c40747d5f15285a592ad84f2be7212",
+    "python/pokemon_jax_learner/core.py": "0aecb281b433b16c68cd188b00e763b69f9b17b149f15f4e4e0f6804bb84f3ba",
+    "tests/fixed-loop/test_math.py": "cab6d37a9aab00dcb23d334da37e7551906aaf3df750cf37c48a980fac20f669"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "50afcb2edd6c06da3643bed1cb36af1532e54185",
+  "created_at": "2026-10-10T22:52:51.211195+00:00",
+  "test_run": false
+}

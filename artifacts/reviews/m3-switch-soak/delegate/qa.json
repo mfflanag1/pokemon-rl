@@ -1,0 +1,7 @@
+{
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "report": "/Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261011-183417-6d000447/qa-642a364c68/result.md",
+  "report_sha256": "7993941a9174634db781f1cddb017f87aecf8958c2d6bba2799482ec5d14d68f",
+  "artifact_sha256": "d8bc84f80dea4499c21c0b41fc90e2c2f456651c8c41ffa84a5953d6306ef92f"
+}

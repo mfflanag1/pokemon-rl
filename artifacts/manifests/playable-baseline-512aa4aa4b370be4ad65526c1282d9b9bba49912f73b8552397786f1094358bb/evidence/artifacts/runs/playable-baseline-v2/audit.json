@@ -1,0 +1,8 @@
+{
+  "status": "pass",
+  "games_replayed": 64,
+  "actor_inputs_and_actions_reproduced": 2904,
+  "report_sha256": "4ff5fff91d307ab4da8270e4227b154113d490d2bce6c7def222f191a7aa3d66",
+  "final_teams_used": 0,
+  "paired_team_assignment_verified": true
+}

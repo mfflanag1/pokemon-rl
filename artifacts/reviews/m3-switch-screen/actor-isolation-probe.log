@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "mutations": [
+    {
+      "other_pair": 1,
+      "changed_other_view": true,
+      "own_view_unchanged": true,
+      "candidate_exact": true
+    },
+    {
+      "other_pair": 4,
+      "changed_other_view": true,
+      "own_view_unchanged": true,
+      "candidate_exact": true
+    },
+    {
+      "other_pair": 8,
+      "changed_other_view": true,
+      "own_view_unchanged": true,
+      "candidate_exact": true
+    },
+    {
+      "other_pair": 12,
+      "changed_other_view": true,
+      "own_view_unchanged": true,
+      "candidate_exact": true
+    },
+    {
+      "other_pair": 23,
+      "changed_other_view": true,
+      "own_view_unchanged": true,
+      "candidate_exact": true
+    }
+  ],
+  "batch_composition_exact": true
+}
+

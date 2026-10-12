@@ -1,0 +1,33 @@
+{
+  "version": "switch-reference-1",
+  "id": "gen9-starter-pairs-v1",
+  "predecessor": "daaa42457c61ba4ae79bbc9a2c7ba53d3ae1c1f376d3e7ab67d265e00803d7c1",
+  "showdown_commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "reference_format": "gen9anythinggoes@@@!Team Preview,Terastal Clause",
+  "team_size": 2,
+  "level": 50,
+  "gender": "M",
+  "nature": "Serious",
+  "item": "",
+  "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 31, "spd": 31, "spe": 31},
+  "variants": {
+    "plain": {"hp": 0, "atk": 0, "def": 0, "spa": 0, "spd": 0, "spe": 0},
+    "swift": {"hp": 0, "atk": 0, "def": 0, "spa": 0, "spd": 0, "spe": 252}
+  },
+  "species": [
+    {"id": "bulbasaur", "species": "Bulbasaur", "ability": "Overgrow", "moves": ["Vine Whip", "Tackle"], "teraType": "Grass"},
+    {"id": "squirtle", "species": "Squirtle", "ability": "Torrent", "moves": ["Water Gun", "Tackle"], "teraType": "Water"},
+    {"id": "fennekin", "species": "Fennekin", "ability": "Blaze", "moves": ["Incinerate", "Scratch"], "teraType": "Fire"}
+  ],
+  "names": ["A", "B"],
+  "actions": ["move-slot-1", "move-slot-2", "switch-original-A", "switch-original-B"],
+  "max_resolved_turns": 12,
+  "max_decisions": 64,
+  "cutoff": "truncate only at a fresh uncommitted joint-move boundary; never relabel as draw",
+  "chance_contract": "Pinned Showdown only; future port must cover crits, damage, speed ties and switch ordering. No common raw-stream claim.",
+  "hidden": ["unrevealed reserve species", "opponent speed EV variant", "opponent exact HP and remaining PP"],
+  "known": ["profile roster and all possible sets", "own complete team and exact stats", "both team sizes", "public species, moves, switches and rounded opponent HP once revealed"],
+  "excluded": ["items", "Terastallization", "status moves", "status conditions", "stat stages", "weather", "terrain", "hazards", "recoil", "healing", "pivot moves", "revival", "team preview", "duplicate species", "PP exhaustion", "Struggle"],
+  "production_ready": false,
+  "custom_engine_implemented": false
+}

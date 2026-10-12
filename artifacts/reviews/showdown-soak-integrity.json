@@ -1,0 +1,13 @@
+{
+  "status": "pass",
+  "content_hash": "1a72a14877ff0c17fbcfca5275edc7e6c9509396d01f898ea18709e18f043fdd",
+  "receipt_sha256": "74d2238dcc0cb8c02e6825b315c832b400aca01005c419051eab804a25ca4bbc",
+  "source_files": 342,
+  "evidence_files": 1134,
+  "live_archive_hash_checks": 2952,
+  "original_preflight_hash_checks": 41,
+  "runtime_copy_and_upstream_checks": 3046,
+  "tested_sources": 298,
+  "repeat_seal_identical": true,
+  "repeat_seal_tests": 426
+}

@@ -1,0 +1,716 @@
+Task and review objective:
+Review CPU G1 learner correctness: analytic clipped PPO and entropy gradients, same-player GAE/terminal/cut semantics, masks and frozen behavior, whole-episode boundary checkpoints and crash rollback. Find concrete errors, missing gates or misleading claims. Config seeds and budgets are predeclared; there is no neural Pokemon policy, no final data, no JAX yet. Unit tests initially exposed and corrected a coordinator hand-arithmetic error (.1+.9*.6-.4 is .24, not .04); do not infer learner failure from that. Checkpoint exactness is same runtime/platform only. Do not treat review as executed tests.
+
+
+FILE python/pokemon_learner/core.py
+1: """Transparent FP32 PPO/GAE reference with analytic tabular gradients.
+2: 
+3: No autodiff, exploration penalty, advantage normalization or privileged inputs.
+4: The table is a canary model, not the future Pokemon policy architecture.
+5: """
+6: import numpy as np
+7: 
+8: F32 = np.float32
+9: 
+10: 
+11: def require(condition, message):
+12:     if not condition: raise ValueError(message)
+13: 
+14: 
+15: def finite(*arrays):
+16:     require(all(np.all(np.isfinite(a)) for a in arrays), 'Nonfinite learner data')
+17: 
+18: 
+19: def linked_gae(rewards, values, next_index, bootstrap, terminal, trajectory, *, gamma=1., lam=.95):
+20:     """Next indices are same-player, same-episode decisions, ordered forward.
+21: 
+22:     next=-1 + terminal means no bootstrap; next=-1 + nonterminal is a buffer cut.
+23:     At a cut bootstrap is that player's frozen-actor next value, never an opponent's.
+24:     trajectory must distinguish both player AND episode; no alternating sign rule.
+25:     """
+26:     rewards, values, bootstrap = [np.asarray(a, dtype=F32) for a in (rewards, values, bootstrap)]
+27:     next_index, terminal, trajectory = [np.asarray(a) for a in (next_index, terminal, trajectory)]
+28:     n = len(rewards)
+29:     require(n > 0 and all(a.shape == (n,) for a in (rewards, values, bootstrap, next_index, terminal, trajectory)), 'GAE shapes')
+30:     require(next_index.dtype.kind in 'iu' and terminal.dtype == np.bool_, 'GAE index/terminal types')
+31:     require(0 <= gamma <= 1 and 0 <= lam <= 1, 'GAE discounts')
+32:     finite(rewards, values, bootstrap)
+33:     advantages = np.zeros(n, dtype=F32)
+34:     for i in range(n-1, -1, -1):
+35:         j = int(next_index[i])
+36:         require(j == -1 or i < j < n, 'GAE linkage must be forward or boundary')
+37:         if terminal[i]:
+38:             require(j == -1 and bootstrap[i] == 0, 'Terminal must not bootstrap')
+39:             v_next, a_next = F32(0), F32(0)
+40:         elif j == -1:
+41:             v_next, a_next = bootstrap[i], F32(0)
+42:         else:
+43:             require(trajectory[i] == trajectory[j], 'Cross-player/episode linkage')
+44:             require(bootstrap[i] == 0, 'Internal decision cannot have boundary bootstrap')
+45:             v_next, a_next = values[j], advantages[j]
+46:         delta = rewards[i] + F32(gamma) * v_next - values[i]
+47:         advantages[i] = delta + F32(gamma * lam) * a_next
+48:     returns = advantages + values
+49:     finite(advantages, returns)
+50:     return advantages, returns
+51: 
+52: 
+53: def distribution(logits, mask):
+54:     logits, mask = np.asarray(logits), np.asarray(mask)
+55:     require(logits.dtype == F32 and logits.ndim == 2 and mask.shape == logits.shape and mask.dtype == np.bool_, 'Policy shape/dtype')
+56:     require(len(logits) > 0 and np.all(mask.any(axis=1)), 'Empty legal-action mask')
+57:     finite(logits)
+58:     maxima = np.max(np.where(mask, logits, F32(-np.inf)), axis=1, keepdims=True)
+59:     # Illegal entries have exactly zero probability and a finite log sentinel.
+60:     shifted = np.where(mask, logits - maxima, F32(0))
+61:     exp = np.where(mask, np.exp(shifted), F32(0))
+62:     denominator = exp.sum(axis=1, keepdims=True, dtype=F32)
+63:     logp = np.where(mask, shifted - np.log(denominator), F32(0))
+64:     probabilities = exp / denominator
+65:     finite(probabilities, logp)
+66:     return probabilities, logp
+67: 
+68: 
+69: def ppo_loss_grad(logits, values, mask, actions, old_logp, advantages, returns, *, clip=.2, value_coef=.5, entropy_coef=0.):
+70:     """Mean clipped actor loss + coefficient * half-MSE - coefficient * entropy."""
+71:     p, logp = distribution(logits, mask)
+72:     n, actions_n = p.shape
+73:     values, old_logp, advantages, returns = [np.asarray(a) for a in (values, old_logp, advantages, returns)]
+74:     actions = np.asarray(actions)
+75:     require(all(a.shape == (n,) and a.dtype == F32 for a in (values, old_logp, advantages, returns)), 'PPO FP32 vectors')
+76:     require(actions.shape == (n,) and actions.dtype.kind in 'iu' and np.all((actions >= 0) & (actions < actions_n)), 'PPO action indices')
+77:     require(np.all(mask[np.arange(n), actions]), 'Known-forbidden action')
+78:     require(0 < clip < 1 and value_coef >= 0 and entropy_coef >= 0, 'PPO coefficients')
+79:     finite(values, old_logp, advantages, returns)
+80:     log_ratio = logp[np.arange(n), actions] - old_logp
+81:     with np.errstate(over='raise', invalid='raise'):
+82:         ratio = np.exp(log_ratio)
+83:     clipped = np.clip(ratio, F32(1-clip), F32(1+clip))
+84:     actor_loss = -np.minimum(ratio * advantages, clipped * advantages).mean(dtype=F32)
+85:     entropy_rows = -(p * logp).sum(axis=1, dtype=F32)
+86:     entropy = entropy_rows.mean(dtype=F32)
+87:     value_loss = F32(.5) * np.square(values - returns).mean(dtype=F32)
+88:     loss = actor_loss + F32(value_coef) * value_loss - F32(entropy_coef) * entropy
+89:     active = np.where(advantages >= 0, ratio <= F32(1+clip), ratio >= F32(1-clip))
+90:     score = -p.copy(); score[np.arange(n), actions] += F32(1)
+91:     grad_logits = (-advantages * ratio * active / F32(n))[:, None] * score
+92:     grad_logits += F32(entropy_coef / n) * p * (logp + entropy_rows[:, None])
+93:     grad_values = F32(value_coef / n) * (values - returns)
+94:     finite(loss, ratio, grad_logits, grad_values)
+95:     return {'loss': float(loss), 'actor_loss': float(actor_loss), 'value_loss': float(value_loss),
+96:             'entropy': float(entropy), 'max_ratio_error': float(np.max(np.abs(ratio-F32(1)))),
+97:             'clip_fraction': float(np.mean(np.abs(ratio-F32(1)) > clip)),
+98:             'approx_kl': float(((ratio-F32(1))-log_ratio).mean())}, grad_logits, grad_values
+99: 
+100: 
+101: class Adam:
+102:     def __init__(self, parameters, *, lr=.03, max_norm=1.):
+103:         require(lr > 0 and max_norm > 0, 'Optimizer configuration')
+104:         self.lr, self.max_norm, self.step = lr, max_norm, 0
+105:         self.m = {k: np.zeros_like(v) for k, v in parameters.items()}
+106:         self.v = {k: np.zeros_like(v) for k, v in parameters.items()}
+107: 
+108:     def apply(self, parameters, gradients):
+109:         require(set(parameters) == set(gradients) == set(self.m) == set(self.v), 'Optimizer keys')
+110:         for k in parameters:
+111:             require(parameters[k].dtype == F32 and gradients[k].dtype == F32 and parameters[k].shape == gradients[k].shape, 'Optimizer FP32 shapes')
+112:         finite(*parameters.values(), *gradients.values(), *self.m.values(), *self.v.values())
+113:         norm = float(np.sqrt(sum(np.square(g.astype(np.float64)).sum() for g in gradients.values())))
+114:         scale = F32(min(1., self.max_norm / max(norm, 1e-30)))
+115:         self.step += 1
+116:         for k, gradient in gradients.items():
+117:             g = gradient * scale
+118:             self.m[k] = F32(.9) * self.m[k] + F32(.1) * g
+119:             self.v[k] = F32(.999) * self.v[k] + F32(.001) * np.square(g)
+120:             m = self.m[k] / F32(1 - .9 ** self.step)
+121:             v = self.v[k] / F32(1 - .999 ** self.step)
+122:             parameters[k] -= F32(self.lr) * m / (np.sqrt(v) + F32(1e-8))
+123:         finite(*parameters.values(), *self.m.values(), *self.v.values())
+124:         return norm
+125: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_learner/trainer.py
+1: """Synchronous whole-episode CPU canaries with explicit behavior versions."""
+2: from dataclasses import dataclass
+3: import copy
+4: import numpy as np
+5: from .core import F32, Adam, require, finite, distribution, linked_gae, ppo_loss_grad
+6: 
+7: 
+8: @dataclass(frozen=True)
+9: class Buffer:
+10:     version: int
+11:     states: np.ndarray
+12:     mask: np.ndarray
+13:     actions: np.ndarray
+14:     old_logp: np.ndarray
+15:     old_values: np.ndarray
+16:     advantages: np.ndarray
+17:     returns: np.ndarray
+18:     rewards: np.ndarray
+19:     next_index: np.ndarray
+20:     trajectory: np.ndarray
+21: 
+22: 
+23: def sample(logits, mask, rng):
+24:     p, logp = distribution(logits, mask)
+25:     cdf = np.cumsum(p.astype(np.float64), axis=1)
+26:     cdf[:, -1] = 1.
+27:     actions = (rng.random(len(p))[:, None] >= cdf).sum(axis=1).astype(np.int64)
+28:     require(np.all(mask[np.arange(len(p)), actions]), 'Sampled known-forbidden action')
+29:     return actions, logp[np.arange(len(p)), actions].copy()
+30: 
+31: 
+32: class Trainer:
+33:     def __init__(self, task, seed, plan):
+34:         require(task in {'bandit', 'delayed'} and seed in plan['seeds'], 'Unknown canary task/seed')
+35:         self.task, self.seed, self.plan = task, seed, copy.deepcopy(plan)
+36:         children = np.random.SeedSequence(seed).spawn(3)
+37:         initial = np.random.Generator(np.random.PCG64(children[0]))
+38:         self.sample_rng = np.random.Generator(np.random.PCG64(children[1]))
+39:         self.shuffle_rng = np.random.Generator(np.random.PCG64(children[2]))
+40:         self.parameters = {'logits': initial.normal(0, .01, (6, 4)).astype(F32), 'values': np.zeros(6, dtype=F32)}
+41:         self.optimizer = Adam(self.parameters, lr=plan['learning_rate'], max_norm=plan['max_gradient_norm'])
+42:         self.version = self.updates = self.decisions = self.episodes = 0
+43:         self.phase = 'idle'
+44: 
+45:     def collect(self, *, crash_before_linkage=False):
+46:         require(self.phase == 'idle', 'Collect only at a completed-update boundary')
+47:         self.phase = 'collecting'
+48:         size = self.plan[self.task]['episodes_per_update']
+49:         # Frozen copies: no update or environment truth is consulted during collection.
+50:         frozen = {k: v.copy() for k, v in self.parameters.items()}
+51:         if self.task == 'bandit':
+52:             states = np.zeros(size, dtype=np.int64)
+53:             mask = np.ones((size, 4), dtype=bool)
+54:             actions, old_logp = sample(frozen['logits'][states], mask, self.sample_rng)
+55:             rewards = (actions == self.plan['bandit']['rewarding_action']).astype(F32)
+56:             nxt = np.full(size, -1, dtype=np.int64)
+57:             terminal = np.ones(size, dtype=bool)
+58:             trajectory = np.arange(size)
+59:         else:
+60:             # Interleaved decision tape: p1 has two forced decisions while p2 waits.
+61:             # Each episode contains two separate perspective trajectories.
+62:             states = np.tile(np.array([0, 1, 2, 3, 4, 5]), size)
+63:             mask = np.zeros((len(states), 4), dtype=bool)
+64:             root = states < 2
+65:             mask[root] = self.plan['delayed']['root_mask']
+66:             mask[~root, self.plan['delayed']['forced_action']] = True
+67:             actions, old_logp = sample(frozen['logits'][states], mask, self.sample_rng)
+68:             rewards = np.zeros((size, 6), dtype=F32)
+69:             chosen = actions.reshape(size, 6)
+70:             # Rewards are from each player's own perspective, never sign-flipped.
+71:             rewards[:, 3] = chosen[:, 0] == self.plan['delayed']['rewarding_actions'][0]
+72:             rewards[:, 5] = chosen[:, 1] == self.plan['delayed']['rewarding_actions'][1]
+73:             rewards = rewards.ravel()
+74:             nxt = np.tile(np.array([2, 4, 3, -1, 5, -1]), (size, 1))
+75:             nxt = np.where(nxt >= 0, nxt + 6*np.arange(size)[:, None], -1).ravel()
+76:             terminal = nxt == -1
+77:             trajectory = (2*np.arange(size)[:, None] + np.array([0, 1, 0, 0, 1, 1])).ravel()
+78:         self.decisions += len(states); self.episodes += size
+79:         if crash_before_linkage: raise RuntimeError('Injected collection crash')
+80:         values = frozen['values'][states].copy()
+81:         advantages, returns = linked_gae(rewards, values, nxt, np.zeros(len(states), dtype=F32), terminal, trajectory,
+82:                                          gamma=self.plan['gamma'], lam=self.plan['lambda'])
+83:         self.phase = 'collected'
+84:         arrays = [states, mask, actions, old_logp, values, advantages, returns, rewards, nxt, trajectory]
+85:         for a in arrays: a.flags.writeable = False
+86:         return Buffer(self.version, *arrays)
+87: 
+88:     def update(self, buffer, *, crash_after_minibatches=None):
+89:         require(self.phase == 'collected' and buffer.version == self.version, 'Stale/reused behavior buffer')
+90:         self.phase = 'updating'
+91:         diagnostics, minibatches = [], 0
+92:         for _ in range(self.plan['epochs']):
+93:             order = self.shuffle_rng.permutation(len(buffer.states))
+94:             for start in range(0, len(order), self.plan['minibatch_size']):
+95:                 ix = order[start:start+self.plan['minibatch_size']]; states = buffer.states[ix]
+96:                 metrics, gl, gv = ppo_loss_grad(self.parameters['logits'][states], self.parameters['values'][states],
+97:                     buffer.mask[ix], buffer.actions[ix], buffer.old_logp[ix], buffer.advantages[ix], buffer.returns[ix],
+98:                     clip=self.plan['clip'], value_coef=self.plan['value_coefficient'], entropy_coef=self.plan['entropy_coefficient'])
+99:                 gradients = {k: np.zeros_like(v) for k, v in self.parameters.items()}
+100:                 np.add.at(gradients['logits'], states, gl); np.add.at(gradients['values'], states, gv)
+101:                 metrics['gradient_norm_before_clip'] = self.optimizer.apply(self.parameters, gradients)
+102:                 diagnostics.append(metrics); minibatches += 1
+103:                 if crash_after_minibatches == minibatches: raise RuntimeError('Injected update crash')
+104:         self.updates += 1; self.version += 1; self.phase = 'idle'
+105:         finite(*self.parameters.values())
+106:         return diagnostics
+107: 
+108:     def probabilities(self):
+109:         if self.task == 'bandit':
+110:             p, _ = distribution(self.parameters['logits'][[0]], np.ones((1, 4), dtype=bool))
+111:             return [float(p[0, self.plan['bandit']['rewarding_action']])]
+112:         p, _ = distribution(self.parameters['logits'][[0, 1]], np.tile(self.plan['delayed']['root_mask'], (2, 1)))
+113:         require(np.all(p[:, 3] == 0), 'Forbidden probability is nonzero')
+114:         return [float(p[i, a]) for i, a in enumerate(self.plan['delayed']['rewarding_actions'])]
+115: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_learner/checkpoint.py
+1: """Atomic completed-update checkpoint, exact on the declared CPU/runtime only.
+2: 
+3: Canaries collect whole episodes, so the boundary has no live games, requests,
+4: private histories, partial buffers or minibatch cursors. Other modes reject.
+5: """
+6: import hashlib
+7: import json
+8: import os
+9: from pathlib import Path
+10: import platform
+11: import sys
+12: import numpy as np
+13: from .core import require, finite, F32
+14: from .trainer import Trainer
+15: 
+16: ROOT = Path(__file__).resolve().parents[2]
+17: 
+18: 
+19: def wire(value): return json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
+20: def digest(value): return hashlib.sha256(wire(value)).hexdigest()
+21: def file_hash(path): return hashlib.sha256(path.read_bytes()).hexdigest()
+22: 
+23: 
+24: def provenance():
+25:     paths = sorted((ROOT/'python/pokemon_learner').glob('*.py')) + [ROOT/'contracts/learner-v1/canaries.json', ROOT/'requirements-learner.txt']
+26:     return {'sources': {str(p.relative_to(ROOT)): file_hash(p) for p in paths},
+27:             'runtime': {'python': sys.version, 'numpy': np.__version__, 'platform': platform.platform(),
+28:                         'machine': platform.machine(), 'byteorder': sys.byteorder}}
+29: 
+30: 
+31: def array_wire(a):
+32:     require(a.dtype == F32, 'Checkpoint array dtype')
+33:     finite(a)
+34:     return {'dtype': '<f4', 'shape': list(a.shape), 'hex': a.astype('<f4', copy=False).tobytes().hex()}
+35: 
+36: 
+37: def read_array(doc, shape):
+38:     require(set(doc) == {'dtype','shape','hex'} and doc['dtype'] == '<f4' and doc['shape'] == list(shape), 'Checkpoint array schema')
+39:     a = np.frombuffer(bytes.fromhex(doc['hex']), dtype='<f4').copy().reshape(shape)
+40:     finite(a)
+41:     return a.astype(F32, copy=False)
+42: 
+43: 
+44: def state(trainer):
+45:     require(trainer.phase == 'idle', 'Only completed-update checkpoints are supported')
+46:     return {'version': 'g1-checkpoint-1', 'mode': 'completed-update-whole-episodes', 'provenance': provenance(),
+47:         'task': trainer.task, 'seed': trainer.seed, 'plan': trainer.plan,
+48:         'parameters': {k: array_wire(v) for k,v in trainer.parameters.items()},
+49:         'optimizer': {'step': trainer.optimizer.step, 'lr': trainer.optimizer.lr, 'max_norm': trainer.optimizer.max_norm,
+50:             'm': {k: array_wire(v) for k,v in trainer.optimizer.m.items()},
+51:             'v': {k: array_wire(v) for k,v in trainer.optimizer.v.items()}},
+52:         'rng': {'sampling': trainer.sample_rng.bit_generator.state, 'shuffle': trainer.shuffle_rng.bit_generator.state},
+53:         'counters': {k: getattr(trainer,k) for k in ['version','updates','decisions','episodes']},
+54:         'environment': {'active_episodes': 0, 'pending_requests': [], 'partial_buffer': None}, 'phase': 'idle'}
+55: 
+56: 
+57: def save(path, trainer, *, interrupt_before_replace=False):
+58:     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+59:     body = state(trainer); document = {'body': body, 'sha256': digest(body)}
+60:     # A stale partial file is evidence of an interrupted write and is not a checkpoint.
+61:     temp = path.with_name(path.name + '.partial')
+62:     with temp.open('xb') as stream:
+63:         stream.write(wire(document) + b'\n'); stream.flush(); os.fsync(stream.fileno())
+64:     if interrupt_before_replace: raise RuntimeError('Injected checkpoint write crash')
+65:     os.replace(temp, path)
+66:     fd = os.open(path.parent, os.O_RDONLY)
+67:     try: os.fsync(fd)
+68:     finally: os.close(fd)
+69:     return document['sha256']
+70: 
+71: 
+72: def load(path, *, expected_plan):
+73:     def pairs(items):
+74:         out = {}
+75:         for k,v in items:
+76:             require(k not in out, 'Duplicate checkpoint key'); out[k]=v
+77:         return out
+78:     document = json.loads(Path(path).read_bytes(), object_pairs_hook=pairs)
+79:     require(set(document) == {'body','sha256'}, 'Checkpoint envelope')
+80:     body = document['body']; require(document['sha256'] == digest(body), 'Checkpoint checksum')
+81:     require(body['version'] == 'g1-checkpoint-1' and body['mode'] == 'completed-update-whole-episodes' and body['phase'] == 'idle', 'Checkpoint mode')
+82:     require(body['provenance'] == provenance() and body['plan'] == expected_plan, 'Checkpoint source/runtime/plan drift')
+83:     require(body['environment'] == {'active_episodes': 0, 'pending_requests': [], 'partial_buffer': None}, 'Unsupported live checkpoint')
+84:     trainer = Trainer(body['task'], body['seed'], expected_plan)
+85:     for table in ['parameters', 'm', 'v']:
+86:         target = trainer.parameters if table == 'parameters' else getattr(trainer.optimizer, table)
+87:         serialized = body['parameters'] if table == 'parameters' else body['optimizer'][table]
+88:         require(set(serialized) == set(target), 'Checkpoint parameter keys')
+89:         for k in target: target[k] = read_array(serialized[k], target[k].shape)
+90:     for k in ['step','lr','max_norm']: setattr(trainer.optimizer, k, body['optimizer'][k])
+91:     require(trainer.optimizer.lr == expected_plan['learning_rate'] and trainer.optimizer.max_norm == expected_plan['max_gradient_norm'], 'Optimizer configuration drift')
+92:     require(set(body['counters']) == {'version','updates','decisions','episodes'}, 'Checkpoint counters')
+93:     for k,v in body['counters'].items():
+94:         require(type(v) is int and v >= 0, 'Invalid checkpoint counter'); setattr(trainer,k,v)
+95:     per_update = expected_plan[trainer.task]['episodes_per_update']
+96:     decisions_per_episode = 1 if trainer.task == 'bandit' else 6
+97:     require(trainer.version == trainer.updates and trainer.episodes == trainer.updates * per_update and
+98:             trainer.decisions == trainer.episodes * decisions_per_episode, 'Inconsistent boundary counters')
+99:     steps = trainer.updates * expected_plan['epochs'] * ((per_update*decisions_per_episode + expected_plan['minibatch_size']-1)//expected_plan['minibatch_size'])
+100:     require(type(trainer.optimizer.step) is int and trainer.optimizer.step == steps, 'Optimizer step mismatch')
+101:     trainer.sample_rng.bit_generator.state = body['rng']['sampling']
+102:     trainer.shuffle_rng.bit_generator.state = body['rng']['shuffle']
+103:     return trainer
+104: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_learner/canaries.py
+1: """Run the predeclared three-seed CPU learning diagnostics into a fresh directory."""
+2: import argparse
+3: import json
+4: from pathlib import Path
+5: import platform
+6: import time
+7: from .trainer import Trainer
+8: from .core import require
+9: from .checkpoint import ROOT, wire, digest, provenance, save
+10: 
+11: 
+12: def write(path, value):
+13:     with path.open('xb') as f:f.write(wire(value)+b'\n')
+14: 
+15: 
+16: def run(out):
+17:     out=Path(out);out.mkdir(parents=True,exist_ok=False)
+18:     plan=json.loads((ROOT/'contracts/learner-v1/canaries.json').read_text())
+19:     sources=provenance();write(out/'plan.json',{'plan':plan,'plan_hash':digest(plan),'provenance':sources})
+20:     results=[];started=time.monotonic_ns()
+21:     try:
+22:         for task in ['bandit','delayed']:
+23:             for seed in plan['seeds']:
+24:                 t=Trainer(task,seed,plan);trace=[];first=None;began=time.monotonic_ns()
+25:                 for _ in range(plan[task]['max_updates']):
+26:                     b=t.collect();metrics=t.update(b);probs=t.probabilities()
+27:                     if min(probs)>=plan[task]['required_probability'] and first is None:first=t.decisions
+28:                     trace.append({'update':t.updates,'decisions':t.decisions,'probabilities':probs,'metrics':metrics})
+29:                 require(t.decisions<=plan[task]['sample_budget'],'Decision budget exceeded')
+30:                 passed=min(t.probabilities())>=plan[task]['required_probability']
+31:                 checkpoint_hash=save(out/f'{task}-{seed}.checkpoint.json',t)
+32:                 record={'task':task,'seed':seed,'decisions':t.decisions,'updates':t.updates,
+33:                     'probabilities':t.probabilities(),'first_threshold_decisions':first,'passed':passed,
+34:                     'elapsed_ms':(time.monotonic_ns()-began)//1_000_000,'checkpoint_hash':checkpoint_hash}
+35:                 write(out/f'{task}-{seed}.trace.json',trace);results.append(record);print(json.dumps(record),flush=True)
+36:         require(provenance()==sources,'Canary source/runtime changed')
+37:         report={'version':'g1-learning-report-1','plan_hash':digest(plan),'provenance':sources,'results':results,
+38:             'status':'passed' if all(r['passed'] for r in results) else 'failed',
+39:             'elapsed_ms':(time.monotonic_ns()-started)//1_000_000,'hardware':platform.platform(),
+40:             'scope':'Synthetic tabular CPU learner only. No Pokemon strength, JAX, GPU or final data.'}
+41:         report['content_hash']=digest(report);write(out/'report.json',report)
+42:         require(report['status']=='passed','Learning threshold failed; investigate before expanding')
+43:         return report
+44:     except BaseException as e:
+45:         write(out/'failure.json',{'error':str(e),'completed_runs':len(results)});raise
+46: 
+47: if __name__=='__main__':
+48:     p=argparse.ArgumentParser();p.add_argument('out');run(p.parse_args().out)
+49: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/learner/test_core.py
+1: import unittest
+2: import numpy as np
+3: from pokemon_learner.core import F32, linked_gae, distribution, ppo_loss_grad, Adam
+4: 
+5: 
+6: class MathTest(unittest.TestCase):
+7:     def test_hand_gae_interleaved_players_terminal_and_cut(self):
+8:         # p1: V=.2 -> .4 -> terminal reward 1. p2: V=.3 -> cut at own V=.8.
+9:         a,r=linked_gae([0,0,1],[.2,.3,.4],[2,-1,-1],[0,.8,0],np.array([False,False,True]),[10,11,10],gamma=1,lam=.5)
+10:         np.testing.assert_allclose(a,[.5,.5,.6],rtol=0,atol=1e-5)
+11:         np.testing.assert_allclose(r,[.7,.8,1],rtol=0,atol=1e-5)
+12:         # Separate discounted three-step hand result: deltas .16, .24, .6;
+13:         # recurrence multiplier .45 => A=.3895,.51,.6; R=.5895,.91,1.2.
+14:         a,r=linked_gae([0,.1,1.2],[.2,.4,.6],[1,2,-1],[0,0,0],np.array([False,False,True]),[1,1,1],gamma=.9,lam=.5)
+15:         np.testing.assert_allclose(a,[.3895,.51,.6],rtol=0,atol=1e-5)
+16:         np.testing.assert_allclose(r,[.5895,.91,1.2],rtol=0,atol=1e-5)
+17: 
+18:     def test_bad_linkage_and_terminal_bootstrap_reject(self):
+19:         with self.assertRaisesRegex(ValueError,'Cross-player'):
+20:             linked_gae([0,1],[0,0],[1,-1],[0,0],np.array([False,True]),[0,1])
+21:         with self.assertRaisesRegex(ValueError,'Terminal'):
+22:             linked_gae([1],[0],[-1],[9],np.array([True]),[0])
+23:         with self.assertRaisesRegex(ValueError,'forward'):
+24:             linked_gae([0],[0],[0],[0],np.array([False]),[0])
+25: 
+26:     def args(self, logits, mask=None, actions=None, adv=None, old=None, entropy=0):
+27:         logits=np.array(logits,dtype=F32);n=len(logits)
+28:         mask=np.ones_like(logits,dtype=bool) if mask is None else np.array(mask,dtype=bool)
+29:         actions=np.zeros(n,dtype=np.int64) if actions is None else np.array(actions)
+30:         logp=distribution(logits,mask)[1]
+31:         return (logits,np.zeros(n,dtype=F32),mask,actions,
+32:                 logp[np.arange(n),actions] if old is None else np.array(old,dtype=F32),
+33:                 np.ones(n,dtype=F32) if adv is None else np.array(adv,dtype=F32),np.zeros(n,dtype=F32))
+34: 
+35:     def test_same_policy_ratios_and_hand_log_ratio(self):
+36:         args=self.args([[0,0,0,0],[1,-1,3,0]])
+37:         metrics,*_=ppo_loss_grad(*args)
+38:         self.assertLessEqual(metrics['max_ratio_error'],1e-5)
+39:         metrics,*_=ppo_loss_grad(*self.args([[0,0]],old=[np.log(.25)]))
+40:         self.assertAlmostEqual(metrics['max_ratio_error'],1,delta=1e-5)
+41:         self.assertAlmostEqual(metrics['actor_loss'],-1.2,delta=1e-5)
+42: 
+43:     def test_single_legal_action_and_multi_candidate_forced_decision(self):
+44:         args=self.args([[3,99,-4,5]],mask=[[False,False,True,False]],actions=[2],adv=[3])
+45:         metrics,gl,gv=ppo_loss_grad(*args,entropy_coef=.2)
+46:         self.assertLessEqual(abs(metrics['entropy']),1e-7)
+47:         self.assertLessEqual(float(np.max(np.abs(gl))),1e-7)
+48:         self.assertAlmostEqual(metrics['actor_loss'],-3,delta=1e-5)
+49:         args=self.args([[0,0,2,1]],mask=[[True,True,False,False]],actions=[0])
+50:         _,gl,_=ppo_loss_grad(*args)
+51:         self.assertGreater(float(np.linalg.norm(gl)),.1)
+52:         self.assertEqual(float(gl[0,2]),0.)
+53: 
+54:     def test_clipping_both_advantage_signs(self):
+55:         # Positive A, ratio=2 clips; negative A, ratio=.5 clips.
+56:         args=self.args([[0,0],[0,0]],old=[np.log(.25),np.log(1.)],adv=[2,-3])
+57:         metrics,gl,_=ppo_loss_grad(*args)
+58:         self.assertAlmostEqual(metrics['actor_loss'],0,delta=1e-5)
+59:         np.testing.assert_array_equal(gl,np.zeros_like(gl))
+60:         # Opposite sides must continue to have gradients.
+61:         args=self.args([[0,0],[0,0]],old=[np.log(.25),np.log(1.)],adv=[-2,3])
+62:         _,gl,_=ppo_loss_grad(*args)
+63:         self.assertGreater(float(np.linalg.norm(gl)),.1)
+64: 
+65:     def test_analytic_gradients_against_central_difference(self):
+66:         args=list(self.args([[.2,-.1,.4],[.5,.2,-.3]],adv=[.7,-.4]))
+67:         args[1][:]=[.2,.8];args[-1][:]=[1,.1]
+68:         metrics,gl,gv=ppo_loss_grad(*args,entropy_coef=.13)
+69:         for index,expected in [(0,gl),(1,gv)]:
+70:             for pos in np.ndindex(args[index].shape):
+71:                 original=args[index][pos].copy();epsilon=F32(.002)
+72:                 args[index][pos]=original+epsilon;plus=ppo_loss_grad(*args,entropy_coef=.13)[0]['loss']
+73:                 args[index][pos]=original-epsilon;minus=ppo_loss_grad(*args,entropy_coef=.13)[0]['loss']
+74:                 args[index][pos]=original
+75:                 self.assertAlmostEqual((plus-minus)/(2*epsilon),float(expected[pos]),delta=5e-5)
+76: 
+77:     def test_masked_probabilities_and_nonfinite_rejection(self):
+78:         mask=np.array([[True,False,True]])
+79:         p,_=distribution(np.array([[0,1e20,0]],dtype=F32),mask)
+80:         np.testing.assert_array_equal(p,[[.5,0,.5]])
+81:         with self.assertRaisesRegex(ValueError,'Empty'):distribution(np.zeros((1,3),dtype=F32),~np.ones((1,3),dtype=bool))
+82:         with self.assertRaisesRegex(ValueError,'Nonfinite'):distribution(np.array([[np.nan,0,0]],dtype=F32),mask)
+83:         args=list(self.args([[0,0]],mask=[[True,False]]));args[3]=np.array([1])
+84:         with self.assertRaisesRegex(ValueError,'Known-forbidden'):ppo_loss_grad(*args)
+85: 
+86:     def test_adam_first_step_and_nonfinite(self):
+87:         parameters={'w':np.array([1.,2.],dtype=F32)};adam=Adam(parameters,lr=.03,max_norm=10.)
+88:         adam.apply(parameters,{'w':np.array([2.,-3.],dtype=F32)})
+89:         np.testing.assert_allclose(parameters['w'],[.97,2.03],atol=1e-6,rtol=0)
+90:         with self.assertRaisesRegex(ValueError,'Nonfinite'):adam.apply(parameters,{'w':np.array([np.inf,0],dtype=F32)})
+91: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/learner/test_resume.py
+1: import json
+2: from pathlib import Path
+3: import tempfile
+4: import unittest
+5: import numpy as np
+6: from pokemon_learner.trainer import Trainer
+7: from pokemon_learner.checkpoint import state, save, load, digest
+8: 
+9: ROOT=Path(__file__).resolve().parents[2]
+10: PLAN=json.loads((ROOT/'contracts/learner-v1/canaries.json').read_text())
+11: 
+12: 
+13: class ResumeTest(unittest.TestCase):
+14:     def test_boundary_next_samples_and_updates_bit_identical_both_tasks(self):
+15:         for task in ['bandit','delayed']:
+16:             t=Trainer(task,11,PLAN)
+17:             for _ in range(3):t.update(t.collect())
+18:             with tempfile.TemporaryDirectory() as d:
+19:                 p=Path(d)/'checkpoint.json';save(p,t);restored=load(p,expected_plan=PLAN)
+20:                 self.assertEqual(state(t),state(restored))
+21:                 for _ in range(3):
+22:                     a,b=t.collect(),restored.collect()
+23:                     for key in ['states','mask','actions','old_logp','old_values','advantages','returns','next_index']:
+24:                         np.testing.assert_array_equal(getattr(a,key),getattr(b,key))
+25:                     self.assertEqual(t.update(a),restored.update(b))
+26:                     self.assertEqual(state(t),state(restored))
+27: 
+28:     def test_collection_and_update_crash_rollback_accounting(self):
+29:         t=Trainer('delayed',29,PLAN);t.update(t.collect())
+30:         with tempfile.TemporaryDirectory() as d:
+31:             p=Path(d)/'checkpoint.json';save(p,t);committed=state(t)
+32:             expected=load(p,expected_plan=PLAN);buffer=expected.collect();expected.update(buffer)
+33:             during_collection=load(p,expected_plan=PLAN)
+34:             with self.assertRaisesRegex(RuntimeError,'collection crash'):during_collection.collect(crash_before_linkage=True)
+35:             self.assertEqual(during_collection.phase,'collecting')
+36:             self.assertEqual(during_collection.decisions-committed['counters']['decisions'],len(buffer.states))
+37:             with self.assertRaisesRegex(ValueError,'completed-update'):save(Path(d)/'partial.json',during_collection)
+38:             recovered=load(p,expected_plan=PLAN);recovered.update(recovered.collect())
+39:             self.assertEqual(state(expected),state(recovered))
+40:             crashed=load(p,expected_plan=PLAN);discard=crashed.collect()
+41:             with self.assertRaisesRegex(ValueError,'completed-update'):save(Path(d)/'bad.json',crashed)
+42:             lost_samples=crashed.decisions-committed['counters']['decisions']
+43:             self.assertEqual(lost_samples,len(discard.states))
+44:             recovered=load(p,expected_plan=PLAN);replayed=recovered.collect()
+45:             np.testing.assert_array_equal(discard.actions,replayed.actions);recovered.update(replayed)
+46:             self.assertEqual(state(expected),state(recovered))
+47:             crashed=load(p,expected_plan=PLAN);discard=crashed.collect()
+48:             with self.assertRaisesRegex(RuntimeError,'update crash'):crashed.update(discard,crash_after_minibatches=1)
+49:             self.assertEqual(crashed.optimizer.step-committed['optimizer']['step'],1)
+50:             recovered=load(p,expected_plan=PLAN);recovered.update(recovered.collect())
+51:             self.assertEqual(state(expected),state(recovered))
+52: 
+53:     def test_atomic_partial_checksum_runtime_and_stale_buffer(self):
+54:         t=Trainer('bandit',47,PLAN)
+55:         with tempfile.TemporaryDirectory() as d:
+56:             p=Path(d)/'checkpoint.json';save(p,t);before=p.read_bytes()
+57:             b=t.collect();t.update(b)
+58:             with self.assertRaisesRegex(ValueError,'Stale'):t.update(b)
+59:             with self.assertRaisesRegex(RuntimeError,'write crash'):save(p,t,interrupt_before_replace=True)
+60:             self.assertEqual(p.read_bytes(),before)
+61:             self.assertEqual(load(p,expected_plan=PLAN).updates,0)
+62:             self.assertTrue(p.with_name(p.name+'.partial').exists())
+63:             doc=json.loads(before);doc['body']['counters']['decisions']=1;p.write_text(json.dumps(doc))
+64:             with self.assertRaisesRegex(ValueError,'checksum'):load(p,expected_plan=PLAN)
+65:             doc=json.loads(before);doc['body']['provenance']['runtime']['numpy']='wrong';doc['sha256']=digest(doc['body']);p.write_text(json.dumps(doc))
+66:             with self.assertRaisesRegex(ValueError,'drift'):load(p,expected_plan=PLAN)
+67: 
+68:     def test_toy_hidden_reward_has_no_policy_input_path(self):
+69:         t=Trainer('delayed',11,PLAN)
+70:         before=t.probabilities();t.plan['delayed']['rewarding_actions']=[2,0]
+71:         # Compare logits/probabilities at fixed visible state; changing hidden target
+72:         # changes scoring only, never the actor's distribution.
+73:         from pokemon_learner.core import distribution
+74:         mask=np.tile(PLAN['delayed']['root_mask'],(2,1))
+75:         p,_=distribution(t.parameters['logits'][[0,1]],mask)
+76:         self.assertEqual(before,[float(p[0,0]),float(p[1,2])])
+77: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/learner-v1/canaries.json
+1: {"version":"g1-canary-plan-1","backend":"numpy-cpu","dtype":"float32","seeds":[11,29,47],"gamma":1,"lambda":0.95,"clip":0.2,"value_coefficient":0.5,"entropy_coefficient":0,"learning_rate":0.03,"epochs":2,"max_gradient_norm":1,"minibatch_size":256,"bandit":{"actions":4,"rewarding_action":2,"episodes_per_update":256,"max_updates":256,"sample_budget":65536,"required_probability":0.99},"delayed":{"actions":4,"root_mask":[true,true,true,false],"rewarding_actions":[0,2],"forced_action":1,"decisions_per_player":3,"episodes_per_update":64,"max_updates":128,"sample_budget":49152,"required_probability":0.99},"checkpoint_mode":"completed-update-whole-episodes","early_stopping":"none; record first threshold crossing and final probability","final_dataset_access":false}
+2: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE docs/ACCEPTANCE_GATES.md
+1: # Proposed execution gates and experiment ladder
+2: 
+3: Contribution for the execution plan, 2026-10-10. All numbers below are proposed engineering acceptance criteria, not facts recovered from Jaxcalibur or guarantees of completeness/convergence. A gate combines an explicit supported scope, executable checks, and logged evidence. Passing a statistical screen licenses the next experiment; it does not prove global correctness or optimality.
+4: 
+5: ## Dependency order and safe parallelism
+6: 
+7: The critical path is: pinned format/data contract → request/observation semantics → reference parity harness → restricted JAX engine → correct small PPO learner → measured learning → expanded mechanics → complete target-format evaluation → search. Keep action IDs, observation schemas, phase names, and checkpoint versions stable early.
+8: 
+9: Three independent workstreams are safe after the interfaces are agreed:
+10: 
+11: - **Simulator:** mechanics, reference scenarios, request timing, supported-feature manifest, JAX throughput. Owns `FullState` and transitions.
+12: - **Policy/learner:** small transformer, per-player rollout buffer, PPO/GAE, auxiliary heads, checkpoint/resume. Initially develops against tiny scripted environments and frozen observation fixtures. Owns learner internals, not simulator truth extraction.
+13: - **Data/evaluation:** pinned generator export, sampled-team validation, frozen team seeds, baseline policies, scoring and paired intervals. Owns fixtures and evaluation reports, not engine mechanics.
+14: 
+15: A separate observation/adapter owner approves interface changes spanning these streams. Belief-model design can run in parallel once observation fixtures exist; connecting beliefs to production action features waits for leakage tests. Search literature/toy-game experiments can run in parallel, but integration waits for a useful validated policy and simulator. Do not launch a large training run while known mechanics divergences remain in its sampled scope.
+16: 
+17: ## Coverage stages: call each game what it is
+18: 
+19: **Stage A: synthetic canaries.** One-step bandits, deterministic delayed reward, asymmetric forced replacements, and toy hidden-information games. These test algorithms, not Pokémon strength.
+20: 
+21: **Stage B: restricted Pokémon.** Explicit fixed teams/sets and a small mechanics whitelist, first 1v1 then 3v3/6v6. Use reference battles with those exact teams and documented rules. Do not call a whitelist-filtered training distribution unmodified Gen 9 Random Battles. Excluded features must be impossible to encounter or must fail loudly before sample collection; never implement unsupported effects as silent no-ops.
+22: 
+23: **Stage C: expanding mechanics.** Add complete mechanic families in batches, with interactions: status/residual damage; stat changes; switching/pivots/trapping; item/ability interactions; field effects; Tera; copying/transformation and other edge cases. Re-run prior fixtures and a newly sampled interaction suite after each batch. Keep the reduced-format baseline checkpoint and compare transfer against training from scratch at the same budget.
+24: 
+25: **Stage D: intended complete format.** Pin the exact official generator, rules, simulator revision, and data export. Audit all generated sets *and the transitive mechanics they can invoke*; move copying or random move effects can extend beyond listed sets. A closed generator manifest plus a passing harness is evidence of supported scope, not proof that every interaction is correct. Record unknowns and observed unsupported effects as blockers to an unqualified full-format claim. Default train/eval sampling may only include fully supported matches; if exclusions remain, label the result restricted and report rejection rates/distribution shift.
+26: 
+27: ## Quantitative gate ledger
+28: 
+29: ### G0 — Contracts and testability (before learning)
+30: 
+31: Deliver a reproducible version manifest; phase diagram; observable action-mask contract; full-state/observation separation; deterministic seed protocol; supported-feature manifest; saved reference fixtures; checkpoint schema.
+32: 
+33: Acceptance: every phase has a fixture for normal entry, terminal exit, cancellation/re-request if applicable, and both player roles. Every action ID round-trips between network, simulator, and adapter. All displayed/consumed observations must be reconstructible from the same player's protocol history and private information. Unknown enum values and unsupported mechanics fail visibly. Zero tolerated silent fallbacks that alter battle rules.
+34: 
+35: ### G1 — Learner canaries (before Pokémon scale)
+36: 
+37: Run on CPU/FP32 where practical, using a transparent reference implementation.
+38: 
+39: - GAE/returns/log-ratios agree with hand-computed short trajectories within absolute 1e-5; terminal and buffer-cut cases are separate. No terminal bootstrap; rollout truncation bootstraps from the correct perspective.
+40: - Same weights/data before an update give PPO ratios of 1 within 1e-5. Single-legal-action decisions have actor gradient/entropy zero within 1e-7, while a forced switch with multiple candidates remains trainable. The scalar surrogate need not be zero (it can equal minus the advantage); alternatively mask those rows out of the actor objective explicitly.
+41: - One-step four-action canary, with exploration penalties disabled: all three learner seeds put at least 99% probability on the known rewarding action within 100,000 sampled decisions. This is a diagnostic target; failure triggers learner investigation rather than immediately expanding training.
+42: - Deterministic delayed-reward canary learns both player perspectives without winner/loser sign inversion. Every example with a known action forbidden by the observable mask produces zero probability for that action. No NaN/Inf in sampled logits, probabilities, losses, gradients, or optimizer state.
+43: - The boundary-checkpoint resume tests below pass before jobs longer than two hours. Mid-collection/mid-epoch tests become required only if those continuation modes are implemented.
+44: 
+45: ### G2 — Restricted engine fidelity and information safety
+46: 
+47: Acceptance within the declared scope:
+48: 
+49: - Zero unexplained disagreements in legal request structure, observation/reveal timing, HP/status/PP changes, winner, and phase transitions across all hand-authored fixtures and at least 10,000 independently seeded reference battles. Adapt the battle count to CPU cost, but record the actual count and do not substitute correlated transitions for independent games in a failure-rate claim.
+50: - Deterministic submechanics and forced random outcomes should compare exactly after normalization. For chance mechanics, either enumerate finite outcome distributions or run predeclared probability checks with a family-wise error policy. Same seed alone is not a parity contract if the engines consume randomness differently; inject/check semantically identified chance outcomes.
+51: - At least 1,000 paired hidden-state mutations, stratified over unrevealed species/sets/items/abilities/Tera and request phases: normalized player observations must be identical whenever that player's information is identical. Deterministic inference logits must then match within 1e-6 FP32 (or exactly for byte-identical inputs and deterministic backend). This includes damage features, memory, masks, and cached values.
+52: - For each covered mechanics family, include adversarial boundary cases: HP/KO thresholds, move PP exhaustion, simultaneous fainting, interrupted turns, forced switches, stale requests, and legal-information changes. Random volume cannot replace these targeted tests.
+53: 
+54: Interpretation: zero failures in 10,000 independent battles implies an approximate 95% upper bound of 0.03% for the tested distribution's per-battle failure probability, *not* for an untested distribution or all mechanics. A discovered divergence blocks training on affected states until resolved or explicitly excluded.
+55: 
+56: ### G3 — Stable restricted-policy pilot
+57: 
+58: Use the smallest practical feed-forward/history-token transformer first; defer recurrence and specialized token MLPs. Measure complete collect/update cycles, not isolated kernel throughput. Proposed pilot: three training seeds, a modest predeclared decision budget, and checkpoint evaluation every fixed budget increment.
+59: 
+60: Hard gates: zero unsupported effects or observation-mask bugs in training scope; zero NaN/Inf; no unexpected recompilation after warm-up at fixed shapes; a two-hour soak without OOM; peak allocated memory leaves roughly 15% headroom where the selected runtime permits it. Throughput gate is budget-derived: measured decisions/s must project the next experiment within its allocated GPU hours with at least 25% overhead allowance. Report decisions/game as well as games/s.
+61: 
+62: Learning gate: reliable improvement over initialization against a frozen baseline panel, plus a predeclared starter target such as point score ≥60% against random legal play and lower 95% confidence bound >55%. Include a damage-greedy baseline and old checkpoints as diagnostics. Beating random alone does not authorize a claim of strategic competence. Analyze all three training seeds; a single successful seed is insufficient to conclude the learner is stable. Record KL/clip fraction, entropy, legal-action probability floor, critic calibration, phase-specific losses, battle length, and timeouts.
+63: 
+64: ### G4 — Full intended-format readiness
+65: 
+66: Expand G2's parity/hidden-info checks to all supported format families and the pinned official team distribution. Run at least 10,000 fresh independent reference battles after the last mechanics/schema change, and an adapter soak of at least 1,000 private/local evaluation games. Require zero unexplained divergences, zero known-forbidden actions, zero unsupported mechanics, and zero server-visible phase/request corruption. Distinguish legitimate hidden-legality rejections from client mistakes.
+67: 
+68: A production-length run is authorized technically only after a short full-format learner smoke test and resume test pass, and its measured complete-cycle throughput/memory predict the planned budget. Save learning curves against fixed opponents; current self-play score near 50% is not a learning metric.
+69: 
+70: ### G5 — Search integration (after a useful policy)
+71: 
+72: First baseline: world-averaged one-step lookahead versus an observation-only opponent policy. Then simultaneous deeper search. Before Pokémon integration, test 2×2 games and rock-paper-scissors against exact solutions: at the declared rollout budget, mean-strategy exploitability ≤0.02 on normalized [-1,1] payoffs across a fixed test suite and at least 20 seeds is a proposed target. Report the whole distribution and worst case; do not elevate toy-game success into a Pokémon equilibrium claim.
+73: 
+74: Require exact pre-reveal hidden-information invariance for any opponent policy component explicitly intended to use only that opponent's information. Test returned action distributions, not only network inputs, because optimized search backups can leak secrets. Root mixed-strategy sampling is the default candidate; argmax is an ablation.
+75: 
+76: Promote a search configuration only after a predeclared meaningful gain (for example ≥2 percentage points in direct head-to-head score) with a paired lower confidence bound above 50%, no material regression against the fixed opponent panel, and p99 decision latency under the adapter's specified time budget. Use measured latency bounds chosen from the target deployment; do not invent a universal seconds threshold. Search timeouts must return a legal base-policy action and be counted.
+77: 
+78: ## Phase-aware reject/re-request semantics
+79: 
+80: A policy's action mask represents what the player is allowed to infer from its request, not all legality knowable to the omniscient simulator. A choice may be admissible under that request but rejected when hidden mechanics are checked. Masking it using hidden truth can disclose information.
+81: 
+82: Implement and test three classes:
+83: 
+84: 1. **Known-invalid choice:** forbidden by the observable mask, stale request ID, malformed mapping, or wrong phase. This is an implementation bug; quarantine/log the affected sample. Do not learn from accidental protocol failures.
+85: 2. **Rule-defined hidden-legality rejection:** reproduce the reference rejection message and knowledge update, issue the appropriate new request, retain commitments exactly as the protocol requires, and consume no turn/PP/chance/reward unless the reference does. The attempted choice and resulting information-bearing re-request form a zero-reward transition in that player's decision trajectory; do not silently erase useful feedback or reset GAE as if the game ended.
+86: 3. **Transport retry:** replay idempotently against the request ID; do not create a new learner decision or change the opponent's commitment merely because a message was resent.
+87: 
+88: Fixtures must cover repeated rejected choices, simultaneous submissions, one player awaiting re-request while the other has committed, terminal events before an anticipated request, and a hidden restriction becoming known. Test whether each feedback event is public or private. Keep the rejection/phase state in checkpoints. Retry-count safeguards should surface a bug or explicit failure, not secretly adjudicate a match as lost.
+89: 
+90: ## Resume and on-policy state
+91: 
+92: Start with synchronous collection: a frozen actor snapshot collects a buffer; PPO updates that buffer; the next collection uses the new actor. Multiple GPUs, async actors, and stale-policy correction can wait.
+93: 
+94: A continuation checkpoint includes learner parameters, optimizer/scaler state, schedules and update counters; behavior/actor parameters and version; live simulator states; phase/request IDs and pending actions; observations/private memory; all PRNG streams; partially filled buffers with old log-probabilities/values/masks; collection cursor; minibatch permutation and epoch/minibatch cursor (plus accumulated gradients if mid-accumulation saving is supported); and data/schema/source versions. Save atomically with checksums. A manifest must make partial writes distinguishable from valid checkpoints.
+95: 
+96: Initial resume gate: support completed-update checkpoints at the documented collection barrier, and on a deterministic CPU canary reproduce the next samples and updates from a restore. Live environment/history/request state is required even at that boundary when games persist. Also simulate a crash during collection and during an update: roll back atomically to the last complete checkpoint, discard intervening work and verify loss/re-execution accounting. This is rollback recovery, not exact continuation at the crash point. GPU checks compare counters, actor versions, masks, next PRNG keys and trajectory identities; declare any numerical tolerance without allowing missing or repeated committed data.
+97: 
+98: Optional extended gate: only after adding exact mid-collection, pre-update-buffer or mid-epoch checkpoint modes, interrupt at each supported point and reproduce the uninterrupted canary's continuation with its complete state above. Prefer bit identity for deterministic operations. A mode that resets unfinished games must be labeled non-exact and report lost samples; it does not satisfy exact continuation. Never stitch a partial buffer to a different behavior-policy version. Raw histories are preferable to unversioned learned recurrent state initially. If recurrence is later added, specify hidden-state recomputation/burn-in across policy updates and restores.
+99: 
+100: ## Lean experiment ladder and statistical promotion
+101: 
+102: Run one decision-relevant question at a time:
+103: 
+104: 1. Tiny canaries and PPO correctness, no architecture search.
+105: 2. Restricted policy baseline, then one exploration/GAE screen (lambda and zero-avoidance settings); keep the best stable cheap configuration.
+106: 3. Set-prediction auxiliary head, opponent-action head, then both. Require calibration/hidden-state safety in addition to win-rate gain.
+107: 4. Snapshot opponent pool versus current-self-play only; measure cyclic regressions against frozen checkpoints.
+108: 5. Expand mechanics and distribution. Repeat the useful baseline before adding model capacity.
+109: 6. Correlated generator-based belief candidates versus no belief input; only then learned conditional proposals.
+110: 7. One-step search, deeper simultaneous search, and world-count/rollouts/depth tradeoffs at equal inference time. Then test sampled mixture versus argmax and exact HP versus bins.
+111: 8. Only after gains survive: specialist MLPs, delayed matchup features, recurrence, distillation, or larger networks. Each competes at both matched sampled decisions and matched GPU-hours; these answer different questions.
+112: 
+113: Use three independent training seeds for pilot selection and preferably five for consequential comparisons. Match team seeds and swap seats. A team-seed pair is one statistical cluster; do not count both games as independent. Direct head-to-head pilot: 1,000 pairs (2,000 games); promotion: 5,000 pairs (10,000 games), extending by a predeclared plan if precision is inadequate. Worst-case normal-approximation 95% half-widths for bounded pair scores are about 3.1 and 1.4 percentage points, respectively. Actual precision depends on within-pair covariance; bootstrap complete pairs, and account for training seeds separately. These counts describe game-level comparisons: balance evaluation across training seeds and report per-seed results; no quantity of games from one checkpoint replaces independent training runs. If a claim depends on run-to-run reliability, budget evaluation for each seed and estimate the training-seed variation explicitly.
+114: 
+115: For comparisons against a fixed opponent panel, compute per-pair score differences between candidate and baseline and bootstrap those paired differences, stratified by opponent. Their variance differs from direct head-to-head score variance; do not reuse the same precision claim. Estimate sample size from a pilot using n ≈ (1.96+0.84)^2 s_delta^2 / desired_gain^2 for a rough two-sided 5%, 80%-power plan, then freeze that plan. Correct for multiple comparisons or reserve untouched confirmation seeds. Avoid repeatedly checking ordinary intervals and stopping when favorable.
+116: 
+117: Common RNG seeds are not automatically common chance outcomes after policies take different actions. If event-indexed random coupling is used, validate it; otherwise pair the teams and seats while allowing independent chance, and state that choice. Preserve full score tables, confidence intervals, generator/simulator/model versions, illegal-action/rejection categories, turn counts, and latency distributions in each promotion report.
+118: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

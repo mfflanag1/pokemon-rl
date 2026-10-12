@@ -1,0 +1,15 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/switch-soak",
+      "-p",
+      "test_gates.py"
+    ],
+    "returncode": 0
+  }
+]

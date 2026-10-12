@@ -1,0 +1,14 @@
+{
+  "status": "pass",
+  "files": [
+    "packages/showdown-bot/audit.mjs",
+    "packages/showdown-bot/campaign.mjs",
+    "packages/showdown-bot/cli.mjs",
+    "packages/showdown-bot/client.mjs",
+    "packages/showdown-bot/development.mjs",
+    "packages/showdown-bot/local-server.mjs",
+    "packages/showdown-bot/network-smoke.mjs",
+    "packages/showdown-bot/policy.mjs",
+    "packages/showdown-bot/protocol.mjs"
+  ]
+}

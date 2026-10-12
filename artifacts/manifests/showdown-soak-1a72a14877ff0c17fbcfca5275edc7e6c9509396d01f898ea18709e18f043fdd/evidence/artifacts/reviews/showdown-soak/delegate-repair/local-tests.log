@@ -1,0 +1,31 @@
+✔ planFor(false) mirrors top-level plan, drops smoke, adds games (1.68725ms)
+✔ planFor() defaults to production (0.093958ms)
+✔ planFor(true) applies smoke overrides and keeps unoverridden fields (0.138542ms)
+✔ planFor returns a fresh deep copy each call and never mutates the source (4.963667ms)
+✔ planFor rejects non-boolean input (0.275583ms)
+✔ gameSpec returns exactly the specified keys (0.113833ms)
+✔ gameSpec() defaults smoke to false (0.067875ms)
+✔ gameSpec pair mapping: fixed teams in fixed seats, swapped policies (0.08725ms)
+✔ gameSpec: every pair has the same two teams in the same seats (3.548916ms)
+✔ gameSpec: index/session/within_session/file/names are consistent (4.381166ms)
+✔ gameSpec production fault placement: offset + session parity (0.107542ms)
+✔ gameSpec smoke fault placement (0.13125ms)
+✔ all six fault/seat strata are covered in production (10 each) (3.667417ms)
+✔ all six fault/seat strata are covered in smoke (1 each) (0.216417ms)
+✔ every session has exactly three faults, one of each type (3.648875ms)
+✔ gameSpec returns fresh objects; mutating one does not affect another (0.089542ms)
+✔ gameSpec rejects out-of-range and unsafe indices (0.44175ms)
+✔ gameSpec rejects non-boolean smoke (0.069041ms)
+✔ expectedCoverage production known answer (7.049583ms)
+✔ expectedCoverage smoke known answer (0.139625ms)
+✔ expectedCoverage internal consistency (3.624333ms)
+✔ expectedCoverage returns fresh objects (6.924125ms)
+✔ expectedCoverage rejects non-boolean input (0.148792ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 126.45525

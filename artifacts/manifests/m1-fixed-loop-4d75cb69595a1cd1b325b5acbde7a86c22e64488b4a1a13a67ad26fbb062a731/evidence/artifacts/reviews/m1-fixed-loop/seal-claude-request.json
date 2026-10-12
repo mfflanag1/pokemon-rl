@@ -1,0 +1,20 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Audit only the NEW completion sealer scripts/seal-fixed-loop.py and the evidence chain it validates. The fixed loop already had a separate review; do not repeat that broad review. The corrected two-hour campaign is currently running and no completion claim has been made. Supplied parity/profile artifacts are real completed phases; the final soak/report does not yet exist. Check whether the sealer can falsely accept an incomplete run, unbound checkpoints, mismatched sample counters, missing regression suites, altered sources, or unsupported scope claims. It must archive both interrupted v1 and corrected v2, keep old receipts unchanged, and leave full G2/G3 open. Identify concrete blockers and simple acceptance improvements; avoid hypothetical adversarial signing infrastructure or stylistic rewrites. Review is tool-free; say which claims you cannot verify.",
+  "files_sha256": {
+    "scripts/seal-fixed-loop.py": "78525e98333607037f58ec58af1fab2440516f62f2cf7c1e074b0413cb13845c",
+    "python/pokemon_fixed/campaign.py": "3d418da8776d9a218552831bd17f27dfd88bfe6cefff4ebbdcf2eccbfe7213be",
+    "python/pokemon_fixed/checkpoint.py": "d8e93bd4e403e9759b78e6bfb052af9d9714e00942993239eb4159e0f46d4fea",
+    "contracts/fixed-loop-v1/plan.json": "0b2867a77ebe4d94d8978c1620fb018d0e2a802844a4cd7a54c6a2f6f234acb3",
+    "artifacts/runs/m1-fixed-loop-v2/admission.json": "cc3d5912c6804859ebcb997ee7fbafdaa188e8a35e23d49d7688e500d9f2afcd",
+    "artifacts/runs/m1-fixed-loop-v2/parity.json": "838e1ce3a6c0a4bed6e0ec4411b05863e0ffad02c39dd5ffc1d78747b091dd44",
+    "artifacts/runs/m1-fixed-loop-v2/profile.json": "6aba25a1c3c5685b8eaec6f173b62bfcd07e5015cb83555edbdd89266a8ef111",
+    "artifacts/reviews/m1-fixed-loop/npm-test.log": "3817c404d1ef041a9134a954cbba417ec07eb5a66857022c65e7888f9321f40b",
+    "docs/M1_FIXED_LOOP.md": "5c0209af22898cddfbf0379f5c66e37d7428fcd27a93d2671dfca1fcd42f8082"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

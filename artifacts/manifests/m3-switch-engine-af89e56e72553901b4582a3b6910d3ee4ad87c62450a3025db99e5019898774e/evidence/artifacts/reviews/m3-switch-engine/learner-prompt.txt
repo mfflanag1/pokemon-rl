@@ -1,0 +1,1028 @@
+Task and review objective:
+Review the new four-action categorical learner for concrete correctness defects: exact dyadic conditional sampler vs stored/PPO log likelihood, gradient masking, same-player GAE across replacement waits, terminal vs capped-game bootstrap, observation-only actor, fixed-budget counter linkage, completed-update checkpoint exact replay and rollback. CPU FP32 only, three seeds x64 updates x32 games engineering smoke; no strength claim. Sealed binary policy and generic Adam imported unchanged. Snapshot-only review: flag verified issues separately from missing context. Mechanics review already done separately; pinned Showdown uses ceil(100*hp/maxhp) so prior speculative hp/maximum*100 finding was disproved by source. Focus on learner code and tests in this packet.
+
+
+FILE contracts/switch-engine-v1/plan.json
+1: {
+2:   "version": "switch-engine-1",
+3:   "profile": "gen9-starter-pairs-v1",
+4:   "namespace": "m3-switch-engine-v1",
+5:   "reference_receipt": "1e484145df3e51b631e07d8192a01f1e35409e6ca3ec4df6b8aca0c51fe2bd34",
+6:   "predecessor_receipt": "1a72a14877ff0c17fbcfca5275edc7e6c9509396d01f898ea18709e18f043fdd",
+7:   "fresh_games": 10000,
+8:   "passivity_games": 24,
+9:   "shard_size": 100,
+10:   "max_turns": 12,
+11:   "max_groups": 14,
+12:   "history_capacity": 32,
+13:   "chance": "Semantic events indexed by game/group/seat. Crit and damage use the sealed exact Showdown uint32 maps; ties use an unbiased bit between tied seats. Accuracy has no misses in this profile. No sodium stream or raw draw schedule equivalence claim.",
+14:   "view": "Own private roster and exact stats/HP/PP; opponent seen species, last public percentage HP and active member; complete bounded public move/switch action history with observer-relative actors. No opponent speed variant, exact HP/PP, reserve species before reveal, RNG, winner label or opponent action commitment.",
+15:   "learner": {
+16:     "seeds": [
+17:       101,
+18:       211,
+19:       307
+20:     ],
+21:     "batch_games": 32,
+22:     "updates": 64,
+23:     "epochs": 2,
+24:     "learning_rate": 0.001,
+25:     "gamma": 1.0,
+26:     "lambda": 0.95,
+27:     "clip": 0.2,
+28:     "entropy": 0.01,
+29:     "value_coefficient": 0.5
+30:   },
+31:   "cutoff": "Finish faint replacements, then truncate at the fresh turn-13 joint boundary. Bootstrap each player's last transition with its own turn-13 value under the frozen collecting actor, never call a cutoff a draw. Reset the truncated game explicitly. Terminal rewards win1/loss0; no dense reward.",
+32:   "acceptance": "Zero scalar/JAX/reference state, event, mask and compact player-view divergences; existing information counterfactuals and positive reveal controls pass; finite categorical PPO updates, no masked samples, same-player GAE, exact supported checkpoint replay. No strength threshold or full G2/G3/G4 closure.",
+33:   "scope": "New additive CPU-only modules; sealed predecessors unchanged. No public server, final reserved data, GPU or Prime. Learner smoke starts only after simulator and information parity pass. A separate sustained qualification and learning-strength evaluation remain future gates.",
+34:   "categorical_policy": "Four leaves of a two-level binary tree. Each node uses the sealed FP32 rare mass floor 2^-24 and exact 64-bit word threshold; leaves are products of root/child conditional masses. Stored and PPO log probabilities sum those same logs. Independent words per node. No rounded CDF or straight-through quantizer."
+35: }
+36: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/switch-engine-v1/README.md
+1: # switch-engine-1
+2: 
+3: The sealed `switch-v1` roster and twelve-turn cutoff remain the admitted scope.
+4: This port adds explicit conditional chance, independent scalar and JAX transitions,
+5: a bounded player-only observation and a four-action learner smoke after parity.
+6: No old implementation or receipt is edited.
+7: 
+8: Original member slots A/B never reorder internally. State holds species IDs 0/1/2,
+9: speed variants, HP, PP, active original slots, phase (0 joint, 1 replacement,
+10: 2 terminal), turn, group and winner (-1 live, otherwise absolute winning seat).
+11: Only the fainted side acts during replacement; -1 is the waiting action. A joint
+12: step resolves both commitments atomically. Switches precede moves; within the same
+13: priority class faster outgoing active Pokémon acts first, with explicit tie bit.
+14: A fainted actor does not execute or spend PP. Finish replacement before advancing
+15: the turn. Terminal/cutoff states are absorbing in the batched kernel; checked host
+16: submission rejects another active decision. Imported arbitrary states are not a
+17: supported resume format: checkpoints bind and restore the complete reachable state.
+18: 
+19: History has 32 padded rows of nine integers:
+20: `turn, actor, kind, member, species, move, affected_member, HP_after, crit`.
+21: Kind 0 is a switch, kind 1 an executed damaging move. Species is 0/1/2;
+22: move is 0/1 or -1 for a switch. HP is the switched-in member's HP for switches
+23: and the opponent target's HP for moves. Initial send-outs are represented in the
+24: initial observation, not in history. No damage roll is actor-visible. The player
+25: projection converts actor to relative 0=self/1=opponent and HP to exact own or
+26: ceil(100*HP/maxHP) for opponents (clamp 100 to 99 when HP is below max); unused history rows are -1. Faint is implicit in
+27: HP zero. Every reachable event fits: at most 24 joint actions plus two replacement
+28: switches. Terminal winner labels are absent from the actor input.
+29: 
+30: Compact PlayerView fields: own[2,9] = species+1, HP, maxHP, attack, defense,
+31: special attack, special defense, speed, active flag; pp[2,2]; opponent[2,4] =
+32: species+1 (0 unknown), public HP percent (-1 unknown), active flag, fainted flag;
+33: context[5] = turn, own phase (0 move,1 replacement,2 wait,3 terminal), own active
+34: original slot, opponent active original slot, history count; history[32,9]; mask[4].
+35: Both policy and value receive only this same projection. PP is reconstructed from
+36: the observer's executed moves, including while waiting; own HP incorporates private
+37: damage events after a stale last full roster request. Opponent reserve and speed
+38: variants must not enter initial input before they cause public evidence.
+39: 
+40: The learner collects whole capped games under one frozen actor, then updates.
+41: Transitions link only the same player and episode; waiting contributes no decision.
+42: Turn-13 cutoffs bootstrap from that player's fresh view under the collecting actor,
+43: then explicitly reset. They are never terminal draws or evaluation scores.
+44: The 64-update three-seed run is an engineering smoke, not a learning promotion.
+45: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/policy.py
+1: """Four-action policy via two levels of exact dyadic binary conditionals.
+2: 
+3: Each node uses the sealed binary policy's FP32 rare mass and real complement.
+4: Independent 64-bit words sample root and child. Leaf logs are sums of exactly
+5: those conditional logs, avoiding a rounded categorical CDF and unreachable tails.
+6: """
+7: from typing import NamedTuple
+8: import jax
+9: import jax.numpy as jnp
+10: import numpy as np
+11: from pokemon_binary.policy import parts as binary_parts, select_words
+12: from .engine import PlayerView
+13: from .scalar import require
+14: 
+15: FEATURES=323
+16: 
+17: 
+18: class ActorInput(NamedTuple):
+19:     features: jax.Array
+20:     mask: jax.Array
+21: 
+22: 
+23: def encode(view):
+24:     require(type(view) is PlayerView,'Actor encoder accepts only PlayerView')
+25:     n=view.context.shape[0]
+26:     return ActorInput(jnp.concatenate([x.reshape(n,-1) for x in view[:-1]],axis=1).astype(jnp.float32)/128,view.mask)
+27: 
+28: 
+29: def _group(logits,mask):
+30:     any_=jnp.any(mask,axis=1);maximum=jax.lax.stop_gradient(jnp.max(jnp.where(mask,logits,-jnp.inf),axis=1))
+31:     maximum=jnp.where(any_,maximum,0);weights=jnp.where(mask,jnp.exp(jnp.where(mask,logits-maximum[:,None],0)),0)
+32:     return maximum+jnp.log(jnp.where(any_,jnp.sum(weights,axis=1),1))
+33: 
+34: 
+35: def nodes(logits,mask):
+36:     left,right=logits[:,:2],logits[:,2:];lm,rm=mask[:,:2],mask[:,2:]
+37:     root=jnp.stack([_group(left,lm),_group(right,rm)],axis=1)
+38:     masks=jnp.stack([jnp.stack([lm.any(1),rm.any(1)],axis=1),lm,rm],axis=1)
+39:     inputs=jnp.stack([root,left,right],axis=1)
+40:     p,logs,rare_action,rare=binary_parts(inputs.reshape(-1,2),masks.reshape(-1,2))
+41:     return p.reshape(-1,3,2),logs.reshape(-1,3,2),rare_action,rare,masks
+42: 
+43: 
+44: def distribution(logits,mask):
+45:     p,logs,*_=nodes(logits,mask)
+46:     probs=jnp.concatenate([p[:,0,0,None]*p[:,1],p[:,0,1,None]*p[:,2]],axis=1)
+47:     logp=jnp.concatenate([logs[:,0,0,None]+logs[:,1],logs[:,0,1,None]+logs[:,2]],axis=1)
+48:     return jnp.where(mask,probs,0),jnp.where(mask,logp,0)
+49: 
+50: 
+51: def select(logits,mask,words):
+52:     _,_,rare_action,rare,masks=nodes(logits,mask)
+53:     decisions=select_words(rare,rare_action,masks.reshape(-1,2),words.reshape(-1,2)).reshape(-1,3)
+54:     root=jnp.maximum(decisions[:,0],0);child=decisions[jnp.arange(len(root)),1+root]
+55:     return jnp.where(mask.any(1),root*2+child,-1).astype(jnp.int32)
+56: 
+57: 
+58: def initialize(seed):
+59:     require(type(seed) is int and 0<=seed<2**32,'Model seed')
+60:     a,b=jax.random.split(jax.random.key(seed))
+61:     return {'w':jax.random.normal(a,(FEATURES,32))*jnp.float32(.05),'b':jnp.zeros(32,jnp.float32),
+62:             'pw':jax.random.normal(b,(32,4))*jnp.float32(.05),'pb':jnp.zeros(4,jnp.float32),
+63:             'vw':jnp.zeros(32,jnp.float32),'vb':jnp.zeros((),jnp.float32)}
+64: 
+65: 
+66: def forward(parameters,obs):
+67:     require(type(obs) is ActorInput,'Policy/value accept only ActorInput')
+68:     hidden=jnp.tanh(obs.features@parameters['w']+parameters['b'])
+69:     return hidden@parameters['pw']+parameters['pb'],hidden@parameters['vw']+parameters['vb']
+70: 
+71: 
+72: @jax.jit
+73: def act(parameters,obs,keys):
+74:     logits,values=forward(parameters,obs);words=jax.vmap(lambda k:jax.random.bits(k,(3,2),dtype=jnp.uint32))(keys)
+75:     actions=select(logits,obs.mask,words);_,logs=distribution(logits,obs.mask)
+76:     live=obs.mask.any(1);selected=logs[jnp.arange(len(actions)),jnp.maximum(actions,0)]
+77:     return actions,jnp.where(live,selected,0),jnp.where(live,values,0)
+78: 
+79: 
+80: def loss(logits,values,mask,actions,old_logp,advantages,returns,valid,clip=.2,value_coef=.5,entropy_coef=.01):
+81:     # Empty/wait rows are finite inert padding; neither optimizer sees them.
+82:     safe=jnp.where(valid[:,None],mask,jnp.array([True,False,False,False]));n=jnp.maximum(1,valid.sum())
+83:     logits=jnp.where(valid[:,None],logits,0);values=jnp.where(valid,values,0)
+84:     probs,logs=distribution(logits,safe);rows=jnp.arange(len(values));indices=jnp.where(valid,actions,0)
+85:     old_logp,advantages,returns=[jax.lax.stop_gradient(jnp.where(valid,x,0)) for x in (old_logp,advantages,returns)]
+86:     ratio=jnp.exp(logs[rows,indices]-old_logp);clipped=jnp.clip(ratio,1-clip,1+clip)
+87:     active=jnp.where(advantages>=0,ratio<=1+clip,ratio>=1-clip)
+88:     surrogate=jnp.where(active,ratio,jax.lax.stop_gradient(clipped))*advantages
+89:     mean=lambda x:jnp.sum(jnp.where(valid,x,0))/n
+90:     entropy=mean(-jnp.sum(probs*logs,axis=1));actor=-mean(surrogate);value=.5*mean((values-returns)**2)
+91:     total=actor+value_coef*value-entropy_coef*entropy
+92:     return total,{'loss':total,'actor_loss':actor,'value_loss':value,'entropy':entropy,
+93:                   'clip_fraction':mean(jnp.abs(ratio-1)>clip),'approx_kl':mean((ratio-1)-jnp.log(ratio))}
+94: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/learner.py
+1: """Fixed-shape capped-game collection and categorical PPO, observation-only actor."""
+2: from typing import NamedTuple
+3: import json
+4: from pathlib import Path
+5: import jax
+6: import jax.numpy as jnp
+7: import numpy as np
+8: from pokemon_fixed.math import adam_step
+9: from . import engine, policy, chance
+10: from .scalar import require
+11: 
+12: PLAN=json.loads((Path(__file__).resolve().parents[2]/'contracts/switch-engine-v1/plan.json').read_text())
+13: CONFIG=PLAN['learner']; BATCH=CONFIG['batch_games']; LANES=BATCH*2; GROUPS=PLAN['max_groups']
+14: 
+15: 
+16: class Learner(NamedTuple):
+17:     parameters: dict
+18:     m: dict
+19:     v: dict
+20:     step: jax.Array
+21:     version: jax.Array
+22:     next_game: jax.Array
+23: 
+24: 
+25: class Buffer(NamedTuple):
+26:     features: jax.Array
+27:     mask: jax.Array
+28:     actions: jax.Array
+29:     old_logp: jax.Array
+30:     values: jax.Array
+31:     valid: jax.Array
+32:     rewards: jax.Array
+33:     terminal: jax.Array
+34:     next_index: jax.Array
+35:     bootstrap: jax.Array
+36:     advantages: jax.Array
+37:     returns: jax.Array
+38: 
+39: 
+40: def start(seed):
+41:     p=policy.initialize(seed)
+42:     return Learner(p,jax.tree.map(jnp.zeros_like,p),jax.tree.map(jnp.zeros_like,p),jnp.int32(0),jnp.int32(0),jnp.uint32(0))
+43: 
+44: 
+45: def observe(state):
+46:     views=[engine.view_kernel(state,side) for side in (0,1)]
+47:     return policy.encode(engine.PlayerView(*[jnp.stack([views[0][k],views[1][k]],axis=1).reshape((-1,*views[0][k].shape[1:])) for k in range(6)]))
+48: 
+49: 
+50: def targets(values,valid,winners,bootstrap):
+51:     """Skip wait/padding rows; carry next same-player value/advantage across gaps."""
+52:     lanes=values.shape[1];ended=jnp.repeat(winners!=-1,2);won=jnp.repeat(winners,2)==jnp.tile(jnp.arange(2),len(winners))
+53:     def one(carry,row):
+54:         next_v,next_adv,next_i=carry
+55:         v,live,index=row;last=next_i<0;terminal=live&last&ended
+56:         reward=(terminal&won).astype(jnp.float32)
+57:         boundary=jnp.where(live&last&~ended,bootstrap,0)
+58:         vnext=jnp.where(terminal,0,next_v);anext=jnp.where(terminal,0,next_adv)
+59:         advantage=reward+CONFIG['gamma']*vnext-v+CONFIG['gamma']*CONFIG['lambda']*anext
+60:         advantage=jnp.where(live,advantage,0)
+61:         outputs=(reward,terminal,jnp.where(live,next_i,-1),boundary,advantage,jnp.where(live,advantage+v,0))
+62:         return (jnp.where(live,v,next_v),jnp.where(live,advantage,next_adv),jnp.where(live,index,next_i)),outputs
+63:     indices=jnp.arange(values.size,dtype=jnp.int32).reshape(values.shape)
+64:     _,result=jax.lax.scan(one,(bootstrap,jnp.zeros(lanes,jnp.float32),jnp.full(lanes,-1,jnp.int32)),(values,valid,indices),reverse=True)
+65:     return result
+66: 
+67: 
+68: @jax.jit
+69: def collect(parameters,next_game,seed):
+70:     ids=next_game+jnp.arange(BATCH,dtype=jnp.uint32)
+71:     teams=jnp.stack([(ids+seed%24)%24,(ids//24+(seed//24)%24)%24],axis=1).astype(jnp.int32)
+72:     state=engine.initial_kernel(teams);master=jax.random.key(seed)
+73:     actor_master=jax.random.fold_in(master,0x41435434)
+74:     def one(state,_):
+75:         obs=observe(state);live=jnp.repeat((state.winner==-1)&(state.turn<=12),2)
+76:         obs=policy.ActorInput(jnp.where(live[:,None],obs.features,0),obs.mask&live[:,None]);valid=obs.mask.any(1)
+77:         def keys(game,group):
+78:             base=jax.random.fold_in(jax.random.fold_in(actor_master,game),group)
+79:             return jnp.stack([jax.random.fold_in(base,side) for side in (0,1)])
+80:         actor_keys=jax.vmap(keys)(ids,state.group.astype(jnp.uint32)).reshape(-1)
+81:         actions,logp,values=policy.act(parameters,obs,actor_keys)
+82:         after,_=engine.step_kernel(state,actions.reshape(BATCH,2),chance.sample(master,ids,state.group.astype(jnp.uint32)))
+83:         return after,(obs.features,obs.mask,actions,logp,values,valid)
+84:     final,rows=jax.lax.scan(one,state,xs=None,length=GROUPS)
+85:     _,boot=policy.forward(parameters,observe(final));boot=jnp.where(jnp.repeat(final.winner==-1,2),boot,0)
+86:     target=targets(rows[4],rows[5],final.winner,boot)
+87:     flatten=lambda x:x.reshape((-1,*x.shape[2:]))
+88:     return Buffer(*[flatten(x) for x in (*rows,*target)]),final
+89: 
+90: 
+91: def objective(parameters,buffer):
+92:     obs=policy.ActorInput(jnp.where(buffer.valid[:,None],buffer.features,0),buffer.mask)
+93:     logits,values=policy.forward(parameters,obs)
+94:     return policy.loss(logits,values,buffer.mask,buffer.actions,buffer.old_logp,buffer.advantages,buffer.returns,buffer.valid,
+95:                        CONFIG['clip'],CONFIG['value_coefficient'],CONFIG['entropy'])
+96: 
+97: 
+98: @jax.jit
+99: def update(learner,buffer):
+100:     def epoch(carry,_):
+101:         p,m,v,step=carry
+102:         (_,metrics),grad=jax.value_and_grad(objective,has_aux=True)(p,buffer)
+103:         p,m,v,step,norm=adam_step(p,grad,m,v,step,lr=CONFIG['learning_rate'])
+104:         return (p,m,v,step),{**metrics,'gradient_norm':norm}
+105:     (p,m,v,step),metrics=jax.lax.scan(epoch,(learner.parameters,learner.m,learner.v,learner.step),xs=None,length=CONFIG['epochs'])
+106:     return Learner(p,m,v,step,learner.version+1,learner.next_game+BATCH),metrics
+107: 
+108: 
+109: def run(learner,seed):
+110:     require(type(seed) is int and 0<=seed<2**32,'Seed range')
+111:     require(int(learner.version)<CONFIG['updates'],'Fixed smoke budget exhausted')
+112:     buffer,final=collect(learner.parameters,learner.next_game,jnp.uint32(seed));jax.block_until_ready((buffer,final))
+113:     validate_buffer(buffer,final)
+114:     candidate,metrics=update(learner,buffer);jax.block_until_ready((candidate,metrics))
+115:     require(all(np.isfinite(np.asarray(v)).all() for v in jax.tree.leaves((candidate,metrics))),'Nonfinite update')
+116:     return candidate,buffer,final,metrics
+117: 
+118: 
+119: def validate_buffer(buffer,final):
+120:     from pokemon_learner.core import linked_gae
+121:     require(all(np.isfinite(np.asarray(v)).all() for v in jax.tree.leaves(buffer)),'Nonfinite collection')
+122:     valid=np.asarray(buffer.valid);mask=np.asarray(buffer.mask);actions=np.asarray(buffer.actions)
+123:     require(valid.any() and np.array_equal(valid,mask.any(1)),'Decision mask/valid linkage')
+124:     require(np.all(actions[~valid]==-1) and np.all(mask[np.flatnonzero(valid),actions[valid]]),'Known-forbidden action')
+125:     require(np.all((np.asarray(final.winner)!=-1)|((np.asarray(final.turn)==13)&(np.asarray(final.phase)==0))),'Unfinished capped games')
+126:     # Independently compare the padded scan with the sealed NumPy forward-link GAE.
+127:     selected=np.flatnonzero(valid);inverse=np.full(len(valid),-1);inverse[selected]=np.arange(len(selected))
+128:     nxt=np.asarray(buffer.next_index)[valid];mapped=np.where(nxt>=0,inverse[np.maximum(nxt,0)],-1)
+129:     trajectory=selected%LANES
+130:     advantages,returns=linked_gae(np.asarray(buffer.rewards)[valid],np.asarray(buffer.values)[valid],mapped,
+131:         np.asarray(buffer.bootstrap)[valid],np.asarray(buffer.terminal)[valid],trajectory,gamma=CONFIG['gamma'],lam=CONFIG['lambda'])
+132:     require(np.allclose(advantages,np.asarray(buffer.advantages)[valid],rtol=2e-6,atol=2e-6) and
+133:             np.allclose(returns,np.asarray(buffer.returns)[valid],rtol=2e-6,atol=2e-6),'Independent GAE parity')
+134:     terminal=np.asarray(buffer.terminal);reward=np.asarray(buffer.rewards)
+135:     require(np.all(reward[~terminal]==0) and np.sum(reward)==np.sum(np.asarray(final.winner)!=-1),'Terminal reward accounting')
+136: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/checkpoint.py
+1: """Atomic completed-update checkpoints; capped games are explicitly reset."""
+2: import json
+3: import os
+4: import platform
+5: import runpy
+6: import sys
+7: from pathlib import Path
+8: import jax
+9: import jaxlib
+10: import jax.numpy as jnp
+11: import numpy as np
+12: from pokemon_learner.checkpoint import wire,digest,array_wire,read_array
+13: from . import learner
+14: from .scalar import require
+15: 
+16: ROOT=Path(__file__).resolve().parents[2]
+17: 
+18: 
+19: def sources():return runpy.run_path(str(ROOT/'scripts/verify-fixed-loop.py'))['source_manifest']()
+20: 
+21: 
+22: def runtime():
+23:     require(jax.default_backend()=='cpu' and not jax.config.x64_enabled,'CPU FP32 runtime')
+24:     return {'python':sys.version,'jax':jax.__version__,'jaxlib':jaxlib.__version__,'numpy':np.__version__,
+25:             'platform':platform.platform(),'machine':platform.machine(),'byteorder':sys.byteorder,
+26:             'backend':jax.default_backend(),'x64':bool(jax.config.x64_enabled),'prng':str(jax.config.jax_default_prng_impl)}
+27: 
+28: 
+29: def validate(state):
+30:     require(type(state) is learner.Learner,'Learner schema')
+31:     shapes={'w':(323,32),'b':(32,),'pw':(32,4),'pb':(4,),'vw':(32,),'vb':()}
+32:     for table in state[:3]:
+33:         require(type(table) is dict and set(table)==set(shapes),'Parameter keys')
+34:         for key,value in table.items():
+35:             a=np.asarray(value);require(a.shape==shapes[key] and a.dtype==np.float32 and np.isfinite(a).all(),'Parameter schema/finite')
+36:     require(all(np.all(np.asarray(a)>=0) for a in state.v.values()),'Nonnegative second moments')
+37:     for a,dtype in zip(state[3:],(np.int32,np.int32,np.uint32)):
+38:         require(np.asarray(a).shape==() and np.asarray(a).dtype==dtype,'Counter schema')
+39:     step,version,next_game=map(int,state[3:])
+40:     require(0<=version<=learner.CONFIG['updates'] and step==version*learner.CONFIG['epochs']
+41:             and next_game==version*learner.BATCH,'Counter linkage')
+42: 
+43: 
+44: def fingerprint(tree):
+45:     leaves,structure=jax.tree.flatten(tree)
+46:     return digest({'structure':str(structure),'arrays':[{'shape':list(np.asarray(x).shape),'dtype':str(np.asarray(x).dtype),
+47:         'hex':np.asarray(x).tobytes().hex()} for x in leaves]})
+48: 
+49: 
+50: def body(state,seed):
+51:     validate(state);require(type(seed) is int and 0<=seed<2**32,'Seed')
+52:     return {'format':'switch-checkpoint-1','phase':'completed-update-capped-games','seed':seed,
+53:         'plan':learner.PLAN,'sources':sources(),'runtime':runtime(),
+54:         'tables':[{k:array_wire(np.asarray(v)) for k,v in t.items()} for t in state[:3]],
+55:         'counters':list(map(int,state[3:])),
+56:         'environment':{'live_games':0,'partial_buffer':None,'cutoff_games_reset':True}}
+57: 
+58: 
+59: def save(path,state,seed,*,interrupt=False):
+60:     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True);data=body(state,seed)
+61:     document={'body':data,'sha256':digest(data)};temp=path.with_name(path.name+'.partial')
+62:     with temp.open('xb') as stream:
+63:         stream.write(wire(document)+b'\n');stream.flush();os.fsync(stream.fileno())
+64:     if interrupt:raise RuntimeError('Injected interrupted checkpoint')
+65:     os.replace(temp,path);fd=os.open(path.parent,os.O_RDONLY)
+66:     try:os.fsync(fd)
+67:     finally:os.close(fd)
+68:     return document['sha256']
+69: 
+70: 
+71: def load(path,seed):
+72:     def pairs(items):
+73:         out={}
+74:         for k,v in items:
+75:             require(k not in out,'Duplicate checkpoint key');out[k]=v
+76:         return out
+77:     doc=json.loads(Path(path).read_bytes(),object_pairs_hook=pairs)
+78:     require(set(doc)=={'body','sha256'} and digest(doc['body'])==doc['sha256'],'Checkpoint checksum')
+79:     b=doc['body'];template=body(learner.start(seed),seed)
+80:     require(set(b)==set(template),'Checkpoint fields')
+81:     for key in set(template)-{'tables','counters'}:require(b[key]==template[key],'Checkpoint binding: '+key)
+82:     require(type(b['tables']) is list and len(b['tables'])==3,'Checkpoint tables')
+83:     require(type(b['counters']) is list and len(b['counters'])==3 and all(type(v) is int and 0<=v<=2**31-1 for v in b['counters']),'Counters')
+84:     shapes={k:np.asarray(v).shape for k,v in learner.start(seed).parameters.items()};tables=[]
+85:     for table in b['tables']:
+86:         require(set(table)==set(shapes),'Checkpoint keys')
+87:         tables.append({k:jnp.asarray(read_array(table[k],shape)) for k,shape in shapes.items()})
+88:     state=learner.Learner(*tables,jnp.int32(b['counters'][0]),jnp.int32(b['counters'][1]),jnp.uint32(b['counters'][2]))
+89:     validate(state);return state
+90: 
+91: 
+92: def transaction(state,seed,*,fault=None):
+93:     """Caller publishes the returned state only on success; no in-place mutation."""
+94:     validate(state);runtime()
+95:     require(int(state.version)<learner.CONFIG['updates'],'Fixed smoke budget exhausted')
+96:     require(type(seed) is int and 0<=seed<2**32,'Seed')
+97:     buffer,final=learner.collect(state.parameters,state.next_game,jnp.uint32(seed));jax.block_until_ready((buffer,final))
+98:     learner.validate_buffer(buffer,final)
+99:     if fault=='collect':raise RuntimeError('Injected collection rollback')
+100:     candidate,metrics=learner.update(state,buffer);jax.block_until_ready((candidate,metrics))
+101:     validate(candidate);require(all(np.isfinite(np.asarray(x)).all() for x in jax.tree.leaves(metrics)),'Finite metrics')
+102:     if fault=='update':raise RuntimeError('Injected update rollback')
+103:     return candidate,buffer,final,metrics
+104: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/chance.py
+1: """Event-addressed chance; exact pinned word maps, independently keyed events."""
+2: import jax
+3: import jax.numpy as jnp
+4: from pokemon_showdown.mapping import kernel as word_map
+5: from .engine import Chance
+6: 
+7: DOMAIN = 0x53574531
+8: 
+9: 
+10: @jax.jit
+11: def sample(master,game_ids,groups):
+12:     def words(game,group):
+13:         key=jax.random.fold_in(jax.random.fold_in(jax.random.fold_in(master,DOMAIN),game),group)
+14:         return jnp.stack([jax.random.bits(jax.random.fold_in(key,i),dtype=jnp.uint32) for i in range(5)])
+15:     raw=jax.vmap(words)(game_ids,groups);mapped=word_map(raw.reshape(-1))
+16:     return Chance(mapped['crit'].reshape(-1,5)[:,:2],100-mapped['roll'].reshape(-1,5)[:,2:4],mapped['tie0'].reshape(-1,5)[:,4])
+17: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/engine.py
+1: """Batched CPU JAX transitions, conditionally exact in the starter-pair scope."""
+2: from typing import NamedTuple
+3: import jax
+4: import jax.numpy as jnp
+5: import numpy as np
+6: from .scalar import ROSTER, require
+7: 
+8: STATS = jnp.array([[120,69,69,85,85,65], [119,68,85,70,84,63], [115,65,60,82,80,80]], jnp.int32)
+9: PP = jnp.array([[40,56],[40,56],[24,56]], jnp.int32)
+10: POWER = jnp.array([45,40,60], jnp.int32)
+11: TYPE = jnp.array([[-2,1,-1],[-1,-1,1],[1,-1,-1]], jnp.int32)
+12: 
+13: 
+14: class State(NamedTuple):
+15:     species: jax.Array
+16:     swift: jax.Array
+17:     hp: jax.Array
+18:     pp: jax.Array
+19:     active: jax.Array
+20:     phase: jax.Array
+21:     turn: jax.Array
+22:     group: jax.Array
+23:     winner: jax.Array
+24:     seen: jax.Array
+25:     history: jax.Array
+26:     count: jax.Array
+27: 
+28: 
+29: class Chance(NamedTuple):
+30:     crit: jax.Array
+31:     roll: jax.Array
+32:     tie: jax.Array
+33: 
+34: 
+35: class PlayerView(NamedTuple):
+36:     own: jax.Array
+37:     pp: jax.Array
+38:     opponent: jax.Array
+39:     context: jax.Array
+40:     history: jax.Array
+41:     mask: jax.Array
+42: 
+43: 
+44: def initial(team_ids):
+45:     require(jax.default_backend() == 'cpu' and not jax.config.x64_enabled, 'CPU int32/FP32 only')
+46:     ids = np.asarray(team_ids)
+47:     require(ids.ndim == 2 and ids.shape[1] == 2 and len(ids) > 0 and ids.dtype.kind in 'iu' and np.all((ids>=0)&(ids<24)), 'Batch team IDs')
+48:     return initial_kernel(jnp.asarray(ids,jnp.int32))
+49: 
+50: 
+51: @jax.jit
+52: def initial_kernel(ids):
+53:     species = jnp.array([r[0] for r in ROSTER],jnp.int32)[ids]
+54:     swift = jnp.array([r[1] for r in ROSTER],jnp.int32)[ids]; n = len(ids)
+55:     return State(species, swift, STATS[species,0], PP[species], jnp.zeros((n,2),jnp.int32),
+56:                  jnp.zeros(n,jnp.int32), jnp.ones(n,jnp.int32), jnp.zeros(n,jnp.int32), jnp.full(n,-1,jnp.int32),
+57:                  jnp.tile(jnp.array([[1,0],[1,0]],jnp.int32),(n,1,1)), jnp.full((n,32,9),-1,jnp.int32), jnp.zeros(n,jnp.int32))
+58: 
+59: 
+60: def damage(source, target, hp, move, crit, roll):
+61:     physical = (move == 1) | (source == 0)
+62:     attack = STATS[source,jnp.where(physical,1,3)]; defense = STATS[target,jnp.where(physical,2,4)]
+63:     attack = jnp.where((move==0)&(3*hp<=STATS[source,0]), (attack*6144+2047)//4096, attack)
+64:     power = jnp.where(move==0,POWER[source],40)
+65:     value = (22*power*attack)//defense//50+2
+66:     value = jnp.where(crit,value*3//2,value)*(100-roll)//100
+67:     value = jnp.where(move==0,(value*6144+2047)//4096,value)
+68:     effect = jnp.where(move==0,TYPE[source,target],0)
+69:     value = jnp.where(effect>0,value*2,jnp.where(effect==-2,value//4,jnp.where(effect==-1,value//2,value)))
+70:     return jnp.maximum(1,value)
+71: 
+72: 
+73: def _mask(s):
+74:     rows = jnp.arange(2); hp = s.hp[rows,s.active]
+75:     need = (s.phase!=2)&((s.phase==0)|(hp==0))
+76:     moves = need[:,None]&(s.phase==0)&(s.pp[rows,s.active]>0)
+77:     switches = need[:,None]&(jnp.arange(2)[None,:]!=s.active[:,None])&(s.hp>0)
+78:     return jnp.concatenate([moves,switches],axis=1)
+79: 
+80: 
+81: mask_kernel = jax.jit(jax.vmap(_mask))
+82: 
+83: 
+84: def _step(s, actions, chance):
+85:     live = (s.winner==-1)&(s.turn<=12)
+86:     rows = jnp.arange(2); speed = STATS[s.species[rows,s.active],5]+32*s.swift[rows,s.active]
+87:     switches = actions>=2
+88:     first = jnp.where(switches[0]!=switches[1], switches[1].astype(jnp.int32),
+89:                       jnp.where(speed[0]!=speed[1], (speed[1]>speed[0]).astype(jnp.int32),chance.tie))
+90:     first = jnp.where(s.phase==1,jnp.argmax(s.hp[rows,s.active]==0),first)
+91:     hp,pp,active,seen,history,count,winner = s.hp,s.pp,s.active,s.seen,s.history,s.count,s.winner
+92:     events=[]
+93:     for side in (first,1-first):
+94:         action=actions[side]; member=active[side]; other=1-side; target=active[other]
+95:         is_switch=action>=2; new_member=jnp.clip(action-2,0,1); move=jnp.clip(action,0,1)
+96:         execute=live&(winner==-1)&(action>=0)&(is_switch|(hp[side,member]>0))
+97:         do_switch=execute&is_switch; do_move=execute&~is_switch
+98:         source_species=s.species[side,member]
+99:         amount=damage(source_species,s.species[other,target],hp[side,member],move,chance.crit[side],chance.roll[side])
+100:         hp=hp.at[other,target].set(jnp.where(do_move,jnp.maximum(0,hp[other,target]-amount),hp[other,target]))
+101:         pp=pp.at[side,member,move].add(-do_move.astype(jnp.int32))
+102:         active=active.at[side].set(jnp.where(do_switch,new_member,member))
+103:         seen=seen.at[side,new_member].set(jnp.where(do_switch,1,seen[side,new_member]))
+104:         member=jnp.where(is_switch,new_member,member)
+105:         row=jnp.array([s.turn,side,jnp.where(is_switch,0,1),member,s.species[side,member],
+106:                        jnp.where(is_switch,-1,move),jnp.where(is_switch,member,target),
+107:                        jnp.where(is_switch,hp[side,member],hp[other,target]),
+108:                        jnp.where(is_switch,0,chance.crit[side])],jnp.int32)
+109:         index=jnp.minimum(count,31)
+110:         history=history.at[index].set(jnp.where(execute,row,history[index])); count+=execute.astype(jnp.int32)
+111:         winner=jnp.where(do_move&jnp.all(hp[other]==0),side,winner)
+112:         events.append(jnp.where(execute,row,jnp.full(9,-1,jnp.int32)))
+113:     phase=jnp.where(winner!=-1,2,jnp.any(hp[rows,active]==0).astype(jnp.int32))
+114:     phase=jnp.where(live,phase,s.phase)
+115:     return State(s.species,s.swift,hp,pp,active,phase,s.turn+(live&(phase==0)).astype(jnp.int32),
+116:                  s.group+live.astype(jnp.int32),winner,seen,history,count),jnp.stack(events)
+117: 
+118: 
+119: step_kernel = jax.jit(jax.vmap(_step))
+120: 
+121: 
+122: def step(state, actions, chance):
+123:     require(type(state) is State and type(chance) is Chance, 'Versioned state/chance')
+124:     validate_state(state)
+125:     n=len(state.turn); actions=np.asarray(actions)
+126:     require(actions.shape==(n,2) and actions.dtype.kind in 'iu', 'Action shape/dtype')
+127:     crit,roll,tie=map(np.asarray,chance)
+128:     require(crit.shape==(n,2) and crit.dtype==np.bool_, 'Crit shape/dtype')
+129:     require(roll.shape==(n,2) and roll.dtype.kind in 'iu' and np.all((roll>=0)&(roll<16)), 'Roll bounds')
+130:     require(tie.shape==(n,) and tie.dtype.kind in 'iu' and np.all((tie>=0)&(tie<=1)), 'Tie bounds')
+131:     legal=np.asarray(mask_kernel(state)); live=(np.asarray(state.winner)==-1)&(np.asarray(state.turn)<=12)
+132:     for i in range(n):
+133:         for side in range(2):
+134:             action=int(actions[i,side]); need=live[i] and legal[i,side].any()
+135:             require(0<=action<4 and legal[i,side,action] if need else action==-1, 'Illegal action or inactive wait')
+136:     require(np.all(np.asarray(state.count)<=26), 'Reachable history bound')
+137:     result,events=step_kernel(state,jnp.asarray(actions,jnp.int32),chance)
+138:     require(np.all(np.asarray(result.count)<=26), 'History overflow')
+139:     return result,events
+140: 
+141: 
+142: def validate_state(s):
+143:     """Reject malformed host inputs; this does not certify arbitrary states reachable."""
+144:     require(type(s) is State, 'State schema')
+145:     n=np.asarray(s.turn).size
+146:     shapes=[(n,2,2),(n,2,2),(n,2,2),(n,2,2,2),(n,2),(n,),(n,),(n,),(n,),(n,2,2),(n,32,9),(n,)]
+147:     require(n>0 and all(np.asarray(a).dtype==np.int32 and a.shape==shape for a,shape in zip(s,shapes)), 'State shape/dtype')
+148:     sp,sw,hp,pp,ac,ph,turn,group,winner,seen,hist,count=map(np.asarray,s)
+149:     require(np.all((sp>=0)&(sp<3)) and np.all(sp[:,:,0]!=sp[:,:,1]), 'Species profile')
+150:     require(np.all((sw==0)|(sw==1)) and np.all((ac==0)|(ac==1)) and np.all((seen==0)|(seen==1)), 'State flags')
+151:     require(np.all((hp>=0)&(hp<=np.asarray(STATS)[sp,0])) and np.all((pp>=0)&(pp<=np.asarray(PP)[sp])), 'HP/PP bounds')
+152:     require(np.all((ph>=0)&(ph<=2)) and np.all((turn>=1)&(turn<=13)) and np.all((group>=0)&(group<=14))
+153:             and np.all((winner>=-1)&(winner<=1)) and np.all((count>=0)&(count<=26)), 'State counters')
+154:     require(np.all((winner!=-1)==(ph==2)) and np.all(count<=2*group), 'State counter linkage')
+155:     rows=np.arange(n)[:,None]; sides=np.arange(2)[None,:];active_hp=hp[rows,sides,ac]
+156:     require(np.all(seen[:,:,0]==1) and np.all(seen[rows,sides,ac]==1), 'Visible active')
+157:     require(np.all((ph!=0)|np.all(active_hp>0,axis=1)) and np.all((ph!=1)|np.any(active_hp==0,axis=1)), 'Phase linkage')
+158:     require(np.all(np.where(np.arange(32)[None,:]>=count[:,None],np.all(hist==-1,axis=2),True)), 'History padding')
+159: 
+160: 
+161: def _percent(hp,maximum):
+162:     n=(100*hp+maximum-1)//maximum
+163:     return jnp.where((n==100)&(hp<maximum),99,n)
+164: 
+165: 
+166: def _view(s,side):
+167:     other=1-side; members=jnp.arange(2); specs=s.species[side]; st=STATS[specs].at[:,5].add(32*s.swift[side])
+168:     own=jnp.concatenate([(specs+1)[:,None],s.hp[side,:,None],st,(members==s.active[side]).astype(jnp.int32)[:,None]],axis=1)
+169:     other_specs=s.species[other]; seen=s.seen[other].astype(bool)
+170:     opponent=jnp.stack([jnp.where(seen,other_specs+1,0),jnp.where(seen,_percent(s.hp[other],STATS[other_specs,0]),-1),
+171:                         (members==s.active[other]).astype(jnp.int32),jnp.where(seen,s.hp[other]==0,0)],axis=1)
+172:     h=s.history; used=jnp.arange(32)<s.count; actors=jnp.clip(h[:,1],0,1); affected=jnp.where(h[:,2]==0,actors,1-actors)
+173:     species=s.species[affected,jnp.clip(h[:,6],0,1)]
+174:     h=h.at[:,7].set(jnp.where(used&(affected!=side),_percent(h[:,7],STATS[species,0]),h[:,7]))
+175:     h=h.at[:,1].set(jnp.where(used,(actors!=side).astype(jnp.int32),-1))
+176:     mask=_mask(s)[side]; phase=jnp.where(s.phase==2,3,jnp.where(s.phase==0,0,jnp.where(jnp.any(mask),1,2)))
+177:     return PlayerView(own,s.pp[side],opponent,jnp.array([s.turn,phase,s.active[side],s.active[other],s.count],jnp.int32),h,mask)
+178: 
+179: 
+180: view_kernel = jax.jit(jax.vmap(_view,in_axes=(0,None)))
+181: 
+182: 
+183: def unpack(state,index):
+184:     result={k:np.asarray(v[index]).tolist() for k,v in state._asdict().items()}
+185:     result['history']=result['history'][:result.pop('count')]
+186:     return result
+187: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_binary/policy.py
+1: """Two-action policy with exact dyadic word selection, conditional on uniform words.
+2: 
+3: The rare FP32 mass and its real complement define the law. Logs use log/log1p
+4: of that same mass; rounded displayed probabilities never define the sampler.
+5: Only this binary profile is admitted. The integer sampler is not differentiated.
+6: """
+7: import jax
+8: import jax.numpy as jnp
+9: import numpy as np
+10: from pokemon_jax_learner.model import (ActorInput, forward, validate_input,
+11:                                        validate_parameters)
+12: from pokemon_learner.core import require
+13: 
+14: FLOOR = np.float32(2**-24)
+15: DOMAIN = 0x44594231
+16: 
+17: 
+18: def parts(logits, mask):
+19:     both = jnp.all(mask, axis=1)
+20:     # Forced/padded rows must have no logit gradient, including their difference.
+21:     safe = jnp.where(both[:, None], logits, jnp.float32(0))
+22:     delta = safe[:, 0] - safe[:, 1]
+23:     rare_action = jnp.where(delta >= 0, 1, 0).astype(jnp.int32)
+24:     tail = jnp.exp(-jnp.abs(delta))
+25:     raw = tail / (jnp.float32(1) + tail)
+26:     rare = jnp.where(raw > FLOOR, raw, FLOOR)  # zero derivative at the floor
+27:     is_rare = jnp.arange(2)[None, :] == rare_action[:, None]
+28:     p = jnp.where(is_rare, rare[:, None], jnp.float32(1) - rare[:, None])
+29:     logs = jnp.where(is_rare, jnp.log(rare)[:, None], jnp.log1p(-rare)[:, None])
+30:     # Forced legal action: exact one/zero; terminal: exact all-zero transport.
+31:     return (jnp.where(both[:, None], p, mask.astype(jnp.float32)),
+32:             jnp.where(both[:, None], logs, jnp.float32(0)), rare_action, rare)
+33: 
+34: 
+35: def distribution_kernel(logits, mask):
+36:     return parts(logits, mask)[:2]
+37: 
+38: 
+39: def threshold_words(rare):
+40:     """Exact high/low words of rare*2^64 for normal FP32 rare in [2^-24,1/2].
+41: 
+42:     rare = m * 2^(e-150), m a 24-bit significand and biased exponent e.
+43:     The shift e-86 lies in [17,40], so two uint32 words suffice without x64.
+44:     """
+45:     bits = jax.lax.bitcast_convert_type(rare, jnp.uint32)
+46:     mantissa = (bits & jnp.uint32(0x7fffff)) | jnp.uint32(0x800000)
+47:     shift = ((bits >> jnp.uint32(23)) & jnp.uint32(255)).astype(jnp.int32) - 86
+48:     high = jnp.where(shift < 32,
+49:         mantissa >> jnp.maximum(32 - shift, 0).astype(jnp.uint32),
+50:         mantissa << jnp.maximum(shift - 32, 0).astype(jnp.uint32))
+51:     low = jnp.where(shift < 32, mantissa << jnp.minimum(shift, 31).astype(jnp.uint32), jnp.uint32(0))
+52:     return jnp.stack((high, low), axis=-1)
+53: 
+54: 
+55: def select_words(rare, rare_action, mask, words):
+56:     """Pure injected-word selector used identically by tests and keyed sampling."""
+57:     threshold = threshold_words(rare)
+58:     choose_rare = ((words[:, 0] < threshold[:, 0]) |
+59:                    ((words[:, 0] == threshold[:, 0]) & (words[:, 1] < threshold[:, 1])))
+60:     selected = jnp.where(choose_rare, rare_action, 1 - rare_action)
+61:     live = jnp.any(mask, axis=1)
+62:     return jnp.where(live, jnp.where(jnp.all(mask, axis=1), selected,
+63:                                    jnp.argmax(mask, axis=1)), -1).astype(jnp.int32)
+64: 
+65: 
+66: @jax.jit
+67: def predict_kernel(parameters, obs):
+68:     logits, values = forward(parameters, obs)
+69:     probabilities, logs = distribution_kernel(logits, obs.mask)
+70:     return probabilities, logs, jnp.where(jnp.any(obs.mask, axis=1), values, 0)
+71: 
+72: 
+73: @jax.jit
+74: def action_kernel(parameters, obs, keys):
+75:     logits, values = forward(parameters, obs)
+76:     _, logs, rare_action, rare = parts(logits, obs.mask)
+77:     words = jax.vmap(lambda key: jax.random.bits(jax.random.fold_in(key, DOMAIN),
+78:                                                (2,), dtype=jnp.uint32))(keys)
+79:     actions = select_words(rare, rare_action, obs.mask, words)
+80:     live = jnp.any(obs.mask, axis=1)
+81:     selected = logs[jnp.arange(len(actions)), jnp.maximum(actions, 0)]
+82:     return actions, jnp.where(live, selected, 0), jnp.where(live, values, 0)
+83: 
+84: 
+85: def act(parameters, obs, keys):
+86:     require(jax.default_backend() == 'cpu' and not jax.config.x64_enabled, 'CPU FP32 only')
+87:     n = validate_input(obs)
+88:     validate_parameters(parameters)
+89:     require(keys.shape == (n,) and str(keys.dtype) == 'key<fry>', 'One Threefry key per row')
+90:     result = action_kernel(parameters, obs, keys)
+91:     actions, mask = np.asarray(result[0]), np.asarray(obs.mask)
+92:     live = mask.any(axis=1)
+93:     require(np.all(actions[~live] == -1) and np.all(mask[np.arange(n)[live], actions[live]]), 'Illegal action')
+94:     require(all(np.all(np.isfinite(x)) for x in result), 'Nonfinite actor output')
+95:     return result
+96: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_fixed/math.py
+1: """Pure JAX math for the fixed-shape whole-episode loop (`contracts/fixed-loop-v1/plan.json`).
+2: 
+3: Three jit-compatible, host-check-free functions built on the sealed reference kernels in
+4: `pokemon_jax_learner.core` (which is imported, never modified):
+5: 
+6: * `masked_loss`     - padded-row PPO loss and the seven reference metrics, with the sealed
+7:                       `_loss` arithmetic (inclusive clip subgradient, half-MSE value loss,
+8:                       entropy bonus) averaged over *valid* rows only.
+9: * `bias_correction` - exact FP32 Adam bias-correction pair from a NumPy host-rounded table
+10:                       for steps 1..20000 and exact ones thereafter.
+11: * `adam_step`       - functional global-norm-clipped Adam update reusing the sealed
+12:                       `_adam_kernel`; the step counter is carried as int32 state.
+13: 
+14: Everything is computed by JAX in FP32 (x64 disabled). No function evaluates traced data on
+15: the host, so each can be wrapped in `jax.jit`, differentiated with `jax.grad`/`value_and_grad`
+16: and carried through `jax.lax.scan`. Validation (finiteness, shapes, legal masks for valid
+17: rows, skipping Adam on empty minibatches) is the caller's responsibility, exactly as the
+18: plan's padding rule states: "invalid rows sanitized before math; losses average valid rows;
+19: empty minibatches skip Adam".
+20: """
+21: import jax
+22: import jax.numpy as jnp
+23: import numpy as np
+24: 
+25: from pokemon_jax_learner.core import _adam_kernel, distribution_kernel
+26: 
+27: __all__ = ['masked_loss', 'bias_correction', 'adam_step', 'BIAS_TABLE_STEPS']
+28: 
+29: 
+30: # ----------------------------------------------------------------------------- masked PPO loss
+31: 
+32: def masked_loss(logits, values, mask, actions, old_logp, advantages, returns, valid,
+33:                 clip=.2, value_coef=.5, entropy_coef=.01):
+34:     """Padded PPO loss -> (scalar_loss, metrics) over the rows flagged by `valid`.
+35: 
+36:     Shapes (n rows, A actions): `logits` (n, A) FP32, `values` (n,) FP32, `mask` (n, A) bool,
+37:     `actions` (n,) integer, `old_logp`/`advantages`/`returns` (n,) FP32, `valid` (n,) bool.
+38:     `clip`, `value_coef`, `entropy_coef` are Python floats (host-rounded to FP32 like the
+39:     reference's `F32(1 - clip)` / `F32(1 + clip)`); treat them as static under `jax.jit`.
+40: 
+41:     Semantics on the valid rows are exactly those of the sealed
+42:     `pokemon_jax_learner.core._loss` applied to the compacted valid subset:
+43:     mean clipped actor loss with the explicit inclusive `active` branch (equality on the
+44:     unclipped side keeps the gradient), `value_coef` * half-MSE value loss, minus
+45:     `entropy_coef` * mean entropy; `old_logp`, `advantages`, `returns` are stop-gradient.
+46:     Metrics are the reference's seven keys: `loss`, `actor_loss`, `value_loss`, `entropy`,
+47:     `max_ratio_error` (max over valid rows), `clip_fraction`, `approx_kl` (valid-row means).
+48: 
+49:     Invalid rows may hold any transport payload (NaN logits/values/targets, action -1,
+50:     all-false mask). Every input is sanitized with `jnp.where(valid, ...)` to neutral finite
+51:     values (zeros; all-true mask; action 0) *before* any arithmetic, and every per-row term is
+52:     re-masked before its reduction, so invalid rows contribute neither value nor gradient:
+53:     both selections have exact-zero cotangents, giving exactly 0 gradient entries on padded
+54:     rows. With no valid rows the divisor is 1, so all seven metrics and both gradients are
+55:     exactly zero. Differentiable in `logits` and `values`; no host checks.
+56:     """
+57:     valid = jnp.asarray(valid, bool)
+58:     valid_rows = valid[:, None]
+59:     zero = jnp.float32(0)
+60:     # Sanitize *all* inputs on invalid rows before any arithmetic touches them.
+61:     logits = jnp.where(valid_rows, logits, zero)
+62:     mask = jnp.where(valid_rows, mask, True)
+63:     actions = jnp.where(valid, actions, 0).astype(jnp.int32)
+64:     values, old_logp, advantages, returns = [jnp.where(valid, a, zero) for a in (values, old_logp, advantages, returns)]
+65:     old_logp, advantages, returns = [jax.lax.stop_gradient(a) for a in (old_logp, advantages, returns)]
+66:     low, high, clip, value_coef, entropy_coef = [
+67:         jnp.asarray(c, jnp.float32) for c in (1 - clip, 1 + clip, clip, value_coef, entropy_coef)]
+68: 
+69:     count = jnp.maximum(jnp.sum(valid.astype(jnp.float32)), jnp.float32(1))
+70: 
+71:     def valid_mean(rows):
+72:         return jnp.sum(jnp.where(valid, rows, zero)) / count
+73: 
+74:     p, logp = distribution_kernel(logits, mask)
+75:     n = logits.shape[0]
+76:     log_ratio = logp[jnp.arange(n), actions] - old_logp
+77:     ratio = jnp.exp(log_ratio)
+78:     clipped = jnp.clip(ratio, low, high)
+79:     # Reference inclusive branch: equality on the unclipped side keeps the gradient.
+80:     active = jnp.where(advantages >= 0, ratio <= high, ratio >= low)
+81:     surrogate = jnp.where(active, ratio, jax.lax.stop_gradient(clipped)) * advantages
+82:     actor_loss = -valid_mean(surrogate)
+83:     entropy = valid_mean(-jnp.sum(p * logp, axis=1))
+84:     value_loss = jnp.float32(.5) * valid_mean(jnp.square(values - returns))
+85:     loss = actor_loss + value_coef * value_loss - entropy_coef * entropy
+86:     error = jnp.abs(ratio - jnp.float32(1))
+87:     metrics = {'loss': loss, 'actor_loss': actor_loss, 'value_loss': value_loss, 'entropy': entropy,
+88:                'max_ratio_error': jnp.max(jnp.where(valid, error, zero)),
+89:                'clip_fraction': valid_mean((error > clip).astype(jnp.float32)),
+90:                'approx_kl': valid_mean((ratio - jnp.float32(1)) - log_ratio)}
+91:     return loss, metrics
+92: 
+93: 
+94: # ----------------------------------------------------------------------------- bias correction
+95: 
+96: BIAS_TABLE_STEPS = 20000
+97: # Host-rounded exactly like the sealed `Adam.apply`: F32(1 - beta ** step) from Python-double
+98: # `beta ** step`. Row s-1 holds step s. Every step beyond the table has 0.999 ** step < 2**-25,
+99: # so its FP32 rounding is exactly 1.0 (and 0.9 ** step underflowed long before).
+100: _BIAS_TABLE = np.array([[1 - .9 ** s, 1 - .999 ** s] for s in range(1, BIAS_TABLE_STEPS + 1)], np.float32)
+101: 
+102: 
+103: def bias_correction(step):
+104:     """FP32 pair `[1 - 0.9**step, 1 - 0.999**step]` for a positive int32 `step`, shape (2,).
+105: 
+106:     Steps 1..`BIAS_TABLE_STEPS` are read from the precomputed NumPy host-rounded table (the
+107:     sealed reference constants bit for bit); later steps return exact FP32 ones, which is the
+108:     host rounding for every such step. Non-positive steps clamp to the step-1 entry (the
+109:     contract only covers positive steps). Pure gather/select: safe under `jit` and `scan`.
+110:     """
+111:     step = jnp.asarray(step, jnp.int32)
+112:     index = jnp.clip(step - 1, 0, BIAS_TABLE_STEPS - 1)
+113:     tabled = jnp.asarray(_BIAS_TABLE)[index]
+114:     return jnp.where(step > BIAS_TABLE_STEPS, jnp.ones(2, jnp.float32), tabled)
+115: 
+116: 
+117: # ----------------------------------------------------------------------------- functional Adam
+118: 
+119: def adam_step(parameters, gradients, m, v, step, lr=.003, max_norm=1.):
+120:     """Functional sealed Adam step -> (new_parameters, new_m, new_v, new_step, preclip_norm).
+121: 
+122:     `parameters`, `gradients`, `m`, `v` are same-keyed dicts of FP32 arrays (`m`/`v` zeros
+123:     before the first update); `step` is the int32 number of updates already applied (0 at
+124:     start) and is returned incremented by one. The recipe is the sealed
+125:     `pokemon_jax_learner.core.Adam.apply`: global-norm clip to `max_norm` (FP32 norm
+126:     returned pre-clip), beta 0.9/0.999, eps 1e-8, bias correction at `step + 1` from
+127:     `bias_correction`, via the sealed `_adam_kernel`. Python-float `lr`/`max_norm` are
+128:     host-rounded to FP32 like the reference. Pure and mutation-free (fresh dicts), so the
+129:     tuple can be scanned; no host checks. Callers skip this call for empty minibatches.
+130:     """
+131:     new_step = jnp.asarray(step, jnp.int32) + 1
+132:     bias = bias_correction(new_step)
+133:     new_parameters, new_m, new_v, norm = _adam_kernel(
+134:         dict(parameters), dict(gradients), dict(m), dict(v),
+135:         jnp.asarray(lr, jnp.float32), jnp.asarray(max_norm, jnp.float32), bias[0], bias[1])
+136:     return new_parameters, new_m, new_v, new_step, norm
+137: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/switch-engine/test_learner.py
+1: import copy
+2: from fractions import Fraction
+3: import json
+4: import tempfile
+5: import unittest
+6: from pathlib import Path
+7: import jax
+8: import jax.numpy as jnp
+9: import numpy as np
+10: from pokemon_learner.core import ppo_loss_grad
+11: from pokemon_learner.checkpoint import digest,wire
+12: from pokemon_switch_engine import policy,learner,checkpoint
+13: 
+14: 
+15: class LearnerTests(unittest.TestCase):
+16:     @classmethod
+17:     def setUpClass(cls):
+18:         cls.state=learner.start(101)
+19:         cls.result=checkpoint.transaction(cls.state,101)
+20: 
+21:     def test_exact_conditional_leaf_support_all_masks(self):
+22:         masks=np.array([[bool(i&(1<<a)) for a in range(4)] for i in range(16)])
+23:         for base in [[.7,-.2,.3,1.1],[1000,-1000,1000,-1000],[-1000,-1000,1000,1000]]:
+24:             logits=jnp.tile(jnp.array(base,jnp.float32),(16,1));mask=jnp.array(masks)
+25:             _,_,rare_action,rare,nodemasks=policy.nodes(logits,mask)
+26:             rare=np.asarray(rare).reshape(16,3);ra=np.asarray(rare_action).reshape(16,3);nm=np.asarray(nodemasks)
+27:             probs,logs=map(np.asarray,policy.distribution(logits,mask))
+28:             for row in range(16):
+29:                 exact=[]
+30:                 for a in range(4):
+31:                     mass=Fraction(1);words=np.full((16,3,2),2**32-1,np.uint32)
+32:                     for node,target in [(0,a//2),(1+a//2,a%2)]:
+33:                         r=Fraction(float(rare[row,node]));threshold=int(r*2**64)
+34:                         if nm[row,node].all():
+35:                             mass*=r if target==ra[row,node] else 1-r
+36:                             w=threshold-1 if target==ra[row,node] else threshold
+37:                             words[row,node]=[w>>32,w&0xffffffff]
+38:                         elif not nm[row,node,target]:mass=Fraction(0)
+39:                     exact.append(mass)
+40:                     if masks[row,a]:
+41:                         self.assertEqual(int(policy.select(logits,mask,jnp.array(words))[row]),a)
+42:                         self.assertAlmostEqual(float(np.exp(float(logs[row,a])))/float(mass),1,places=5)
+43:                     else:self.assertEqual(mass,0);self.assertEqual(probs[row,a],0)
+44:                 self.assertEqual(sum(exact),int(masks[row].any()))
+45:             self.assertEqual(int(policy.select(logits,mask,jnp.zeros((16,3,2),jnp.uint32))[0]),-1)
+46: 
+47:     def test_numpy_categorical_ppo_gradient_parity(self):
+48:         rng=np.random.default_rng(234);n=64
+49:         logits=rng.normal(size=(n,4)).astype(np.float32);mask=rng.random((n,4))>.35;mask[:,0]=True
+50:         actions=np.argmax(mask,axis=1).astype(np.int32);values=rng.normal(size=n).astype(np.float32)
+51:         old=np.asarray(policy.distribution(jnp.array(logits),jnp.array(mask))[1])[np.arange(n),actions]+rng.uniform(-.5,.5,n).astype(np.float32)
+52:         advantages=rng.normal(size=n).astype(np.float32);returns=rng.normal(size=n).astype(np.float32)
+53:         expected,gl,gv=ppo_loss_grad(logits,values,mask,actions,old,advantages,returns,entropy_coef=.01)
+54:         fn=lambda l,v:policy.loss(l,v,jnp.array(mask),jnp.array(actions),jnp.array(old),jnp.array(advantages),jnp.array(returns),jnp.ones(n,bool))
+55:         (loss,metrics),grad=jax.value_and_grad(fn,(0,1),has_aux=True)(jnp.array(logits),jnp.array(values))
+56:         self.assertAlmostEqual(float(loss),expected['loss'],places=6)
+57:         np.testing.assert_allclose(grad[0],gl,rtol=5e-5,atol=3e-7);np.testing.assert_allclose(grad[1],gv,rtol=1e-6,atol=1e-7)
+58:         np.testing.assert_array_equal(np.asarray(grad[0])[~mask],0)
+59: 
+60:     def test_extreme_and_padding_finite_zero_gradients(self):
+61:         mask=jnp.array([[1,0,1,0],[0,1,0,0],[0,0,0,0]],bool);valid=jnp.array([1,1,0],bool)
+62:         logits=jnp.array([[1000,-1000,-1000,1000],[1000,1000,-1000,1000],[jnp.nan]*4])
+63:         def loss(l):return policy.loss(l,jnp.array([0.,0.,jnp.nan]),mask,jnp.array([2,1,-1]),jnp.array([-16.635532,0.,jnp.nan]),jnp.array([1.,1.,jnp.nan]),jnp.array([1.,0.,jnp.nan]),valid)[0]
+64:         value,grad=jax.value_and_grad(loss)(logits)
+65:         self.assertTrue(np.isfinite(value));self.assertTrue(np.isfinite(grad).all())
+66:         np.testing.assert_array_equal(grad,0)
+67:         with self.assertRaises(ValueError):policy.forward(self.state.parameters,{'features':jnp.zeros((1,323)),'mask':jnp.ones((1,4),bool)})
+68: 
+69:     def test_three_seed_categorical_bandit_canary(self):
+70:         # A four-action numerical learning canary, not Pokemon strength evaluation.
+71:         @jax.jit
+72:         def step(logits,key):
+73:             mask=jnp.ones((128,4),bool);rows=jnp.tile(logits,(128,1));words=jax.random.bits(key,(128,3,2),dtype=jnp.uint32)
+74:             actions=policy.select(rows,mask,words);_,logs=policy.distribution(rows,mask)
+75:             old=logs[jnp.arange(128),actions];reward=(actions==3).astype(jnp.float32)
+76:             def objective(l):return policy.loss(jnp.tile(l,(128,1)),jnp.zeros(128),mask,actions,old,reward-.25,reward,jnp.ones(128,bool),entropy_coef=0)[0]
+77:             return logits-.3*jax.grad(objective)(logits)
+78:         for seed in (101,211,307):
+79:             logits=jnp.zeros(4)
+80:             for i in range(128):logits=step(logits,jax.random.fold_in(jax.random.key(seed),i))
+81:             self.assertGreater(float(policy.distribution(logits[None,:],jnp.ones((1,4),bool))[0][0,3]),.9)
+82: 
+83:     def test_collection_linkage_and_original_next_update(self):
+84:         candidate,buffer,final,_=self.result;learner.validate_buffer(buffer,final)
+85:         self.assertGreater(int(buffer.terminal.sum()),0);self.assertGreater(int((buffer.bootstrap!=0).sum()),-1)
+86:         # Checkpoint followed by the ORIGINAL next update, then fresh load/re-execution.
+87:         with tempfile.TemporaryDirectory() as d:
+88:             path=Path(d)/'state.json';checkpoint.save(path,candidate,101)
+89:             original=checkpoint.transaction(candidate,101)
+90:             resumed=checkpoint.transaction(checkpoint.load(path,101),101)
+91:             self.assertEqual(checkpoint.fingerprint(original),checkpoint.fingerprint(resumed))
+92:             self.assertGreater(int((original[1].bootstrap!=0).sum()),0)
+93:             self.assertEqual(int(original[0].step),4);self.assertEqual(int(original[0].next_game),64)
+94: 
+95:     def test_transaction_failure_preserves_original(self):
+96:         before=checkpoint.fingerprint(self.state)
+97:         for stage in ('collect','update'):
+98:             with self.assertRaises(RuntimeError):checkpoint.transaction(self.state,101,fault=stage)
+99:             self.assertEqual(checkpoint.fingerprint(self.state),before)
+100: 
+101:     def test_checkpoint_admission_corruption_and_atomicity(self):
+102:         with tempfile.TemporaryDirectory() as d:
+103:             path=Path(d)/'state.json';checkpoint.save(path,self.result[0],101);raw=path.read_bytes();doc=json.loads(raw)
+104:             with self.assertRaises(RuntimeError):checkpoint.save(path,self.state,101,interrupt=True)
+105:             self.assertEqual(path.read_bytes(),raw);self.assertTrue(path.with_name(path.name+'.partial').exists())
+106:             for mutation in ('checksum','sources','counter','runtime','dtype','seed','phase','negative_variance'):
+107:                 obj=copy.deepcopy(doc);b=obj['body']
+108:                 if mutation=='checksum':obj['sha256']='0'*64
+109:                 elif mutation=='sources':b['sources']={}
+110:                 elif mutation=='counter':b['counters'][2]+=1
+111:                 elif mutation=='runtime':b['runtime']['jax']='wrong'
+112:                 elif mutation=='dtype':b['tables'][0]['w']['dtype']='<f8'
+113:                 elif mutation=='seed':b['seed']+=1
+114:                 elif mutation=='phase':b['phase']='collecting'
+115:                 else:b['tables'][2]['vb']['hex']=np.array(-1,np.float32).tobytes().hex()
+116:                 if mutation!='checksum':obj['sha256']=digest(b)
+117:                 path.write_bytes(wire(obj))
+118:                 with self.assertRaises((ValueError,TypeError)):checkpoint.load(path,101)
+119:             path.write_text('{"body":0,"body":1,"sha256":""}')
+120:             with self.assertRaises(ValueError):checkpoint.load(path,101)
+121: 
+122:     def test_explicit_wait_gap_and_cutoff_targets(self):
+123:         values=jnp.array([[.1,.2],[.3,.4],[.5,.6]],jnp.float32)
+124:         valid=jnp.array([[1,1],[0,1],[1,0]],bool)
+125:         rewards,terminal,nxt,boot,adv,ret=learner.targets(values,valid,jnp.array([-1]),jnp.array([.7,.8]))
+126:         np.testing.assert_array_equal(nxt,[[4,3],[-1,-1],[-1,-1]])
+127:         np.testing.assert_allclose(boot,[[0,0],[0,.8],[.7,0]],atol=1e-7)
+128:         np.testing.assert_allclose(adv,[[.59,.58],[0,.4],[.2,0]],atol=1e-6)
+129:         self.assertEqual(int(terminal.sum()),0);self.assertEqual(float(rewards.sum()),0)
+130: 
+131: 
+132: if __name__=='__main__':unittest.main()
+133: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

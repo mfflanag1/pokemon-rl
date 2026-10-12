@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 101406,
+  "stop_reason": "end_turn",
+  "session_id": "93dcd0eb-34a7-4eae-8d6f-2f11599f6153",
+  "total_cost_usd": 0.90537,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 26205,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7625,
+    "output_tokens_details": {
+      "thinking_tokens": 5765
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26205,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 7625,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 26205,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 26205
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 7625,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 26205,
+      "webSearchRequests": 0,
+      "costUSD": 0.90537,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 5765,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: no blocking findings in reviewed scope; two low-severity items and one dependence worth verifying.** The integer mapping, boundary handling, and reference oracle are consistent with the contract as written.\n\n## Findings\n\n**1. Low \u2014 `reference.py:102-105` forced-row `rare_index` semantics diverge from `policy.py:21-23`.**\nFor one legal action the oracle returns `rare_index = only` with `rare_mass = 0`; the kernel's `parts` returns `rare_action = 1` (since `safe` is zeroed \u2192 `delta = 0 \u2192 d>=0` branch) and `rare = 0.5`. `test_reference.py:39-43` compares only `probabilities`/`logp` on these rows, so nothing fails, but the oracle is not a reference for the transport fields on forced/terminal rows. Either document that `rare_index`/`rare_mass` are undefined for `legal < 2`, or align. Not a law mismatch (sampler/log path for forced rows is mask-driven in both).\n\n**2. Low / verify \u2014 tie-branch gradient depends on JAX's `abs` JVP at 0.**\n`contract.json:10` (\"at equal logits use the d>=0 branch\"), `reference.py:136`, and `test_policy.py:50-58` (d=0, expected `[0.5,-0.5]`) all assume `d|d|/dd = +1` at `d=0`. This holds iff `lax.abs` lowers its JVP as `select(x>=0, g, -g)` (current JAX behaviour as I understand it) rather than `g*sign(x)`. If a JAX upgrade changes this, the policy silently moves to a zero-gradient tie branch while the oracle does not. Suggested verification: `jax.grad(jnp.abs)(jnp.float32(0.))` pinned in a test, or implement the branch explicitly (`jnp.where(delta>=0, -delta, delta)`) so the contract does not depend on library convention.\n\n**3. Info \u2014 oracle independence is partial.**\n`dyadic_threshold` (Fraction/`as_integer_ratio`) and `selected_logp_derivative` are genuinely independent of `threshold_words`/autodiff. `_rare_mass` (`reference.py:84-90`) mirrors the kernel's `exp(-|d|)/(1+exp(-|d|))` formula, so the FP32 value tests mainly check NumPy-vs-XLA `exp` agreement under tolerance, not an independent derivation of the mass. Acceptable for the stated scope; do not cite it as an independent check of the FP32 value itself.\n\n## Verified by reading (no issues)\n\n- **Integer mapping** (`policy.py:39-52`): `rare = m\u00b72^(e\u2212150)`, so `rare\u00b72^64 = m\u00b72^(e\u221286)`; for rare \u2208 [2^-24, 1/2], e \u2208 [103,126] \u21d2 shift \u2208 [17,40]. Branch `shift<32`: `high = m>>(32\u2212shift)` (shift count 1..15), `low = (m<<shift) mod 2^32` \u2014 correct low word. Branch `shift\u226532`: `high = m<<(shift\u221232)` (\u2264 24+8 bits, fits), `low=0`; at shift=40, m=2^23 gives exactly 2^63 for 0.5. Shift counts are clamped so no UB. `raw \u2264 0.5` always (tail \u2264 1), floor via `where(raw > FLOOR,\u2026)` gives exact zero derivative at/below floor, matching `reference.py:134`.\n- **Boundary semantics**: both sides choose rare iff `word < threshold` (`policy.py:58-59`, `reference.py:65`); equality \u2192 common. Test covers `{0, t\u22121, t, t+1, 2^64\u22121}` over all admitted exponents incl. 2^-24 and 0.5. Hand-checked `test_mirrored_tails` expectations `[0,1,1,1,1,0,-1]` / `[1,0,0,0,1,0,-1]` \u2014 correct.\n- **Log/gradient consistency**: sampler threshold, `log(r)`, `log1p(-r)` all consume the same FP32 `rare`; `fl(1\u2212r)` is only a rendering. Reference derivative `dr/dd = \u2213r(1\u2212r)`, `\u2202log r = dr/r`, `\u2202log(1\u2212r) = \u2212dr/(1\u2212r)`, logit1 = \u2212logit0 \u2014 correct. Remaining differences are ordinary FP32 rounding, not a law mismatch.\n- **Masking/leakage**: `safe` zeroing kills logit gradient on forced/padded rows; `masked_loss` sanitizes all inputs before arithmetic; dead rows yield action \u22121, logp 0, value 0; `act` host-checks legality.\n- **Checkpoint isolation**: distinct format string, provenance hashes `pokemon_binary/*.py` + contract dir, plan equality, canonical re-serialisation check, counter bounds (4\u00b7u \u2264 step \u2264 8\u00b7u consistent with 2\u20134 nonempty minibatches \u00d7 2 epochs).\n\n## Scope limitations\n\nCannot run tests. Did not review `pokemon_jax.engine`, `pokemon_fixed.math.adam_step`, `pokemon_jax_learner.collector`, or the sealed loss for parity claims. Claim that finished games yield an all-false mask (required for the `legal` check) is assumed, not verified. No assessment of the \"nominal 1/24 chance sampler\" remark.",
+  "ttft_ms": 77171,
+  "type": "result",
+  "duration_ms": 101467,
+  "uuid": "379a516f-c38f-4b78-a341-9ca348974211",
+  "ttft_stream_ms": 900,
+  "time_to_request_ms": 59,
+  "first_content_frame_ms": 901,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

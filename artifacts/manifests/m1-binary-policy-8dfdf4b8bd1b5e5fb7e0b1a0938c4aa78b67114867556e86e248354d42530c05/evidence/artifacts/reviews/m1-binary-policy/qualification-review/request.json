@@ -1,0 +1,17 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused review of the newly added short qualification campaign and completion sealer. The numerical policy/loop/checkpoint received a prior separate audit with no blockers. Check false-success paths, result/accounting/source/checkpoint/test evidence linkage, and claims exceeding this bounded 60-second CPU qualification. New binary policy is not two-hour requalified; full G2/G3 stay open and no strength claim. Find concrete issues only; you cannot execute tests. Verify the exact dyadic proof summary stays conditional on uniform words.",
+  "files_sha256": {
+    "python/pokemon_binary/qualification.py": "c75dc95f7528e3224c5839ef75da2a73e39082c8b2530036921655c30edb31ac",
+    "scripts/seal-binary-policy.py": "df18c6643e50a31c80af604dd8cad376de0976463c3f0c2debb6d86246a4e06a",
+    "python/pokemon_binary/checkpoint.py": "8cf139e3c31e4da20b7295cda4a5f8df2f6df179460ebaccf5c2d487f809f73d",
+    "contracts/binary-policy-v1/contract.json": "4e8dddf08fd264a5b881a3e81e1e688f987602512f0612f27f5df73433d9a230",
+    "contracts/binary-policy-v1/plan.json": "80f979c1ac97123c46fc33d42a05b0a1fa1787ec74218e71b7f796c47cc3e316",
+    "scripts/verify-fixed-loop.py": "963e2bbab5a06a5763902ca280ad45bca9e22f5c6a3133b891994f8ae8dd2513"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

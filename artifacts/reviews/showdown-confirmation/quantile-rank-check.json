@@ -1,0 +1,8 @@
+{
+  "production_samples": 30000,
+  "production_rank": 500,
+  "exact_expected_rank": 500,
+  "mismatches_for_other_sample_counts": 0,
+  "examples": [],
+  "scope": "Only the frozen production/sample settings are qualified; changed settings require a new version and review."
+}

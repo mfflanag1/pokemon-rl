@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 211647,
+  "stop_reason": "end_turn",
+  "session_id": "ad631064-3cef-4ce2-b36f-c245fe7b8e6f",
+  "total_cost_usd": 1.06887,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 16275,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 14867,
+    "output_tokens_details": {
+      "thinking_tokens": 13417
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16275,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 14867,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 16275,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 16275
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 14867,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 16275,
+      "webSearchRequests": 0,
+      "costUSD": 1.06887,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 13417,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (no blocking correctness bug in the covered paths; one consequential misclassification and one unverified server assumption).**\n\n## Findings\n\n**1. Medium \u2014 Transport loss during CLOSING is treated as a fatal protocol error (no reconnect).**\n`packages/showdown-bot/client.mjs:43` throws `'Connection is not active'` whenever `socket.readyState !== 1`. Between the server's close frame (readyState \u2192 2) and the `close` event, any timer-driven send in the sealed baseline \u2014 the decision timer (`:136`), keepalive (`:156`), or `/leave` on battleEnd (`:120`) \u2014 throws, and the baseline `fail()`s with that message. `packages/showdown-session/client.mjs:136` does not list it in `TRANSPORT`, so `connectionFailed` escalates to a fatal failure instead of scheduling a retry.\nSequence: active request, decision timer pending \u2192 server begins close handshake \u2192 timer fires \u2192 `send` throws \u2192 `fail('Connection is not active')` \u2192 session `failure`, `expected` never populated, battle abandoned. Same path if the socket drops between `updateuser` and the `ready` handler's `/join` (`:106`).\nVerification: mock socket with `readyState = 2` before dispatching `close`, with `decisionDelayMs: 0` and a live request; expect `reconnecting`, not `failure`.\n\n**2. Low/Medium \u2014 `|sentchoice|` binding relies on unverified server state hygiene.**\n`client.mjs:102` (baseline) marks the *current* request as committed on any `|sentchoice|`; the line carries no rqid. The session reports `committed: true` and never acts. Correct only if the pinned `room-battle` clears `player.request.choice` after `[Unavailable choice]` / `[Invalid choice]` and on every new `receiveRequest`. If a rejected-but-stored choice is echoed on rejoin, the bot sits silently on a live request until the battle timer forfeits. The supplied excerpt doesn't show this; please confirm in the pinned server, and add a loopback test: choose, receive `[Unavailable choice]`, drop, rejoin, assert a decision is emitted.\n\n**3. Low \u2014 One-frame request+sentchoice is a hard dependency.**\nWith `decisionDelayMs: 0`, a 0 ms timer and a subsequent I/O message are both macrotasks with no ordering guarantee. If request and sentchoice ever arrive in separate frames, the duplicate `/choose` yields a server `|error|` \u2192 fatal via baseline `:110`. Acceptable given the pinned server, but document it; no test exercises the split case (test 2 deliberately sends them together).\n\n**4. Low \u2014 Coverage gaps versus the review objective.**\nNo test for: (a) multiple pending rooms restored across one reconnect; (b) a second drop mid-recovery (history received, request not), exercising the `Math.max` merge at session `:140-141`; (c) forced-switch re-request with same turn after a committed restore (`rqid+1`, no `|turn|`). The code paths look correct by inspection (`:48` uses `<`, baseline accepts same-turn higher rqid), but these are the stated focus areas.\n\n**5. Informational.** `finished`, `decisions`, `retries` (session) and baseline `rooms` grow for the session lifetime; bounded only by battles played. Not a defect for single-battle-at-a-time use.\n\n## Scope limitations\n- No access to the pinned server `room-battle.ts`/`rooms.ts` beyond the described excerpt; findings 2\u20133 are assumption checks, not confirmed defects.\n- Cannot confirm whether the server auto-rejoins a reconnecting user (would double-`init` and trip `:29`); PS `joinRoom` is idempotent per connection, so likely fine.\n- Loopback fault tests were not observed.\n\n## Verdict\nFindings. Finding 1 is a concrete, reproducible gap in retry classification caused by the sealed baseline's `send` guard; the fix belongs in the session layer (treat `'Connection is not active'` as transport when `child.socket?.readyState !== 1`, or compare against the socket state at failure time). Duplicate-choice, rollback, admission, and budget logic otherwise hold under the stated one-frame server behavior.",
+  "ttft_ms": 190506,
+  "type": "result",
+  "duration_ms": 211692,
+  "uuid": "2ac8337c-13d9-4813-b4ca-69e713708521",
+  "ttft_stream_ms": 761,
+  "time_to_request_ms": 49,
+  "first_content_frame_ms": 761,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

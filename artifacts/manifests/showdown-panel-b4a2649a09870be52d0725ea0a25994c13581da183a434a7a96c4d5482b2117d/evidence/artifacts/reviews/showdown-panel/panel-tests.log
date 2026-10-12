@@ -1,0 +1,43 @@
+✔ fresh official development panel reproduces every input, action, outcome and interval (954.033834ms)
+✔ replay rejects an altered actor-visible request (126.860125ms)
+✔ replay rejects altered mechanics seeds and policy seats (236.662666ms)
+✔ recount rejects a changed score even if the aggregate is left intact (507.978666ms)
+✔ recomputed pair bootstrap rejects a changed interval (568.726666ms)
+✔ regenerated development-team admission rejects a changed team (113.664375ms)
+✔ public damage proxies respond to observed stages, known items and defender typing (144.90775ms)
+✔ only revealed moves/items/abilities enter opponent memory; switches reset stat stages (0.849166ms)
+✔ Illusion reveal preserves observed moves and stages; public statuses and hazards update (0.326708ms)
+✔ selective stage clears, Psych Up and swaps follow pinned public events (0.115833ms)
+✔ Illusion keeps earlier disguise knowledge separate from the current appearance (0.11575ms)
+✔ actual pinned Psych Up and Power Swap events update observed stages (12.634292ms)
+✔ entry cost is charged only when entering, and first-turn moves work for incoming mons (0.365042ms)
+✔ accuracy uses the 3-based combined stage and always-hit moves ignore stages (0.117833ms)
+✔ opponents honor masks, refrain from input mutation and choose legal Tera or forced switches (0.630792ms)
+✔ known ability immunity changes choice while unknown abilities stay explicit assumptions (0.159625ms)
+✔ the richer driver preserves the sealed baseline/random trajectories (13.555917ms)
+✔ both new policies have identical actual player inputs/actions under hidden-reserve mutation (2.076125ms)
+✔ exact 0 / 0.5 / 1 accounting, pair averaging, and edge order (2.583ms)
+✔ mirror=1 scores are still from a's point of view and the pair is the resampling unit (3.098208ms)
+✔ a single pair always yields a degenerate interval equal to its pair score (0.300167ms)
+✔ two pairs at 0 and 1 give the full [0, 1] interval at the default sample count (2.99675ms)
+✔ all edges use the same resampled pair indices in every replicate (1.780208ms)
+✔ nontrivial bootstrap matches an independent re-derivation of the documented spec (1.285ms)
+✔ mulberry32 seed 0 reproduces the frozen first 15 uint32 words (0.070917ms)
+✔ uniformIndex over the seed 0 stream reproduces the frozen indices for n = 3 (0.090208ms)
+✔ bootstrap known answer: pair scores [0, 0.5, 1], B = 5, seed 0 ⇒ interval [1/3, 2/3] (0.093208ms)
+✔ summaries are deterministic for a given seed and return fresh objects (22.420417ms)
+✔ mulberry32 is reproducible, uint32-valued, and seed-sensitive (0.366875ms)
+✔ uniformIndex rejects values at or above the unbiased limit (0.82625ms)
+✔ percentileInterval95 uses k = ceil(B/40): k-th smallest and k-th largest (0.695375ms)
+✔ records given in the reverse orientation are normalised with complemented scores (0.265583ms)
+✔ malformed grids are rejected (0.86975ms)
+✔ invalid options are rejected (0.388375ms)
+✔ inputs are not mutated (0.281167ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7357.65025

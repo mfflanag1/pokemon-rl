@@ -1,0 +1,23 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new restricted CPU JAX port, event-addressed chance sampler, fixed-family statistical checks and reference campaign for concrete correctness/leakage/provenance bugs. The immutable profile is a 1v1 fixed Rattata duel, not full Pokemon; full G2 remains open. Pinned Custom Game exposes exact opponent HP. Compare conditional events to pinned Showdown plus player-channel-only reducer. Check KO cancellation, padding, event identity, integer rounding, unbiased uint32 mapping, statistical sample/stopping/family validity, view/history timing and claims beyond evidence. Tests currently pass 7 engine tests and 6 reducer tests; first complete campaign is running. Please return actionable findings with severity; no recursive delegation.",
+  "files_sha256": {
+    "python/pokemon_jax/engine.py": "2ab8888de20af016a3bc38e908122721e684bf040ce3735b95f6d8b90a62a60d",
+    "python/pokemon_jax/chance.py": "d2b4191cb48fac8b47819db529ffb7deea622c9a352e8a5daf641d791af47454",
+    "python/pokemon_jax/statistics.py": "99a11fcee6a211e759dc256d7dbdb1eb80efdbcbd10d3ab83c6b8d4d3f390831",
+    "python/pokemon_jax/campaign.py": "a8a38ae89dac1f680f8cff5d41ba344da6e2849d3a330f0ef4d346b2ed558dd8",
+    "python/pokemon_jax/views.py": "0669e58742aee912bd07ee5604e4f4eb62cce3dfb948d8735561ad685e6d2989",
+    "packages/jax-slice/reference.mjs": "228903e55ea889228570e825421915355cd51babfe8192c46dd2905c5db4cb46",
+    "contracts/jax-slice-v1/campaign.json": "4fa9a3eca18bf893096a902efd88e434eef1967f0d2c7af97a88964335e093b5",
+    "contracts/jax-slice-v1/view.md": "ef911fd23fed3640614f0f1d51c7dc91e3f8dd99615e76c970ab69e6add27bc3",
+    "contracts/slice-v1/profile.json": "e2c87730f2c515af0383c4d049f9b4373a917ccf9c86db61cb8f65e9a46ddd7e",
+    "python/pokemon_slice/engine.py": "1e0436f01450eb2afad3951ceef97dcdfa676ba8f11e18d79b6133031c05668c",
+    "tests/jax-slice/test_engine.py": "73f0fe0503e857787ecab8d277d0c2f41e0db0707dda06cbc76e4c1afcdaffce",
+    "tests/jax-slice/test_views.py": "a2e5e238be9b6069839f5d6a32ded4b7340ed9b02d504fac341e17ba430799ea"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

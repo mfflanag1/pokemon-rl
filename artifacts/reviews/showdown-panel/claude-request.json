@@ -1,0 +1,19 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new public-information heuristic opponents and their evaluation driver. Focus on actor information leakage, consequential public-state/heuristic bugs, legal-action handling and whether the fixed paired protocol supports only descriptive development claims. The baseline/random candidate uses the sealed original reducer/policy unchanged, new policies use explicit species-based neutral-stat assumptions for unknown opponent stats, not true sets. These are deliberately approximate heuristic rankings, not exact damage or a mechanics port. Seven focused tests pass including actual hidden-reserve mutation and exact sealed baseline driver parity. Production has not run; no tuning after its results. Statistics are being independently implemented/reviewed separately. Identify concrete consequential errors; do not demand implementing all mechanics or make claims of testing. No recursive delegation.",
+  "files_sha256": {
+    "packages/showdown-panel/view.mjs": "b5c5dfd0bf7224f4ce2b88d74b70858c883b212adae24516f4dec9c20f8c40b9",
+    "packages/showdown-panel/policy.mjs": "e0d03e8b949405a3c766df093f45d745a44ae929b3d54a371a68ffeb0a5dc930",
+    "packages/showdown-panel/game.mjs": "74a743fdbc0a8bc959333c9b867ae929de2d86c837e76e67ff9110b125e1b02c",
+    "packages/showdown-panel/campaign.mjs": "9bd4f28b7ed711d580cccfc7213e70edb224c995640de460b5627827535f198a",
+    "packages/showdown-panel/plan.json": "c18f0bcc2105d5704efdf67db10c371085602a8bb9c6cefd7bb6b3c0e57dd2b6",
+    "tests/showdown-panel/policy.test.mjs": "590104966a0226e8bc255211a4f9660a8be8797c2b59beec388b2c794b8bf9a3",
+    "packages/reference-node/observations.mjs": "8f2cda2cc71d688a7232e3aa66671335b5324f50f1783f44052995241faa1e8d",
+    "packages/showdown-bot/protocol.mjs": "5203d70b9891b97c7e0b79d77efd10fcaa3b7d651f1f982f8151efd55cbceb54"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

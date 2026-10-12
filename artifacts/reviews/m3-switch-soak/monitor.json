@@ -1,0 +1,13 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Created automation in the app."
+    },
+    {
+      "type": "text",
+      "text": "{\"automationId\":\"finish-pok-mon-switching-qualification\",\"mode\":\"create\",\"status\":\"ACTIVE\"}"
+    }
+  ],
+  "isError": false
+}

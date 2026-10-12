@@ -1,0 +1,30 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "network-soak-schedule",
+  "task": "Implement a pure deterministic schedule helper for the supplied frozen plan. Own only packages/showdown-soak/schedule.mjs and tests/showdown-soak/schedule.test.mjs. You are not alone in the codebase; do not alter other files. Export planFor(smoke=false), gameSpec(index,smoke=false), expectedCoverage(smoke=false). planFor requires a boolean and returns a fresh deep copy of top-level plan with smoke overrides applied, smoke subobject removed, plus games=sessions*games_per_session; do not mutate JSON. gameSpec validates a safe integer in [0,games), returns exactly {index,session,within_session,pair,mirror,tactical_team,baseline_team,tactical_seat,challenger,scenario,file,names}. session=floor(index/games_per_session), within_session=index%games_per_session, pair=floor(index/2), mirror=index%2, tactical_team=pair*2+mirror, baseline_team=pair*2+1-mirror, tactical_seat mirror ? p2 : p1, challenger mirror ? baseline : tactical, scenario from faults whose fault_offsets plus session%2 equal within_session else normal, file game-NNNN.json.gz four-digit index, names {tactical:SoakTacSESSION,baseline:SoakBaseSESSION}. expectedCoverage returns exactly {games,sessions,rematches,faults,tactical_connections,baseline_connections,tactical_p1,tactical_p2,scenarios}; derive from full schedule, three faults per session, one new tactical connection per fault, one baseline connection per session. Node builtins only; import JSON via readFileSync(new URL(...)). Write substantive known-answer tests for production totals (1000 games,20 sessions,980 rematches,60 faults,80 tactical connections,20 baseline connections,500 each seat,940 normal and20 each fault); smoke8games2sessions6faults; pair mapping fixed teams/seats; all six fault-seat strata; no mutation; invalid input rejection. No recursive delegation or other work.",
+  "criteria": "Exact exports, keys, mappings and counts as specified. No dependency on simulator or network. Inputs immutable; safe input validation. Only two owned files changed. Node tests pass.",
+  "owned": [
+    "packages/showdown-soak/schedule.mjs",
+    "tests/showdown-soak/schedule.test.mjs"
+  ],
+  "checks": [
+    [
+      "node",
+      "--test",
+      "tests/showdown-soak/schedule.test.mjs"
+    ]
+  ],
+  "files_sha256": {
+    "packages/showdown-soak/plan.json": "5d5cd9a1bdba853ec9334c0575417cd974cde236da978fd8f37b8a6491b6af05"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "f8e88138d6a6d7b5e849439a1ffd0d9a9b07abd4",
+  "created_at": "2026-10-11T18:52:10.277758+00:00",
+  "test_run": false
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "case": "smoke-as-production",
+    "rejected": true,
+    "reason": "Run status/mode"
+  },
+  {
+    "case": "runtime-drift",
+    "rejected": true,
+    "reason": "Preregistration/source/runtime/reservation drift"
+  },
+  {
+    "case": "reserved-data",
+    "rejected": true,
+    "reason": "Scope flags"
+  },
+  {
+    "case": "missing-cell",
+    "rejected": true,
+    "reason": "Complete evaluation roster"
+  },
+  {
+    "case": "counter",
+    "rejected": true,
+    "reason": "Checkpoint counters"
+  },
+  {
+    "case": "checkpoint-next",
+    "rejected": true,
+    "reason": "Original-next-update fingerprints"
+  },
+  {
+    "case": "action-logp",
+    "rejected": true,
+    "reason": "Action/logp/value replay mismatch"
+  },
+  {
+    "case": "cutoff-as-win",
+    "rejected": true,
+    "reason": "Terminal protocol linkage"
+  },
+  {
+    "case": "view-prefix",
+    "rejected": true,
+    "reason": "Original view binding"
+  }
+]

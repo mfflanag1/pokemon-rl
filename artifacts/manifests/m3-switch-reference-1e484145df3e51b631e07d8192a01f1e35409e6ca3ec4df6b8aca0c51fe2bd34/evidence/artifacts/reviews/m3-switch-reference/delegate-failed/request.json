@@ -1,0 +1,38 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Implement a small independent Python semantic action codec for switch-reference-1. You own only python/pokemon_switch/contract.py and tests/switch-reference/test_contract.py. You are not alone: do not edit or revert other files, and do not delegate recursively. API mask(request) returns exactly four booleans; command(request,index) returns move 1/move 2/switch current-position; reject invalid or boolean indices and illegal actions. Read profile and contract. Handle stock Showdown wait requests ({wait:true}), singles move requests, and forceSwitch:[true]. Validate two own Pokemon with idents p1: A/B or p2: A/B, matching side.id, one active member, no duplicates; current request order may reverse. Reject unsupported Tera, trap, reviving, teamPreview, extra active dimensions, malformed PP or disabled flags, Struggle, unknown move IDs or move count. Use profile species/details to require the two allowed active move IDs in declared order; tolerate normal legitimate Showdown request metadata. Wait has empty mask; force switch only bench living. Tests must prove stable original identities after reorder, forced/wait handling, PP disable and zero, malformed/out-of-scope requests, and rejection before command generation. Standard library only; no dependency installation or external queries.",
+  "criteria": "Both files only; independent four-action codec with stable identities; meaningful negative tests; no changes to profile or existing sealed implementation; focused unittest passes.",
+  "owned": [
+    "tests/switch-reference/test_contract.py"
+  ],
+  "checks": [
+    [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/switch-reference",
+      "-p",
+      "test_contract.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/switch-v1/profile.json": "1b9b65d92b13c45f3425081a650e8750013f7d1d93dbbcbfd0012bb60a171df5",
+    "contracts/switch-v1/README.md": "79f900a1059c73d3d5fad50590d9db6ffe7743c7d0442cddb5ee0d5bf9e1dc36",
+    "python/pokemon_switch/__init__.py": "fc66041d697e7622c5273456f11593a5f1527f1024eb6c5db8c8ea76e731740c"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "9de0aa8da77c74c306e237a864199008ff133dce",
+  "created_at": "2026-10-11T15:15:35.536901+00:00",
+  "test_run": false
+}

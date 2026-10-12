@@ -1,0 +1,2 @@
+npm run bot:tactical -- --name TacticalBot --accept YourName [--url ws://127.0.0.1:8000/showdown/websocket]
+Optional --challenge NAME. Frozen tactical-v1 policy; at most three reconnects. Remote login reads SHOWDOWN_PASSWORD on each connection. No ladder searches.

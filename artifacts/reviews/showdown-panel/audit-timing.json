@@ -1,0 +1,9 @@
+{
+  "command": [
+    "node",
+    "packages/showdown-panel/audit.mjs",
+    "artifacts/runs/showdown-panel-v1"
+  ],
+  "elapsed_seconds": 22.14495737524703,
+  "exit_code": 0
+}

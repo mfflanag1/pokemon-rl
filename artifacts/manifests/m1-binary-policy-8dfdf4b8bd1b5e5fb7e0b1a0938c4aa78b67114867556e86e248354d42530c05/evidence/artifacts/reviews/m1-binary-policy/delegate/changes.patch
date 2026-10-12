@@ -1,0 +1,456 @@
+diff --git a/python/pokemon_binary/__pycache__/__init__.cpython-310.pyc b/python/pokemon_binary/__pycache__/__init__.cpython-310.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..c5257e2dc1e7a17deb773b817cd393901145bb6a
+GIT binary patch
+literal 297
+zcmYjMF;2uV5Ol5~Lb^Y=y~1&vz#Robh>iv#A+DgY9NXc{Io`-Nx(fw=;2C^{CtOR(
+z52$dUVWgeaXtguDFrOczgtxDcr|Z-|C-EOy5|^n$o=Bkwq_R7-n7v%BwGRfIR#@+a
+zj6{t>8HwW#NRnxSgXjmVJr+*kUPQSu?h!Z5EgrxcITkmI>~O@n0?GM1^0O51OW&{b
+zJ|uVAi+x863sP7bqKKMG4<V2ql(w{it?t2*vs#FiY?oDgqG?rDOIEUyRP2<on$&f-
+xVr|{g9r$e+gw%8x;|3fZ{?>VGobV&%+&B|CFNX1upQnUpt1qVK!*o}UegJurR!#r_
+
+literal 0
+HcmV?d00001
+
+diff --git a/python/pokemon_binary/__pycache__/reference.cpython-310.pyc b/python/pokemon_binary/__pycache__/reference.cpython-310.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..0eb47aef811a9d13f0145fea5a316742cbccaae6
+GIT binary patch
+literal 5103
+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
+Fe*vF<=Y{|P
+
+literal 0
+HcmV?d00001
+
+diff --git a/python/pokemon_binary/reference.py b/python/pokemon_binary/reference.py
+new file mode 100644
+index 0000000..b55fd77
+--- /dev/null
++++ b/python/pokemon_binary/reference.py
+@@ -0,0 +1,147 @@
++"""Independent scalar oracle for the binary-policy-v1 contract.
++
++This module deliberately uses Python integer arithmetic for sampling thresholds.
++It is a readable reference, not a vectorized implementation.
++"""
++
++from __future__ import annotations
++
++from fractions import Fraction
++from typing import NamedTuple
++
++import numpy as np
++
++
++MINIMUM_LEGAL_MASS = np.float32(2.0**-24)
++_UINT32_MAX = (1 << 32) - 1
++
++
++class ScalarPolicy(NamedTuple):
++    probabilities: np.ndarray
++    logp: np.ndarray
++    rare_index: int
++    rare_mass: np.float32
++
++
++def _checked_probability(probability: object) -> np.float32:
++    if not isinstance(probability, np.float32):
++        raise TypeError("probability must be an actual numpy.float32 scalar")
++    if not np.isfinite(probability):
++        raise ValueError("probability must be finite")
++    if probability < MINIMUM_LEGAL_MASS or probability > np.float32(0.5):
++        raise ValueError("probability must be in [2^-24, 0.5]")
++    return probability
++
++
++def dyadic_threshold(probability: object) -> tuple[int, int]:
++    """Return high/low uint32 words of the exact integer ``p * 2**64``."""
++
++    probability = _checked_probability(probability)
++    numerator, denominator = probability.item().as_integer_ratio()
++    scaled = Fraction(numerator, denominator) * (1 << 64)
++    if scaled.denominator != 1:  # Defensive: impossible for an in-range float32.
++        raise ValueError("probability does not have an integral 64-bit threshold")
++    threshold = scaled.numerator
++    return threshold >> 32, threshold & _UINT32_MAX
++
++
++def _checked_word(word: object, name: str) -> int:
++    # bool is intentionally excluded even though it subclasses int.
++    if type(word) is not int:
++        raise TypeError(f"{name} must be a Python int")
++    if not 0 <= word <= _UINT32_MAX:
++        raise ValueError(f"{name} must be in uint32 range")
++    return word
++
++
++def word_selects_rare(high: object, low: object, probability: object) -> bool:
++    """Whether the concatenated high/low word lies below the exact threshold."""
++
++    high = _checked_word(high, "high")
++    low = _checked_word(low, "low")
++    threshold_high, threshold_low = dyadic_threshold(probability)
++    word = (high << 32) | low
++    threshold = (threshold_high << 32) | threshold_low
++    return word < threshold
++
++
++def _checked_policy_inputs(
++    logits: object, mask: object
++) -> tuple[np.ndarray, np.ndarray]:
++    if not isinstance(logits, np.ndarray) or logits.dtype != np.float32:
++        raise TypeError("logits must be a numpy.ndarray with dtype float32")
++    if logits.shape != (2,):
++        raise ValueError("logits must have shape (2,)")
++    if not np.all(np.isfinite(logits)):
++        raise ValueError("logits must be finite")
++    if not isinstance(mask, np.ndarray) or mask.dtype != np.bool_:
++        raise TypeError("mask must be a numpy.ndarray with dtype bool")
++    if mask.shape != (2,):
++        raise ValueError("mask must have shape (2,)")
++    return logits, mask
++
++
++def _rare_mass(logits: np.ndarray) -> tuple[int, np.float32, np.float32]:
++    d = np.float32(logits[0] - logits[1])
++    rare_index = 1 if d >= np.float32(0.0) else 0
++    exponent = np.float32(-np.abs(d))
++    exp_value = np.exp(exponent, dtype=np.float32)
++    raw = np.float32(exp_value / np.float32(1.0 + exp_value))
++    return rare_index, np.maximum(raw, MINIMUM_LEGAL_MASS), raw
++
++
++def scalar_policy(logits: object, mask: object) -> ScalarPolicy:
++    """Evaluate the contract's clipped two-action policy for one state."""
++
++    logits, mask = _checked_policy_inputs(logits, mask)
++    legal = int(mask[0]) + int(mask[1])
++    probabilities = np.zeros(2, dtype=np.float32)
++    logp = np.zeros(2, dtype=np.float32)
++    if legal == 0:
++        return ScalarPolicy(probabilities, logp, -1, np.float32(0.0))
++    if legal == 1:
++        only = 0 if mask[0] else 1
++        probabilities[only] = np.float32(1.0)
++        return ScalarPolicy(probabilities, logp, only, np.float32(0.0))
++
++    rare_index, rare_mass, _ = _rare_mass(logits)
++    common_index = 1 - rare_index
++    probabilities[rare_index] = rare_mass
++    probabilities[common_index] = np.float32(np.float32(1.0) - rare_mass)
++    logp[rare_index] = np.log(rare_mass, dtype=np.float32)
++    logp[common_index] = np.log1p(np.float32(-rare_mass), dtype=np.float32)
++    return ScalarPolicy(probabilities, logp, rare_index, rare_mass)
++
++
++def selected_logp_derivative(
++    logits: object, mask: object, selected_action: object
++) -> np.ndarray:
++    """Analytic derivative of the selected action's log probability."""
++
++    logits, mask = _checked_policy_inputs(logits, mask)
++    if type(selected_action) is not int:
++        raise TypeError("selected_action must be a Python int")
++    if selected_action not in (0, 1):
++        raise ValueError("selected_action must be 0 or 1")
++    if not mask[selected_action]:
++        raise ValueError("selected_action must be legal")
++    if int(mask[0]) + int(mask[1]) < 2:
++        return np.zeros(2, dtype=np.float32)
++
++    d = np.float32(logits[0] - logits[1])
++    rare_index, rare_mass, raw = _rare_mass(logits)
++    # The clipping primitive is constant at equality with the floor as specified.
++    if raw <= MINIMUM_LEGAL_MASS:
++        return np.zeros(2, dtype=np.float32)
++    sign = np.float32(-1.0 if d >= np.float32(0.0) else 1.0)
++    dr_dd = np.float32(sign * rare_mass * np.float32(1.0 - rare_mass))
++    if selected_action == rare_index:
++        derivative_d = np.float32(dr_dd / rare_mass)
++    else:
++        derivative_d = np.float32(-dr_dd / np.float32(1.0 - rare_mass))
++    return np.array([derivative_d, -derivative_d], dtype=np.float32)
++
++
++# A descriptive alias useful to callers that phrase the operation in sampler terms.
++probability_to_threshold_words = dyadic_threshold
++
+diff --git a/tests/binary-policy/__pycache__/test_reference.cpython-310-pytest-9.0.1.pyc b/tests/binary-policy/__pycache__/test_reference.cpython-310-pytest-9.0.1.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..001f062cbcfb39a3bc176d33a01b07d97a47a6e3
+GIT binary patch
+literal 9420
+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
+WsBP%u#w-B&qJARe8Afet<o^H+a63By
+
+literal 0
+HcmV?d00001
+
+diff --git a/tests/binary-policy/test_reference.py b/tests/binary-policy/test_reference.py
+new file mode 100644
+index 0000000..237f2d0
+--- /dev/null
++++ b/tests/binary-policy/test_reference.py
+@@ -0,0 +1,117 @@
++from __future__ import annotations
++
++import numpy as np
++import pytest
++
++from pokemon_binary.reference import (
++    MINIMUM_LEGAL_MASS,
++    dyadic_threshold,
++    scalar_policy,
++    selected_logp_derivative,
++    word_selects_rare,
++)
++
++
++@pytest.mark.parametrize(
++    ("probability", "threshold"),
++    [
++        (np.float32(0.5), 1 << 63),
++        (np.float32(0.25), 1 << 62),
++        (np.float32(2.0**-24), 1 << 40),
++        (np.nextafter(np.float32(0.5), np.float32(0.0)), (1 << 63) - (1 << 39)),
++        (np.nextafter(MINIMUM_LEGAL_MASS, np.float32(1.0)), (1 << 40) + (1 << 17)),
++    ],
++)
++def test_exact_hand_computable_thresholds(probability, threshold):
++    high, low = dyadic_threshold(probability)
++    assert (high << 32) | low == threshold
++
++
++def test_word_boundary_is_strict_and_uses_high_low_order():
++    probability = np.float32(0.25)
++    threshold = 1 << 62
++    for word, expected in ((threshold - 1, True), (threshold, False), (threshold + 1, False)):
++        assert word_selects_rare(word >> 32, word & 0xFFFFFFFF, probability) is expected
++
++
++@pytest.mark.parametrize("bad", [0.25, np.float64(0.25), np.float32(np.nan), np.float32(0.0), np.float32(0.75)])
++def test_threshold_rejects_invalid_probability(bad):
++    with pytest.raises((TypeError, ValueError)):
++        dyadic_threshold(bad)
++
++
++@pytest.mark.parametrize("bad", [True, np.uint32(1), -1, 1 << 32])
++def test_word_rejects_non_python_int_or_out_of_range(bad):
++    with pytest.raises((TypeError, ValueError)):
++        word_selects_rare(bad, 0, np.float32(0.25))
++
++
++def test_equal_logits_designate_action_one_rare():
++    result = scalar_policy(np.array([3.0, 3.0], np.float32), np.array([True, True]))
++    assert result.rare_index == 1
++    np.testing.assert_array_equal(result.probabilities, np.array([0.5, 0.5], np.float32))
++    np.testing.assert_allclose(result.logp, np.log(np.array([0.5, 0.5], np.float32)), rtol=0, atol=0)
++
++
++def test_mirrored_extremes_clip_the_rare_action():
++    mask = np.array([True, True])
++    left = scalar_policy(np.array([-100.0, 100.0], np.float32), mask)
++    right = scalar_policy(np.array([100.0, -100.0], np.float32), mask)
++    assert left.rare_index == 0 and right.rare_index == 1
++    assert left.rare_mass == right.rare_mass == MINIMUM_LEGAL_MASS
++    np.testing.assert_array_equal(left.probabilities, right.probabilities[::-1])
++    assert np.all(np.isfinite(left.logp)) and np.all(np.isfinite(right.logp))
++
++
++def test_masks_have_contract_values():
++    logits = np.array([2.0, -1.0], np.float32)
++    one = scalar_policy(logits, np.array([False, True]))
++    terminal = scalar_policy(logits, np.array([False, False]))
++    np.testing.assert_array_equal(one.probabilities, np.array([0.0, 1.0], np.float32))
++    np.testing.assert_array_equal(one.logp, np.zeros(2, np.float32))
++    assert terminal.rare_index == -1
++    np.testing.assert_array_equal(terminal.probabilities, np.zeros(2, np.float32))
++
++
++@pytest.mark.parametrize(
++    ("logits", "mask"),
++    [
++        ([0.0, 1.0], np.array([True, True])),
++        (np.array([0.0, 1.0]), np.array([True, True])),
++        (np.array([0.0], np.float32), np.array([True, True])),
++        (np.array([0.0, np.nan], np.float32), np.array([True, True])),
++        (np.array([0.0, 1.0], np.float32), np.array([1, 1], np.int32)),
++    ],
++)
++def test_policy_checks_inputs(logits, mask):
++    with pytest.raises((TypeError, ValueError)):
++        scalar_policy(logits, mask)
++
++
++@pytest.mark.parametrize("selected", [0, 1])
++def test_derivative_has_expected_sign_sum_and_finite_difference(selected):
++    logits = np.array([0.7, -0.4], np.float32)
++    mask = np.array([True, True])
++    derivative = selected_logp_derivative(logits, mask, selected)
++    assert derivative[0] == -derivative[1]
++    assert bool(derivative[0] > 0) == (selected == 0)
++    epsilon = np.float32(1e-3)
++    plus = logits.copy()
++    minus = logits.copy()
++    plus[0] += epsilon
++    minus[0] -= epsilon
++    finite_difference = (
++        scalar_policy(plus, mask).logp[selected] - scalar_policy(minus, mask).logp[selected]
++    ) / np.float32(2.0 * epsilon)
++    np.testing.assert_allclose(derivative[0], finite_difference, rtol=2e-3, atol=2e-4)
++
++
++def test_derivative_equal_logits_convention_and_floor_are_explicit():
++    mask = np.array([True, True])
++    equal = np.array([0.0, 0.0], np.float32)
++    np.testing.assert_array_equal(
++        selected_logp_derivative(equal, mask, 1), np.array([-0.5, 0.5], np.float32)
++    )
++    clipped = np.array([100.0, -100.0], np.float32)
++    np.testing.assert_array_equal(selected_logp_derivative(clipped, mask, 0), np.zeros(2, np.float32))
++    np.testing.assert_array_equal(selected_logp_derivative(clipped, mask, 1), np.zeros(2, np.float32))

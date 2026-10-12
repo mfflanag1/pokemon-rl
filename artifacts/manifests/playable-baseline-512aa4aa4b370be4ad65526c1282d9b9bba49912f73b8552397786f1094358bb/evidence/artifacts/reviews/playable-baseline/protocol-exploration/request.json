@@ -1,0 +1,26 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "research",
+  "category": "showdown-protocol",
+  "task": "Inspect the pinned Showdown protocol/server source for a minimal Gen9 Random Battles singles bot. Identify client authentication, native websocket framing, challenge acceptance, rqid/noCancel handling, forced switch/revival, unknown trapping rejection and retry, local server startup without modifying upstream, and any deployment constraints. This is a read-only protocol research subtask: do not implement or run servers. Do not recursively delegate.",
+  "criteria": "Give precise primary source file/line or official URL evidence; distinguish supported facts from recommendations; identify minimal end-to-end tests and risky edge cases.",
+  "owned": [],
+  "checks": [],
+  "files_sha256": {
+    "vendor/pokemon-showdown/PROTOCOL.md": "399a301c48de30dabd849d5447c8a10cddca96feabbd3c1b4444239c20321dbd",
+    "vendor/pokemon-showdown/sim/SIM-PROTOCOL.md": "d4fea2abe286651a92aeecac54d9ac31b75ae6c2f0d5c667808e93e50a682f56",
+    "vendor/pokemon-showdown/server/sockets.ts": "0e0785187bf82821c0e8a3673d6f72459d7e841b9d5643001efc051a32883063",
+    "vendor/pokemon-showdown/server/rooms.ts": "6c5b05d16dd5df4131922f541460d60beda1760cc76d5b6b2014388c7b347b9d",
+    "vendor/pokemon-showdown/server/room-battle.ts": "b96e84d1add9f2c1ae20e447afd03c5db511ddd8e09abbf8d304b8206769e29c",
+    "vendor/pokemon-showdown/config/config-example.js": "05fb15ac3bf2bed1a45ba6cc30183efc37fbb5896bbb58329bcf457cbf9611e9"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "c259e2747098b0acb273669973731a206c8a6a1c",
+  "created_at": "2026-10-11T16:02:42.570334+00:00",
+  "test_run": false
+}

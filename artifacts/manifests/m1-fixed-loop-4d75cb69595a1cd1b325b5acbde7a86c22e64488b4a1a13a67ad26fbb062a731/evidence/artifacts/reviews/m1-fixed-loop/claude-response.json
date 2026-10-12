@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 189310,
+  "stop_reason": "end_turn",
+  "session_id": "f26b6164-1eac-4ced-9fca-8f2dbd7e24c6",
+  "total_cost_usd": 1.74726,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 50952,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 14564,
+    "output_tokens_details": {
+      "thinking_tokens": 13005
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 50952,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 14564,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 50952,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 50952
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 14564,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 50952,
+      "webSearchRequests": 0,
+      "costUSD": 1.74726,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 13005,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (no numerical correctness blocker located; one telemetry claim is unverified and likely vacuous).**\n\n## Findings\n\n**1. Medium\u2013High \u2014 `unexpected_compilations` counter may never observe real XLA compiles (python/pokemon_fixed/campaign.py:48-53, 190, 208, 230; tests/fixed-loop/test_campaign.py:31-35).**\n`CompileLog` only matches messages starting with `'Compiling jit('` on logger `jax._src.interpreters.pxla`. The real `jax_log_compiles` message in `pxla.lower_sharding_computation` is formatted as `\"Compiling %s with global shapes and types ...\"` with `fun_name` = the Python function name (e.g. `wrapped`), not `jit(wrapped)` \u2014 and in some JAX versions it reads `\"Compiling %s for with global shapes...\"`. If the prefix never matches, `baseline == count == 0` for the whole campaign and the \"no unexpected compilation\" guarantees in `profile`/`soak` are vacuously satisfied. The unit test only feeds synthetic strings it invented itself; it never asserts that a genuine first-call `jax.jit(f)(x)` increments the counter. **Verification:** add a positive control after warmup (fresh `jax.jit(lambda x: x+1)(jnp.ones(3))` must raise `count` by \u22651, then re-baseline), or match on the logger record rather than a string prefix. Until then the `unexpected_compilations: 0` fields should not be cited as evidence. (I cannot confirm the exact message for the installed JAX version from the packet.)\n\n**2. Medium \u2014 Profile-phase latency/throughput is measured with cProfile enabled (campaign.py:172-176).**\n`Aggregate.add` timings for the 1000 profile cycles are taken inside `profiler.enable()`, so `complete_cycle_seconds`, `decisions_per_cycle_second` and the latency quantiles in `profile.json` include cProfile's per-call host overhead. `host_profiler_enabled: True` is recorded, but nothing labels these numbers as profiler-inflated; the soak numbers (campaign.py:206) are the clean ones. **Verification:** either time outside the profiler, or add an explicit `timing_scope` caveat to the profile report.\n\n**3. Low \u2014 Checkpoint invariants rely on an engine-derived bound that is only implicit (checkpoint.py:108-109).**\n`4*updates \u2264 step \u2264 8*updates` and `256*updates \u2264 decisions` assume every game lasts \u22652 turns. That holds (max hit = `damage(crit, 100)` = 59 < 105, engine.py:40-42), but the bound is undocumented and `check_report` uses the weaker `128 \u2264 decisions` (loop.py:236), so a checkpoint written from a passing report could in principle fail to reload. Not reachable with the current engine; document or align the two bounds.\n\n**Reviewed and found consistent (no finding):** padding sanitisation before `forward` and inside `masked_loss` (loop.py:143; math.py:61-64), exact-zero padded cotangents (test_math.py:30, test_loop.py:84-89); Adam skipped and step not incremented on empty minibatches (loop.py:158-162); actor sees only pre-step `view_kernel` output, with `terminal/win` zero-checked (loop.py:109-116, 184); time-major `(4,128)` GAE scan is per (game, seat) column with `ended` masking next value/advantage, matching `_gae_kernel`; `next_index = i+128` and `max_link < 512`; both seats sampled from the same pre-step state with frozen parameters; RNG domains ENV/ACT/SHF disjoint and game ids monotone; counter bounds `8\u00b71e7 < 2\u00b3\u00b9`, `64\u00b71e7 < 2\u00b3\u00b2`; hex `<f4` round-trip with `state(runner)==b` is byte-exact; bias table threshold (step 17320 < 20000); bounded `Aggregate`; soak stop and accounting checks.\n\n## Scope limitations\n`Comparisons`, `checked_file`, `previous_checks`, `pokemon_slice`, `pokemon_learner.core`, and the predecessor report were not supplied. Tests were not executed; the \"10 tests passed\" claim is unverified here. Exact JAX version/log format unknown.\n\n## Verdict\nFindings. No blocker to the numerical/checkpoint claims from the supplied code; the compile-telemetry claim (Finding 1) needs a positive control before the soak report can cite it as evidence.",
+  "ttft_ms": 168809,
+  "type": "result",
+  "duration_ms": 189351,
+  "uuid": "e3f5e737-2938-45d0-8cbc-dfa9bcb5a06b",
+  "ttft_stream_ms": 1138,
+  "time_to_request_ms": 39,
+  "first_content_frame_ms": 1138,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

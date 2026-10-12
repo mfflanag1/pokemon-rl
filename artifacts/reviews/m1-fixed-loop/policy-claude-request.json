@@ -1,0 +1,14 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused follow-up on ONE new measured precision limitation; do not re-review the loop. A completed 7200-second soak passed its frozen engineering gates but recorded minimum exp(old_logp)=1.8081183252027788e-12. The inherited action_kernel in the supplied sealed model uses FP32 random.uniform and inverse CDF. Coordinator inspected installed JAX 0.11.2 _uniform (file hash/lines in audit JSON): it draws uint32, shifts right by 32-nmant, ORs float32 1.0 exponent bits, bitcasts and subtracts 1, with nmant=23. Thus conditional on uniform random words, u=k/2^23 for k=0..2^23-1, zero included. Coordinator exhaustively enumerated all 8388608 grid points: for a constructed first-action probability equal to the observed minimum, exactly u=0 selects it, finite-grid mass=2^-23, versus nominal softmax mass ~1.8e-12. We do NOT reconstruct a specific rare soak row or estimate its empirical frequency; no numerical NaN/fidelity gate failure is claimed. Proposed conclusion: fixed-shape engineering milestone remains passed under the unchanged sealed FP32 recipe, full G2/G3 and policy strength remain open, and action-tail sampling precision or an explicit probability-floor recipe needs an explicit decision before strength promotion. Is this reasoning sound and appropriately qualified? Identify any mathematical/semantic error or overclaim; do not propose changing the sealed recipe in this milestone. No tools/test execution available.",
+  "files_sha256": {
+    "python/pokemon_jax_learner/model.py": "2ce02061d9932bbbab287833be5302aa1f50d58dbdcb8344933045b033500b6e",
+    "artifacts/reviews/m1-fixed-loop/policy-grid-audit.json": "1762c50754bd8b76accce312f5883cce56e3d35f7a9006e81c2bb1efc4bcf3a7",
+    "artifacts/runs/m1-fixed-loop-v2/soak.json": "2f5da8f05c487e65662ebeec1efa07c9295a48441038fc65f707d9ee18a95467"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

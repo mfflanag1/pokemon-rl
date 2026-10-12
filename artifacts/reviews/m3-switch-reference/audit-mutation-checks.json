@@ -1,0 +1,27 @@
+[
+  {
+    "case": "wrong_submission_command",
+    "rejected": true,
+    "reason": "Submission codec"
+  },
+  {
+    "case": "golden_mask_drift",
+    "rejected": true,
+    "reason": "Complete golden-view roster"
+  },
+  {
+    "case": "counterfactual_visible_drift",
+    "rejected": true,
+    "reason": "Hidden initial invariance"
+  },
+  {
+    "case": "damage_threshold_erased",
+    "rejected": true,
+    "reason": "Ability effect"
+  },
+  {
+    "case": "privileged_actor_envelope",
+    "rejected": true,
+    "reason": "Expected a player-only R1 view, without audit/seed/opponent state"
+  }
+]

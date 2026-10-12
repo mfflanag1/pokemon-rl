@@ -1,0 +1,9 @@
+{
+  "changed": [],
+  "outside_owned": [],
+  "symlinks": [],
+  "output_hashes": {
+    "docs/PLAYABLE_BASELINE.md": "5ffda069e36ce593db0acc0b7cf8456586cb5c2162b2e4495db290edd50f9ded",
+    "showdown.pin.json": "8fed8a8c06edcdbf97ee7dcf05348de4417861417cdd4d8484fb2429ad6f6ea1"
+  }
+}

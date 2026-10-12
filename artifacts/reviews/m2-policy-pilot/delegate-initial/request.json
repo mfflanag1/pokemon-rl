@@ -1,0 +1,39 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Implement only python/pokemon_pilot/statistics.py. You are not alone: other files are being developed independently; do not edit or revert any other files. Implement paired_summary(candidate, baseline=None, *, seed, replicates, alpha): candidate numeric array [N,2], N>=2, each score exactly 0,.5,1, reject bool/nonfinite/invalid values. Baseline if present same shape. Average the two seats FIRST then bootstrap N complete pairs with replacement with numpy.random.default_rng(seed). Resample the same pair indexes for baseline; percentile interval at alpha/2 and 1-alpha/2 using numpy quantile linear method. Return JSON-native dict with pairs,games,wins,draws,losses,mean,lower,upper and improvement={mean,lower,upper} if baseline supplied. Require seed integer non-bool uint32, replicates positive integer non-bool, finite 0<alpha<1; all invalid inputs raise ValueError. Bound temporary index memory via chunks (e.g.64 replicates). Implement calibration(values,outcomes): nonempty 1D finite numeric equal lengths, outcomes in {0,.5,1}; return count,raw_mse,clipped_brier,out_of_range_rate,bins. Clip predictions only for Brier and 10 bins; bin=floor(clipped*10) capped9. Each bin dict index,count,mean_prediction,mean_outcome; empty means null. Raw MSE is NOT clipped. Pure functions, no file IO or JAX. Read the frozen tests and plan. Do not recursively delegate.",
+  "criteria": "Only owned statistics.py changes; all five frozen tests pass; correct pair clustering, paired differences, deterministic bootstrap and descriptive calibration; no new dependencies. Check command uses installed project Python but isolated source via PYTHONPATH.",
+  "owned": [
+    "python/pokemon_pilot/statistics.py"
+  ],
+  "checks": [
+    [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/pilot",
+      "-p",
+      "test_statistics.py"
+    ]
+  ],
+  "files_sha256": {
+    "python/pokemon_pilot/__init__.py": "fc20fc50fd6e4a3b7e1f53ec211af9c4b40b5edae3d845ae5db6b1033b8a0bd0",
+    "python/pokemon_pilot/statistics.py": "110897ed280a10e6a0938db3b0118ffddffa1666a4b0dc67c88b1aa33cbe35a3",
+    "tests/pilot/test_statistics.py": "f512f4bbe4c2a116e708d841768f0bd63e24ade299eb1a8e28666f695efca0f5",
+    "contracts/pilot-v1/plan.json": "bd4f10bd6fdb6fb96689860122c6a7875fd95642fdebf297de08fb10181c437c"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "5dc5164bbc04d63b7ec1ba2a10fef5a0eed97885",
+  "created_at": "2026-10-11T14:15:00.492459+00:00",
+  "test_run": false
+}

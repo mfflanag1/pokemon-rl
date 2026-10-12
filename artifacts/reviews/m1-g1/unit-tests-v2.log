@@ -1,0 +1,17 @@
+test_adam_first_step_and_nonfinite (test_core.MathTest.test_adam_first_step_and_nonfinite) ... ok
+test_analytic_gradients_against_central_difference (test_core.MathTest.test_analytic_gradients_against_central_difference) ... ok
+test_bad_linkage_and_terminal_bootstrap_reject (test_core.MathTest.test_bad_linkage_and_terminal_bootstrap_reject) ... ok
+test_clipping_both_advantage_signs (test_core.MathTest.test_clipping_both_advantage_signs) ... ok
+test_hand_gae_interleaved_players_terminal_and_cut (test_core.MathTest.test_hand_gae_interleaved_players_terminal_and_cut) ... ok
+test_masked_probabilities_and_nonfinite_rejection (test_core.MathTest.test_masked_probabilities_and_nonfinite_rejection) ... ok
+test_same_policy_ratios_and_hand_log_ratio (test_core.MathTest.test_same_policy_ratios_and_hand_log_ratio) ... ok
+test_single_legal_action_and_multi_candidate_forced_decision (test_core.MathTest.test_single_legal_action_and_multi_candidate_forced_decision) ... ok
+test_atomic_partial_checksum_runtime_and_stale_buffer (test_resume.ResumeTest.test_atomic_partial_checksum_runtime_and_stale_buffer) ... ok
+test_boundary_next_samples_and_updates_bit_identical_both_tasks (test_resume.ResumeTest.test_boundary_next_samples_and_updates_bit_identical_both_tasks) ... ok
+test_collection_and_update_crash_rollback_accounting (test_resume.ResumeTest.test_collection_and_update_crash_rollback_accounting) ... ok
+test_toy_hidden_reward_has_no_policy_input_path (test_resume.ResumeTest.test_toy_hidden_reward_has_no_policy_input_path) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.072s
+
+OK

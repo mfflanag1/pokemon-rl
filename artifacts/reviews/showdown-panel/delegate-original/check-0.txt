@@ -1,0 +1,48 @@
+✔ exact 0 / 0.5 / 1 accounting, pair averaging, and edge order (2.249791ms)
+✔ mirror=1 scores are still from a's point of view and the pair is the resampling unit (3.036291ms)
+✔ a single pair always yields a degenerate interval equal to its pair score (0.272541ms)
+✔ two pairs at 0 and 1 give the full [0, 1] interval at the default sample count (2.85775ms)
+✔ all edges use the same resampled pair indices in every replicate (1.649334ms)
+✔ nontrivial bootstrap matches an independent re-derivation of the documented spec (1.223083ms)
+✔ summaries are deterministic for a given seed and return fresh objects (22.358083ms)
+✔ mulberry32 is reproducible, uint32-valued, and seed-sensitive (0.525667ms)
+✔ uniformIndex rejects values at or above the unbiased limit (0.88975ms)
+✔ percentileInterval95 uses k = ceil(B/40): k-th smallest and k-th largest (0.972833ms)
+✔ records given in the reverse orientation are normalised with complemented scores (0.332708ms)
+✔ malformed grids are rejected (0.88625ms)
+✖ invalid options are rejected (1.145125ms)
+✔ inputs are not mutated (0.26275ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 13
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 117.729792
+
+✖ failing tests:
+
+test at tests/showdown-panel/statistics.test.mjs:439:1
+✖ invalid options are rejected (1.145125ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /duplicate policy id/. Input:
+  
+  'policyIds contains duplicate id "p"'
+  
+      at Object.<anonymous> (file:///Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261011-131150-d03d0086/workspace/tests/showdown-panel/statistics.test.mjs:52:14)
+      at expectedException (node:assert:553:17)
+      at expectsError (node:assert:678:21)
+      at strict.throws (node:assert:734:3)
+      at expectRejected (file:///Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261011-131150-d03d0086/workspace/tests/showdown-panel/statistics.test.mjs:48:10)
+      at TestContext.<anonymous> (file:///Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261011-131150-d03d0086/workspace/tests/showdown-panel/statistics.test.mjs:451:3)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'policyIds contains duplicate id "p"',
+    expected: /duplicate policy id/,
+    operator: 'match',
+    diff: 'simple'
+  }

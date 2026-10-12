@@ -1,0 +1,1 @@
+Preflight failure before admission or sampling: integer-only legacy JSON parser rejected family_alpha=0.01. Fixed campaign-plan reader to use the float-capable report format. No thresholds or seeds changed.

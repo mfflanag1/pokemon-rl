@@ -1,0 +1,34 @@
+{
+  "claude-": {
+    "packages/showdown-panel/view.mjs": {
+      "reviewed": "b5c5dfd0bf7224f4ce2b88d74b70858c883b212adae24516f4dec9c20f8c40b9",
+      "current": "a75e750ff3b880a9c1b69eecf57fcfd4a659551179b0470ba6ea5ba260505f2f"
+    },
+    "packages/showdown-panel/policy.mjs": {
+      "reviewed": "e0d03e8b949405a3c766df093f45d745a44ae929b3d54a371a68ffeb0a5dc930",
+      "current": "fdb816cd87c3ee08520e8b2706a3915d6596123d7437e10d08100e45ec730362"
+    },
+    "tests/showdown-panel/policy.test.mjs": {
+      "reviewed": "590104966a0226e8bc255211a4f9660a8be8797c2b59beec388b2c794b8bf9a3",
+      "current": "05111e7618df3ca6f58a5301d4fc10272e901a0ab32798f536c2a6351966a520"
+    }
+  },
+  "pipeline-": {
+    "packages/showdown-panel/audit.mjs": {
+      "reviewed": "eeeb1bfe86af29b2ae82920081486dd76a714d5df2afe0776127e34c6151340b",
+      "current": "c125ae8eec1fdcb9e4368729ff4ecec63a8d0a65144cd79856bd3274e93d628f"
+    },
+    "packages/showdown-panel/view.mjs": {
+      "reviewed": "ce17caebeb6a4d82ad58ee93d315463e30b1f78d918c27456705ddfc61f1a347",
+      "current": "a75e750ff3b880a9c1b69eecf57fcfd4a659551179b0470ba6ea5ba260505f2f"
+    },
+    "scripts/seal-showdown-panel.py": {
+      "reviewed": "56ab149949ed029017d02ef170e69a9e73434daaebfcdc0a9c24342cefeaf025",
+      "current": "abdc632bab8a2668cd9a89cbdeb33924f5a8e0a093aaef84bb4162fdaab6b0b0"
+    },
+    "tests/showdown-panel/policy.test.mjs": {
+      "reviewed": "b275dd4950e850b78d360f96f51c91a6377fcabc696b364d1127832736d14c83",
+      "current": "05111e7618df3ca6f58a5301d4fc10272e901a0ab32798f536c2a6351966a520"
+    }
+  }
+}

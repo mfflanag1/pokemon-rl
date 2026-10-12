@@ -1,0 +1,31 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "benchmark-statistics",
+  "task": "Repair the previously rejected statistics implementation. Only owned files may change; you are not alone, do not revert others or recursively delegate. Change duplicate policy ID validation message to satisfy the existing test /duplicate policy id/. Add a literal known-answer test supplementing the runtime oracle, without changing statistics algorithms or weakening tests. Independently computed by coordinator Python unsigned-integer arithmetic for mulberry32 seed 0: first 15 words [1144304738,1416247,958946056,627933444,2007157716,2340967985,2642484575,2787370982,1958536065,2496316458,1057668038,420269829,3880206403,1753221639,3093645806]. Indices modulo 3: [2,1,1,0,0,2,2,2,0,0,2,0,1,0,2]; all accepted by rejection sampler. For 3 pair scores [0,0.5,1], B=5, seed0, means [2/3,1/3,2/3,1/3,1/2], interval [1/3,2/3]. Freeze these literal words/indices/expected interval into a test, with records containing both mirrors for each pair. Do not compute the expected values with another bootstrap implementation. Validate scope, and report what was changed.",
+  "criteria": "All existing tests and literal uint32/index/bootstrap fixtures pass; algorithm unchanged; only the two owned files changed.",
+  "owned": [
+    "packages/showdown-panel/statistics.mjs",
+    "tests/showdown-panel/statistics.test.mjs"
+  ],
+  "checks": [
+    [
+      "node",
+      "--test",
+      "tests/showdown-panel/statistics.test.mjs"
+    ]
+  ],
+  "files_sha256": {
+    "packages/showdown-panel/statistics.mjs": "42ba04412435dfa2f28640569d8be8826b1ad4e89b75c5439287b94e3550e9c8",
+    "tests/showdown-panel/statistics.test.mjs": "565388fc0f1ed9e32ee5e2e3b5965973f4bcaf34bd9b983384ffd5bd74cf1923"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "7e99301e69394fc141e85271ba5cbd4b7eae427c",
+  "created_at": "2026-10-11T17:25:22.275176+00:00",
+  "test_run": false
+}

@@ -1,0 +1,7 @@
+/vendor/pokemon-showdown/
+/artifacts/runs/
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

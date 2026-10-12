@@ -1,0 +1,22 @@
+[
+  {
+    "name": "actor-view",
+    "rejected": true,
+    "reason": "Actor input/action differs from player-visible transport\n+ actual - expected\n... Skipped lines\n\n  {\n    actor_input: {\n      request: {\n        active: [\n          {\n...\n        tier: 'gen9botbaselinedevelopment',\n+       turn: 2,\n-       turn: 1,\n        winner: null\n      }\n    },\n    choice: 'move 1',\n    generation: 2,\n"
+  },
+  {
+    "name": "accepted-choice-replay",
+    "rejected": true,
+    "reason": "Duplicate or accepted pending choice replayed"
+  },
+  {
+    "name": "terminal-result",
+    "rejected": true,
+    "reason": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Wrong'\n- 'RecoveryA'\n"
+  },
+  {
+    "name": "fault-inventory",
+    "rejected": true,
+    "reason": "Expected values to be strictly equal:\n\n1 !== 0\n"
+  }
+]

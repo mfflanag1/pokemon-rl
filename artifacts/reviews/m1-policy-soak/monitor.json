@@ -1,0 +1,6 @@
+{
+  "automation_id": "finish-pok-mon-policy-chance-qualification",
+  "interval_minutes": 15,
+  "scope": "Finish the already-running qualification, seal verified evidence, and disable after outcome.",
+  "status_at_launch": "ACTIVE"
+}

@@ -1,0 +1,498 @@
+{
+  "source": "data/random-battles/gen9/sets.json",
+  "source_sha256": "2bbb7c374811791207c159d4537f586bc28be26829c20dc144bd16911a27dc09",
+  "entry_count": 509,
+  "examples": {
+    "alcremie": {
+      "level": 90,
+      "sets": [
+        {
+          "role": "Bulky Setup",
+          "movepool": [
+            "Alluring Voice",
+            "Calm Mind",
+            "Psyshock",
+            "Recover"
+          ],
+          "abilities": [
+            "Aroma Veil"
+          ],
+          "teraTypes": [
+            "Poison",
+            "Steel"
+          ]
+        },
+        {
+          "role": "Tera Blast user",
+          "movepool": [
+            "Alluring Voice",
+            "Calm Mind",
+            "Recover",
+            "Tera Blast"
+          ],
+          "abilities": [
+            "Aroma Veil"
+          ],
+          "teraTypes": [
+            "Ground"
+          ]
+        }
+      ]
+    },
+    "pikachu": {
+      "level": 93,
+      "sets": [
+        {
+          "role": "Fast Attacker",
+          "movepool": [
+            "Fake Out",
+            "Knock Off",
+            "Play Rough",
+            "Surf",
+            "Volt Switch",
+            "Volt Tackle"
+          ],
+          "abilities": [
+            "Lightning Rod"
+          ],
+          "teraTypes": [
+            "Water"
+          ]
+        }
+      ]
+    },
+    "basculin": {
+      "level": 86,
+      "sets": [
+        {
+          "role": "Wallbreaker",
+          "movepool": [
+            "Aqua Jet",
+            "Double-Edge",
+            "Flip Turn",
+            "Wave Crash"
+          ],
+          "abilities": [
+            "Adaptability"
+          ],
+          "teraTypes": [
+            "Water"
+          ]
+        }
+      ]
+    },
+    "greninja": {
+      "level": 80,
+      "sets": [
+        {
+          "role": "Fast Attacker",
+          "movepool": [
+            "Dark Pulse",
+            "Grass Knot",
+            "Gunk Shot",
+            "Hydro Pump",
+            "Ice Beam",
+            "Toxic Spikes",
+            "U-turn"
+          ],
+          "abilities": [
+            "Protean"
+          ],
+          "teraTypes": [
+            "Dark",
+            "Poison",
+            "Water"
+          ]
+        },
+        {
+          "role": "Wallbreaker",
+          "movepool": [
+            "Grass Knot",
+            "Gunk Shot",
+            "Hydro Pump",
+            "Ice Beam",
+            "Spikes",
+            "U-turn"
+          ],
+          "abilities": [
+            "Protean"
+          ],
+          "teraTypes": [
+            "Poison"
+          ]
+        }
+      ]
+    },
+    "greninjabond": {
+      "level": 80,
+      "sets": [
+        {
+          "role": "Fast Attacker",
+          "movepool": [
+            "Dark Pulse",
+            "Gunk Shot",
+            "Hydro Pump",
+            "Ice Beam"
+          ],
+          "abilities": [
+            "Battle Bond"
+          ],
+          "teraTypes": [
+            "Poison",
+            "Water"
+          ]
+        }
+      ]
+    },
+    "zacian": {
+      "level": 69,
+      "sets": [
+        {
+          "role": "Fast Attacker",
+          "movepool": [
+            "Close Combat",
+            "Crunch",
+            "Play Rough",
+            "Psychic Fangs",
+            "Swords Dance",
+            "Wild Charge"
+          ],
+          "abilities": [
+            "Intrepid Sword"
+          ],
+          "teraTypes": [
+            "Fighting"
+          ]
+        }
+      ]
+    },
+    "zaciancrowned": {
+      "level": 64,
+      "sets": [
+        {
+          "role": "Setup Sweeper",
+          "movepool": [
+            "Behemoth Blade",
+            "Close Combat",
+            "Play Rough",
+            "Swords Dance"
+          ],
+          "abilities": [
+            "Intrepid Sword"
+          ],
+          "teraTypes": [
+            "Fighting"
+          ]
+        }
+      ]
+    },
+    "zoroark": {
+      "level": 83,
+      "sets": [
+        {
+          "role": "Wallbreaker",
+          "movepool": [
+            "Dark Pulse",
+            "Flamethrower",
+            "Focus Blast",
+            "Psychic",
+            "Sludge Bomb",
+            "Trick",
+            "U-turn"
+          ],
+          "abilities": [
+            "Illusion"
+          ],
+          "teraTypes": [
+            "Poison"
+          ]
+        },
+        {
+          "role": "Setup Sweeper",
+          "movepool": [
+            "Dark Pulse",
+            "Encore",
+            "Focus Blast",
+            "Nasty Plot",
+            "Psychic",
+            "Sludge Bomb"
+          ],
+          "abilities": [
+            "Illusion"
+          ],
+          "teraTypes": [
+            "Poison"
+          ]
+        }
+      ]
+    },
+    "terapagos": {
+      "level": 77,
+      "sets": [
+        {
+          "role": "Setup Sweeper",
+          "movepool": [
+            "Calm Mind",
+            "Dark Pulse",
+            "Rapid Spin",
+            "Rest",
+            "Tera Starstorm"
+          ],
+          "abilities": [
+            "Tera Shift"
+          ],
+          "teraTypes": [
+            "Stellar"
+          ]
+        },
+        {
+          "role": "Fast Bulky Setup",
+          "movepool": [
+            "Calm Mind",
+            "Earth Power",
+            "Rapid Spin",
+            "Rest",
+            "Tera Starstorm"
+          ],
+          "abilities": [
+            "Tera Shift"
+          ],
+          "teraTypes": [
+            "Stellar"
+          ]
+        }
+      ]
+    },
+    "ogerpon": {
+      "level": 80,
+      "sets": [
+        {
+          "role": "Fast Support",
+          "movepool": [
+            "Encore",
+            "Ivy Cudgel",
+            "Knock Off",
+            "Spikes",
+            "Superpower",
+            "Synthesis",
+            "U-turn"
+          ],
+          "abilities": [
+            "Defiant"
+          ],
+          "teraTypes": [
+            "Grass"
+          ]
+        },
+        {
+          "role": "Setup Sweeper",
+          "movepool": [
+            "Ivy Cudgel",
+            "Knock Off",
+            "Superpower",
+            "Swords Dance"
+          ],
+          "abilities": [
+            "Defiant"
+          ],
+          "teraTypes": [
+            "Grass"
+          ]
+        }
+      ]
+    },
+    "palafin": {
+      "level": 77,
+      "sets": [
+        {
+          "role": "Wallbreaker",
+          "movepool": [
+            "Close Combat",
+            "Flip Turn",
+            "Jet Punch",
+            "Wave Crash"
+          ],
+          "abilities": [
+            "Zero to Hero"
+          ],
+          "teraTypes": [
+            "Fighting",
+            "Water"
+          ]
+        },
+        {
+          "role": "Bulky Setup",
+          "movepool": [
+            "Bulk Up",
+            "Drain Punch",
+            "Ice Punch",
+            "Jet Punch",
+            "Wave Crash"
+          ],
+          "abilities": [
+            "Zero to Hero"
+          ],
+          "teraTypes": [
+            "Dragon",
+            "Steel"
+          ]
+        }
+      ]
+    },
+    "mimikyu": {
+      "level": 79,
+      "sets": [
+        {
+          "role": "Setup Sweeper",
+          "movepool": [
+            "Drain Punch",
+            "Play Rough",
+            "Shadow Sneak",
+            "Swords Dance"
+          ],
+          "abilities": [
+            "Disguise"
+          ],
+          "teraTypes": [
+            "Fairy",
+            "Fighting"
+          ]
+        },
+        {
+          "role": "Fast Bulky Setup",
+          "movepool": [
+            "Play Rough",
+            "Shadow Claw",
+            "Shadow Sneak",
+            "Swords Dance"
+          ],
+          "abilities": [
+            "Disguise"
+          ],
+          "teraTypes": [
+            "Fairy",
+            "Ghost"
+          ]
+        }
+      ]
+    },
+    "maushold": {
+      "level": 76,
+      "sets": [
+        {
+          "role": "Setup Sweeper",
+          "movepool": [
+            "Bite",
+            "Encore",
+            "Population Bomb",
+            "Tidy Up"
+          ],
+          "abilities": [
+            "Technician"
+          ],
+          "teraTypes": [
+            "Ghost",
+            "Normal"
+          ]
+        }
+      ]
+    },
+    "toxtricity": {
+      "level": 82,
+      "sets": [
+        {
+          "role": "Fast Attacker",
+          "movepool": [
+            "Boomburst",
+            "Overdrive",
+            "Sludge Wave",
+            "Volt Switch"
+          ],
+          "abilities": [
+            "Punk Rock"
+          ],
+          "teraTypes": [
+            "Normal"
+          ]
+        },
+        {
+          "role": "Setup Sweeper",
+          "movepool": [
+            "Boomburst",
+            "Gunk Shot",
+            "Overdrive",
+            "Shift Gear"
+          ],
+          "abilities": [
+            "Punk Rock"
+          ],
+          "teraTypes": [
+            "Normal"
+          ]
+        }
+      ]
+    },
+    "meowstic": {
+      "level": 89,
+      "sets": [
+        {
+          "role": "Bulky Support",
+          "movepool": [
+            "Alluring Voice",
+            "Light Screen",
+            "Psychic Noise",
+            "Reflect",
+            "Thunder Wave",
+            "Yawn"
+          ],
+          "abilities": [
+            "Prankster"
+          ],
+          "teraTypes": [
+            "Fairy"
+          ]
+        }
+      ]
+    },
+    "gastrodon": {
+      "level": 86,
+      "sets": [
+        {
+          "role": "Bulky Attacker",
+          "movepool": [
+            "Clear Smog",
+            "Earthquake",
+            "Ice Beam",
+            "Recover",
+            "Spikes",
+            "Stealth Rock",
+            "Surf"
+          ],
+          "abilities": [
+            "Storm Drain"
+          ],
+          "teraTypes": [
+            "Poison",
+            "Steel"
+          ]
+        },
+        {
+          "role": "Bulky Support",
+          "movepool": [
+            "Earthquake",
+            "Recover",
+            "Sludge Bomb",
+            "Stealth Rock",
+            "Surf"
+          ],
+          "abilities": [
+            "Storm Drain"
+          ],
+          "teraTypes": [
+            "Poison"
+          ]
+        }
+      ]
+    }
+  }
+}

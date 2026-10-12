@@ -1,0 +1,8 @@
+{
+  "verdict": "unverified",
+  "evidence": "evidence-a36cc04aff0448f4b2d6acf1b0ddaddb.md",
+  "evidence_sha256": "420dfd4f48c687d8f1816d1b1f4ecf01f89a9c3e610f0660d985076a1fcd517a",
+  "artifact_sha256": "9d76f2c51179aca36676e03577608aaa26a4cc936f60b6ab8b8fdf581e63bf20",
+  "rework_minutes": 2.0,
+  "recorded_at": "2026-10-11T20:36:48.460000+00:00"
+}

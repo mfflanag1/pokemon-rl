@@ -1,0 +1,607 @@
+Task and review objective:
+Review bounded in-memory WebSocket recovery for the stateless Showdown heuristic. Focus on duplicate accepted choices, stale-frame/timer races, recovering multiple pending rooms, request/history admission, and finite retries/fatal errors. The sealed baseline cannot be modified: fixes belong only in new showdown-session files. Twelve mocked failure/recovery tests pass; real loopback fault tests are running. The pinned server rooms.ts onConnect sends init+complete player-specific log first, then game.onConnect sends request plus sentchoice in ONE frame if a choice was accepted (see supplied excerpt). Do not require a new turn for forced-switch/re-request. Identify actionable consequential defects with concrete event sequences; do not claim executed tests. No recursive delegation.
+
+
+FILE packages/showdown-session/client.mjs
+1: import {EventEmitter} from 'node:events';
+2: import {ShowdownBot} from '../showdown-bot/client.mjs';
+3: import {parseFrame} from '../showdown-bot/protocol.mjs';
+4: 
+5: // These are the sealed v1 client's transport failures. Protocol/authentication
+6: // errors must remain fatal rather than repeatedly logging in or submitting moves.
+7: const TRANSPORT = new Set(['WebSocket transport error',
+8:   'Disconnected; no automatic replay of pending choices', 'Server stopped responding', 'Login timed out']);
+9: 
+10: class SessionConnection extends ShowdownBot {
+11:   constructor(options, session, expected) {
+12:     super(options);
+13:     this.session = session;
+14:     this.expected = expected;
+15:     this.initialized = new Set();
+16:   }
+17:   acceptChallenge(name, format) {
+18:     if (!this.expected.size) super.acceptChallenge(name, format);
+19:   }
+20:   async receive(frame) {
+21:     if (this.stopped || this.failed) return;
+22:     const lines = parseFrame(frame), touched = new Set();
+23:     for (const {room: id, line} of lines) {
+24:       if (!id.startsWith('battle-')) continue;
+25:       if (line.startsWith('|noinit|') || line === '|deinit' && this.expected.has(id)) {
+26:         throw new Error('Battle recovery unavailable');
+27:       }
+28:       if (line === '|init|battle') {
+29:         if (this.initialized.has(id)) throw new Error('Repeated battle initialization');
+30:         if (this.initialized.size >= 64) throw new Error('Session room budget exceeded');
+31:         this.initialized.add(id);
+32:       }
+33:       if (!this.initialized.has(id)) throw new Error('Battle message preceded history initialization');
+34:       if (line.startsWith('|request|') && line !== '|request|null') {
+35:         const request = JSON.parse(line.slice(9)), before = this.expected.get(id);
+36:         if (before && (request.rqid < before.rqid || request.side && before.seat && request.side.id !== before.seat)) {
+37:           throw new Error('Recovered request moved backwards or changed seat');
+38:         }
+39:         touched.add(id);
+40:       }
+41:       if (line.startsWith('|win|') || line === '|tie') touched.add(id);
+42:     }
+43:     await super.receive(frame);
+44:     if (this.stopped || this.failed) return;
+45:     for (const id of touched) {
+46:       const before = this.expected.get(id), room = this.rooms.get(id);
+47:       if (!before || !room) continue;
+48:       if (room.state.turn < before.turn) throw new Error('Recovered public history moved backwards');
+49:       this.expected.delete(id);
+50:       this.session.emit('restored', {room: id, rqid: room.lastRqid, turn: room.state.turn,
+51:         committed: Boolean(room.request && room.sent.has(JSON.stringify(room.request))), ended: room.done});
+52:     }
+53:     this.session.maybeReady(this);
+54:   }
+55:   send(room, command) {
+56:     if (command.startsWith('/choose ')) {
+57:       const total = this.session.decisions.get(room) ?? 0;
+58:       if (total >= 20_000) throw new Error('Session battle decision budget exceeded');
+59:       this.session.decisions.set(room, total + 1);
+60:     }
+61:     super.send(room, command);
+62:   }
+63: }
+64: 
+65: /** In-memory recovery of the deterministic heuristic. A new socket rebuilds each
+66:  * active battle from the server's player-visible history and current request.
+67:  * Never copy a stale request, action, sent set or reducer into a new connection. */
+68: export class RecoveringBot extends EventEmitter {
+69:   constructor({password, passwordProvider = () => password, maxReconnects = 3,
+70:     retryDelayMs = 1_000, recoveryTimeoutMs = 30_000, ...options} = {}) {
+71:     super();
+72:     if (options.policy && options.policy !== 'heuristic') throw new Error('Recovery requires the stateless heuristic policy');
+73:     if (!Number.isSafeInteger(maxReconnects) || maxReconnects < 0 || maxReconnects > 10 ||
+74:         !Number.isFinite(retryDelayMs) || retryDelayMs < 0 || retryDelayMs > 30_000 ||
+75:         !Number.isFinite(recoveryTimeoutMs) || recoveryTimeoutMs <= 0 || recoveryTimeoutMs > 120_000) {
+76:       throw new Error('Invalid recovery budget');
+77:     }
+78:     if (typeof passwordProvider !== 'function') throw new Error('Invalid password provider');
+79:     this.options = {...options, policy: 'heuristic'};
+80:     this.passwordProvider = passwordProvider;
+81:     this.maxReconnects = maxReconnects; this.retryDelayMs = retryDelayMs; this.recoveryTimeoutMs = recoveryTimeoutMs;
+82:     this.reconnects = 0; this.generation = 0; this.expected = new Map(); this.decisions = new Map();
+83:     this.retries = new Map(); this.finished = new Set(); this.ready = false; this.stopped = false; this.failed = false;
+84:   }
+85:   connect() {
+86:     if (this.started || this.stopped) throw new Error('Session already started or closed');
+87:     this.started = true;
+88:     const promise = new Promise((resolve, reject) => { this.resolveReady = resolve; this.rejectReady = reject; });
+89:     void this.attempt();
+90:     return promise;
+91:   }
+92:   async attempt() {
+93:     const generation = ++this.generation;
+94:     try {
+95:       let password;
+96:       try { password = this.passwordProvider(); } catch { throw new Error('Credential provider failed'); }
+97:       // Providers are synchronous: a blocked provider must not create an unbounded reconnect attempt.
+98:       if (password !== undefined && typeof password !== 'string') throw new Error('Credential provider must return a string or undefined');
+99:       if (this.stopped || this.failed) return;
+100:       const child = new SessionConnection({...this.options, password}, this, this.expected);
+101:       this.connection = child;
+102:       child.on('failure', error => this.connectionFailed(child, generation, error));
+103:       child.on('ready', () => {
+104:         if (!this.current(child, generation)) return;
+105:         try {
+106:           for (const id of this.expected.keys()) child.send('', `/join ${id}`);
+107:           if (this.expected.size) this.recoveryTimer = setTimeout(() => this.fail(new Error('Battle recovery timed out')), this.recoveryTimeoutMs);
+108:           this.maybeReady(child);
+109:         } catch (error) { this.fail(error); }
+110:       });
+111:       child.on('decision', event => this.emit('decision', {...event, generation}));
+112:       child.on('retry', event => {
+113:         this.retries.set(event.room, (this.retries.get(event.room) ?? 0) + 1); this.emit('retry', event);
+114:       });
+115:       child.on('battleEnd', event => {
+116:         if (this.finished.has(event.room)) return;
+117:         this.finished.add(event.room);
+118:         this.emit('battleEnd', {...event, decisions: this.decisions.get(event.room) ?? 0, retries: this.retries.get(event.room) ?? 0});
+119:       });
+120:       await child.connect();
+121:     } catch (error) {
+122:       if (!this.stopped && !this.failed && generation === this.generation) this.fail(error);
+123:     }
+124:   }
+125:   current(child, generation = this.generation) {
+126:     return !this.stopped && !this.failed && child === this.connection && generation === this.generation;
+127:   }
+128:   maybeReady(child) {
+129:     if (!this.current(child) || child.failed || !child.ready || this.expected.size || this.ready) return;
+130:     clearTimeout(this.recoveryTimer); this.ready = true;
+131:     this.resolveReady?.(this); this.emit('ready', {generation: this.generation, reconnects: this.reconnects});
+132:   }
+133:   connectionFailed(child, generation, error) {
+134:     if (!this.current(child, generation)) return;
+135:     this.ready = false; clearTimeout(this.recoveryTimer);
+136:     if (!TRANSPORT.has(error.message) || this.reconnects >= this.maxReconnects) {
+137:       this.fail(new Error(TRANSPORT.has(error.message) ? 'Reconnect budget exhausted' : error.message)); return;
+138:     }
+139:     for (const [id, room] of child.rooms) {
+140:       if (!room.done) this.expected.set(id, {rqid: Math.max(room.lastRqid, this.expected.get(id)?.rqid ?? -1),
+141:         turn: Math.max(room.state.turn, this.expected.get(id)?.turn ?? 0), seat: room.seat ?? this.expected.get(id)?.seat});
+142:     }
+143:     child.close();
+144:     // Invalidate an in-flight login promise or queued event from this socket.
+145:     this.generation++;
+146:     const delayMs = Math.min(30_000, this.retryDelayMs * 2 ** this.reconnects++);
+147:     this.emit('reconnecting', {attempt: this.reconnects, delayMs, rooms: [...this.expected.keys()], reason: error.message});
+148:     if (!this.stopped && !this.failed) this.retryTimer = setTimeout(() => void this.attempt(), delayMs);
+149:   }
+150:   challenge(name) {
+151:     if (!this.ready || this.failed || this.stopped) throw new Error('Session is not ready');
+152:     this.connection.challenge(name);
+153:   }
+154:   fail(error) {
+155:     if (this.failed || this.stopped) return;
+156:     this.failed = true; this.ready = false;
+157:     clearTimeout(this.retryTimer); clearTimeout(this.recoveryTimer);
+158:     this.connection?.close(); this.passwordProvider = null;
+159:     this.rejectReady?.(error); this.emit('failure', error);
+160:   }
+161:   close() {
+162:     if (this.stopped) return;
+163:     this.stopped = true; this.ready = false;
+164:     clearTimeout(this.retryTimer); clearTimeout(this.recoveryTimer);
+165:     this.connection?.close(); this.passwordProvider = null;
+166:     this.rejectReady?.(new Error('Session closed'));
+167:   }
+168: }
+169: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/showdown-session/session.test.mjs
+1: import test from 'node:test';
+2: import assert from 'node:assert/strict';
+3: import {setTimeout as pause} from 'node:timers/promises';
+4: import {RecoveringBot} from '../../packages/showdown-session/client.mjs';
+5: 
+6: const ID = 'battle-gen9randombattle-1';
+7: const request = (rqid = 4) => ({rqid, side: {id: 'p1', name: 'RecoverBot', pokemon: [
+8:   {ident: 'p1: Squirtle', details: 'Squirtle, L80', condition: '200/200', active: true,
+9:     stats: {atk: 100, spa: 100}, moves: ['watergun']},
+10: ]}, active: [{moves: [{id: 'watergun', move: 'Water Gun', pp: 20}]}]});
+11: const history = (turn = 1) => `>${ID}\n|init|battle\n|gametype|singles\n|tier|[Gen 9] Random Battle\n|switch|p2a: Foe|Fennekin, L80|100/100\n|turn|${turn}`;
+12: const frame = (r, extra = '') => `>${ID}\n|request|${JSON.stringify(r)}\n${extra}`;
+13: class Socket extends EventTarget {
+14:   readyState = 1; sent = [];
+15:   send(x) { this.sent.push(x); }
+16:   close() { this.readyState = 3; }
+17:   drop() { this.readyState = 3; this.dispatchEvent(new Event('close')); }
+18:   message(data) { this.dispatchEvent(new MessageEvent('message', {data})); }
+19: }
+20: async function until(fn) {
+21:   for (let i = 0; i < 100; i++) { if (fn()) return; await pause(5); }
+22:   assert.fail('Timed out waiting for test condition');
+23: }
+24: function setup(t, options = {}) {
+25:   const sockets = [], failures = [], restores = [], decisions = [], readyEvents = [];
+26:   const bot = new RecoveringBot({name: 'RecoverBot', decisionDelayMs: 0, retryDelayMs: 0,
+27:     socketFactory: () => { const s = new Socket(); sockets.push(s); return s; }, ...options});
+28:   bot.on('failure', e => failures.push(e)); bot.on('restored', e => restores.push(e));
+29:   bot.on('decision', e => decisions.push(e)); bot.on('ready', e => readyEvents.push(e));
+30:   t.after(() => bot.close());
+31:   const initial = bot.connect(); initial.catch(() => {});
+32:   async function login(i = sockets.length - 1) {
+33:     await until(() => sockets[i]); const s = sockets[i];
+34:     s.message(`|challstr|4|challenge-${i}`); await until(() => s.sent.some(x => x.startsWith('|/trn ')));
+35:     s.message('|updateuser| RecoverBot|1|1|{}'); await until(() => bot.connection.ready || bot.failed);
+36:     return s;
+37:   }
+38:   return {bot, sockets, failures, restores, decisions, readyEvents, initial, login};
+39: }
+40: 
+41: test('rebuilds history, submits an uncommitted current request once, cancels old timer', async t => {
+42:   const c = setup(t, {decisionDelayMs: 30}); const s = await c.login(); await c.initial;
+43:   s.message(history() + '\n' + frame(request())); await until(() => c.bot.connection.rooms.size);
+44:   s.drop(); const next = await c.login(1);
+45:   assert(next.sent.includes(`|/join ${ID}`)); assert.equal(c.bot.ready, false);
+46:   next.message(history()); next.message(frame(request()));
+47:   await until(() => c.decisions.length === 1);
+48:   assert.equal(s.sent.filter(x => x.includes('/choose')).length, 0);
+49:   assert.equal(c.restores[0].committed, false); assert.equal(c.bot.ready, true);
+50:   next.message(frame(request())); await pause(50); assert.equal(c.decisions.length, 1);
+51:   assert.equal(c.failures.length, 0);
+52: });
+53: 
+54: test('accepted pending choice is not replayed; next fresh request can act', async t => {
+55:   const c = setup(t); const s = await c.login(); await c.initial;
+56:   s.message(history() + '\n' + frame(request())); await until(() => c.decisions.length === 1);
+57:   s.drop(); const next = await c.login(1);
+58:   next.message(history()); next.message(frame(request(), '|sentchoice|move 1'));
+59:   await until(() => c.restores.length); await pause(20);
+60:   assert.equal(c.restores[0].committed, true); assert.equal(c.decisions.length, 1);
+61:   next.message(`>${ID}\n|turn|2\n|request|${JSON.stringify(request(5))}`);
+62:   await until(() => c.decisions.length === 2);
+63:   assert.equal(c.bot.decisions.get(ID), 2); assert.equal(c.failures.length, 0);
+64: });
+65: 
+66: test('an unsent action is reconsidered from the server request, not a local sent marker', async t => {
+67:   const c = setup(t); const s = await c.login(); await c.initial;
+68:   s.message(history() + '\n' + frame(request())); await until(() => c.decisions.length === 1);
+69:   s.drop(); const next = await c.login(1);
+70:   next.message(history() + '\n' + frame(request())); await until(() => c.decisions.length === 2);
+71:   assert.equal(c.restores[0].committed, false); assert.equal(c.decisions[0].rqid, c.decisions[1].rqid);
+72: });
+73: 
+74: test('wait and completed battles restore without submitting; terminal emits once', async t => {
+75:   const c = setup(t); let ends = 0; c.bot.on('battleEnd', () => ends++);
+76:   const s = await c.login(); await c.initial;
+77:   s.message(history() + '\n' + frame({rqid: 4, wait: true})); await until(() => c.bot.connection.rooms.size);
+78:   s.drop(); const next = await c.login(1);
+79:   next.message(history() + '\n' + frame({rqid: 4, wait: true})); await until(() => c.restores.length);
+80:   assert.equal(c.decisions.length, 0); assert(c.bot.ready);
+81:   next.drop(); const last = await c.login(2);
+82:   last.message(history(2) + '\n|win|RecoverBot'); await until(() => ends === 1);
+83:   assert.equal(c.restores.at(-1).ended, true); assert.equal(c.decisions.length, 0);
+84:   last.message(`>${ID}\n|win|RecoverBot`); await pause(10); assert.equal(ends, 1);
+85: });
+86: 
+87: test('missing history is fatal and does not retry the protocol error', async t => {
+88:   const c = setup(t); const s = await c.login(); await c.initial;
+89:   s.message(frame(request())); await until(() => c.failures.length);
+90:   assert.match(c.failures[0].message, /history/); assert.equal(c.sockets.length, 1); assert.equal(c.decisions.length, 0);
+91: });
+92: 
+93: test('request rollback, seat changes, and truncated public history fail before any action', async t => {
+94:   for (const fault of ['rqid', 'seat', 'turn']) {
+95:     const c = setup(t, {decisionDelayMs: 30}); const s = await c.login(); await c.initial;
+96:     s.message(history(5) + '\n' + frame(request())); await until(() => c.bot.connection.rooms.size);
+97:     s.drop(); const next = await c.login(1); const r = request(fault === 'rqid' ? 3 : 4);
+98:     if (fault === 'seat') r.side.id = 'p2';
+99:     next.message(history(fault === 'turn' ? 4 : 5) + '\n' + frame(r));
+100:     await until(() => c.failures.length); await pause(35); assert.equal(c.decisions.length, 0);
+101:     assert.equal(c.sockets.length, 2);
+102:   }
+103: });
+104: 
+105: test('missing rooms and silent rejoin responses fail on a bounded recovery deadline', async t => {
+106:   for (const response of ['noinit', 'silent']) {
+107:     const c = setup(t, {recoveryTimeoutMs: 30}); const s = await c.login(); await c.initial;
+108:     s.message(history() + '\n' + frame({rqid: 4, wait: true})); await until(() => c.bot.connection.rooms.size);
+109:     s.drop(); const next = await c.login(1);
+110:     if (response === 'noinit') next.message(`>${ID}\n|noinit|nonexistent|The room is gone`);
+111:     await until(() => c.failures.length); assert.match(c.failures[0].message, /recovery/);
+112:     assert.equal(c.sockets.length, 2); assert.equal(c.decisions.length, 0);
+113:   }
+114: });
+115: 
+116: test('retry budget spans successful reconnects; stale socket messages are ignored', async t => {
+117:   const c = setup(t, {maxReconnects: 1}); const s = await c.login(); await c.initial;
+118:   s.drop(); const next = await c.login(1); await until(() => c.bot.ready);
+119:   s.message(history() + '\n' + frame(request())); await pause(10); assert.equal(c.decisions.length, 0);
+120:   next.drop(); await until(() => c.failures.length);
+121:   assert.match(c.failures[0].message, /budget exhausted/); assert.equal(c.sockets.length, 2);
+122: });
+123: 
+124: test('initial transport outage retries and shutdown cancels delayed recovery', async t => {
+125:   const c = setup(t, {retryDelayMs: 20}); c.sockets[0].drop();
+126:   await c.login(1); await c.initial; assert.equal(c.bot.reconnects, 1);
+127:   c.sockets[1].drop(); c.bot.close(); await pause(60);
+128:   assert.equal(c.sockets.length, 2); assert.equal(c.failures.length, 0);
+129: });
+130: 
+131: test('each remote connection gets fresh authentication; permanent login errors do not retry', async t => {
+132:   const calls = []; let reads = 0;
+133:   const c = setup(t, {url: 'wss://example.com/showdown/websocket', passwordProvider: () => { reads++; return 'local-secret'; },
+134:     authenticate: async (name, password, challenge) => { calls.push({name, password, challenge}); return `signed-${calls.length}`; }});
+135:   const s = await c.login(); await c.initial; s.drop(); const next = await c.login(1);
+136:   assert.equal(reads, 2); assert.deepEqual(calls.map(x => x.challenge), ['4|challenge-0', '4|challenge-1']);
+137:   assert(next.sent.includes('|/trn RecoverBot,0,signed-2'));
+138:   assert(!JSON.stringify([...c.readyEvents, ...c.restores, ...c.decisions]).includes('local-secret'));
+139:   next.message('|nametaken|RecoverBot|Rejected'); await until(() => c.failures.length);
+140:   assert.equal(c.sockets.length, 2); assert.match(c.failures[0].message, /unavailable/);
+141: });
+142: 
+143: test('pending restoration prevents accepting or initiating another challenge', async t => {
+144:   const c = setup(t, {accept: ['Friend']}); const s = await c.login(); await c.initial;
+145:   s.message(history() + '\n' + frame({rqid: 4, wait: true})); await until(() => c.bot.connection.rooms.size);
+146:   s.drop(); const next = await c.login(1);
+147:   next.message('|pm| Friend| RecoverBot|/challenge gen9randombattle||||'); await pause(10);
+148:   assert(!next.sent.some(x => x.includes('/accept'))); assert.throws(() => c.bot.challenge('Friend'), /not ready/);
+149: });
+150: 
+151: test('stateful policies and invalid or unbounded recovery configuration are rejected', () => {
+152:   assert.throws(() => new RecoveringBot({policy: 'random'}), /stateless/);
+153:   for (const options of [{maxReconnects: Infinity}, {maxReconnects: 11}, {retryDelayMs: -1}, {recoveryTimeoutMs: 0}]) {
+154:     assert.throws(() => new RecoveringBot(options), /budget/);
+155:   }
+156: });
+157: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/showdown-bot/client.mjs
+1: import {EventEmitter} from 'node:events';
+2: import {FORMAT, DEV_FORMAT, isLoopback, legalChoices, parseFrame, PublicBattle, toID} from './protocol.mjs';
+3: import {makePolicy} from './policy.mjs';
+4: 
+5: const safeName = name => typeof name === 'string' && /^[A-Za-z0-9][A-Za-z0-9 ]{0,17}$/.test(name) && toID(name);
+6: const identityID = value => toID(value.replace(/^[^A-Za-z0-9]+/, '').split('@')[0]);
+7: 
+8: export async function loginAssertion(name, password, challstr, fetcher = fetch) {
+9:   const response = await fetcher('https://play.pokemonshowdown.com/api/login', {
+10:     method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+11:     body: new URLSearchParams({name, pass: password, challstr}), signal: AbortSignal.timeout(15_000),
+12:     redirect: 'error',
+13:   });
+14:   if (!response.ok) throw new Error(`Login HTTP ${response.status}`);
+15:   const text = await response.text();
+16:   let data;
+17:   try { data = JSON.parse(text.startsWith(']') ? text.slice(1) : text); } catch { throw new Error('Malformed login response'); }
+18:   if (!data.actionsuccess || typeof data.assertion !== 'string' || !data.assertion || /[\r\n]/.test(data.assertion)) {
+19:     throw new Error('Login failed (check credentials or account requirements)');
+20:   }
+21:   return data.assertion;
+22: }
+23: 
+24: export class ShowdownBot extends EventEmitter {
+25:   constructor({url = 'ws://127.0.0.1:8000/showdown/websocket', name = 'BaselineBot', password,
+26:     format = FORMAT, policy = 'heuristic', seed, accept = [], team = null, socketFactory = endpoint => new WebSocket(endpoint),
+27:     authenticate = loginAssertion, decisionDelayMs = 750, timeoutMs = 30_000} = {}) {
+28:     super();
+29:     const endpoint = new URL(url);
+30:     if (!['ws:', 'wss:'].includes(endpoint.protocol) || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) throw new Error('Invalid WebSocket endpoint');
+31:     if (!isLoopback(url) && endpoint.protocol !== 'wss:') throw new Error('Remote connections require WSS');
+32:     if (!safeName(name) || accept.some(n => !safeName(n))) throw new Error('Invalid player name');
+33:     if (![FORMAT, DEV_FORMAT].includes(format) || (format === DEV_FORMAT && !isLoopback(url))) throw new Error('Unsupported format');
+34:     if (!isLoopback(url) && !password) throw new Error('Remote login requires SHOWDOWN_PASSWORD');
+35:     if (!Number.isFinite(decisionDelayMs) || decisionDelayMs < 0 || !Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error('Invalid client timing');
+36:     if (team !== null && (typeof team !== 'string' || /[\r\n]/.test(team))) throw new Error('Invalid packed team');
+37:     this.options = {url, name, format, policy, seed, team, decisionDelayMs, timeoutMs};
+38:     this.password = password; this.socketFactory = socketFactory; this.authenticate = authenticate;
+39:     this.accept = new Set(accept.map(toID)); this.rooms = new Map(); this.accepting = new Set();
+40:     this.queue = Promise.resolve(); this.failed = false; this.stopped = false; this.ready = false;
+41:   }
+42:   send(room, command) {
+43:     if (this.failed || this.stopped || this.socket?.readyState !== 1) throw new Error('Connection is not active');
+44:     if (/[\r\n]/.test(command) || (room && !/^battle-[a-z0-9-]+$/.test(room))) throw new Error('Unsafe protocol command');
+45:     this.socket.send(`${room}|${command}`);
+46:     // Do not emit credentials, login assertions, chat or raw private requests into diagnostic logs.
+47:   }
+48:   connect() {
+49:     if (this.socket) throw new Error('Client already connected');
+50:     return new Promise((resolve, reject) => {
+51:       this.resolveReady = resolve; this.rejectReady = reject;
+52:       this.loginTimer = setTimeout(() => this.fail(new Error('Login timed out')), this.options.timeoutMs);
+53:       this.socket = this.socketFactory(this.options.url);
+54:       this.socket.addEventListener('message', event => {
+55:         this.lastMessageAt = Date.now();
+56:         this.queue = this.queue.then(() => this.receive(event.data)).catch(error => this.fail(error));
+57:       });
+58:       this.socket.addEventListener('error', () => this.fail(new Error('WebSocket transport error')));
+59:       this.socket.addEventListener('close', () => {
+60:         if (!this.stopped && !this.failed) this.fail(new Error('Disconnected; no automatic replay of pending choices'));
+61:       });
+62:     });
+63:   }
+64:   fail(error) {
+65:     if (this.failed || this.stopped) return;
+66:     this.failed = true; clearTimeout(this.loginTimer); clearInterval(this.keepalive);
+67:     for (const room of this.rooms.values()) clearTimeout(room.timer);
+68:     this.rejectReady?.(error); this.socket?.close(); this.emit('failure', error);
+69:   }
+70:   close() {
+71:     this.stopped = true; clearTimeout(this.loginTimer); clearInterval(this.keepalive);
+72:     for (const room of this.rooms.values()) clearTimeout(room.timer);
+73:     this.socket?.close();
+74:   }
+75:   challenge(name) {
+76:     if (!this.ready || !safeName(name)) throw new Error('Not ready or invalid opponent');
+77:     if ([...this.rooms.values()].some(r => !r.done)) throw new Error('Finish the current battle first');
+78:     this.send('', `/utm ${this.options.team ?? 'null'}`);
+79:     this.send('', `/challenge ${name}, ${this.options.format}`);
+80:   }
+81:   async receive(frame) {
+82:     if (this.failed || this.stopped) return;
+83:     const touched = new Set();
+84:     for (const {room: id, line} of parseFrame(frame)) {
+85:       if (!id) { await this.global(line); continue; }
+86:       if (!id.startsWith('battle-')) continue;
+87:       if (!this.rooms.has(id)) this.rooms.set(id, {state: new PublicBattle(), request: null, lastRqid: -1,
+88:         sent: new Set(), decisions: 0, retries: 0, timer: null, done: false, choose: makePolicy(this.options.policy, this.options.seed)});
+89:       const room = this.rooms.get(id);
+90:       room.state.ingest(line); touched.add(id);
+91:       if (line.startsWith('|request|')) {
+92:         const request = JSON.parse(line.slice(9));
+93:         if (request === null) { room.request = null; clearTimeout(room.timer); continue; }
+94:         if (!Number.isSafeInteger(request.rqid) || request.rqid < 0) throw new Error('Missing/invalid server request ID');
+95:         if (request.rqid < room.lastRqid) continue;
+96:         if (!request.wait && toID(request.side?.name) !== toID(this.options.name)) throw new Error('Private request belongs to another player');
+97:         if (request.side && room.seat && request.side.id !== room.seat) throw new Error('Player seat changed within a battle');
+98:         if (request.side) room.seat = request.side.id;
+99:         room.lastRqid = request.rqid; room.request = request;
+100:         clearTimeout(room.timer); room.timer = null;
+101:       }
+102:       if (line.startsWith('|sentchoice|') && room.request) room.sent.add(JSON.stringify(room.request));
+103:       if (line === '|deinit') { room.request = null; room.done = true; clearTimeout(room.timer); }
+104:       if (line.startsWith('|bigerror|')) throw new Error(`Simulator reported a battle error in ${id}`);
+105:       if (line.startsWith('|error|')) {
+106:         if (line.startsWith('|error|[Unavailable choice]')) {
+107:           room.request = null; clearTimeout(room.timer); room.retries++;
+108:           this.emit('retry', {room: id, reason: 'unavailable-choice'});
+109:           // The simulator sends a refreshed request after this error. Never guess a retry from stale information.
+110:         } else throw new Error(`Battle ${id} rejected a choice: ${line.slice(7, 250)}`);
+111:       }
+112:     }
+113:     for (const id of touched) {
+114:       const room = this.rooms.get(id);
+115:       if (room.state.ended) {
+116:         clearTimeout(room.timer);
+117:         if (!room.done) {
+118:           room.done = true;
+119:           this.emit('battleEnd', {room: id, winner: room.state.winner, turns: room.state.turn, decisions: room.decisions, retries: room.retries});
+120:           this.send(id, '/leave');
+121:         }
+122:         continue;
+123:       }
+124:       if (room.done || !room.request || room.request.wait || room.timer || !this.ready) continue;
+125:       if (room.state.gameType !== 'singles' || room.state.tier !== this.options.format) throw new Error('Unexpected battle format or game type');
+126:       const key = JSON.stringify(room.request);
+127:       if (room.sent.has(key)) continue;
+128:       room.timer = setTimeout(() => {
+129:         room.timer = null;
+130:         try {
+131:           if (!room.request || room.state.ended || this.failed || this.stopped || JSON.stringify(room.request) !== key) return;
+132:           const choice = room.choose(structuredClone(room.request), structuredClone(room.state));
+133:           if (!legalChoices(room.request).includes(choice)) throw new Error('Policy returned an inadmissible choice');
+134:           if (++room.decisions > 20_000) throw new Error('Battle decision budget exceeded');
+135:           room.sent.add(key);
+136:           this.send(id, `/choose ${choice}|${room.request.rqid}`);
+137:           this.emit('decision', {room: id, rqid: room.request.rqid, turn: room.state.turn, choice});
+138:         } catch (error) { this.fail(error); }
+139:       }, this.options.decisionDelayMs);
+140:     }
+141:   }
+142:   async global(line) {
+143:     const [, type, value, named] = line.split('|');
+144:     if (type === 'challstr') {
+145:       if (this.authStarted) throw new Error('Repeated authentication challenge');
+146:       this.authStarted = true;
+147:       const assertion = this.password ? await this.authenticate(this.options.name, this.password, line.slice(10)) : '';
+148:       this.password = undefined;
+149:       this.send('', `/trn ${this.options.name},0,${assertion}`);
+150:     } else if (type === 'updateuser' && named === '1' && identityID(value) === toID(this.options.name)) {
+151:       if (!this.ready) {
+152:         this.ready = true; clearTimeout(this.loginTimer); this.lastMessageAt = Date.now();
+153:         this.keepalive = setInterval(() => {
+154:           try {
+155:             if (Date.now() - this.lastMessageAt > 60_000) throw new Error('Server stopped responding');
+156:             this.send('', `/query userdetails ${toID(this.options.name)}`);
+157:           } catch (error) { this.fail(error); }
+158:         }, 30_000);
+159:         this.keepalive.unref(); this.resolveReady?.(this); this.emit('ready');
+160:       }
+161:     } else if (['nametaken', 'popup'].includes(type)) {
+162:       throw new Error(type === 'nametaken' ? 'Requested username unavailable' : 'Server rejected the operation (popup)');
+163:     } else if (type === 'updatechallenges' && this.ready) {
+164:       const {challengesFrom = {}} = JSON.parse(line.slice(18));
+165:       for (const name of this.accepting) if (!(name in challengesFrom)) this.accepting.delete(name);
+166:       for (const [name, format] of Object.entries(challengesFrom)) {
+167:         this.acceptChallenge(name, format);
+168:       }
+169:     } else if (type === 'pm' && this.ready) {
+170:       const [, , from, to, message] = line.split('|');
+171:       const fromID = identityID(from), toIDValue = identityID(to), self = toID(this.options.name);
+172:       // Challenge removal is broadcast to both parties; its from/to direction may be reversed on acceptance.
+173:       if (message === '/challenge' && (fromID === self || toIDValue === self)) {
+174:         this.accepting.delete(fromID === self ? toIDValue : fromID);
+175:       } else if (toIDValue === self && message?.startsWith('/challenge ')) this.acceptChallenge(fromID, message.slice(11));
+176:     }
+177:   }
+178:   acceptChallenge(name, format) {
+179:     name = toID(name);
+180:     if (this.accept.has(name) && format === this.options.format && !this.accepting.has(name) &&
+181:         ![...this.rooms.values()].some(r => !r.done)) {
+182:       this.accepting.add(name); this.send('', `/utm ${this.options.team ?? 'null'}`); this.send('', `/accept ${name}`);
+183:     }
+184:   }
+185: }
+186: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/showdown-bot/protocol.mjs
+1: export const FORMAT = 'gen9randombattle';
+2: export const DEV_FORMAT = 'gen9botbaselinedevelopment';
+3: export const toID = value => String(value).toLowerCase().replace(/[^a-z0-9]/g, '');
+4: export const isLoopback = url => ['localhost', '127.0.0.1', '[::1]'].includes(new URL(url).hostname);
+5: 
+6: export function parseFrame(text) {
+7:   if (typeof text !== 'string' || text.length > 2_000_000) throw new Error('Invalid or oversized protocol frame');
+8:   let room = '';
+9:   const result = [];
+10:   for (const line of text.split('\n')) {
+11:     if (line.startsWith('>')) {
+12:       room = line.slice(1);
+13:       if (!/^[a-z0-9-]+$/.test(room)) throw new Error('Invalid room ID');
+14:     } else if (line) result.push({room, line});
+15:   }
+16:   return result;
+17: }
+18: 
+19: export function legalChoices(request) {
+20:   if (!request || request.wait) return [];
+21:   const team = request.side?.pokemon;
+22:   if (!Array.isArray(team) || team.length < 1 || team.length > 6) throw new Error('Expected a singles team');
+23:   if (!['p1', 'p2'].includes(request.side.id) || team.some(p => !p.ident?.startsWith(`${request.side.id}: `))) {
+24:     throw new Error('Foreign or malformed private request');
+25:   }
+26:   if (request.teamPreview) return [`team ${team.map((_, i) => i + 1).join('')}`];
+27:   const fainted = p => /(?:^0(?:\/\d+)?(?: |$)| fnt$)/.test(p.condition);
+28:   if (request.forceSwitch) {
+29:     if (request.forceSwitch.length !== 1) throw new Error('Only singles are supported');
+30:     if (!request.forceSwitch[0]) return ['pass'];
+31:     const reviving = Boolean(team[0].reviving);
+32:     const choices = team.flatMap((p, i) => (reviving ? fainted(p) : !p.active && !fainted(p)) ? [`switch ${i + 1}`] : []);
+33:     if (!choices.length) throw new Error('Forced replacement has no eligible target');
+34:     return choices;
+35:   }
+36:   if (request.active?.length !== 1) throw new Error('Only singles move requests are supported');
+37:   const active = request.active[0];
+38:   if (active.canDynamax || active.canMegaEvo || active.canZMove) throw new Error('Only Gen 9 mechanics are supported');
+39:   const choices = active.moves.flatMap((m, i) => m.disabled ? [] : [
+40:     `move ${i + 1}`, ...(active.canTerastallize ? [`move ${i + 1} terastallize`] : []),
+41:   ]);
+42:   if (!choices.length) throw new Error('No advertised move (expected Struggle)');
+43:   if (!active.trapped) team.forEach((p, i) => {
+44:     if (!p.active && !fainted(p)) choices.push(`switch ${i + 1}`);
+45:   });
+46:   return choices;
+47: }
+48: 
+49: // Public events only. The request is supplied separately and never mixed with an opponent request.
+50: export class PublicBattle {
+51:   constructor() { this.active = {}; this.revealedTera = {}; this.turn = 0; this.ended = false; this.winner = null; this.tier = null; this.gameType = null; }
+52:   ingest(line) {
+53:     const [, type, ident, value, condition] = line.split('|');
+54:     const seat = ident?.slice(0, 2);
+55:     if (type === 'split') throw new Error('Unprojected simulator output cannot enter the bot');
+56:     if (type === 'turn') this.turn = Number(ident);
+57:     if (type === 'tier') this.tier = toID(ident);
+58:     if (type === 'gametype') this.gameType = ident;
+59:     if (['switch', 'drag', 'replace'].includes(type)) {
+60:       const previous = this.active[seat];
+61:       this.active[seat] = {ident, species: value.split(',')[0],
+62:         condition: condition ?? (type === 'replace' ? previous?.condition : null) ?? null, types: null,
+63:         tera: this.revealedTera[ident] ?? (type === 'replace' ? previous?.tera ?? null : null)};
+64:       if (this.active[seat].tera) this.revealedTera[ident] = this.active[seat].tera;
+65:     }
+66:     const mon = this.active[seat];
+67:     if (mon && ['-damage', '-heal', '-sethp'].includes(type)) mon.condition = value;
+68:     if (mon && ['detailschange', '-formechange'].includes(type)) { mon.species = value.split(',')[0]; mon.types = null; }
+69:     if (mon && type === '-terastallize') { mon.tera = value; this.revealedTera[ident] = value; }
+70:     if (mon && type === '-start' && value === 'typechange') mon.types = condition.split('/');
+71:     if (mon && type === '-start' && value === 'typeadd') mon.addedType = condition;
+72:     if (mon && type === 'faint') mon.condition = '0 fnt';
+73:     if (type === 'win' || type === 'tie') { this.ended = true; this.winner = type === 'win' ? ident : null; }
+74:   }
+75: }
+76: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

@@ -1,0 +1,40 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Own only python/pokemon_pilot/statistics.py. You are not alone: do not edit or revert other files and do not delegate. Use the supplied artifacts/reviews/m2-policy-pilot/statistics-candidate.py as the starting implementation; copy its behavior to the owned module and make a bounded repair. All invalid parameters must raise ValueError, including OverflowError from converting huge integer alpha. Calibration must reject arithmetic overflow/nonfinite raw MSE with ValueError rather than return Infinity; retain unclipped raw MSE and clipped Brier semantics. The previous implementation passed five tests and accepting Codex QA but these two independently reproduced issues caused rejection. Preserve the paired bootstrap design, same pair indices, complete pair units, fixed NumPy RNG, 64-replicate chunks, validation and API. Pass all six frozen tests. No new dependencies.",
+  "criteria": "Only owned module changes; all six frozen tests pass including huge-alpha and finite-value arithmetic overflow; JSON-native finite outputs for admitted input or ValueError. Preserve bootstrap and calibration behavior.",
+  "owned": [
+    "python/pokemon_pilot/statistics.py"
+  ],
+  "checks": [
+    [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/pilot",
+      "-p",
+      "test_statistics.py"
+    ]
+  ],
+  "files_sha256": {
+    "python/pokemon_pilot/__init__.py": "fc20fc50fd6e4a3b7e1f53ec211af9c4b40b5edae3d845ae5db6b1033b8a0bd0",
+    "python/pokemon_pilot/statistics.py": "110897ed280a10e6a0938db3b0118ffddffa1666a4b0dc67c88b1aa33cbe35a3",
+    "tests/pilot/test_statistics.py": "1cea7c446c7a2f322b3d34ac7e09716af1bf389662b40f08ea594bc3f0dc290c",
+    "contracts/pilot-v1/plan.json": "bd4f10bd6fdb6fb96689860122c6a7875fd95642fdebf297de08fb10181c437c",
+    "artifacts/reviews/m2-policy-pilot/statistics-candidate.py": "a421ca8c098c03923568fad78bd213031e9357c558738161c094218d51c31588"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "7834d3797b982cb4a2e477073b2d42b42e42dbf9",
+  "created_at": "2026-10-11T14:22:30.195690+00:00",
+  "test_run": false
+}

@@ -1,0 +1,12 @@
+✔ team receipt uses only the authenticated caller and sends privately (2.492875ms)
+✔ team receipt denies a target, outsider, unnamed identity or non-local configuration (2.302292ms)
+✔ actor snapshots reject fields that JSON would silently erase or distort (1.658083ms)
+✔ captured actor inputs are detached from the live room (0.759166ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.736167

@@ -1,0 +1,6 @@
+.Compiling jit(<lambda>) with global shapes and types (ShapedArray(float32[3]),). Argument mapping: (UnspecifiedValue,).
+............
+----------------------------------------------------------------------
+Ran 13 tests in 5.822s
+
+OK

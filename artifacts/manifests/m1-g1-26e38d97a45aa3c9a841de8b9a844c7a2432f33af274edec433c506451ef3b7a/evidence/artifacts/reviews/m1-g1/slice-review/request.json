@@ -1,0 +1,18 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the initial restricted CPU transition specification and Showdown fixture capture. It is ONLY fixed Rattata 1v1, explicit no-Tera format, Tackle/Quick Attack, fullHP/fullPP level50 EV0 IV31 Serious Run Away, no items. Events are semantically recorded from Showdown; parity is conditional on those chance outcomes, not RNG distribution parity, not public history, not JAX or full G2. Independently check damage rounding, four-turn bound excluding PP exhaustion/Struggle, action order and KO cancellation, admission and trace verification. Find concrete unsafe assumptions or missing validation before a 10000-case conditional-parity campaign. Source excerpt has exact pinned damage/stat/ability context but does not claim full reachability analysis.",
+  "files_sha256": {
+    "packages/slice/reference.mjs": "e5b912378b8c8161b44b22dbb561ef6b9e5f7ad217147147d668e9f3d3f243bd",
+    "python/pokemon_slice/engine.py": "1e0436f01450eb2afad3951ceef97dcdfa676ba8f11e18d79b6133031c05668c",
+    "python/pokemon_slice/verify.py": "b57ebbf5b6e794012457ec41fb8a30b1424c1060ac0b611396e218b15763a0dc",
+    "contracts/slice-v1/profile.json": "e2c87730f2c515af0383c4d049f9b4373a917ccf9c86db61cb8f65e9a46ddd7e",
+    "tests/slice/test_slice.py": "fc38b641dda4dc5f1bd0ab4f2aa5353d3efe6e1d867e8f21bc69078901481893",
+    "tests/slice/slice.test.mjs": "0b809f3d4a38aae0f6daea08dcfdcc4d7668cf2b4580b4b8dfe3e1d3fd6f77e6",
+    "artifacts/reviews/m1-g1/slice-source-excerpts.md": "6e7d1f0fbd7eaec16305e567e1b0d4c718a6330d6db61e23b33aab4bb9f7fb90"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

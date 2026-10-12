@@ -1,0 +1,37 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Implement the dependency-free strict Python protocol reducer specified in contracts/jax-slice-v1/view.md as python/pokemon_jax/views.py. Do not recursively delegate. You own only that new file; others are concurrently implementing the JAX engine and oracle capture and must not be reverted. Add no dependencies. Read selected tests; implement all specified invariants including terminal stale request handling, HP lost capped at KO, executed-only move reveal, unknown protocol rejection and side isolation. Profile is immutable. No access to simulator state.",
+  "criteria": "reduce_view returns exact header/history schema from the contract; supplied tests pass; malformed or unsupported mechanics raise ValueError; no input mutations; terminal and both seats work; only owned file changed.",
+  "owned": [
+    "python/pokemon_jax/views.py"
+  ],
+  "checks": [
+    [
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/jax-slice",
+      "-p",
+      "test_views.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/jax-slice-v1/view.md": "ef911fd23fed3640614f0f1d51c7dc91e3f8dd99615e76c970ab69e6add27bc3",
+    "contracts/slice-v1/profile.json": "e2c87730f2c515af0383c4d049f9b4373a917ccf9c86db61cb8f65e9a46ddd7e",
+    "tests/jax-slice/test_views.py": "a2e5e238be9b6069839f5d6a32ded4b7340ed9b02d504fac341e17ba430799ea",
+    "python/pokemon_jax/__init__.py": "e364b40e3acc4a5d20973391630359dd0cc066279ebbcda5f76bd4856c621551"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "921b826e988eb4cbee513a20b084e36dcd90e635",
+  "created_at": "2026-10-10T21:31:31.516783+00:00",
+  "test_run": false
+}

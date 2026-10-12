@@ -1,0 +1,13 @@
+{
+  "changed": [
+    "python/pokemon_switch_screen/statistics.py"
+  ],
+  "outside_owned": [],
+  "symlinks": [],
+  "output_hashes": {
+    "contracts/switch-screen-v1/statistics-task.md": "7968e399419fd544acb661b625360c96d3162c5697664659b0a0f9933957a6a5",
+    "python/pokemon_switch_screen/__init__.py": "04a97011dfaf16f1ea91ee9befc9a491d47a46a0add8a3d84ba82ca82737d42e",
+    "python/pokemon_switch_screen/statistics.py": "a4934377aa849b9ee19f4103c13a09c01eefe602b226f74d986c064e991f689d",
+    "tests/switch-screen/test_statistics.py": "d5fe9ebfb40ef51832c4b0bc9033fd1711833c7c11b43a59d942a860c7364044"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused review of the newly added completion sealer, separate from the in-progress capture/kernel audit. Check scripts/seal-showdown-chance.py for consequential evidence-binding and false-promotion defects. This is a local trusted-source correctness receipt, not a signature against a malicious user who can rewrite all source and evidence. The actual campaign passed 10,000 fresh public-duel games, 180,000 views including padding, 55,062 executed moves, and 3 x 8 learner updates plus original/restored exact replay. All 229 regression tests passed and verify-fixed-loop binds their log to current sources. Preserve sealed predecessors; no full G2/G3, two-hour, strength or Prime claim. Consider altered report counts, missing shards, checkpoint identities, source drift, review artifacts and archive reproducibility. The sealer replays two restores as an additional audit; original-versus-restore was checked in the source-bound campaign. Prior admission recursively verifies final-data reservation and predecessor source pins. Provide concrete blocking findings only; do not request broad unrelated schema redesign.",
+  "files_sha256": {
+    "scripts/seal-showdown-chance.py": "a50be718b2f331feded3375e33eed3b2c04cdd2e988bf999e9beb81f93a6ac08",
+    "scripts/verify-fixed-loop.py": "963e2bbab5a06a5763902ca280ad45bca9e22f5c6a3133b891994f8ae8dd2513",
+    "scripts/seal-binary-policy.py": "bc462e36dbeb5ac7f142dbc4ac29cde657f06c1c89e873078e4ed51a6f855732",
+    "python/pokemon_showdown/campaign.py": "792e04b1acca4ba1d6e389369e993156e94794119fd70e3febde29b01597c8ab",
+    "python/pokemon_showdown/checkpoint.py": "99c633de2000ee3531a3753b7d2d3b4b9650e40f5ac6394f316f0aab99045633",
+    "tests/showdown-chance/test_receipt.py": "5c31abbb2eb7fba856eac6731ca55e945451d7015ba1ebbfb409d1b2261f9d86",
+    "contracts/showdown-chance-v1/contract.json": "8160e0b6c7a272aea5b95bbe609fe7bf08909354b926d0788a8d605827a1955e",
+    "artifacts/runs/m1-showdown-chance-v1/report.json": "c1058893e037404ba8d0e3bbad87cbd90d8faec6de83e2e808e22328e8ddc1b7",
+    "artifacts/runs/m1-showdown-chance-v1/player-shards.json": "cb916d1a355c6a88f7b08b9eceebbcff5197e6523002946d9d2ec68fe6229a02",
+    "docs/M1_SHOWDOWN_CHANCE.md": "2579b6bf95670034029bff685c43798ebdde04b4018e5242365f18dad20073be"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

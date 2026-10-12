@@ -1,0 +1,19 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review CPU G1 learner correctness: analytic clipped PPO and entropy gradients, same-player GAE/terminal/cut semantics, masks and frozen behavior, whole-episode boundary checkpoints and crash rollback. Find concrete errors, missing gates or misleading claims. Config seeds and budgets are predeclared; there is no neural Pokemon policy, no final data, no JAX yet. Unit tests initially exposed and corrected a coordinator hand-arithmetic error (.1+.9*.6-.4 is .24, not .04); do not infer learner failure from that. Checkpoint exactness is same runtime/platform only. Do not treat review as executed tests.",
+  "files_sha256": {
+    "python/pokemon_learner/core.py": "db814827cd5a80957a54bf629c048979e370f5c14529bde4580722d2aee1adde",
+    "python/pokemon_learner/trainer.py": "05256b93fca9440c38e50e80a04f7609882b1a412d2a1ae8da78d420b14ad77c",
+    "python/pokemon_learner/checkpoint.py": "aa0dff4efa214df32888f183fa58dbab5c7f133d8b81138368045ab586dc30a0",
+    "python/pokemon_learner/canaries.py": "b71e52e47cea725e2d00f6c7d17f7c7f48342122ab7a228f7aeadd7d8d41096e",
+    "tests/learner/test_core.py": "f81da66ae64a53149264387ff264d5472101b111dda371b0ad466a8f839ea9f8",
+    "tests/learner/test_resume.py": "59a6314ab68aaf695dc192b5eb409263bf8900cd448d92a168ff74502c6f7580",
+    "contracts/learner-v1/canaries.json": "af7b3ee58ef50e3f78701f1dc13910ed1dcfe0561b139067dc54ccb23d160006",
+    "docs/ACCEPTANCE_GATES.md": "adf29b2d094daabaa5f4ecad89500565b4263282d1fbff29ad1041bb4008641b"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

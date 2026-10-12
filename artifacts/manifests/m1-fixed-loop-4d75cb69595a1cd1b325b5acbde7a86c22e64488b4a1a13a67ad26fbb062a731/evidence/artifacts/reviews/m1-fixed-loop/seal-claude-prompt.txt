@@ -1,0 +1,860 @@
+Task and review objective:
+Audit only the NEW completion sealer scripts/seal-fixed-loop.py and the evidence chain it validates. The fixed loop already had a separate review; do not repeat that broad review. The corrected two-hour campaign is currently running and no completion claim has been made. Supplied parity/profile artifacts are real completed phases; the final soak/report does not yet exist. Check whether the sealer can falsely accept an incomplete run, unbound checkpoints, mismatched sample counters, missing regression suites, altered sources, or unsupported scope claims. It must archive both interrupted v1 and corrected v2, keep old receipts unchanged, and leave full G2/G3 open. Identify concrete blockers and simple acceptance improvements; avoid hypothetical adversarial signing infrastructure or stylistic rewrites. Review is tool-free; say which claims you cannot verify.
+
+
+FILE scripts/seal-fixed-loop.py
+1: """Verify and archive the fixed-shape CPU loop milestone; full G2/G3 stay open."""
+2: import argparse
+3: import json
+4: from pathlib import Path
+5: import re
+6: import sys
+7: import numpy as np
+8: 
+9: ROOT=Path(__file__).resolve().parents[1]
+10: sys.path.insert(0,str(ROOT/'python'))
+11: from pokemon_learner.checkpoint import digest,wire,file_hash
+12: from pokemon_learner.core import require
+13: from pokemon_fixed.campaign import admission
+14: from pokemon_fixed.loop import Executables
+15: from pokemon_fixed.checkpoint import load
+16: 
+17: REVIEW=ROOT/'artifacts/reviews/m1-fixed-loop'
+18: 
+19: 
+20: def read(path):return json.loads(path.read_bytes())
+21: 
+22: 
+23: def write_once(path,data):
+24:     path.parent.mkdir(parents=True,exist_ok=True)
+25:     if path.exists():require(path.read_bytes()==data,'Changed sealed artifact: '+str(path))
+26:     else:
+27:         with path.open('xb') as stream:stream.write(data)
+28: 
+29: 
+30: def main(directory):
+31:     run=Path(directory).resolve();require(run.is_relative_to(ROOT/'artifacts/runs'),'Run directory')
+32:     result=read(run/'report.json');admitted=read(run/'admission.json');p=admitted['plan']
+33:     require(result['content_hash']==digest({k:v for k,v in result.items() if k!='content_hash'}),'Result hash')
+34:     require(result['status']=='passed' and result['full_g2']==result['full_g3']=='open','Gate status')
+35:     control=result['compile']['logging_positive_control']
+36:     require(control['first_call_compilation_events']>=1 and control['same_shape_repeat_events']==0,'Real compilation positive control')
+37:     require(result['admission_hash']==digest(admitted) and admitted==admission(),'Admission/source drift')
+38:     parity,profile,soak=[result[k] for k in ('parity','profile','soak')]
+39:     for key in ('parity','profile','soak'):
+40:         require(result[key]==read(run/f'{key}.json') and result[key]['status']=='passed','Result linkage '+key)
+41:     batches=len(p['parity_seeds'])*p['parity_batches_per_seed']
+42:     require(parity['games']==64*batches and parity['disk_resumes_with_compared_next_cycle']==batches,'Parity budget')
+43:     require(parity['atol']==p['atol'] and parity['rtol']==p['rtol'],'Tolerance drift')
+44:     for value in parity['comparisons'].values():
+45:         require(value['comparisons']>0 and value['elements']>0 and 0<=value['max_fraction_of_tolerance']<=1,'Numerical parity')
+46:     require(profile['cycles']==p['profile_cycles'] and profile['host_profiler_enabled'] is True,'Profile budget')
+47:     require(soak['elapsed_seconds']>=soak['target_seconds']==p['soak_seconds']==7200,'Two-hour soak incomplete')
+48:     for item in (profile,soak):
+49:         require(item['unexpected_compilations']==0 and item['entry_traces']=={'collect':1,'update':1,'cycle':1},'Compilation stability')
+50:         require(item['warmup_compilation_count']>0,'Vacuous compilation counter')
+51:         require(item['games']==item['cycles']*64 and 4*item['games']<=item['decisions']<=8*item['games'],'Fixed-loop accounting')
+52:         require(item['decisions']-item['games']<=item['executed_moves']<=item['decisions'],'Canceled-move accounting')
+53:         require(sum(item['latency_histogram']['counts'])==item['cycles'],'Latency accounting')
+54:         require(item['complete_cycle_seconds']>0 and item['decisions_per_cycle_second']==item['decisions']/item['complete_cycle_seconds'],'Throughput calculation')
+55:     require(soak['full_g2']==soak['full_g3']=='open' and soak['device_memory_headroom_certified'] is False,'Scope/headroom claim')
+56:     telemetry=[json.loads(line) for line in (run/'telemetry.jsonl').read_text().splitlines()]
+57:     require(len(telemetry)>=119,'Soak telemetry coverage')
+58:     require(all(a['elapsed_seconds']<b['elapsed_seconds'] and a['soak_cycles']<b['soak_cycles'] for a,b in zip(telemetry,telemetry[1:])),'Telemetry monotonicity')
+59:     require(telemetry[-1]['elapsed_seconds']>=7140 and telemetry[-1]['soak_cycles']<=soak['cycles'],'Telemetry endpoint')
+60:     ex=Executables();final=load(run/'soak-final.checkpoint.json',ex);initial=load(run/'soak-start.checkpoint.json',ex)
+61:     require(int(initial.learner.version)==p['warmup_cycles'],'Warmup checkpoint')
+62:     require(int(final.learner.version)-int(initial.learner.version)==soak['cycles'] and final.decisions-initial.decisions==soak['decisions'],'Checkpoint sample accounting')
+63:     require(int(final.learner.step)==soak['final_counters']['optimizer_steps'],'Optimizer endpoint')
+64:     boundaries=sorted(run.glob('soak-boundary-*.checkpoint.json'))
+65:     require(len(boundaries)+1==soak['disk_resumes_with_compared_next_cycle'] and len(boundaries)>=11,'Soak recovery evidence')
+66:     for path in boundaries:load(path,ex)
+67:     for seed in p['parity_seeds']:
+68:         for batch in range(p['parity_batches_per_seed']):
+69:             require(int(load(run/f'parity-{seed}-{batch}.checkpoint.json',ex).learner.version)==batch,'Parity boundary checkpoint')
+70:         d=run/f'first-buffer-{seed}';m=read(d/'manifest.json')
+71:         require(m['actor_has_targets'] is False and m['capacity']==512,'Actor export schema')
+72:         for name,h in m['files'].items():require(file_hash(d/name)==h,'Export hash')
+73:         with np.load(d/'actor.npz',allow_pickle=False) as actor, np.load(d/'targets.npz',allow_pickle=False) as target:
+74:             valid=target['valid'];require(valid.shape==(512,) and int(valid.sum())==m['valid'],'Validity export')
+75:             require(set(actor.files)==set(m['actor_fields'])=={'features','mask','actions','old_logp','old_values','game_id','side','turn'},'Actor field boundary')
+76:             require(np.all(actor['features'][valid,1:3]==0) and np.all(actor['features'][~valid]==0),'Actor outcome/padding')
+77:     log=(REVIEW/'npm-test.log').read_text();match=re.search(r'^ℹ tests (\d+)$',log,re.M)
+78:     require(match is not None,'Node test summary');node=int(match[1])
+79:     require(re.search(rf'^ℹ pass {node}$',log,re.M) and re.search(r'^ℹ fail 0$',log,re.M),'Node failures')
+80:     counts=[int(x) for x in re.findall(r'^Ran (\d+) tests? in ',log,re.M)]
+81:     require(len(counts)==11 and log.count('\nOK\n')==11 and 'FAILED (' not in log,'Python suite completeness')
+82:     for name in ('claude-review.md','review-dispositions.md','delegate-verification.md'):
+83:         require((REVIEW/name).is_file(),'Missing review evidence '+name)
+84:     sources=[]
+85:     for directory in ('packages','python','contracts','scripts','tests','docs','tools/mechanics-deps'):
+86:         sources.extend(x for x in (ROOT/directory).rglob('*') if x.is_file() and not {'node_modules','__pycache__'} & set(x.parts))
+87:     sources.extend(ROOT/name for name in ('README.md','package.json','package-lock.json','showdown.pin.json','requirements-contract.txt','requirements-learner.txt','requirements-jax.txt','.node-version','.gitignore'))
+88:     sources=sorted(set(sources));runs=sorted((ROOT/'artifacts/runs').glob('m1-fixed-loop-v*'))
+89:     evidence=sorted(set([x for d in [REVIEW,*runs] for x in d.rglob('*') if x.is_file()]+[ROOT/'artifacts/reports/m1-jax-learner.json']))
+90:     report={'format':'m1-fixed-loop-completion-1','status':'complete-for-declared-scope','full_g2':'open','full_g3':'open',
+91:             'campaign_directory':str(run.relative_to(ROOT)),'campaign_hash':result['content_hash'],'campaign':result,
+92:             'predecessor':p['predecessor'],'final_reservation_unchanged':True,
+93:             'tests':{'node_passed':node,'python_passed':sum(counts),'python_suite_counts':counts,'log_sha256':file_hash(REVIEW/'npm-test.log')},
+94:             'source_files':{str(x.relative_to(ROOT)):file_hash(x) for x in sources},
+95:             'evidence_files':{str(x.relative_to(ROOT)):file_hash(x) for x in evidence},
+96:             'limitations':['Fixed public 1v1 Rattata duel and small linear policy only; no strength claim.',
+97:                            'Only completed whole-episode updates; no live-game cuts or partial continuation.',
+98:                            'New full-capacity shuffle; numerical parity uses the identical valid sample order.',
+99:                            'Process RSS is not accelerator allocation or certified system headroom.',
+100:                            'Known nominal-versus-finite-word Showdown sampler distinction remains.',
+101:                            'Final evaluation unopened; CPU only; Prime unnecessary.'],
+102:             'next':'Close G2 coverage/chance-law decisions; preregister restricted-policy evaluation against frozen opponents before G3 promotion.'}
+103:     report['content_hash']=digest(report);content=wire(report)+b'\n'
+104:     archive=ROOT/'artifacts/manifests'/('m1-fixed-loop-'+report['content_hash'])
+105:     for group,files in [('source',sources),('evidence',evidence)]:
+106:         for path in files:
+107:             rel=str(path.relative_to(ROOT));dest=archive/group/rel;write_once(dest,path.read_bytes())
+108:             require(file_hash(dest)==report[group+'_files'][rel],'Archive hash')
+109:     write_once(archive/'completion.json',content);write_once(ROOT/'artifacts/reports/m1-fixed-loop.json',content)
+110:     print(json.dumps({'report':str(ROOT/'artifacts/reports/m1-fixed-loop.json'),'content_hash':report['content_hash'],
+111:                       'tests':report['tests'],'soak_seconds':soak['elapsed_seconds'],'soak_decisions':soak['decisions'],
+112:                       'sources':len(sources),'evidence':len(evidence)},sort_keys=True))
+113: 
+114: 
+115: if __name__=='__main__':
+116:     parser=argparse.ArgumentParser();parser.add_argument('run');main(parser.parse_args().run)
+117: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_fixed/campaign.py
+1: """Frozen-plan parity, fixed-shape CPU profiling and a two-hour complete-cycle soak."""
+2: import argparse
+3: import cProfile
+4: import io
+5: import json
+6: import logging
+7: import os
+8: from pathlib import Path
+9: import pstats
+10: import resource
+11: import subprocess
+12: import sys
+13: import time
+14: import traceback
+15: import jax
+16: import jax.numpy as jnp
+17: import numpy as np
+18: from pokemon_jax_learner.campaign import admission_checks as previous_checks, Comparisons
+19: from pokemon_jax_learner.collector import collect as reference_collect, array_hash
+20: from pokemon_jax_learner.model import model_loss_grad, predict_kernel, ActorInput
+21: from pokemon_jax_learner.core import Adam
+22: from pokemon_jax.engine import validate_state
+23: from pokemon_learner.checkpoint import digest, wire, file_hash
+24: from pokemon_learner.core import require
+25: from pokemon_reference.dataset_gate import checked_file
+26: from .loop import ROOT, plan, start, Executables, permutation, check_report
+27: from .checkpoint import Runner, provenance, state, save, load
+28: 
+29: 
+30: def write(path, value):
+31:     Path(path).write_bytes(wire(value) + b'\n')
+32: 
+33: 
+34: def admission():
+35:     p = plan()
+36:     previous = json.loads((ROOT / 'artifacts/reports/m1-jax-learner.json').read_bytes())
+37:     require(previous['content_hash'] == p['predecessor'] == digest({k:v for k,v in previous.items() if k != 'content_hash'}), 'Predecessor receipt')
+38:     # Immutable predecessors; documentation, test runner and additive new package may evolve.
+39:     prefixes = ('python/pokemon_jax_learner/', 'python/pokemon_jax/', 'python/pokemon_slice/',
+40:                 'python/pokemon_learner/', 'python/pokemon_reference/', 'contracts/jax-learner-v1/',
+41:                 'contracts/jax-slice-v1/', 'contracts/slice-v1/', 'contracts/learner-v1/')
+42:     for path, sha in previous['source_files'].items():
+43:         if path.startswith(prefixes) or path in ('requirements-jax.txt','requirements-learner.txt','requirements-contract.txt','scripts/seal-jax-learner.py'):
+44:             checked_file(ROOT, path, sha)
+45:     return {'plan': p, 'provenance': provenance(), 'predecessor': p['predecessor'], 'prior_gates': previous_checks()}
+46: 
+47: 
+48: class CompileLog(logging.Handler):
+49:     """Count actual XLA compilation messages, in addition to entry-point tracing."""
+50:     def __init__(self):
+51:         super().__init__(); self.count = 0
+52:     def emit(self, record):
+53:         # JAX 0.11.2 emits this from dispatch.LogElapsedTimeContextManager, including
+54:         # compile-or-cache retrieval. Actual first-call/repeated-call controls test it.
+55:         if record.getMessage().startswith('Finished XLA compilation of '): self.count += 1
+56: 
+57: 
+58: def compile_positive_control(counter):
+59:     fn=jax.jit(lambda x:jnp.sin(x)+jnp.float32(.125))
+60:     x=np.array([.1,.3,.7],np.float32);before=counter.count
+61:     jax.block_until_ready(fn(x));after=counter.count
+62:     require(after>before,'Compilation logger failed positive control')
+63:     jax.block_until_ready(fn(x))
+64:     require(counter.count==after,'Repeated control unexpectedly compiled')
+65:     return {'first_call_compilation_events':after-before,'same_shape_repeat_events':counter.count-after,
+66:             'logger':'jax._src.dispatch','message_prefix':'Finished XLA compilation of '}
+67: 
+68: 
+69: def memory():
+70:     # ru_maxrss is process peak RSS (bytes on macOS, KiB on Linux); not device allocation.
+71:     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+72:     if sys.platform != 'darwin': peak *= 1024
+73:     try:
+74:         current = int(subprocess.check_output(['/bin/ps','-o','rss=','-p',str(os.getpid())],text=True,
+75:                                               stderr=subprocess.DEVNULL).strip()) * 1024
+76:     except (OSError, ValueError, subprocess.CalledProcessError): current = None
+77:     device = jax.devices()[0].memory_stats()
+78:     return {'peak_process_rss_bytes': int(peak), 'current_process_rss_bytes': current,
+79:             'device_memory_stats': device, 'rss_scope': 'this process, including JAX runtime/compiler; system free memory not certified'}
+80: 
+81: 
+82: class Aggregate:
+83:     """Constant-memory latency histogram and weighted scalar diagnostics."""
+84:     def __init__(self):
+85:         self.cycles = self.decisions = self.games = self.moves = self.weight = 0
+86:         self.wall = self.latency_min = self.latency_max = 0.
+87:         self.edges = np.geomspace(1e-5, 10, 257)
+88:         self.hist = np.zeros(258, dtype=np.int64)
+89:         self.sums = {}; self.maxima = {}; self.minima = {}
+90:         self.probability_min = 1.
+91: 
+92:     def add(self, report, elapsed):
+93:         self.cycles += 1; self.decisions += int(report['decisions']); self.games += 64
+94:         self.moves += int(report['executed_moves']); self.wall += elapsed
+95:         self.latency_min = elapsed if self.cycles == 1 else min(elapsed, self.latency_min)
+96:         self.latency_max = max(elapsed, self.latency_max)
+97:         self.hist[np.searchsorted(self.edges, elapsed)] += 1
+98:         self.probability_min = min(self.probability_min, float(report['minimum_behavior_probability']))
+99:         count = np.asarray(report['metrics']['valid_count']); self.weight += int(count.sum())
+100:         for k in ('loss','actor_loss','value_loss','entropy','approx_kl','clip_fraction','gradient_norm','max_ratio_error'):
+101:             values = np.asarray(report['metrics'][k]); selected = values[count > 0]
+102:             self.sums[k] = self.sums.get(k,0.) + float(np.sum(values * count))
+103:             self.maxima[k] = max(self.maxima.get(k,-float('inf')),float(selected.max()))
+104:             self.minima[k] = min(self.minima.get(k,float('inf')),float(selected.min()))
+105: 
+106:     def report(self):
+107:         quantiles = {}
+108:         for q in (.5,.95,.99):
+109:             i = np.searchsorted(np.cumsum(self.hist), np.ceil(q * self.cycles))
+110:             quantiles[str(q)] = float(self.edges[i]) if i < len(self.edges) else None
+111:         return {'cycles':self.cycles, 'games':self.games, 'decisions':self.decisions, 'executed_moves':self.moves,
+112:                 'complete_cycle_seconds':self.wall, 'decisions_per_cycle_second':self.decisions/self.wall,
+113:                 'games_per_cycle_second':self.games/self.wall, 'decisions_per_game':self.decisions/self.games,
+114:                 'latency_min_seconds':self.latency_min, 'latency_max_seconds':self.latency_max,
+115:                 'latency_quantile_upper_bounds_seconds':quantiles,
+116:                 'latency_histogram':{'edges':self.edges.tolist(),'counts':self.hist.tolist()},
+117:                 'diagnostics':{k:{'valid_weighted_mean':self.sums[k]/self.weight,'min_minibatch':self.minima[k],
+118:                                   'max_minibatch':self.maxima[k]} for k in self.sums},
+119:                 'minimum_sampled_behavior_probability':self.probability_min,
+120:                 'diagnostic_scope':'one supported joint-action phase, minibatch values before their respective updates; probability minimum over sampled actions'}
+121: 
+122: 
+123: def identical(a,b):
+124:     require(jax.tree.structure(a)==jax.tree.structure(b),'Resume tree structure')
+125:     for x,y in zip(jax.tree.leaves(a),jax.tree.leaves(b)):
+126:         require(np.array_equal(np.asarray(x),np.asarray(y)),'Resume array/diagnostic mismatch')
+127: 
+128: 
+129: def parity(executable, out):
+130:     p=executable.plan; comparisons=Comparisons(p); games=decisions=resumes=0
+131:     for seed in p['parity_seeds']:
+132:         runner=Runner(seed,executable)
+133:         for batch in range(p['parity_batches_per_seed']):
+134:             l=runner.learner
+135:             b,terminal=executable.compiled['collect'](l.parameters,l.next_game,jnp.uint32(seed))
+136:             validate_state(terminal); valid=np.asarray(b.valid)
+137:             ref=reference_collect(l.parameters,int(l.version),np.arange(int(l.next_game),int(l.next_game)+64,dtype=np.uint32),environment_seed=seed,action_seed=seed)
+138:             for name in b.actor._fields:
+139:                 expected=getattr(ref.actor,name);actual=np.asarray(getattr(b.actor,name))[valid]
+140:                 if expected.dtype.kind in 'iub':require(np.array_equal(expected,actual),'Discrete actor parity: '+name)
+141:                 comparisons.check('actor/'+name,expected,actual)
+142:             for name in ('rewards','terminal','advantages','returns'): comparisons.check('targets/'+name,getattr(ref.targets,name),np.asarray(getattr(b.targets,name))[valid])
+143:             mapping=np.cumsum(valid)-1;nxt=np.asarray(b.targets.next_index)[valid]
+144:             require(np.array_equal(np.where(nxt>=0,mapping[np.maximum(nxt,0)],-1),ref.targets.next_index),'Compacted own-player linkage')
+145:             _,logp,values=predict_kernel(l.parameters,ActorInput(b.actor.features,b.actor.mask))
+146:             selected=np.asarray(logp)[np.arange(512),np.maximum(np.asarray(b.actor.actions),0)]
+147:             comparisons.check('behavior/old_logp',selected[valid],np.asarray(b.actor.old_logp)[valid])
+148:             comparisons.check('behavior/old_values',np.asarray(values)[valid],np.asarray(b.actor.old_values)[valid])
+149:             pars=dict(l.parameters); opt=Adam(pars,lr=p['learning_rate'],max_norm=p['max_gradient_norm'])
+150:             opt.m,opt.v,opt.step=dict(l.m),dict(l.v),int(l.step)
+151:             fixed,fixed_metrics=executable.compiled['update'](l,b,jnp.uint32(seed))
+152:             for epoch in range(2):
+153:                 order=np.asarray(permutation(jnp.uint32(seed),l.version,jnp.int32(epoch),b.valid))
+154:                 for mb,ix in enumerate(order.reshape(4,128)):
+155:                     ix=ix[valid[ix]]
+156:                     if not len(ix):continue
+157:                     (_,metrics),gradients=model_loss_grad(pars,b.actor.features[ix],b.actor.mask[ix],b.actor.actions[ix],
+158:                         b.actor.old_logp[ix],b.targets.advantages[ix],b.targets.returns[ix],p['ppo_clip'],p['value_coefficient'],p['entropy_coefficient'])
+159:                     opt.apply(pars,gradients)
+160:                     for name in metrics:comparisons.check('update/'+name,metrics[name],fixed_metrics[name][epoch,mb])
+161:             for label,a,c in [('parameters',pars,fixed.parameters),('m',opt.m,fixed.m),('v',opt.v,fixed.v)]:
+162:                 for name in a:comparisons.check(label+'/'+name,a[name],c[name])
+163:             require(opt.step==int(fixed.step),'Applied optimizer steps')
+164:             if batch==0:
+165:                 directory=out/f'first-buffer-{seed}';directory.mkdir()
+166:                 np.savez(directory/'actor.npz',**{k:np.asarray(v) for k,v in b.actor._asdict().items()})
+167:                 np.savez(directory/'targets.npz',**{k:np.asarray(v) for k,v in b.targets._asdict().items()},valid=valid)
+168:                 write(directory/'manifest.json',{'capacity':512,'valid':int(valid.sum()),'actor_fields':list(b.actor._fields),
+169:                     'actor_has_targets':False,'files':{f:file_hash(directory/f) for f in ('actor.npz','targets.npz')}})
+170:             boundary=out/f'parity-{seed}-{batch}.checkpoint.json'
+171:             save(boundary,runner)
+172:             restored=load(boundary,executable)
+173:             report=runner.run();again=restored.run();identical(report,again);identical(runner.learner,restored.learner)
+174:             require(state(runner)==state(restored),'Resume complete state');resumes+=1
+175:             for x,y in zip(jax.tree.leaves(fixed),jax.tree.leaves(runner.learner)):comparisons.check('fused_vs_separate',x,y)
+176:             games+=64;decisions+=int(report['decisions'])
+177:     return {'status':'passed','games':games,'decisions':decisions,'disk_resumes_with_compared_next_cycle':resumes,
+178:             'comparisons':comparisons.rows,'atol':p['atol'],'rtol':p['rtol'],
+179:             'shuffle_scope':'new fixed-capacity shuffle; compact reference uses the identical resulting valid order, not the prior variable-length permutation'}
+180: 
+181: 
+182: def profile(ex, out, compile_log):
+183:     runner=Runner(61,ex)
+184:     for _ in range(ex.plan['warmup_cycles']):runner.run()
+185:     baseline=compile_log.count;traces=dict(ex.traces);aggregate=Aggregate();profiler=cProfile.Profile()
+186:     profiler.enable()
+187:     for _ in range(ex.plan['profile_cycles']):
+188:         t=time.perf_counter();r=runner.run();aggregate.add(r,time.perf_counter()-t)
+189:     profiler.disable();profiler.dump_stats(str(out/'host-profile.pstats'))
+190:     stream=io.StringIO();pstats.Stats(profiler,stream=stream).strip_dirs().sort_stats('cumulative').print_stats(35)
+191:     (out/'host-profile.txt').write_text(stream.getvalue())
+192:     phases={}
+193:     for name in ('collect','update'):
+194:         samples=[]
+195:         b,_=ex.compiled['collect'](runner.learner.parameters,runner.learner.next_game,jnp.uint32(runner.seed))
+196:         for _ in range(100):
+197:             t=time.perf_counter()
+198:             value=ex.compiled[name](runner.learner.parameters,runner.learner.next_game,jnp.uint32(runner.seed)) if name=='collect' else ex.compiled[name](runner.learner,b,jnp.uint32(runner.seed))
+199:             jax.block_until_ready(value);samples.append(time.perf_counter()-t)
+200:         phases[name]={'repetitions':100,'median_seconds':float(np.median(samples)),
+201:                       'p95_seconds':float(np.quantile(samples,.95)),
+202:                       'scope':'isolated repeated phase on a fixed input; not complete-cycle throughput'}
+203:     require(compile_log.count==baseline and ex.traces==traces,'Unexpected profile compilation')
+204:     return {'status':'passed',**aggregate.report(),'warmup_cycles':ex.plan['warmup_cycles'],
+205:             'host_profiler_enabled':True,'memory':memory(),'isolated_phases':phases,
+206:             'timing_scope':'cProfile is enabled and adds host overhead; use the unprofiled soak for operational throughput',
+207:             'warmup_compilation_count':baseline,
+208:             'unexpected_compilations':compile_log.count-baseline,'entry_traces':dict(ex.traces)}
+209: 
+210: 
+211: def soak(ex,out,compile_log):
+212:     p=ex.plan;runner=Runner(p['soak_seed'],ex)
+213:     for _ in range(p['warmup_cycles']):runner.run()
+214:     save(out/'soak-start.checkpoint.json',runner)
+215:     baseline=compile_log.count;traces=dict(ex.traces);initial_memory=memory()
+216:     initial_counters={'updates':int(runner.learner.version),'decisions':runner.decisions,'next_game':int(runner.learner.next_game)}
+217:     aggregate=Aggregate();start_wall=time.monotonic();start_cpu=time.process_time()
+218:     next_telemetry=p['telemetry_seconds'];next_checkpoint=p['checkpoint_seconds'];resumes=0
+219:     with (out/'telemetry.jsonl').open('x') as log:
+220:         while time.monotonic()-start_wall < p['soak_seconds']:
+221:             t=time.perf_counter();r=runner.run();aggregate.add(r,time.perf_counter()-t)
+222:             elapsed=time.monotonic()-start_wall
+223:             require(ex.traces==traces and compile_log.count==baseline,'Unexpected soak recompilation')
+224:             if elapsed>=next_telemetry:
+225:                 line={'elapsed_seconds':elapsed,'updates':int(runner.learner.version),'soak_cycles':aggregate.cycles,
+226:                       'decisions':aggregate.decisions,'memory':memory(),
+227:                       'recent_metrics':{k:float(np.mean(v)) for k,v in r['metrics'].items()}}
+228:                 log.write(wire(line).decode()+'\n');log.flush()
+229:                 write(out/'progress.json',line)
+230:                 print(json.dumps({'soak_elapsed_seconds':round(elapsed,2),'cycles':aggregate.cycles,
+231:                                   'decisions':aggregate.decisions,'peak_rss_bytes':line['memory']['peak_process_rss_bytes']}),flush=True)
+232:                 next_telemetry+=p['telemetry_seconds']
+233:             if elapsed>=next_checkpoint:
+234:                 path=out/f'soak-boundary-{resumes+1}.checkpoint.json';save(path,runner)
+235:                 restored=load(path,ex)
+236:                 # Audit the NEXT update without counting a duplicate as primary work.
+237:                 expected,expected_report=ex(runner.learner,runner.seed);check_report(expected_report)
+238:                 restored_report=restored.run();identical(expected,restored.learner);identical(expected_report,restored_report)
+239:                 resumes+=1;next_checkpoint+=p['checkpoint_seconds']
+240:     wall=time.monotonic()-start_wall;cpu=time.process_time()-start_cpu
+241:     save(out/'soak-final.checkpoint.json',runner)
+242:     restored=load(out/'soak-final.checkpoint.json',ex)
+243:     expected,expected_report=ex(runner.learner,runner.seed);check_report(expected_report)
+244:     identical(expected_report,restored.run());identical(expected,restored.learner);resumes+=1
+245:     require(compile_log.count==baseline and ex.traces==traces,'Unexpected final-resume compilation')
+246:     require(int(runner.learner.version)==initial_counters['updates']+aggregate.cycles and
+247:             runner.decisions==initial_counters['decisions']+aggregate.decisions,'Soak accounting')
+248:     return {'status':'passed',**aggregate.report(),'target_seconds':p['soak_seconds'],'elapsed_seconds':wall,
+249:             'process_cpu_seconds':cpu,'decisions_per_elapsed_second':aggregate.decisions/wall,
+250:             'games_per_elapsed_second':aggregate.games/wall,'initial_memory':initial_memory,'final_memory':memory(),
+251:             'warmup_cycles':p['warmup_cycles'],'initial_counters':initial_counters,
+252:             'final_counters':{'updates':int(runner.learner.version),'optimizer_steps':int(runner.learner.step),
+253:                               'decisions':runner.decisions,'next_game':int(runner.learner.next_game)},
+254:             'unexpected_compilations':compile_log.count-baseline,'entry_traces':dict(ex.traces),
+255:             'warmup_compilation_count':baseline,
+256:             'disk_resumes_with_compared_next_cycle':resumes,
+257:             'timing_scope':'elapsed includes host validation, aggregation, telemetry, checkpoint I/O and audit replay; cycle sum excludes those except validation; warmup/compile excluded',
+258:             'device_memory_headroom_certified':False,'full_g2':'open','full_g3':'open'}
+259: 
+260: 
+261: def main(output):
+262:     out=Path(output).resolve();require(out.is_relative_to(ROOT/'artifacts/runs'),'Output must be under artifacts/runs')
+263:     out.mkdir(parents=True,exist_ok=False);admitted=admission();write(out/'admission.json',admitted)
+264:     compilation=CompileLog();logger=logging.getLogger('jax._src.dispatch');logger.addHandler(compilation)
+265:     jax.config.update('jax_log_compiles',True)
+266:     result={'status':'failed','full_g2':'open','full_g3':'open','admission_hash':digest(admitted)}
+267:     try:
+268:         t=time.perf_counter();ex=Executables();ex.diagnostics()
+269:         result['compile']={'seconds':time.perf_counter()-t,'entry_traces':dict(ex.traces),
+270:                            'cycle_memory_analysis':str(ex.compiled['cycle'].memory_analysis()),
+271:                            'cycle_cost_analysis':ex.compiled['cycle'].cost_analysis(),
+272:                            'logging_positive_control':compile_positive_control(compilation)}
+273:         result['parity']=parity(ex,out);write(out/'parity.json',result['parity'])
+274:         result['profile']=profile(ex,out,compilation);write(out/'profile.json',result['profile'])
+275:         print(json.dumps({'parity':'passed','profile':'passed','soak_seconds':ex.plan['soak_seconds']}),flush=True)
+276:         result['soak']=soak(ex,out,compilation);write(out/'soak.json',result['soak'])
+277:         require(admission()==admitted,'Source/runtime/predecessor changed during campaign')
+278:         result['status']='passed'
+279:     except Exception as error:
+280:         result['error']=repr(error);result['traceback']=traceback.format_exc();raise
+281:     finally:
+282:         logger.removeHandler(compilation)
+283:         result['content_hash']=digest(result);write(out/'report.json',result)
+284:         print(json.dumps({'report':str(out/'report.json'),'status':result['status']}),flush=True)
+285: 
+286: 
+287: if __name__=='__main__':
+288:     parser=argparse.ArgumentParser();parser.add_argument('output');main(parser.parse_args().output)
+289: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_fixed/checkpoint.py
+1: """Bounded checkpoint state: no per-update ledger growing during the CPU soak.
+2: 
+3: Only completed whole-episode updates can be published. A failed collection/update
+4: must load the last durable boundary; no live-game or partial optimizer continuation.
+5: """
+6: import json
+7: import os
+8: from pathlib import Path
+9: import jax
+10: import jax.numpy as jnp
+11: import numpy as np
+12: from pokemon_jax_learner.checkpoint import provenance as prior_provenance
+13: from pokemon_jax_learner.model import validate_parameters
+14: from pokemon_learner.checkpoint import wire, digest, file_hash, array_wire, read_array
+15: from pokemon_learner.core import require
+16: from .loop import ROOT, Learner, start, plan, check_report
+17: 
+18: 
+19: def provenance():
+20:     result = prior_provenance()
+21:     for path in sorted((ROOT / 'python/pokemon_fixed').glob('*.py')) + sorted((ROOT / 'contracts/fixed-loop-v1').glob('*')):
+22:         result['sources'][str(path.relative_to(ROOT))] = file_hash(path)
+23:     return result
+24: 
+25: 
+26: class Runner:
+27:     def __init__(self, seed, executable):
+28:         require(type(seed) is int and 0 <= seed < 2**32, 'Seed range')
+29:         self.seed, self.executable, self.plan = seed, executable, executable.plan
+30:         self.learner = start(seed)
+31:         self.decisions = self.executed_moves = 0
+32:         self.phase = 'idle'
+33: 
+34:     def run(self, *, fault=None):
+35:         require(self.phase == 'idle', 'Uncommitted work: restore a boundary checkpoint')
+36:         require(fault in (None, 'after_collect', 'after_update'), 'Unknown fault')
+37:         require(int(self.learner.version) < self.plan['maximum_updates'], 'Counter budget exhausted')
+38:         self.phase = 'collect-update'
+39:         if fault == 'after_collect':
+40:             buffer, state = self.executable.compiled['collect'](self.learner.parameters, self.learner.next_game, jnp.uint32(self.seed))
+41:             jax.block_until_ready((buffer, state))
+42:             raise RuntimeError('Injected failure after collection before update/commit')
+43:         candidate, report = self.executable(self.learner, self.seed)
+44:         r = check_report(report)  # includes device synchronization
+45:         if fault == 'after_update': raise RuntimeError('Injected failure after update before commit')
+46:         self.learner = candidate
+47:         self.decisions += int(r['decisions'])
+48:         self.executed_moves += int(r['executed_moves'])
+49:         self.phase = 'idle'
+50:         return r
+51: 
+52: 
+53: def state(runner):
+54:     require(runner.phase == 'idle', 'Only completed-update checkpoints supported')
+55:     l = runner.learner
+56:     return {'format': 'fixed-loop-checkpoint-1', 'mode': 'completed-update-whole-episodes',
+57:             'provenance': provenance(), 'plan': runner.plan, 'seed': runner.seed,
+58:             'parameters': {k: array_wire(np.asarray(v)) for k, v in l.parameters.items()},
+59:             'm': {k: array_wire(np.asarray(v)) for k, v in l.m.items()},
+60:             'v': {k: array_wire(np.asarray(v)) for k, v in l.v.items()},
+61:             'step': int(l.step), 'version': int(l.version), 'next_game': int(l.next_game),
+62:             'decisions': runner.decisions, 'executed_moves': runner.executed_moves,
+63:             'environment': {'active_games': 0, 'partial_buffer': None},
+64:             'random_streams': 'Threefry(seed); ENV/game/turn/role; ACT/game/turn/seat; SHF/version/epoch; no mutable cursor'}
+65: 
+66: 
+67: def save(path, runner, *, interrupt_before_replace=False):
+68:     path = Path(path)
+69:     path.parent.mkdir(parents=True, exist_ok=True)
+70:     body = state(runner)
+71:     doc = {'body': body, 'sha256': digest(body)}
+72:     temporary = path.with_name(path.name + '.partial')
+73:     with temporary.open('xb') as stream:
+74:         stream.write(wire(doc) + b'\n')
+75:         stream.flush()
+76:         os.fsync(stream.fileno())
+77:     if interrupt_before_replace: raise RuntimeError('Injected interrupted checkpoint publication')
+78:     os.replace(temporary, path)
+79:     fd = os.open(path.parent, os.O_RDONLY)
+80:     try: os.fsync(fd)
+81:     finally: os.close(fd)
+82:     return doc['sha256']
+83: 
+84: 
+85: def load(path, executable):
+86:     def unique(pairs):
+87:         result = {}
+88:         for k, v in pairs:
+89:             require(k not in result, 'Duplicate checkpoint key')
+90:             result[k] = v
+91:         return result
+92:     doc = json.loads(Path(path).read_bytes(), object_pairs_hook=unique)
+93:     require(set(doc) == {'body', 'sha256'} and doc['sha256'] == digest(doc['body']), 'Checkpoint checksum')
+94:     b = doc['body']
+95:     require(b['format'] == 'fixed-loop-checkpoint-1' and b['mode'] == 'completed-update-whole-episodes', 'Checkpoint mode')
+96:     require(b['plan'] == executable.plan == plan() and b['provenance'] == provenance(), 'Source/runtime/plan drift')
+97:     runner = Runner(b['seed'], executable)
+98:     arrays = {}
+99:     for name in ('parameters', 'm', 'v'):
+100:         require(set(b[name]) == set(runner.learner.parameters), 'Array keys')
+101:         arrays[name] = {k: jnp.asarray(read_array(b[name][k], a.shape)) for k, a in runner.learner.parameters.items()}
+102:         validate_parameters(arrays[name])
+103:     require(all(np.all(np.asarray(a) >= 0) for a in arrays['v'].values()), 'Negative second moment')
+104:     for key in ('step', 'version', 'next_game', 'decisions', 'executed_moves'):
+105:         require(type(b[key]) is int and b[key] >= 0, 'Counter type')
+106:     updates = b['version']
+107:     require(updates <= executable.plan['maximum_updates'] and b['next_game'] == 64 * updates, 'Game/version counter')
+108:     # Each game lasts 2..4 turns: 256..512 decisions, 2..4 nonempty minibatches/epoch.
+109:     require(4 * updates <= b['step'] <= 8 * updates and b['step'] % 2 == 0, 'Optimizer counter')
+110:     require(256 * updates <= b['decisions'] <= 512 * updates and b['decisions'] % 2 == 0, 'Decision counter')
+111:     require(b['decisions'] - 64 * updates <= b['executed_moves'] <= b['decisions'], 'Executed move counter')
+112:     runner.learner = Learner(arrays['parameters'], arrays['m'], arrays['v'], jnp.int32(b['step']),
+113:                              jnp.int32(updates), jnp.uint32(b['next_game']))
+114:     runner.decisions, runner.executed_moves = b['decisions'], b['executed_moves']
+115:     require(state(runner) == b, 'Noncanonical checkpoint or unsupported live environment')
+116:     return runner
+117: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/fixed-loop-v1/plan.json
+1: {
+2:   "version": "m1-fixed-loop-plan-1",
+3:   "predecessor": "ecc7c9a9026831dca0fd7a70c25e00b3b0386f62dd0a8e17f8eee62ee580c1be",
+4:   "profile": "gen9-rattata-duel-v1",
+5:   "backend": "cpu",
+6:   "x64_enabled": false,
+7:   "games_per_batch": 64,
+8:   "turns": 4,
+9:   "seats": 2,
+10:   "capacity": 512,
+11:   "features": 59,
+12:   "actions": 2,
+13:   "epochs": 2,
+14:   "minibatch": 128,
+15:   "learning_rate": 0.003,
+16:   "max_gradient_norm": 1.0,
+17:   "gamma": 1.0,
+18:   "gae_lambda": 0.95,
+19:   "ppo_clip": 0.2,
+20:   "value_coefficient": 0.5,
+21:   "entropy_coefficient": 0.01,
+22:   "atol": 0.000003,
+23:   "rtol": 0.00003,
+24:   "parity_seeds": [11, 29, 47],
+25:   "parity_batches_per_seed": 8,
+26:   "warmup_cycles": 8,
+27:   "profile_cycles": 1000,
+28:   "soak_seconds": 7200,
+29:   "soak_seed": 73,
+30:   "telemetry_seconds": 60,
+31:   "checkpoint_seconds": 600,
+32:   "maximum_updates": 50000000,
+33:   "padding": "time-major [4,64,2]; invalid rows sanitized before math; losses average valid rows; empty minibatches skip Adam",
+34:   "shuffle": "permute all 512 rows with Threefry domain SHF, version, epoch; stable-partition valid rows first; 4 fixed minibatches per epoch",
+35:   "optimizer_bias": "FP32(1-beta**step) table for steps 1..20000; exact FP32 one thereafter",
+36:   "checkpoint_mode": "completed whole-episode update boundary; atomic rollback only",
+37:   "soak_stop": "elapsed monotonic wall time >=7200 after warmup; fail on nonfinite, illegal action, incomplete game, unexpected tracing, source drift, or counter limit",
+38:   "full_g2": "open",
+39:   "full_g3": "open",
+40:   "final_evaluation": "sealed; no reads of final episode data or new final games"
+41: }
+42: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE artifacts/runs/m1-fixed-loop-v2/admission.json
+1: {"plan":{"actions":2,"atol":3e-06,"backend":"cpu","capacity":512,"checkpoint_mode":"completed whole-episode update boundary; atomic rollback only","checkpoint_seconds":600,"entropy_coefficient":0.01,"epochs":2,"features":59,"final_evaluation":"sealed; no reads of final episode data or new final games","full_g2":"open","full_g3":"open","gae_lambda":0.95,"games_per_batch":64,"gamma":1.0,"learning_rate":0.003,"max_gradient_norm":1.0,"maximum_updates":50000000,"minibatch":128,"optimizer_bias":"FP32(1-beta**step) table for steps 1..20000; exact FP32 one thereafter","padding":"time-major [4,64,2]; invalid rows sanitized before math; losses average valid rows; empty minibatches skip Adam","parity_batches_per_seed":8,"parity_seeds":[11,29,47],"ppo_clip":0.2,"predecessor":"ecc7c9a9026831dca0fd7a70c25e00b3b0386f62dd0a8e17f8eee62ee580c1be","profile":"gen9-rattata-duel-v1","profile_cycles":1000,"rtol":3e-05,"seats":2,"shuffle":"permute all 512 rows with Threefry domain SHF, version, epoch; stable-partition valid rows first; 4 fixed minibatches per epoch","soak_seconds":7200,"soak_seed":73,"soak_stop":"elapsed monotonic wall time >=7200 after warmup; fail on nonfinite, illegal action, incomplete game, unexpected tracing, source drift, or counter limit","telemetry_seconds":60,"turns":4,"value_coefficient":0.5,"version":"m1-fixed-loop-plan-1","warmup_cycles":8,"x64_enabled":false},"predecessor":"ecc7c9a9026831dca0fd7a70c25e00b3b0386f62dd0a8e17f8eee62ee580c1be","prior_gates":{"final_reservation_unchanged":true,"previous_g2":"0b974be3082ce9eda957b5a201da39c55db95a315f91f1f9d013cd8bb05ee21f","previous_r7":"4bedcd08af395d7e012cbaad2a315edfe72b2ede8f54266b0137d49b505a2721"},"provenance":{"runtime":{"backend":"cpu","byteorder":"little","compiler":{"default_matmul_precision":null,"numpy_dtype_promotion":"standard","numpy_rank_promotion":"allow","xla_flags":""},"packages":{"attrs":"26.1.0","jax":"0.11.2","jaxlib":"0.11.2","jsonschema":"4.23.0","jsonschema-specifications":"2025.9.1","ml_dtypes":"0.6.0","numpy":"2.5.4","opt_einsum":"3.4.0","referencing":"0.37.0","rpds-py":"2026.9.1","scipy":"1.18.1"},"platform":"macOS-26.6.2-arm64-arm-64bit-Mach-O","prng":"threefry2x32","python":"3.14.3 (main, Feb  3 2026, 15:32:20) [Clang 17.0.0 (clang-1700.6.3.2)]","x64_enabled":false},"sources":{"contracts/fixed-loop-v1/plan.json":"0b2867a77ebe4d94d8978c1620fb018d0e2a802844a4cd7a54c6a2f6f234acb3","contracts/jax-learner-v1/core.md":"6e9ca76ece62511b90064ec8ea241ddf39cdb0afa0beda7cb0e02d0ddca224b8","contracts/jax-learner-v1/plan.json":"a80d8b40e6da0778ddeb9fefe00de40c2d2462b33751298f2f69e4f414f8ec09","contracts/learner-v1/canaries.json":"9dea26748af79ed63cbfbed1befc98da1ec9a06e11f5e272d333489a3b5f5a3a","contracts/slice-v1/profile.json":"e2c87730f2c515af0383c4d049f9b4373a917ccf9c86db61cb8f65e9a46ddd7e","python/pokemon_fixed/__init__.py":"5ce0e28d586286386e2c6d9a1dbcc859b74c1b9bca35b6de0272f539c9520b27","python/pokemon_fixed/campaign.py":"3d418da8776d9a218552831bd17f27dfd88bfe6cefff4ebbdcf2eccbfe7213be","python/pokemon_fixed/checkpoint.py":"d8e93bd4e403e9759b78e6bfb052af9d9714e00942993239eb4159e0f46d4fea","python/pokemon_fixed/loop.py":"38e37eabab0ea406549c7fa232a217930567ca3a6b079a64d7c36ddef446fd81","python/pokemon_fixed/math.py":"2442da19684ece79e9aa11c0287ba722f2b31178b0ef67faa681b23c898e86fb","python/pokemon_jax/__init__.py":"e364b40e3acc4a5d20973391630359dd0cc066279ebbcda5f76bd4856c621551","python/pokemon_jax/campaign.py":"aeec49558c695e7af2b3bf72ea460a39a16cdc7e7869586654ca7df57a80685f","python/pokemon_jax/chance.py":"d2b4191cb48fac8b47819db529ffb7deea622c9a352e8a5daf641d791af47454","python/pokemon_jax/engine.py":"da278cf797f6d691e1d2674544d9a6fab5ef6bb6eb282b07deac09d070e5c262","python/pokemon_jax/statistics.py":"facd962626fd43625af12fd785ed207f9c54692214641b3cc27f1e182416b6b1","python/pokemon_jax/views.py":"e4452df2515b500a1989c5fd2d8e84d55d3d3a6260add28fc51fb34c8c74b98b","python/pokemon_jax_learner/__init__.py":"8582070d68847c641e165cbf273f515a72c40747d5f15285a592ad84f2be7212","python/pokemon_jax_learner/campaign.py":"4748f279500afb150c1cd84552eb4d7257c743af9d2ab1974197a7e315419779","python/pokemon_jax_learner/canaries.py":"f7f1b1f8aa1021ad2a39440d334ec995ad8b7fb1eb969682268e0e3f4887c91a","python/pokemon_jax_learner/checkpoint.py":"e4d2a80b1b4ee452523baeb01cc5cb5c614f599cd5b2f7ecf65e591ecac16649","python/pokemon_jax_learner/collector.py":"7585d02a945a086d8d4aa4b7fdba5b421ab4518e93d898ea4c8a39a8a457c0df","python/pokemon_jax_learner/core.py":"0aecb281b433b16c68cd188b00e763b69f9b17b149f15f4e4e0f6804bb84f3ba","python/pokemon_jax_learner/model.py":"2ce02061d9932bbbab287833be5302aa1f50d58dbdcb8344933045b033500b6e","python/pokemon_jax_learner/trainer.py":"27618ce63708d88aee033b58d9a4bb02ed048063ef59e2407dc05ca1ef3c6da1","python/pokemon_learner/__init__.py":"5070128702692556479c080ff959ba40e1e7421417c212f8f4a2dacf1dbecccc","python/pokemon_learner/canaries.py":"b71e52e47cea725e2d00f6c7d17f7c7f48342122ab7a228f7aeadd7d8d41096e","python/pokemon_learner/checkpoint.py":"0f8a4f05a97f0af6ddba77f0c95158a74e8287af98c76181a961fb6fd85841dc","python/pokemon_learner/core.py":"db814827cd5a80957a54bf629c048979e370f5c14529bde4580722d2aee1adde","python/pokemon_learner/trainer.py":"8af7e2d2d7d54fbb3d5db2da3603fc62dd01e811ce861a45ed28a1a0f8575967","python/pokemon_reference/__init__.py":"137518363bf6632c5a37d4fe47719f99995099baf83c92561d4d6641bc291f59","python/pokemon_reference/__main__.py":"9b1946534392b097e74307ef2ffec79474c2aa45f9380c90fc700e0fc31f4592","python/pokemon_reference/actor_actions.py":"b371d30d8fa401124140366fa4a783df10437c6663de22db6c08ff81bd55ecbc","python/pokemon_reference/contract.py":"a7f3accdfac9ba6c34e03c719786484c6d3d4fd383866eb9b8b5259d90f4b5d6","python/pokemon_reference/corpus.py":"6626cf863138255ad14cbf69e1c011daec115f09ecb238d018625b9587b9475c","python/pokemon_reference/dataset_build.py":"7c6cf5b02f8ba099177d5e7022b7e56c299e80cef2b9cd2ea526e2fbe042fb03","python/pokemon_reference/dataset_gate.py":"fcce48073cafec1e28879aa2b8130bea420082ec06df83e980d29c2159d8a62b","python/pokemon_reference/dataset_identity.py":"950d7365143042e3b4b4395154925957babb6a943bbcb76f0eb3936c96166759","python/pokemon_reference/dataset_legacy.py":"4f08979581f4c4d6d1f8569aa465dc6a45b173343f28602045e4a2d12f3a7cc4","python/pokemon_reference/episode_campaign.py":"d60b9f1415124a4173e88e389ab78b960c0950f01f161a9d0597d4561bbd5901","python/pokemon_reference/episodes.py":"73f9e8dd3d3e389866c9ceaafc718b7a1a5a53d514dcef24bf9ec5cc428e4646","python/pokemon_reference/feature_campaign.py":"bec839133398629894023e072255139a9d641972bc6deb455eec5eda9fb5b58a","python/pokemon_reference/feature_checks.py":"b69321f7a0f5fe0326c860a0876edeead41c8109090c62533bc0217cc0818225","python/pokemon_reference/feature_spec.py":"0abefe0840e4e670677874206ac0199f777202e324002d797769c5b46730be29","python/pokemon_reference/feature_trajectories.py":"ea0f33e2d44ea0ab272820726ebd2839c568768eb49d5ed1a7d977b9b849f2b0","python/pokemon_reference/feature_validation.py":"6215eadb7e22c1883e3c14df3d0089571edf4c24962942ee1e10aae82669832f","python/pokemon_reference/mechanics.py":"5876ab4c307f62f29baddefa876b468d4e0141634c577371e152e90d213a2192","python/pokemon_reference/player_history.py":"9d99c29013c50726c3d926109958e8606d7dd33716443d91f627a25d011a8b4c","python/pokemon_reference/public_history.py":"7a4600d13a6a26bf33ce2c7fd43fe31a89a05bf03213b5e2f240c9be671abf7c","python/pokemon_slice/__init__.py":"a6a1b674c4406a97709a1698a19f3b7a28131ed30d29c8f0314433ebeca6d534","python/pokemon_slice/engine.py":"1e0436f01450eb2afad3951ceef97dcdfa676ba8f11e18d79b6133031c05668c","python/pokemon_slice/verify.py":"90448ff8f067a73d819a809a773dd0d2f646cd958bf521d7af0092a330de351b","requirements-contract.txt":"b41f5e1c575082b07952e8cc81de8ea702f1efefbc2abcb6c3290f375a5731c3","requirements-jax.txt":"41290b5aa43647bb33647dcecfe10899cea4fa5641377c5971ab0dc24aab24ad","requirements-learner.txt":"b9e3ea48fc98e677cf2f29c20e7c0be2f26422bb223f5018490ed3b0188135db"}}}
+2: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE artifacts/runs/m1-fixed-loop-v2/parity.json
+1: {"atol":3e-06,"comparisons":{"actor/actions":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"actor/features":{"comparisons":24,"elements":567226,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"actor/game_id":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"actor/mask":{"comparisons":24,"elements":19228,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"actor/old_logp":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"actor/old_values":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"actor/side":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"actor/turn":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"behavior/old_logp":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"behavior/old_values":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"fused_vs_separate":{"comparisons":360,"elements":13032,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"m/policy_b":{"comparisons":24,"elements":48,"max_absolute_error":3.725290298461914e-09,"max_fraction_of_tolerance":0.0009401119382635862},"m/policy_w":{"comparisons":24,"elements":2832,"max_absolute_error":1.862645149230957e-09,"max_fraction_of_tolerance":0.0005289947116853608},"m/value_b":{"comparisons":24,"elements":24,"max_absolute_error":1.862645149230957e-09,"max_fraction_of_tolerance":0.0005777480771562687},"m/value_w":{"comparisons":24,"elements":1416,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"parameters/policy_b":{"comparisons":24,"elements":48,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"parameters/policy_w":{"comparisons":24,"elements":2832,"max_absolute_error":7.450580596923828e-09,"max_fraction_of_tolerance":0.0015048384604518987},"parameters/value_b":{"comparisons":24,"elements":24,"max_absolute_error":7.450580596923828e-09,"max_fraction_of_tolerance":0.001248965709638948},"parameters/value_w":{"comparisons":24,"elements":1416,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"targets/advantages":{"comparisons":24,"elements":9614,"max_absolute_error":1.1920928955078125e-07,"max_fraction_of_tolerance":0.00707566000412143},"targets/returns":{"comparisons":24,"elements":9614,"max_absolute_error":1.1920928955078125e-07,"max_fraction_of_tolerance":0.019713304678862183},"targets/rewards":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"targets/terminal":{"comparisons":24,"elements":9614,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"update/actor_loss":{"comparisons":192,"elements":192,"max_absolute_error":5.960464477539063e-08,"max_fraction_of_tolerance":0.004855097950921447},"update/approx_kl":{"comparisons":192,"elements":192,"max_absolute_error":6.373738870024681e-09,"max_fraction_of_tolerance":0.0021198663074904313},"update/clip_fraction":{"comparisons":192,"elements":192,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"update/entropy":{"comparisons":192,"elements":192,"max_absolute_error":1.7881393432617188e-07,"max_fraction_of_tolerance":0.008121718176119395},"update/loss":{"comparisons":192,"elements":192,"max_absolute_error":8.940696716308594e-08,"max_fraction_of_tolerance":0.005715425925428049},"update/max_ratio_error":{"comparisons":192,"elements":192,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"update/value_loss":{"comparisons":192,"elements":192,"max_absolute_error":2.9802322387695312e-08,"max_fraction_of_tolerance":0.0032689560813658337},"v/policy_b":{"comparisons":24,"elements":48,"max_absolute_error":7.275957614183426e-12,"max_fraction_of_tolerance":2.4232335904719634e-06},"v/policy_w":{"comparisons":24,"elements":2832,"max_absolute_error":3.637978807091713e-12,"max_fraction_of_tolerance":1.2120531835251106e-06},"v/value_b":{"comparisons":24,"elements":24,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0},"v/value_w":{"comparisons":24,"elements":1416,"max_absolute_error":0.0,"max_fraction_of_tolerance":0.0}},"decisions":9614,"disk_resumes_with_compared_next_cycle":24,"games":1536,"rtol":3e-05,"shuffle_scope":"new fixed-capacity shuffle; compact reference uses the identical resulting valid order, not the prior variable-length permutation","status":"passed"}
+2: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE artifacts/runs/m1-fixed-loop-v2/profile.json
+1: {"complete_cycle_seconds":0.8195384321734309,"cycles":1000,"decisions":400804,"decisions_per_cycle_second":489060.6520270934,"decisions_per_game":6.2625625,"diagnostic_scope":"one supported joint-action phase, minibatch values before their respective updates; probability minimum over sampled actions","diagnostics":{"actor_loss":{"max_minibatch":0.4843572974205017,"min_minibatch":-0.5550338625907898,"valid_weighted_mean":-0.0005759170066065284},"approx_kl":{"max_minibatch":0.0017819656059145927,"min_minibatch":-3.585591912269592e-08,"valid_weighted_mean":4.4717498936929104e-05},"clip_fraction":{"max_minibatch":0.0,"min_minibatch":0.0,"valid_weighted_mean":0.0},"entropy":{"max_minibatch":0.688559889793396,"min_minibatch":0.06342946738004684,"valid_weighted_mean":0.38533115335073315},"gradient_norm":{"max_minibatch":0.7728646993637085,"min_minibatch":0.005956800188869238,"valid_weighted_mean":0.05112572130462029},"loss":{"max_minibatch":0.5400751829147339,"min_minibatch":-0.4842546284198761,"valid_weighted_mean":0.050582442388258424},"max_ratio_error":{"max_minibatch":0.15532445907592773,"min_minibatch":0.0,"valid_weighted_mean":0.015570441748172447},"value_loss":{"max_minibatch":0.1440354436635971,"min_minibatch":0.0883684828877449,"valid_weighted_mean":0.11002334186528644}},"entry_traces":{"collect":1,"cycle":1,"update":1},"executed_moves":351613,"games":64000,"games_per_cycle_second":78092.73792111351,"host_profiler_enabled":true,"isolated_phases":{"collect":{"median_seconds":0.0003316875081509352,"p95_seconds":0.0003771518124267459,"repetitions":100,"scope":"isolated repeated phase on a fixed input; not complete-cycle throughput"},"update":{"median_seconds":0.0002461459953337908,"p95_seconds":0.0003116664011031389,"repetitions":100,"scope":"isolated repeated phase on a fixed input; not complete-cycle throughput"}},"latency_histogram":{"counts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,40,381,287,171,53,25,5,8,0,1,0,2,1,0,1,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"edges":[1e-05,1.055449600878603e-05,1.1139738599948024e-05,1.175743265920711e-05,1.2409377607517196e-05,1.3097472643005898e-05,1.3823722273578995e-05,1.4590242156305607e-05,1.539926526059492e-05,1.6253148373118643e-05,1.715437896342879e-05,1.8105582430271218e-05,1.9109529749704406e-05,2.0169145547303305e-05,2.1287516617963725e-05,2.2467900918126444e-05,2.3713737056616554e-05,2.502865431174608e-05,2.6416483203860926e-05,2.788126665413133e-05,2.9427271762092818e-05,3.105900223624705e-05,3.2781211513934585e-05,3.4598916608699325e-05,3.651741272548377e-05,3.8542288686231066e-05,4.067944321083047e-05,4.293510210083482e-05,4.531583637600818e-05,4.782858141653791e-05,5.048065716667471e-05,5.327978945865641e-05,5.623413251903491e-05,5.9352292722969863e-05,6.264335366568856e-05,6.611690262414816e-05,6.978305848598664e-05,7.36525012271228e-05,7.773650302387759e-05,8.204696109024991e-05,8.659643233600654e-05,9.139816994654904e-05,9.646616199111992e-05,0.00010181517217181818,0.00010746078283213175,0.00011341944035027569,0.000119708503049573,0.00012634629176544684,0.0001333521432163324,0.00014074646633398434,0.0001485508017172775,0.00015678788438269704,0.00016548170999431815,0.00017465760476621182,0.00018434229924091104,0.00019456400615886356,0.0002053525026457146,0.00021673921695684176,0.00022875732003183958,0.00024144182212566394,0.00025482967479793463,0.00026895987855750435,0.0002838735964758755,0.0002996142741004364,0.00031622776601683794,0.0003337624694292039,0.00035226946514731015,0.00037180266639144746,0.0003924189758484536,0.0004141784514364405,0.00043714448126110897,0.00046138396827332144,0.0004869675251658631,0.0005139696800771512,0.0005424690937011326,0.0005725487884358379,0.0006042963902381329,0.0006378043838892178,0.0006731703824144982,0.0007104974114426787,0.0007498942093324559,0.000791475543941116,0.0008353625469578261,0.0008816830667755709,0.0009305720409296989,0.0009821718891880379,0.001036632928437698,0.0010941138105771857,0.0011547819846894581,0.0012188141848422896,0.0012863969449369746,0.001357727142105184,0.0014330125702369627,0.0015124725453106234,0.0015963385442879423,0.0016848548794358388,0.0017782794100389228,0.0018768842935762188,0.0019809567785503386,0.002090800041278718,0.0022067340690845897,0.002329096592460546,0.0024582440689201973,0.0025945527214040155,0.0027384196342643613,0.0028902639100224503,0.0030505278902670254,0.003219678444251379,0.003398208328942559,0.0035866376244847687,0.00378551524925863,0.003995420558949887,0.004216965034285823,0.0044507940623559955,0.0046975888167064914,0.004958068241684656,0.005232991146814947,0.005523158417307099,0.005829415347136074,0.006152654101490372,0.006493816315762113,0.006853895838650082,0.007233941627366748,0.007635060803383346,0.008058421877614819,0.008505258154439962,0.008976871324473142,0.009474635256553754,0.01,0.01055449600878603,0.011139738599948023,0.011757432659207109,0.012409377607517195,0.013097472643005897,0.013823722273578996,0.014590242156305605,0.01539926526059492,0.016253148373118646,0.01715437896342879,0.01810558243027122,0.019109529749704406,0.020169145547303306,0.021287516617963725,0.022467900918126442,0.023713737056616554,0.025028654311746078,0.026416483203860926,0.027881266654131334,0.029427271762092817,0.03105900223624705,0.03278121151393459,0.03459891660869933,0.03651741272548377,0.038542288686231066,0.040679443210830474,0.042935102100834815,0.04531583637600818,0.04782858141653791,0.05048065716667471,0.05327978945865641,0.05623413251903491,0.059352292722969865,0.06264335366568856,0.06611690262414815,0.06978305848598663,0.0736525012271228,0.07773650302387758,0.0820469610902499,0.08659643233600653,0.09139816994654905,0.09646616199111992,0.10181517217181818,0.10746078283213174,0.1134194403502757,0.11970850304957299,0.12634629176544684,0.1333521432163324,0.14074646633398435,0.1485508017172775,0.15678788438269703,0.16548170999431813,0.1746576047662118,0.18434229924091106,0.19456400615886357,0.2053525026457146,0.21673921695684176,0.22875732003183957,0.24144182212566392,0.25482967479793467,0.2689598785575043,0.28387359647587546,0.2996142741004364,0.31622776601683794,0.33376246942920385,0.35226946514731017,0.37180266639144743,0.3924189758484536,0.4141784514364405,0.437144481261109,0.4613839682733214,0.4869675251658631,0.5139696800771513,0.5424690937011326,0.5725487884358379,0.6042963902381329,0.6378043838892178,0.6731703824144982,0.7104974114426788,0.7498942093324559,0.7914755439411161,0.8353625469578262,0.8816830667755708,0.930572040929699,0.9821718891880378,1.036632928437698,1.0941138105771857,1.1547819846894583,1.2188141848422898,1.2863969449369745,1.357727142105184,1.4330125702369627,1.5124725453106234,1.5963385442879423,1.6848548794358387,1.7782794100389228,1.8768842935762187,1.9809567785503388,2.090800041278718,2.20673406908459,2.329096592460546,2.458244068920197,2.5945527214040154,2.7384196342643614,2.8902639100224503,3.0505278902670256,3.219678444251379,3.3982083289425593,3.586637624484769,3.78551524925863,3.9954205589498866,4.216965034285822,4.450794062355996,4.697588816706491,4.958068241684655,5.232991146814947,5.523158417307099,5.829415347136074,6.152654101490373,6.493816315762113,6.853895838650082,7.233941627366748,7.635060803383346,8.058421877614817,8.505258154439963,8.976871324473143,9.474635256553753,10.0]},"latency_max_seconds":0.0037790420465171337,"latency_min_seconds":0.000689040869474411,"latency_quantile_upper_bounds_seconds":{"0.5":0.0008353625469578261,"0.95":0.0009305720409296989,"0.99":0.0010941138105771857},"memory":{"current_process_rss_bytes":593297408,"device_memory_stats":null,"peak_process_rss_bytes":593297408,"rss_scope":"this process, including JAX runtime/compiler; system free memory not certified"},"minimum_sampled_behavior_probability":0.00012100933963665739,"status":"passed","timing_scope":"cProfile is enabled and adds host overhead; use the unprofiled soak for operational throughput","unexpected_compilations":0,"warmup_compilation_count":330,"warmup_cycles":8}
+2: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE artifacts/reviews/m1-fixed-loop/npm-test.log
+1: 
+2: > pokemon-reference@0.1.0 test
+3: > node scripts/test.mjs
+4: 
+5: ✔ canonical bytes are portable, including Unicode scalar ordering and integer boundaries (130.570458ms)
+6: ✔ strict wire decoders reject ambiguous numbers, duplicate keys, malformed Unicode and trailing data (122.295334ms)
+7: ✔ shared artifact goldens validate independently and preserve all bytes through Python hashing (364.908333ms)
+8: ✔ all 14 policy indices are bijective; pass and wait have no trainable index (124.295958ms)
+9: ✔ captured and constructed requests agree across semantic, protocol and tensor codecs (212.072292ms)
+10: ✔ known zero, absent item and unknown knowledge are distinct (127.790416ms)
+11: ✔ malformed choices, unknown versions and unsupported phases fail in both languages (754.709334ms)
+12: ✔ actor loader rejects privileged artifacts, wrong manifest, wrong viewer and inconsistent masks (32.800542ms)
+13: ✔ natural hidden-trapping attempts and re-requests preserve semantic choices and history boundaries (1088.399708ms)
+14: ✔ live semantic submission executes Tera, rejects stale requests and invalid visible actions before engine input (21.486042ms)
+15: ✔ switch slot is the current request order after a live switch (5.374917ms)
+16: ✔ constructed hidden-disabled live state resolves to Struggle before any re-request (3.744042ms)
+17: ✔ pinned upstream AI includes slot zero in constructed revival target requests (3.620583ms)
+18: ✔ vocabulary includes lazily resolved cosmetic forms and templates retain distinct identities (206.61625ms)
+19: ✔ whole teams are complete, ordered, deterministic across shards, and replay exactly (596.946083ms)
+20: ✔ failed shard is never committed or skipped; resume records the failure and reproduces content (711.740666ms)
+21: ✔ wrong resume configuration and corrupt shards fail without rewriting a completed corpus (365.08775ms)
+22: ✔ active writer lock prevents a second writer (55.128208ms)
+23: ✔ checkpoint failure reports the durable prefix and resumes through an orphan shard (350.856333ms)
+24: ✔ dead local writer is recovered only with exclusive recovery ownership (314.462417ms)
+25: ✔ leftover recovery guard does not prevent a fresh exclusive writer acquisition (194.569083ms)
+26: ✔ Node and independent Python agree on ordered team identities and full-digest partitions (483.399333ms)
+27: ✔ partition edges use the entire 256-bit digest with exact rational thresholds (0.128208ms)
+28: ✔ new mechanical fields reject and exposed/cross-role battle seeds fail before collection (0.465833ms)
+29: ✔ campaign checkpoints replayed episodes, resumes exact indices and retains failure/orphan evidence (4777.404583ms)
+30: ✔ complete R4 episode preserves R1 visible mechanics and replays after canonical serialization (1757.363792ms)
+31: ✔ natural hidden re-requests preserve the already chosen opponent action and zero-reward linkage (1496.364958ms)
+32: ✔ budget reached on a hidden rejection waits for a fresh group; IDs distinguish order and action content (2410.327459ms)
+33: ✔ concurrent submissions serialize, exact retries are idempotent, stale or invalid choices fail before writes (49.358542ms)
+34: ✔ actor view does not change when only the opponent has submitted its hidden choice (47.332583ms)
+35: ✔ constructed single and double faint replacements enter, retain commitments, and exit correctly (623.854167ms)
+36: ✔ a constructed reference tie cancels the unsubmitted request and yields terminal half reward (136.32075ms)
+37: ✔ constructed live continuations, mixed requests and revival targets cover both player roles (733.459083ms)
+38: ✔ explicit truncation finishes the current group and bootstraps each same-player trajectory (199.037083ms)
+39: ✔ semantic corruption remains rejected after artifact hashes are recomputed (155.745875ms)
+40: ✔ R5 live hidden-state, HP, Transform, Illusion and Node/Python codec probes (8796.61175ms)
+41: ✔ both player channels hide pending commitments through terminal (154.870875ms)
+42: ✔ fixed public profile cannot admit hidden set perturbations (1.808125ms)
+43: ✔ all R3 roots have sources; conservative inventory contains unobserved generated effects (1020.326208ms)
+44: ✔ form enumeration rejects hidden RNG channels and restores generator state (0.264958ms)
+45: ✔ AST indexes array callbacks and computed calls; ordinary inherited names are not sinks (0.351875ms)
+46: ✔ sixteen scripted reference cases satisfy semantic assertions and replay in both seats (44.643083ms)
+47: ✔ fixed reference fingerprints remain stable across future harness changes (140.424291ms)
+48: ✔ manifest identifies the exact source, lockfile and resolved rules (18.031625ms)
+49: ✔ provenance refuses changed source and a tampered compiled tree (117.007083ms)
+50: ✔ official whole teams regenerate exactly with their own random stream (2.185625ms)
+51: ✔ a completed seeded battle and its input tape reproduce exactly (90.313667ms)
+52: ✔ replay is independent of wall-clock time while raw evidence is retained (88.29025ms)
+53: ✔ natural hidden-trapping rejections retain the action and updated request on replay (124.801375ms)
+54: ✔ explicit teams retain identity when seats and mechanics seed change (2.708458ms)
+55: ✔ projection agrees with upstream getPlayerStreams for an entire recorded battle (15.403208ms)
+56: ✔ private requests, split HP and terminal private teams do not cross player channels (0.206625ms)
+57: ✔ real initial opponent-private mutation leaves the other player view unchanged (1.255166ms)
+58: ✔ stale requests and injected control commands are rejected before simulation (2.535917ms)
+59: ✔ observable choices exclude known-disabled moves without inspecting hidden legality (0.066083ms)
+60: ✔ timestamps alone normalize; choice errors, HP and mechanics remain intact (0.031ms)
+61: ✔ tampered episode, raw trace and incompatible schemas fail replay (3.170375ms)
+62: ✔ live replay detects divergent requests and results even with a valid envelope hash (88.835083ms)
+63: ✔ a safety cap cannot be reported as a completed draw (21.037208ms)
+64: ✔ JSONL worker processes multiple requests and reports malformed commands (369.397167ms)
+65: ✔ artifact hash is independent of object key insertion order (0.12575ms)
+66: ✔ restricted admission rejects items, abilities, Tera fields and extra team members (3.315583ms)
+67: ✔ restricted reference replays exactly, cannot Tera, and enumerates damage (158.7285ms)
+68: ℹ tests 63
+69: ℹ suites 0
+70: ℹ pass 63
+71: ℹ fail 0
+72: ℹ cancelled 0
+73: ℹ skipped 0
+74: ℹ todo 0
+75: ℹ duration_ms 33264.5445
+76: .......
+77: ----------------------------------------------------------------------
+78: Ran 7 tests in 0.553s
+79: 
+80: OK
+81: ..{"validated_teams": 4, "requested": 12}
+82: {"validated_teams": 8, "requested": 12}
+83: {"validated_teams": 12, "requested": 12}
+84: {"validated_teams": 4, "requested": 12}
+85: {"validated_teams": 8, "requested": 12}
+86: {"validated_teams": 12, "requested": 12}
+87: ....
+88: ----------------------------------------------------------------------
+89: Ran 6 tests in 1.900s
+90: 
+91: OK
+92: ...............
+93: ----------------------------------------------------------------------
+94: Ran 15 tests in 7.168s
+95: 
+96: OK
+97: .............
+98: ----------------------------------------------------------------------
+99: Ran 13 tests in 2.452s
+100: 
+101: OK
+102: ..........
+103: ----------------------------------------------------------------------
+104: Ran 10 tests in 16.292s
+105: 
+106: OK
+107: ...............
+108: ----------------------------------------------------------------------
+109: Ran 15 tests in 5.899s
+110: 
+111: OK
+112: .............
+113: ----------------------------------------------------------------------
+114: Ran 13 tests in 0.106s
+115: 
+116: OK
+117: ......
+118: ----------------------------------------------------------------------
+119: Ran 6 tests in 0.004s
+120: 
+121: OK
+122: .........................
+123: ----------------------------------------------------------------------
+124: Ran 25 tests in 3.149s
+125: 
+126: OK
+127: .................
+128: ----------------------------------------------------------------------
+129: Ran 17 tests in 6.056s
+130: 
+131: OK
+132: .Compiling jit(<lambda>) with global shapes and types (ShapedArray(float32[3]),). Argument mapping: (UnspecifiedValue,).
+133: ............
+134: ----------------------------------------------------------------------
+135: Ran 13 tests in 6.015s
+136: 
+137: OK
+138: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE docs/M1_FIXED_LOOP.md
+1: # Fixed-shape collect/update loop and CPU soak
+2: 
+3: The new `pokemon_fixed` package compiles complete collection, player-view encoding,
+4: action sampling, simulator transitions, same-player GAE, PPO and Adam into one
+5: fixed-signature CPU executable. It extends the sealed JAX learner without changing
+6: its source or the pinned simulator. Full G2 and G3 remain open; no competitive
+7: strength, full-format, GPU or Prime claim is made.
+8: 
+9: ## Scope and data path
+10: 
+11: The admitted game remains the public, fixed-set Rattata duel: 64 simultaneous
+12: games, two players, at most four turns. The policy remains linear over 59
+13: player-history features, with two action logits and a value head. The frozen
+14: [plan](../contracts/fixed-loop-v1/plan.json) fixes capacity at 512 decision rows,
+15: two PPO epochs and four 128-row minibatch slots per epoch.
+16: 
+17: Both views are projected before either choice is submitted. The actor receives
+18: only `ActorInput(features, mask)`, from the same frozen parameter tree for the
+19: whole collection. Targets and terminal scores stay outside this API. Both players'
+20: submitted decisions remain in a KO turn even when the second move is canceled.
+21: Training decisions and executed moves are counted separately.
+22: 
+23: Buffers use time/game/seat order `[4,64,2]`. Terminal lanes become padding; validity
+24: is separate from the legal action mask. Padded features and numerical inputs are
+25: sanitized before arithmetic, including before the model, so even NaN padding
+26: cannot affect parameter gradients. Losses average valid rows, and empty
+27: minibatches skip Adam completely. Per-player returns use a reverse time scan;
+28: there is no alternation of reward sign or bootstrap from a terminal state.
+29: 
+30: The shuffle recipe is intentionally new: permute all 512 indices, then stably
+31: partition valid rows first. Shapes remain fixed even when episode lengths vary.
+32: Numerical update parity compares against the sealed learner using this identical
+33: valid sample order; it does not claim the old variable-length permutation has the
+34: same trajectory. Adam uses a constant table of the reference's host-rounded bias
+35: corrections for the first 20,000 steps, then exact FP32 ones. Parameters, moments
+36: and optimizer counters are carried through compiled scans.
+37: 
+38: ## Verification and measurements
+39: 
+40: **Campaign status: awaiting completion and seal.** Final measured counts, timing,
+41: memory and receipt are added only after the corrected two-hour campaign completes.
+42: 
+43: Acceptance combines comparisons with the sealed collector and learner, poisoned
+44: padding tests, zero-gradient/empty-minibatch tests, fused/separate execution checks,
+45: legal-action and outcome-feature checks, and exact disk recovery. Three parity
+46: seeds each run eight batches; every boundary is freshly loaded and its next cycle
+47: compared byte for byte. First-batch actor and target NPZ exports are separate.
+48: 
+49: Compilation checks use precompiled callables that reject shape/dtype changes,
+50: entry-point trace counters, and actual JAX compilation/cache-lookup log events.
+51: A real fresh JIT positive control and identical-call negative control must pass
+52: before a zero-new-compilation result can be accepted. Warm-up and compilation are
+53: outside soak timing. A preliminary run exposed an ineffective log matcher and
+54: was interrupted and preserved; it is not evidence of a passing soak.
+55: 
+56: The operational soak measures complete cycles with host validation and records a
+57: second elapsed-time rate that includes aggregation, telemetry, checkpoint I/O and
+58: resume audits. The cProfile run is a separate 1,000-cycle host-cost diagnostic;
+59: its rates include profiler overhead. Isolated collection/update timings repeat
+60: fixed inputs and are not end-to-end throughput. Latency quantiles are upper bounds
+61: from a fixed log-spaced histogram, not exact stored per-cycle quantiles.
+62: 
+63: Memory reporting distinguishes process RSS from device allocator statistics. CPU
+64: JAX may provide no device memory statistics; process RSS alone does not certify
+65: 15% available system/device headroom. Training buffers, aggregate metrics and
+66: checkpoint state have bounded size. Telemetry is streamed to disk once per minute,
+67: not accumulated in a Python list. There is no per-update history in the checkpoint.
+68: 
+69: ## Recovery and provenance
+70: 
+71: Checkpoints contain exact FP32 parameter/moment bytes, Adam step, policy version,
+72: next game ID, cumulative decision/move counts, seed, plan and source/runtime hashes.
+73: The random streams are addressed by seed, named domain and game/turn/seat or
+74: version/epoch. The update limit keeps uint32 game IDs and int32 optimizer counters
+75: within range; cumulative decisions use an unrestricted Python integer.
+76: 
+77: Publication is atomic with fsync and rename. Only complete whole-episode update
+78: boundaries are supported. A collection/update failure discards uncommitted work
+79: and restores the last durable checkpoint; this is rollback, not continuation at
+80: the crash point. Tests reject partial publication, source/runtime/plan drift,
+81: malformed counters and moments. The soak periodically loads a fresh disk checkpoint
+82: and compares its next cycle without counting duplicate audit games as primary work.
+83: 
+84: The admission gate pins the preceding learner receipt, verifies sealed core files,
+85: checks dependency/runtime versions and keeps the R7 final reservation unchanged.
+86: Admission is checked again at exit. The final seal archives source, tests, review
+87: dispositions, runtime receipts, checkpoints, NPZ exports and campaign logs.
+88: 
+89: ## Reproduce and continue
+90: 
+91: ```sh
+92: npm test
+93: # Existing pinned .venv; no extra packages, network, paid hardware or Prime needed.
+94: npm run jax:fixed-loop -- artifacts/runs/NEW-fixed-loop-run
+95: # The campaign runs a full 7200-second soak. Use a fresh output directory.
+96: .venv/bin/python scripts/seal-fixed-loop.py artifacts/runs/NEW-fixed-loop-run
+97: ```
+98: 
+99: Independent work used the [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md):
+100: Fable implemented the bounded numerical helper; Codex reviewed it; local checks
+101: verified it before integration. A separate Fable audit covered the loop, recovery
+102: and measurement claims. Findings and executed dispositions are preserved in
+103: [the review record](../artifacts/reviews/m1-fixed-loop/review-dispositions.md).
+104: 
+105: Next close the remaining G2 evidence gaps and decide the exact Showdown finite-word
+106: chance contract before policy promotion. Then preregister a restricted-policy
+107: evaluation against frozen random, damage-greedy and checkpoint opponents, using
+108: multiple training seeds and seat-swapped games. This soak does not establish
+109: learning progress or strategic competence. Persistent games, arbitrary rollout
+110: cuts, live-state checkpoints, richer mechanics and a history transformer remain
+111: separate work. Keep final evaluation sealed; local CPU remains sufficient.
+112: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

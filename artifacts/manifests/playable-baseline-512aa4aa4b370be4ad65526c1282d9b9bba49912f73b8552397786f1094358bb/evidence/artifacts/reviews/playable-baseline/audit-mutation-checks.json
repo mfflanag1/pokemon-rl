@@ -1,0 +1,23 @@
+{
+  "checks": [
+    {
+      "case": "win-score",
+      "rejected": true,
+      "exit_code": 1,
+      "diagnostic": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n2 !== 1\n\n    at file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-bot/audit.mjs:34:10 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 2,\n  expected: 1,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v25.6.1\n"
+    },
+    {
+      "case": "actor-input",
+      "rejected": true,
+      "exit_code": 1,
+      "diagnostic": " side: { name: 'Baseline 1', id: 'p1', pokemon: [Array] }\n        },\n        public: {\n          active: { p1: [Object], p2: [Object] },\n          turn: 24,\n          ended: false,\n          winner: null,\n          tier: 'gen9randombattle',\n          gameType: 'singles'\n        }\n      },\n      errors: []\n    },\n    {\n      side: 'p2',\n      request_id: 32,\n      turn: 25,\n      choice: 'move 1',\n      actor_input: {\n        request: {\n          active: [ [Object] ],\n          side: { name: 'Baseline 2', id: 'p2', pokemon: [Array] }\n        },\n        public: {\n          active: { p1: [Object], p2: [Object] },\n          turn: 25,\n          ended: false,\n          winner: null,\n          tier: 'gen9randombattle',\n          gameType: 'singles'\n        }\n      },\n      errors: []\n    },\n    {\n      side: 'p1',\n      request_id: 32,\n      turn: 25,\n      choice: 'move 3',\n      actor_input: {\n        request: {\n          active: [ [Object] ],\n          side: { name: 'Baseline 1', id: 'p1', pokemon: [Array] }\n        },\n        public: {\n          active: { p1: [Object], p2: [Object] },\n          turn: 25,\n          ended: false,\n          winner: null,\n          tier: 'gen9randombattle',\n          gameType: 'singles'\n        }\n      },\n      errors: []\n    },\n    {\n      side: 'p2',\n      request_id: 33,\n      turn: 26,\n      choice: 'move 3',\n      actor_input: {\n        request: {\n          active: [ [Object] ],\n          side: { name: 'Baseline 2', id: 'p2', pokemon: [Array] }\n        },\n        public: {\n          active: { p1: [Object], p2: [Object] },\n          turn: 26,\n          ended: false,\n          winner: null,\n          tier: 'gen9randombattle',\n          gameType: 'singles'\n        }\n      },\n      errors: []\n    },\n    {\n      side: 'p1',\n      request_id: 3"
+    },
+    {
+      "case": "counter",
+      "rejected": true,
+      "exit_code": 1,
+      "diagnostic": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1639 !== 1638\n\n    at file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-bot/audit.mjs:45:61 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 1639,\n  expected: 1638,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v25.6.1\n"
+    }
+  ],
+  "audit_source_sha256": "41169aef6b83e40d41e1d9f9d31a8adc3148b0c7e185faef8e654a463e7b555d"
+}

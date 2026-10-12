@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 94163,
+  "stop_reason": "end_turn",
+  "session_id": "2a9bb2ca-1594-49b4-8191-e52d79f2caf4",
+  "total_cost_usd": 0.6129600000000001,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 15332,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6126,
+    "output_tokens_details": {
+      "thinking_tokens": 4708
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15332,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 6126,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 15332,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 15332
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 6126,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 15332,
+      "webSearchRequests": 0,
+      "costUSD": 0.6129600000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 4708,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (no blockers to the bounded 60-s claim; one evidence gap in the sampling audit, several unchecked linkages).**\n\nMost important: the random probe in `sampling_audit` never draws exponent 126, so the mass range [0.25, 0.5) \u2014 the regime actually hit for |d| < ln 3 \u2014 is covered by a single hand-added value (0.5), while the recorded proof string claims coverage of e=103..126.\n\n## Findings\n\n**1. Medium \u2014 sampling probe excludes exponent 126 (`qualification.py:58-59,76`)**\n`rng.integers(103,126,\u2026)` has an exclusive upper bound, so random rows have e\u2208[103,125] only. The `proof` text asserts \"e=103..126; shift17..40\", and the sealer accepts `rare_mass_cases==n`. Masses in [0.25,0.5) (e=126, shift 40) get exactly one probe (0.5, the boundary). Verification: change to `integers(103,127)` or add explicit e=126 rows, and have the sealer check the exponent histogram rather than only the row count.\n\n**2. Low\u2013Medium \u2014 dyadic proof string is not itself conditional (`qualification.py:76`)**\nThe adjacent field `uniform_word_assumption: True` and contract line 9 carry the conditionality, but the `proof` sentence states unconditional selection semantics. Not wrong (it is about integer comparison, not mass), but a reader of the receipt could lift it as an unconditional mass claim. Suggest appending \"mass = threshold/2^64 only under uniform word pairs\".\n\n**3. Low\u2013Medium \u2014 parity does not independently check the policy (`qualification.py:86,102`)**\nThe \"sealed Python-control collector\" receives `actor_fn=act` imported from the same `.policy` module the JAX collector uses. Parity therefore validates environment/GAE/fused-vs-split update, not the binary policy math; only the threshold oracle (`dyadic_threshold`) is independent. The reference string partially acknowledges this but the receipt should say so explicitly.\n\n**4. Low \u2014 soak numerics recorded but unbounded by the sealer (`qualification.py:158`, `seal-binary-policy.py:53-59`)**\n`minimum_exp_behavior_logp` (actually `minimum_behavior_probability`) and `maximum_update_ratio_error` are never checked against the contract floor 2^-24 / any bound. A soak violating the law would still seal.\n\n**5. Low \u2014 hard-coded suite roster cannot be tied to new tests (`seal-binary-policy.py:87`)**\n`[7,6,15,13,10,15,13,6,25,17,16,11]` and node=63 are asserted but nothing shows which suite exercises `pokemon_binary` or the fault-injection paths in `checkpoint.py:34-50`. If the new tests live in an existing file, the literal must have been bumped; the packet cannot confirm.\n\n**6. Low \u2014 `peak_process_rss_bytes` label (`qualification.py:160`)**\n`ru_maxrss` is bytes on darwin, KiB on Linux; the key name is platform-dependent truth.\n\n## Scope limitations\n- Not in packet: `.loop`, `.policy`, `.reference`, `pokemon_fixed.campaign`, `wire`/`digest`, `CompileLog`, test files. I cannot confirm `digest` is computed over `wire()` bytes (needed for `content_hash` round-trip, `seal:32`), that `dyadic_threshold` is genuinely independent of `threshold_words`, or that `exe.traces` counts retraces correctly.\n- Float equality `decisions_per_second==decisions/elapsed` (`seal:58`) survives only if `wire` preserves repr; a mismatch would false-fail, not false-pass.\n\n## Verdict\nFindings. Scope claims are correctly bounded (`full_g2/g3 open`, `new_two_hour_soak False`, `strength_evaluation False`, `complete-for-declared-scope`); source/checkpoint/accounting linkage is sound. The exponent-126 probe gap (Finding 1) should be fixed before relying on the \"exact threshold oracle\" statement as covering the full legal mass range.",
+  "ttft_ms": 75341,
+  "type": "result",
+  "duration_ms": 94232,
+  "uuid": "402a0575-c336-49bb-a351-11bdb7242669",
+  "ttft_stream_ms": 2448,
+  "time_to_request_ms": 68,
+  "first_content_frame_ms": 2449,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

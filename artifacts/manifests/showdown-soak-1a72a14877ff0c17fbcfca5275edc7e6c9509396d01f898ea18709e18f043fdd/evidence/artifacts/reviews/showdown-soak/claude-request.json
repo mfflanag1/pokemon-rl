@@ -1,0 +1,20 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review this additive real local-server soak harness and wire auditor before production. Scope fixed frozen tactical-v1 client versus frozen baseline RecoveringBot; no policy changes. Plan1000games20sessions50games3faults each=60. Each pair uses fixed teams in simulator seats and mirrored policy seats. Both clients audited separately from received wire. Current schedule.mjs is independently delegated pure helper, contract gameSpec(index,smoke) returns index,session,within_session,pair=floor(index/2),mirror=index%2,tactical_team=pair*2+mirror,baseline_team=pair*2+1-mirror,tactical_seat=p1/p2,challenger=tactical/baseline,scenario when fault_offsets+session%2 equals within_session else normal,file game-NNNN.json.gz,names SoakTacSESSION/SoakBaseSESSION. planFor smoke uses smoke overrides, removes smoke subobject, adds games. expectedCoverage totals as sealer. Focus actor isolation, both-seat team upload, rematch event linkage, socket generation, request/sentchoice/retry audit, fault scheduling, failure preservation and evidence binding. Real server chance is uncontrolled; no simulated exact replay or paired strength claim. Client RSS gate only,768MiB. Sealer Node count191 is a deliberate pre-production placeholder to replace with executed final test count; not a production result. Implementation/preflight not finished; do not treat absent runs as passes. Find concrete bugs or missing meaningful checks. Do not recursively delegate.",
+  "files_sha256": {
+    "packages/showdown-soak/campaign.mjs": "31b6fdeefe161ec5c60afe71c9c287a750cee941e2d55b30666cd26c5fe1d2e6",
+    "packages/showdown-soak/audit.mjs": "2599ed6d007acc46468e5fce7aa0505a4431225611ffd44d04cd4ea1a5cebbb1",
+    "packages/showdown-soak/teams.mjs": "083f297ec20e8019348ce4c4d0c179b46abcd7854f7ff34cbc02c1f77777f379",
+    "packages/showdown-soak/plan.json": "5d5cd9a1bdba853ec9334c0575417cd974cde236da978fd8f37b8a6491b6af05",
+    "scripts/seal-showdown-soak.py": "72302c14c574e8978e1ee55cb75a549e224caccb945dec12eaf122ce96c1b42f",
+    "packages/showdown-confirmation/client.mjs": "f16dfb87253d39daa7c81cacde9aeb2b1c4cfff4ddf852b850c1fc62d6e90a45",
+    "packages/showdown-session/client.mjs": "27f24d3d33595ec7bcec40f2e502198dc66e894389b96dbec1034f1090c59311",
+    "packages/showdown-bot/client.mjs": "9cfbb0b85904953504399acf9e1c2643c6ad0bbc006b96d09b70eaadd5610c8c",
+    "packages/showdown-bot/local-server.mjs": "9e28a859d3f4f0f430f8bbe05a265a732fbc8f4bb31586bb53d202196d7b6d6e"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

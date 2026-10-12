@@ -1,0 +1,341 @@
+diff --git a/python/pokemon_pilot/statistics.py b/python/pokemon_pilot/statistics.py
+index 8c1a78b..d56d073 100644
+--- a/python/pokemon_pilot/statistics.py
++++ b/python/pokemon_pilot/statistics.py
+@@ -1 +1,335 @@
+-"""Paired development statistics. Implementation delegated with frozen tests."""
++"""Paired development statistics. Implementation delegated with frozen tests.
++
++Pure functions only: no file IO, no JAX. The resampling unit is one *pair*
++(two seats sharing a Showdown seed); seats are averaged first and complete
++pairs are then bootstrapped with replacement. When a baseline is supplied the
++same pair indexes are reused so that the paired improvement interval keeps
++the common per-pair variation.
++
++Every rejected input raises ``ValueError`` (never ``OverflowError``,
++``TypeError`` or ``FloatingPointError``), and every admitted input yields a
++JSON-native result whose floats are finite.
++"""
++
++from __future__ import annotations
++
++import math
++from typing import Any, Dict, List, Optional
++
++import numpy as np
++
++__all__ = ["paired_summary", "calibration"]
++
++_VALID_SCORES = (0.0, 0.5, 1.0)
++_CHUNK_REPLICATES = 64
++_UINT32_MAX = 2**32 - 1
++_NUM_BINS = 10
++
++
++# --------------------------------------------------------------------------- #
++# validation helpers
++# --------------------------------------------------------------------------- #
++def _as_numeric_array(value: Any, name: str) -> np.ndarray:
++    """Coerce to a float64 ndarray, rejecting bool/object/complex and nonfinite."""
++    try:
++        arr = np.asarray(value)
++    except Exception as exc:  # pragma: no cover - defensive
++        raise ValueError(f"{name} is not array-like: {exc}") from exc
++    if arr.dtype.kind not in "iuf":
++        raise ValueError(
++            f"{name} must have a real numeric dtype, got {arr.dtype} "
++            "(bool, object and complex values are rejected)"
++        )
++    try:
++        arr = arr.astype(np.float64, copy=False)
++    except (OverflowError, TypeError, ValueError) as exc:
++        raise ValueError(f"{name} cannot be represented as float64: {exc}") from exc
++    if arr.size == 0:
++        raise ValueError(f"{name} must be non-empty")
++    if not np.all(np.isfinite(arr)):
++        raise ValueError(f"{name} contains non-finite values")
++    return arr
++
++
++def _validate_scores(value: Any, name: str) -> np.ndarray:
++    """Validate a [N,2] score matrix with N>=2 whose entries are 0, .5 or 1."""
++    arr = _as_numeric_array(value, name)
++    if arr.ndim != 2 or arr.shape[1] != 2:
++        raise ValueError(f"{name} must have shape [N, 2], got {arr.shape}")
++    if arr.shape[0] < 2:
++        raise ValueError(f"{name} needs at least two pairs, got {arr.shape[0]}")
++    if not np.isin(arr, _VALID_SCORES).all():
++        raise ValueError(f"{name} scores must be exactly 0, 0.5 or 1")
++    return arr
++
++
++def _is_int(value: Any) -> bool:
++    return isinstance(value, (int, np.integer)) and not isinstance(
++        value, (bool, np.bool_)
++    )
++
++
++def _validate_seed(seed: Any) -> int:
++    if not _is_int(seed):
++        raise ValueError("seed must be a non-bool integer")
++    seed = int(seed)
++    if not 0 <= seed <= _UINT32_MAX:
++        raise ValueError(f"seed must fit in uint32 (0..{_UINT32_MAX}), got {seed}")
++    return seed
++
++
++def _validate_replicates(replicates: Any) -> int:
++    if not _is_int(replicates):
++        raise ValueError("replicates must be a non-bool integer")
++    replicates = int(replicates)
++    if replicates < 1:
++        raise ValueError(f"replicates must be positive, got {replicates}")
++    return replicates
++
++
++def _validate_alpha(alpha: Any) -> float:
++    if isinstance(alpha, (bool, np.bool_)) or not isinstance(
++        alpha, (int, float, np.integer, np.floating)
++    ):
++        raise ValueError("alpha must be a real number")
++    # A huge Python int (e.g. 10**1000) makes float() raise OverflowError;
++    # every rejected parameter must surface as ValueError instead.
++    try:
++        alpha = float(alpha)
++    except (OverflowError, TypeError, ValueError) as exc:
++        raise ValueError(f"alpha is not representable as a float: {exc}") from exc
++    if not math.isfinite(alpha) or not 0.0 < alpha < 1.0:
++        raise ValueError(f"alpha must be finite with 0 < alpha < 1, got {alpha}")
++    return alpha
++
++
++def _finite_float(value: Any, name: str) -> float:
++    """Convert a scalar to a finite Python float or raise ValueError."""
++    try:
++        out = float(value)
++    except (OverflowError, TypeError, ValueError) as exc:
++        raise ValueError(f"{name} is not representable as a float: {exc}") from exc
++    if not math.isfinite(out):
++        raise ValueError(f"{name} is not finite ({out}); arithmetic overflowed")
++    return out
++
++
++# --------------------------------------------------------------------------- #
++# bootstrap
++# --------------------------------------------------------------------------- #
++def _pair_bootstrap(
++    pair_means: np.ndarray,
++    pair_diffs: Optional[np.ndarray],
++    *,
++    seed: int,
++    replicates: int,
++) -> tuple[np.ndarray, Optional[np.ndarray]]:
++    """Resample complete pairs with replacement.
++
++    Index memory is bounded by drawing at most ``_CHUNK_REPLICATES`` replicate
++    rows of ``N`` indexes at a time. The same index rows are applied to the
++    candidate pair means and to the paired differences, so the improvement
++    interval is a genuine paired statistic.
++    """
++    n_pairs = pair_means.shape[0]
++    rng = np.random.default_rng(seed)
++    boot_means = np.empty(replicates, dtype=np.float64)
++    boot_diffs = (
++        np.empty(replicates, dtype=np.float64) if pair_diffs is not None else None
++    )
++    start = 0
++    while start < replicates:
++        stop = min(start + _CHUNK_REPLICATES, replicates)
++        idx = rng.integers(0, n_pairs, size=(stop - start, n_pairs))
++        boot_means[start:stop] = pair_means[idx].mean(axis=1)
++        if boot_diffs is not None:
++            boot_diffs[start:stop] = pair_diffs[idx].mean(axis=1)  # type: ignore[index]
++        start = stop
++    return boot_means, boot_diffs
++
++
++def _interval(samples: np.ndarray, alpha: float) -> tuple[float, float]:
++    lower, upper = np.quantile(
++        samples, [alpha / 2.0, 1.0 - alpha / 2.0], method="linear"
++    )
++    return _finite_float(lower, "lower"), _finite_float(upper, "upper")
++
++
++# --------------------------------------------------------------------------- #
++# public API
++# --------------------------------------------------------------------------- #
++def paired_summary(
++    candidate: Any,
++    baseline: Any = None,
++    *,
++    seed: Any,
++    replicates: Any,
++    alpha: Any,
++) -> Dict[str, Any]:
++    """Pair-bootstrap summary of a candidate's [N,2] seat scores.
++
++    Parameters
++    ----------
++    candidate
++        Numeric array of shape ``[N, 2]`` with ``N >= 2``; every entry must be
++        exactly ``0``, ``0.5`` or ``1`` (loss / draw / win for that seat).
++    baseline
++        Optional array of the same shape; when supplied a paired improvement
++        (candidate minus baseline, per pair) is also bootstrapped using the
++        identical pair indexes.
++    seed
++        Non-bool integer in the uint32 range for ``numpy.random.default_rng``.
++    replicates
++        Positive non-bool integer number of bootstrap replicates.
++    alpha
++        Finite real with ``0 < alpha < 1``; the percentile interval uses the
++        ``alpha/2`` and ``1 - alpha/2`` linear quantiles.
++
++    Returns
++    -------
++    dict
++        JSON-native: ``pairs, games, wins, draws, losses, mean, lower, upper``
++        and, when ``baseline`` is given, ``improvement={mean, lower, upper}``.
++
++    Raises
++    ------
++    ValueError
++        For any malformed or unrepresentable parameter.
++    """
++    seed = _validate_seed(seed)
++    replicates = _validate_replicates(replicates)
++    alpha = _validate_alpha(alpha)
++
++    cand = _validate_scores(candidate, "candidate")
++    base: Optional[np.ndarray] = None
++    if baseline is not None:
++        base = _validate_scores(baseline, "baseline")
++        if base.shape != cand.shape:
++            raise ValueError(
++                f"baseline shape {base.shape} must match candidate shape {cand.shape}"
++            )
++
++    # Average the two seats FIRST: the pair is the resampling unit.
++    pair_means = cand.mean(axis=1)
++    pair_diffs = (pair_means - base.mean(axis=1)) if base is not None else None
++
++    boot_means, boot_diffs = _pair_bootstrap(
++        pair_means, pair_diffs, seed=seed, replicates=replicates
++    )
++    lower, upper = _interval(boot_means, alpha)
++
++    n_pairs = int(cand.shape[0])
++    result: Dict[str, Any] = {
++        "pairs": n_pairs,
++        "games": 2 * n_pairs,
++        "wins": int(np.count_nonzero(cand == 1.0)),
++        "draws": int(np.count_nonzero(cand == 0.5)),
++        "losses": int(np.count_nonzero(cand == 0.0)),
++        "mean": _finite_float(pair_means.mean(), "mean"),
++        "lower": lower,
++        "upper": upper,
++    }
++    if pair_diffs is not None and boot_diffs is not None:
++        d_lower, d_upper = _interval(boot_diffs, alpha)
++        result["improvement"] = {
++            "mean": _finite_float(pair_diffs.mean(), "improvement mean"),
++            "lower": d_lower,
++            "upper": d_upper,
++        }
++    return result
++
++
++def calibration(values: Any, outcomes: Any) -> Dict[str, Any]:
++    """Descriptive calibration of critic value predictions against outcomes.
++
++    Parameters
++    ----------
++    values
++        Non-empty 1-D finite numeric predictions (may fall outside [0, 1]).
++    outcomes
++        Non-empty 1-D finite numeric array of the same length; entries must be
++        exactly ``0``, ``0.5`` or ``1``.
++
++    Returns
++    -------
++    dict
++        ``count``: number of predictions.
++        ``raw_mse``: mean squared error of the *unclipped* predictions.
++        ``clipped_brier``: mean squared error after clipping predictions to
++        ``[0, 1]``.
++        ``out_of_range_rate``: fraction of predictions strictly outside
++        ``[0, 1]``.
++        ``bins``: ten reliability bins; ``bin = floor(clipped * 10)`` capped at
++        9. Each bin is ``{index, count, mean_prediction, mean_outcome}`` where
++        the means are ``None`` for empty bins. ``mean_prediction`` is the mean
++        of the clipped predictions in the bin.
++
++    Raises
++    ------
++    ValueError
++        For malformed inputs, and when the unclipped squared error overflows
++        float64 (e.g. a finite prediction near ``1e308``): the function fails
++        closed rather than returning ``inf``/``nan``.
++    """
++    vals = _as_numeric_array(values, "values")
++    outs = _as_numeric_array(outcomes, "outcomes")
++    if vals.ndim != 1 or outs.ndim != 1:
++        raise ValueError("values and outcomes must be one-dimensional")
++    if vals.shape[0] != outs.shape[0]:
++        raise ValueError(
++            f"values length {vals.shape[0]} must equal outcomes length {outs.shape[0]}"
++        )
++    if not np.isin(outs, _VALID_SCORES).all():
++        raise ValueError("outcomes must be exactly 0, 0.5 or 1")
++
++    count = int(vals.shape[0])
++
++    # Finite inputs can still overflow when squared or summed. Promote NumPy's
++    # overflow/invalid warnings to exceptions and verify finiteness explicitly
++    # so that arithmetic overflow surfaces as ValueError, never as Infinity.
++    try:
++        with np.errstate(over="raise", invalid="raise"):
++            raw_sq_err = (vals - outs) ** 2  # NOT clipped
++            raw_mse_arr = np.mean(raw_sq_err)
++    except FloatingPointError as exc:
++        raise ValueError(
++            f"raw_mse arithmetic overflowed float64 for finite values: {exc}"
++        ) from exc
++    raw_mse = _finite_float(raw_mse_arr, "raw_mse")
++
++    clipped = np.clip(vals, 0.0, 1.0)
++    clipped_brier = _finite_float(np.mean((clipped - outs) ** 2), "clipped_brier")
++    out_of_range = np.count_nonzero((vals < 0.0) | (vals > 1.0))
++    out_of_range_rate = _finite_float(out_of_range / count, "out_of_range_rate")
++
++    bin_index = np.minimum(
++        np.floor(clipped * _NUM_BINS).astype(np.int64), _NUM_BINS - 1
++    )
++    bins: List[Dict[str, Any]] = []
++    for b in range(_NUM_BINS):
++        mask = bin_index == b
++        n = int(np.count_nonzero(mask))
++        bins.append(
++            {
++                "index": b,
++                "count": n,
++                "mean_prediction": (
++                    _finite_float(clipped[mask].mean(), f"bin {b} mean_prediction")
++                    if n
++                    else None
++                ),
++                "mean_outcome": (
++                    _finite_float(outs[mask].mean(), f"bin {b} mean_outcome")
++                    if n
++                    else None
++                ),
++            }
++        )
++
++    return {
++        "count": count,
++        "raw_mse": raw_mse,
++        "clipped_brier": clipped_brier,
++        "out_of_range_rate": out_of_range_rate,
++        "bins": bins,
++    }

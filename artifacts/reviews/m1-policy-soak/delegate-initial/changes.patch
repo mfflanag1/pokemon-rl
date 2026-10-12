@@ -1,0 +1,310 @@
+diff --git a/python/pokemon_soak/gates.py b/python/pokemon_soak/gates.py
+index a38ec31..0086dcb 100644
+--- a/python/pokemon_soak/gates.py
++++ b/python/pokemon_soak/gates.py
+@@ -1,4 +1,303 @@
+-"""Pure completion gates; implementation delegated against coordinator-owned tests."""
++"""Pure completion gates; implementation delegated against coordinator-owned tests.
++
++``validate_summary(report, plan)`` checks a two-hour qualification *summary*
++against the frozen ``policy-chance-soak-1`` contract.  It is deliberately
++narrow: it only establishes that the summary is internally consistent and
++within contract bounds.  It does not inspect telemetry files, checkpoint
++fingerprints or source provenance; the coordinator sealer does that separately.
++
++Standard library only.  Returns ``None`` when valid, raises ``ValueError``
++otherwise (including for missing or wrongly-typed input).
++"""
++
++import math
++
++GAMES_PER_CYCLE = 64
++MIN_DECISIONS_PER_GAME = 4
++MAX_DECISIONS_PER_GAME = 8
++
++# FP32 exp/log round trip tolerance on the behaviour-probability floor.
++PROBABILITY_FLOOR = 2.0 ** -24
++PROBABILITY_TOLERANCE = 3e-6
++PROBABILITY_MIN = PROBABILITY_FLOOR * (1.0 - PROBABILITY_TOLERANCE)
++PROBABILITY_MAX = 1.0 + PROBABILITY_TOLERANCE
++
++# Importance-ratio diagnostic: 1/floor plus slack for FP32 rounding.
++RATIO_ERROR_MAX = 2.0 ** 24 + 16
++
++REQUIRED_TRACES = ("cycle", "collect", "update")
++COUNTER_FIELDS = ("updates", "next_game", "decisions", "executed_moves")
++
++PLAN_VERSION = "policy-chance-soak-1"
++
++
++def _fail(message):
++    raise ValueError(message)
++
++
++def _require_mapping(value, name):
++    if not isinstance(value, dict):
++        _fail("%s must be a mapping" % name)
++    return value
++
++
++def _get(mapping, key, name):
++    if key not in mapping:
++        _fail("%s missing required field %r" % (name, key))
++    return mapping[key]
++
++
++def _is_number(value):
++    return isinstance(value, (int, float)) and not isinstance(value, bool)
++
++
++def _require_int(value, name):
++    if not isinstance(value, int) or isinstance(value, bool):
++        _fail("%s must be an integer, got %r" % (name, value))
++    return value
++
++
++def _require_nonneg_int(value, name):
++    _require_int(value, name)
++    if value < 0:
++        _fail("%s must be nonnegative, got %r" % (name, value))
++    return value
++
++
++def _require_positive_int(value, name):
++    _require_int(value, name)
++    if value <= 0:
++        _fail("%s must be positive, got %r" % (name, value))
++    return value
++
++
++def _require_finite(value, name):
++    if not _is_number(value):
++        _fail("%s must be a number, got %r" % (name, value))
++    if not math.isfinite(value):
++        _fail("%s must be finite, got %r" % (name, value))
++    return value
++
++
++def _require_positive_finite(value, name):
++    _require_finite(value, name)
++    if value <= 0:
++        _fail("%s must be positive, got %r" % (name, value))
++    return value
++
++
++def _require_nonneg_finite(value, name):
++    _require_finite(value, name)
++    if value < 0:
++        _fail("%s must be nonnegative, got %r" % (name, value))
++    return value
++
++
++def _require_bool(value, expected, name):
++    if not isinstance(value, bool):
++        _fail("%s must be a boolean, got %r" % (name, value))
++    if value is not expected:
++        _fail("%s must be %r, got %r" % (name, expected, value))
++    return value
++
++
++def _require_equal(value, expected, name):
++    # Guard against bool/int coercion (True == 1) and type confusion.
++    if isinstance(value, bool) != isinstance(expected, bool) or value != expected:
++        _fail("%s must equal %r, got %r" % (name, expected, value))
++    return value
++
++
++def _validate_plan(plan):
++    """Check the contract itself is the frozen 7200/600 qualification plan."""
++    _require_mapping(plan, "plan")
++    _require_equal(_get(plan, "version", "plan"), PLAN_VERSION, "plan.version")
++    target = _require_positive_int(
++        _get(plan, "qualification_seconds", "plan"), "plan.qualification_seconds")
++    if target != 7200:
++        _fail("plan.qualification_seconds must be 7200 for a two-hour qualification")
++    warmup = _require_positive_int(_get(plan, "warmup_cycles", "plan"), "plan.warmup_cycles")
++    telemetry_seconds = _require_positive_int(
++        _get(plan, "telemetry_seconds", "plan"), "plan.telemetry_seconds")
++    checkpoint_seconds = _require_positive_int(
++        _get(plan, "checkpoint_seconds", "plan"), "plan.checkpoint_seconds")
++    max_gap = _require_nonneg_finite(
++        _get(plan, "maximum_host_gap_seconds", "plan"), "plan.maximum_host_gap_seconds")
++    minimum_cycles = _require_positive_int(
++        _get(plan, "minimum_cycles", "plan"), "plan.minimum_cycles")
++    _require_equal(_get(plan, "full_g2", "plan"), "open", "plan.full_g2")
++    _require_equal(_get(plan, "full_g3", "plan"), "open", "plan.full_g3")
++    _require_bool(_get(plan, "strength_evaluation", "plan"), False, "plan.strength_evaluation")
++    _require_bool(_get(plan, "prime_used", "plan"), False, "plan.prime_used")
++    if target % telemetry_seconds or target % checkpoint_seconds:
++        _fail("plan intervals must divide qualification_seconds")
++    if checkpoint_seconds != 600 or telemetry_seconds != 60:
++        _fail("plan must be the frozen 7200/600 contract with 60-second telemetry")
++    # Smoke parameters must not be mistaken for the qualification target.
++    smoke = _require_mapping(_get(plan, "smoke", "plan"), "plan.smoke")
++    smoke_seconds = _require_positive_int(_get(smoke, "seconds", "plan.smoke"), "plan.smoke.seconds")
++    if smoke_seconds >= target:
++        _fail("plan.smoke.seconds must be shorter than the qualification target")
++    return {
++        "target": target,
++        "warmup": warmup,
++        "telemetry_seconds": telemetry_seconds,
++        "checkpoint_seconds": checkpoint_seconds,
++        "max_gap": max_gap,
++        "minimum_cycles": minimum_cycles,
++    }
++
++
++def _validate_scope(report):
++    """Reject smoke runs, unfinished runs and any claim beyond the soak scope."""
++    _require_equal(_get(report, "status", "report"), "passed", "report.status")
++    _require_equal(_get(report, "mode", "report"), "qualification", "report.mode")
++    _require_bool(_get(report, "two_hour_qualification", "report"), True,
++                  "report.two_hour_qualification")
++    _require_equal(_get(report, "full_g2", "report"), "open", "report.full_g2")
++    _require_equal(_get(report, "full_g3", "report"), "open", "report.full_g3")
++    _require_bool(_get(report, "prime_used", "report"), False, "report.prime_used")
++    _require_bool(_get(report, "strength_evaluation", "report"), False,
++                  "report.strength_evaluation")
++    _require_bool(_get(report, "final_reservation_unchanged", "report"), True,
++                  "report.final_reservation_unchanged")
++
++
++def _validate_compile_controls(report, soak):
++    control = _require_mapping(_get(report, "compile_control", "report"), "report.compile_control")
++    _require_positive_int(_get(control, "first_call_compilation_events", "compile_control"),
++                          "compile_control.first_call_compilation_events")
++    repeats = _require_nonneg_int(_get(control, "same_shape_repeat_events", "compile_control"),
++                                  "compile_control.same_shape_repeat_events")
++    if repeats != 0:
++        _fail("compile_control.same_shape_repeat_events must be 0, got %r" % repeats)
++
++    _require_positive_int(_get(soak, "warmup_compilation_count", "soak"),
++                          "soak.warmup_compilation_count")
++    unexpected = _require_nonneg_int(_get(soak, "unexpected_compilations", "soak"),
++                                     "soak.unexpected_compilations")
++    if unexpected != 0:
++        _fail("soak.unexpected_compilations must be 0, got %r" % unexpected)
++
++    traces = _require_mapping(_get(soak, "traces", "soak"), "soak.traces")
++    if set(traces) != set(REQUIRED_TRACES):
++        _fail("soak.traces must contain exactly %r, got %r" % (REQUIRED_TRACES, sorted(traces)))
++    for name in REQUIRED_TRACES:
++        count = _require_int(traces[name], "soak.traces.%s" % name)
++        if count != 1:
++            _fail("soak.traces.%s must be exactly 1, got %r" % (name, count))
++
++
++def _validate_timing(soak, limits):
++    target = _require_int(_get(soak, "target_seconds", "soak"), "soak.target_seconds")
++    if target != limits["target"]:
++        _fail("soak.target_seconds must equal plan.qualification_seconds (%r), got %r"
++              % (limits["target"], target))
++    elapsed = _require_positive_finite(_get(soak, "elapsed_seconds", "soak"), "soak.elapsed_seconds")
++    if elapsed < target:
++        _fail("soak.elapsed_seconds %r is below target %r" % (elapsed, target))
++    cycle_seconds = _require_positive_finite(_get(soak, "cycle_seconds", "soak"), "soak.cycle_seconds")
++    if cycle_seconds > elapsed:
++        _fail("soak.cycle_seconds %r exceeds elapsed %r" % (cycle_seconds, elapsed))
++    _require_positive_finite(_get(soak, "process_cpu_seconds", "soak"), "soak.process_cpu_seconds")
++    gap = _require_nonneg_finite(_get(soak, "maximum_host_gap_seconds", "soak"),
++                                 "soak.maximum_host_gap_seconds")
++    if gap > limits["max_gap"]:
++        _fail("soak.maximum_host_gap_seconds %r exceeds plan limit %r" % (gap, limits["max_gap"]))
++
++
++def _validate_counters(soak, limits):
++    cycles = _require_nonneg_int(_get(soak, "cycles", "soak"), "soak.cycles")
++    games = _require_nonneg_int(_get(soak, "games", "soak"), "soak.games")
++    decisions = _require_nonneg_int(_get(soak, "decisions", "soak"), "soak.decisions")
++    moves = _require_nonneg_int(_get(soak, "executed_moves", "soak"), "soak.executed_moves")
++
++    if cycles < limits["minimum_cycles"]:
++        _fail("soak.cycles %r is below plan.minimum_cycles %r" % (cycles, limits["minimum_cycles"]))
++    if games != cycles * GAMES_PER_CYCLE:
++        _fail("soak.games %r must equal cycles*%d = %r"
++              % (games, GAMES_PER_CYCLE, cycles * GAMES_PER_CYCLE))
++    if not (games * MIN_DECISIONS_PER_GAME <= decisions <= games * MAX_DECISIONS_PER_GAME):
++        _fail("soak.decisions %r outside [games*%d, games*%d]"
++              % (decisions, MIN_DECISIONS_PER_GAME, MAX_DECISIONS_PER_GAME))
++    if not (decisions - games <= moves <= decisions):
++        _fail("soak.executed_moves %r outside [decisions-games, decisions]" % moves)
++
++    initial = _require_mapping(_get(soak, "initial_counters", "soak"), "soak.initial_counters")
++    final = _require_mapping(_get(soak, "final_counters", "soak"), "soak.final_counters")
++    for name in COUNTER_FIELDS:
++        _require_nonneg_int(_get(initial, name, "soak.initial_counters"),
++                            "soak.initial_counters.%s" % name)
++        _require_nonneg_int(_get(final, name, "soak.final_counters"),
++                            "soak.final_counters.%s" % name)
++
++    if initial["updates"] != limits["warmup"]:
++        _fail("soak.initial_counters.updates %r must equal plan.warmup_cycles %r"
++              % (initial["updates"], limits["warmup"]))
++    if initial["next_game"] != initial["updates"] * GAMES_PER_CYCLE:
++        _fail("soak.initial_counters.next_game %r must equal updates*%d"
++              % (initial["next_game"], GAMES_PER_CYCLE))
++
++    expected = {"updates": cycles, "next_game": games,
++                "decisions": decisions, "executed_moves": moves}
++    for name in COUNTER_FIELDS:
++        delta = final[name] - initial[name]
++        if delta != expected[name]:
++            _fail("final-minus-start %s delta %r does not match aggregate %r"
++                  % (name, delta, expected[name]))
++
++
++def _validate_diagnostics(soak):
++    floor = _require_finite(_get(soak, "minimum_exp_behavior_logp", "soak"),
++                            "soak.minimum_exp_behavior_logp")
++    if not (PROBABILITY_MIN <= floor <= PROBABILITY_MAX):
++        _fail("soak.minimum_exp_behavior_logp %r outside [%r, %r]"
++              % (floor, PROBABILITY_MIN, PROBABILITY_MAX))
++    ratio = _require_finite(_get(soak, "maximum_update_ratio_error", "soak"),
++                            "soak.maximum_update_ratio_error")
++    if not (0 <= ratio <= RATIO_ERROR_MAX):
++        _fail("soak.maximum_update_ratio_error %r outside [0, %r]" % (ratio, RATIO_ERROR_MAX))
++
++
++def _validate_evidence(soak, limits):
++    target = limits["target"]
++    # Telemetry at every interval boundary inside the run; the final row may be
++    # folded into the terminal summary, so require one fewer than the boundaries.
++    min_rows = target // limits["telemetry_seconds"] - 1
++    expected_periodic = target // limits["checkpoint_seconds"] - 1
++    expected_replays = expected_periodic + 2  # initial + periodic + final
++
++    rows = _require_nonneg_int(_get(soak, "telemetry_rows", "soak"), "soak.telemetry_rows")
++    if rows < min_rows:
++        _fail("soak.telemetry_rows %r below required minimum %r" % (rows, min_rows))
++    periodic = _require_nonneg_int(_get(soak, "periodic_replays", "soak"), "soak.periodic_replays")
++    if periodic != expected_periodic:
++        _fail("soak.periodic_replays must be exactly %r, got %r" % (expected_periodic, periodic))
++    replays = _require_nonneg_int(_get(soak, "replays", "soak"), "soak.replays")
++    if replays != expected_replays:
++        _fail("soak.replays must be exactly %r (initial+periodic+final), got %r"
++              % (expected_replays, replays))
++
++    _require_positive_int(_get(soak, "peak_process_rss_bytes", "soak"), "soak.peak_process_rss_bytes")
++    _require_bool(_get(soak, "device_memory_headroom_certified", "soak"), False,
++                  "soak.device_memory_headroom_certified")
++
+ 
+ def validate_summary(report, plan):
+-    raise NotImplementedError
++    """Validate a two-hour qualification summary against the soak plan.
++
++    Returns ``None`` if the summary is acceptable; raises ``ValueError``
++    describing the first violated requirement otherwise.  This gate only
++    establishes summary-level consistency; it makes no claim about telemetry
++    files, checkpoint fingerprints, device-memory headroom or source provenance.
++    """
++    _require_mapping(report, "report")
++    limits = _validate_plan(plan)
++    _validate_scope(report)
++    soak = _require_mapping(_get(report, "soak", "report"), "report.soak")
++    _validate_timing(soak, limits)
++    _validate_counters(soak, limits)
++    _validate_compile_controls(report, soak)
++    _validate_diagnostics(soak)
++    _validate_evidence(soak, limits)
++    return None

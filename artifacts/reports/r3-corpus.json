@@ -1,0 +1,453 @@
+{
+  "report_version": "r3-corpus-verification-1",
+  "generated_at": "2026-10-10T16:47:45.263900+00:00",
+  "status": "complete",
+  "corpus_id": "2266d7b8b9ea2a9264c0e283d3b3501daed67f1d984973b0f14971663d14e81a",
+  "index_hash": "7d60ee89717e07643cef617b586df5082389a31a4f69df5cc4d4b1e8220d0924",
+  "corpus_directory": "artifacts/runs/r3-gen9-random-100k-v2",
+  "inventory_directory": "artifacts/runs/r3-gen9-random-100k-v2/inventory-final",
+  "showdown_commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "config": {
+    "battle_manifest_id": "9eb8c302d7e68e3fda8167479de6f6338ee3ae45d48153b6e73f873c99ca799f",
+    "catalog_hash": "429570e57cb4e9f6442283d4eb2d929ed5f52f63d70b5290cdc61f0454c22b46",
+    "count": 100000,
+    "namespace": "r3-inventory-2026-10-10-v1",
+    "producer_hashes": {
+      "packages/corpus/catalog.mjs": "d1cccf0fa9ecec48ecc862db30cdc0aa268b18a2275ea82d487b7e65a6d6d202",
+      "packages/corpus/common.mjs": "e4f215eb2745ac3bfe037ba7564df993cefb7dd5241bf1ea8fffe406812e85d7",
+      "packages/corpus/generate.mjs": "4c75c8f5ecc00b7621989da1d1599c5624df918e956a64e7cb88ca6bbc0b5b62"
+    },
+    "seed_version": "r3-team-seeds-v1",
+    "shard_size": 1000,
+    "split": "unassigned",
+    "vocabulary_hash": "23f0a0d697638c4648d1058694b6a5de785fd9cf0062e515d455b8c79b7f5fd8"
+  },
+  "vocabulary_version": "showdown-dex-ids-v2",
+  "teams": 100000,
+  "pokemon": 600000,
+  "move_slots": 2395662,
+  "shards": 100,
+  "failure_events": 0,
+  "distinct": {
+    "abilities": 203,
+    "base_species": 421,
+    "base_species_pairs": 87972,
+    "compatible_templates": 879,
+    "display_forms": 561,
+    "forms": 561,
+    "gender": 3,
+    "items": 60,
+    "lead_source_species": 501,
+    "levels": 33,
+    "move_count_per_pokemon": 2,
+    "moves": 348,
+    "roles": 10,
+    "shiny": 2,
+    "source_abilities": 583,
+    "source_forms": 563,
+    "source_moves": 3330,
+    "source_roles": 873,
+    "source_species": 509,
+    "source_tera_types": 1285,
+    "template_match_cardinality": 1,
+    "tera_types": 19,
+    "unique_template_matches": 879
+  },
+  "unique_joint_sets": 9589,
+  "team_duplicates": {
+    "exact_generated": {
+      "duplicate_records": 0,
+      "unique": 100000
+    },
+    "ordered_config": {
+      "duplicate_records": 0,
+      "unique": 100000
+    }
+  },
+  "compressed_shard_bytes": 55379296,
+  "canonical_jsonl_bytes": 376928145,
+  "coverage": {
+    "comparisons": {
+      "source_abilities": {
+        "declared": 583,
+        "observed_declared": 583,
+        "observed_outside_declaration": [],
+        "unobserved_declared": []
+      },
+      "source_moves": {
+        "declared": 3330,
+        "observed_declared": 3330,
+        "observed_outside_declaration": [],
+        "unobserved_declared": []
+      },
+      "source_roles": {
+        "declared": 873,
+        "observed_declared": 873,
+        "observed_outside_declaration": [],
+        "unobserved_declared": []
+      },
+      "source_species": {
+        "declared": 509,
+        "observed_declared": 509,
+        "observed_outside_declaration": [],
+        "unobserved_declared": []
+      },
+      "source_templates": {
+        "declared": 879,
+        "interpretation": "Compatibility with emitted role/moves/ability/Tera is not a trace of the selected generator template. Overlapping templates can match the same emitted set.",
+        "match_cardinality_counts": {
+          "1": 600000
+        },
+        "observed_compatible": 879,
+        "observed_unique_match": 879,
+        "unobserved_compatible": []
+      },
+      "source_tera_types": {
+        "declared": 1285,
+        "observed_declared": 1285,
+        "observed_outside_declaration": [],
+        "unobserved_declared": []
+      }
+    },
+    "coverage_version": "r3-declarative-coverage-v1",
+    "interpretation": "Unobserved declared alternatives are coverage gaps, not proof of unreachability. Items, display forms, EV/IVs and other programmatic choices have no exhaustive declarative denominator here. Initial sets do not close dynamic battle mechanics."
+  },
+  "top_frequencies": {
+    "source_species": [
+      {
+        "id": "dachsbun",
+        "count": 1643
+      },
+      {
+        "id": "florges",
+        "count": 1632
+      },
+      {
+        "id": "mimikyu",
+        "count": 1616
+      },
+      {
+        "id": "mismagius",
+        "count": 1607
+      },
+      {
+        "id": "alcremie",
+        "count": 1603
+      },
+      {
+        "id": "clefable",
+        "count": 1603
+      },
+      {
+        "id": "comfey",
+        "count": 1578
+      },
+      {
+        "id": "komala",
+        "count": 1574
+      },
+      {
+        "id": "spectrier",
+        "count": 1570
+      },
+      {
+        "id": "azelf",
+        "count": 1566
+      }
+    ],
+    "moves": [
+      {
+        "id": "knockoff",
+        "count": 101949
+      },
+      {
+        "id": "earthquake",
+        "count": 97545
+      },
+      {
+        "id": "closecombat",
+        "count": 66788
+      },
+      {
+        "id": "swordsdance",
+        "count": 57728
+      },
+      {
+        "id": "uturn",
+        "count": 49947
+      },
+      {
+        "id": "calmmind",
+        "count": 45833
+      },
+      {
+        "id": "recover",
+        "count": 37134
+      },
+      {
+        "id": "stoneedge",
+        "count": 36792
+      },
+      {
+        "id": "thunderbolt",
+        "count": 35565
+      },
+      {
+        "id": "roost",
+        "count": 32701
+      }
+    ],
+    "abilities": [
+      {
+        "id": "levitate",
+        "count": 26723
+      },
+      {
+        "id": "intimidate",
+        "count": 20692
+      },
+      {
+        "id": "pressure",
+        "count": 14655
+      },
+      {
+        "id": "protosynthesis",
+        "count": 13786
+      },
+      {
+        "id": "quarkdrive",
+        "count": 13585
+      },
+      {
+        "id": "regenerator",
+        "count": 13134
+      },
+      {
+        "id": "technician",
+        "count": 11649
+      },
+      {
+        "id": "thickfat",
+        "count": 11163
+      },
+      {
+        "id": "prankster",
+        "count": 10603
+      },
+      {
+        "id": "chlorophyll",
+        "count": 8913
+      }
+    ],
+    "items": [
+      {
+        "id": "leftovers",
+        "count": 158983
+      },
+      {
+        "id": "heavydutyboots",
+        "count": 110620
+      },
+      {
+        "id": "lifeorb",
+        "count": 89052
+      },
+      {
+        "id": "choiceband",
+        "count": 44269
+      },
+      {
+        "id": "assaultvest",
+        "count": 30198
+      },
+      {
+        "id": "choicespecs",
+        "count": 26419
+      },
+      {
+        "id": "eviolite",
+        "count": 19993
+      },
+      {
+        "id": "choicescarf",
+        "count": 19060
+      },
+      {
+        "id": "sitrusberry",
+        "count": 11410
+      },
+      {
+        "id": "whiteherb",
+        "count": 9634
+      }
+    ],
+    "tera_types": [
+      {
+        "id": "steel",
+        "count": 90347
+      },
+      {
+        "id": "fighting",
+        "count": 69304
+      },
+      {
+        "id": "water",
+        "count": 62677
+      },
+      {
+        "id": "ground",
+        "count": 61390
+      },
+      {
+        "id": "dark",
+        "count": 38901
+      },
+      {
+        "id": "poison",
+        "count": 35225
+      },
+      {
+        "id": "ghost",
+        "count": 34133
+      },
+      {
+        "id": "fairy",
+        "count": 32427
+      },
+      {
+        "id": "grass",
+        "count": 26899
+      },
+      {
+        "id": "fire",
+        "count": 26476
+      }
+    ],
+    "levels": [
+      {
+        "id": "84",
+        "count": 52023
+      },
+      {
+        "id": "82",
+        "count": 50484
+      },
+      {
+        "id": "79",
+        "count": 40542
+      },
+      {
+        "id": "88",
+        "count": 40450
+      },
+      {
+        "id": "83",
+        "count": 40208
+      },
+      {
+        "id": "87",
+        "count": 36114
+      },
+      {
+        "id": "85",
+        "count": 35426
+      },
+      {
+        "id": "86",
+        "count": 31102
+      },
+      {
+        "id": "80",
+        "count": 30739
+      },
+      {
+        "id": "77",
+        "count": 29478
+      }
+    ]
+  },
+  "verification": {
+    "all_records_validated_in_python": true,
+    "all_canonical_bytes_match": true,
+    "seed_order_verified": true,
+    "sampled_official_replays": 1000,
+    "all_sampled_replays_exact": true,
+    "completed_resume_integrity_check_passed": true,
+    "producer_fix_regeneration_all_100_shards_identical": true,
+    "final_consumer_logical_outputs_match_previous_pass": true
+  },
+  "inventory_report_hash": "49c0cc9a403d1dbcea4f816e164b13fc78b149a6019e42390bb582840261969b",
+  "inventory_files": {
+    "counts.sqlite": {
+      "bytes": 42954752,
+      "sha256": "6d8092e76fb5d231992cecca41512375c82128c5d86e80bfe89bedc5ddc5a03b"
+    },
+    "coverage.json": {
+      "bytes": 1249,
+      "sha256": "1fceaf43646ea9eb6285041d14f817b3707d8e548a8d308a01ff432581b74e5e"
+    },
+    "frequencies.json": {
+      "bytes": 3238948,
+      "sha256": "869d59aa23be70d0c87376f56744ef62824d58e80310e56a37adad52ebd909c3"
+    },
+    "joint-sets.jsonl.gz": {
+      "bytes": 690015,
+      "sha256": "aea9a21c32d081da6819ccd294820e32ac24ff9bdd27f7a2ab6b0cb9c98e7c6c"
+    },
+    "team-counts.jsonl.gz": {
+      "bytes": 7664853,
+      "sha256": "2b4cc0e2b6de01dd66f163af92c10bce261761a458b1f76ff54f5f6424a54e42"
+    }
+  },
+  "replay_report_hash": "ac8c7d5d3bae0818fb613a985dd39ec893ae16a7e1881433d95c8fe2666861b2",
+  "metadata_archive": {
+    "index.json": {
+      "path": "artifacts/manifests/r3-2266d7b8b9ea2a9264c0e283d3b3501daed67f1d984973b0f14971663d14e81a/index.json",
+      "sha256": "10c7cca2805e024da17f80becf706e359f84dcfa406f5455ea061b66fe11e9f1",
+      "bytes": 26541
+    },
+    "manifest.json": {
+      "path": "artifacts/manifests/r3-2266d7b8b9ea2a9264c0e283d3b3501daed67f1d984973b0f14971663d14e81a/manifest.json",
+      "sha256": "c7696fbefc3f08f0b8a090e1cbd265c4a2b0a26b20b37838272596535edae6a3",
+      "bytes": 4092
+    },
+    "catalog.json": {
+      "path": "artifacts/manifests/r3-2266d7b8b9ea2a9264c0e283d3b3501daed67f1d984973b0f14971663d14e81a/catalog.json",
+      "sha256": "eea9c14a8c1f797174495e752fd3d456a93b0b85ce5eb7f47cc6cac523054d75",
+      "bytes": 373260
+    },
+    "vocabulary.json": {
+      "path": "artifacts/manifests/r3-2266d7b8b9ea2a9264c0e283d3b3501daed67f1d984973b0f14971663d14e81a/vocabulary.json",
+      "sha256": "da8daaea01ada83c06166208a76edd6cc5243e4fd2dd2cfcf1d27ea1139cb817",
+      "bytes": 42911
+    },
+    "replay.json": {
+      "path": "artifacts/manifests/r3-2266d7b8b9ea2a9264c0e283d3b3501daed67f1d984973b0f14971663d14e81a/replay.json",
+      "sha256": "20a359d4e72b789b9e762614c5915048abe935c86dfae013c06be7ccd0de7d0d",
+      "bytes": 269323
+    },
+    "inventory-report.json": {
+      "path": "artifacts/manifests/r3-2266d7b8b9ea2a9264c0e283d3b3501daed67f1d984973b0f14971663d14e81a/inventory-report.json",
+      "sha256": "9f816a0b242bed6f413d63ec8fa85c060e709140b433d95e12282e75c31582ef",
+      "bytes": 2682
+    }
+  },
+  "observed_generation_ms": 125147,
+  "inventory_ms": 107649,
+  "timing_interpretation": "Local CPU data-pipeline runs; concurrent work varied. Not a training throughput benchmark.",
+  "regression": {
+    "command": "npm test",
+    "node_tests_passed": 40,
+    "python_tests_passed": 13,
+    "after_streaming_hash_change": "Six corpus Python tests rerun and passed; full inventory rerun.",
+    "test_source_hashes": {
+      "scripts/test.mjs": "43eba48e2d75f8c73e731db9ff12aabca57983797e32a8287c7940afa9c43183",
+      "tests/corpus/generate.test.mjs": "b64cf958ff77d9a7ae1b9ed38cb20826c9f7c0ce73d76a156081e0323ea6372d",
+      "tests/corpus/test_corpus.py": "e45f865e4867886d00c231d4c7f40ed68e0881141e8a5dc1184ebf0e22179373"
+    },
+    "r2_smoke_report": "artifacts/reports/r2-contract.json",
+    "r2_smoke_sha256": "43d608934a4b5c88ddd206577d4616a8d25fad02899c6c6e208bce89ad02c3bb"
+  },
+  "scope": "Exploratory initial-team inventory, split unassigned. Not full dynamic mechanics coverage, held-out evaluation or policy strength.",
+  "content_hash": "f5ce643eee3782905521a964ca22698ee0daa2c4bf978265af29f3e674226a34"
+}

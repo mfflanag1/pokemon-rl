@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "fixture_hash": "74e64ca4abb8391b1ad6c8172b874b507f624f558b4486362b918d032fd08ab0",
+  "games": 72,
+  "outcomes": {
+    "terminal": 24,
+    "truncated": 48
+  },
+  "decisions": 1656,
+  "codec_views": 1826,
+  "actor_views": 5426,
+  "actor_fingerprints_hash": "81c4df7881d90df327999c71cbbe94aa108e387c9a43e741bfe87b3b5b4832d4",
+  "hidden_initial_equal": 1008,
+  "hidden_post_equal": 864,
+  "own_variant_positive_controls": 576,
+  "different_reserve_reveals": 24,
+  "coverage": {
+    "terminal": 24,
+    "truncated": 48,
+    "replacement": 74,
+    "wait": 74,
+    "voluntary_switch": 720,
+    "critical_hits": 31,
+    "super_effective": 206,
+    "resisted": 596,
+    "low_hp_ability_attacks": 85,
+    "speed_tie_turns": 138,
+    "masked_hp": 820
+  },
+  "conditional_damage_values": 3456,
+  "full_g2": "open",
+  "full_g3": "open",
+  "jax_port_implemented": false,
+  "training_performed": false,
+  "prime_used": false,
+  "final_evaluation_used": false
+}

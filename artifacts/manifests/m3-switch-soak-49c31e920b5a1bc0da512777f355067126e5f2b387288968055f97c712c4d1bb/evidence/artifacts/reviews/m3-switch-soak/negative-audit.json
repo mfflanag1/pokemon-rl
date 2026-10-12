@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "negatives": [
+    {
+      "case": "smoke-as-production",
+      "rejected": "Wrong campaign mode"
+    },
+    {
+      "case": "unfinished",
+      "rejected": "report.status must be 'passed'"
+    },
+    {
+      "case": "runtime",
+      "rejected": "Source/runtime admission"
+    },
+    {
+      "case": "missing-telemetry",
+      "rejected": "rows length must equal report.soak.telemetry_rows"
+    },
+    {
+      "case": "broken-counters",
+      "rejected": "report.soak.final_counters.next_game must equal 32*updates"
+    },
+    {
+      "case": "changed-replay",
+      "rejected": "Original next-update fingerprints"
+    },
+    {
+      "case": "checkpoint-corruption",
+      "rejected": "Checkpoint bytes"
+    },
+    {
+      "case": "partial-write",
+      "rejected": "Incomplete evidence"
+    },
+    {
+      "case": "reserved-data",
+      "rejected": "report.final_evaluation_used must preserve plan scope value False"
+    }
+  ],
+  "production_unchanged": true,
+  "receipt_written": false
+}

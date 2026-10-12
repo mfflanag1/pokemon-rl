@@ -1,0 +1,1437 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokemon-reference.local/contracts/battle-v1/schema.json",
+  "title": "Pinned singles battle artifacts 1.0.0",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "artifact_kind": {
+          "const": "manifest"
+        },
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "payload": {
+          "$ref": "#/$defs/manifest"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^manifest:[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_kind",
+        "manifest_id",
+        "payload",
+        "content_hash",
+        "artifact_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "artifact_kind": {
+          "const": "team"
+        },
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "payload": {
+          "$ref": "#/$defs/team"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^team:[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_kind",
+        "manifest_id",
+        "payload",
+        "content_hash",
+        "artifact_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "artifact_kind": {
+          "const": "player_view"
+        },
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "payload": {
+          "$ref": "#/$defs/player_view"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^player_view:[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_kind",
+        "manifest_id",
+        "payload",
+        "content_hash",
+        "artifact_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "artifact_kind": {
+          "const": "decision"
+        },
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "payload": {
+          "$ref": "#/$defs/decision"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^decision:[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_kind",
+        "manifest_id",
+        "payload",
+        "content_hash",
+        "artifact_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "artifact_kind": {
+          "const": "episode"
+        },
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "payload": {
+          "$ref": "#/$defs/episode"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^episode:[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_kind",
+        "manifest_id",
+        "payload",
+        "content_hash",
+        "artifact_id"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "seed": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "showdown-sodium"
+        },
+        "hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "kind",
+        "hex"
+      ],
+      "additionalProperties": false
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "move"
+            },
+            "slot": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "terastallize": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "slot",
+            "terastallize"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "switch"
+            },
+            "slot": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            }
+          },
+          "required": [
+            "kind",
+            "slot"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "pass"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "unknown": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "const": "unknown"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "known_integer": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/unknown"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "known"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "state",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "known_id": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/unknown"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "known"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[a-z0-9]*$(?![\\s\\S])"
+            }
+          },
+          "required": [
+            "state",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "move_request": {
+      "type": "object",
+      "properties": {
+        "move": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+$(?![\\s\\S])"
+        },
+        "pp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxpp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "target": {
+          "type": "string"
+        },
+        "disabled": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "disabledSource": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "move",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "active_request": {
+      "type": "object",
+      "properties": {
+        "moves": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/move_request"
+          },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "maybeDisabled": {
+          "type": "boolean"
+        },
+        "maybeLocked": {
+          "type": "boolean"
+        },
+        "trapped": {
+          "type": "boolean"
+        },
+        "maybeTrapped": {
+          "type": "boolean"
+        },
+        "canTerastallize": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "moves"
+      ],
+      "additionalProperties": false
+    },
+    "pokemon_request": {
+      "type": "object",
+      "properties": {
+        "ident": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        },
+        "condition": {
+          "type": "string",
+          "pattern": "^(0 fnt|[0-9]+/[0-9]+( [a-z]+)?)$(?![\\s\\S])"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "atk": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "def": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "spa": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "spd": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "spe": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "atk",
+            "def",
+            "spa",
+            "spd",
+            "spe"
+          ],
+          "additionalProperties": false
+        },
+        "moves": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+$(?![\\s\\S])"
+          },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "baseAbility": {
+          "type": "string"
+        },
+        "item": {
+          "type": "string"
+        },
+        "pokeball": {
+          "type": "string"
+        },
+        "ability": {
+          "type": "string"
+        },
+        "commanding": {
+          "const": false
+        },
+        "reviving": {
+          "type": "boolean"
+        },
+        "teraType": {
+          "type": "string"
+        },
+        "terastallized": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ident",
+        "details",
+        "condition",
+        "active",
+        "stats",
+        "moves",
+        "baseAbility",
+        "item",
+        "pokeball"
+      ],
+      "additionalProperties": false
+    },
+    "side_request": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "enum": [
+            "p1",
+            "p2"
+          ]
+        },
+        "pokemon": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/pokemon_request"
+          },
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "noCancel": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "id",
+        "pokemon"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "side": {
+              "$ref": "#/$defs/side_request"
+            },
+            "noCancel": {
+              "type": "boolean"
+            },
+            "update": {
+              "type": "boolean"
+            },
+            "active": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/active_request"
+              },
+              "minItems": 1,
+              "maxItems": 1
+            }
+          },
+          "required": [
+            "side",
+            "active"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "side": {
+              "$ref": "#/$defs/side_request"
+            },
+            "noCancel": {
+              "type": "boolean"
+            },
+            "update": {
+              "type": "boolean"
+            },
+            "forceSwitch": {
+              "type": "array",
+              "items": {
+                "type": "boolean"
+              },
+              "minItems": 1,
+              "maxItems": 1
+            }
+          },
+          "required": [
+            "side",
+            "forceSwitch"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "side": {
+              "$ref": "#/$defs/side_request"
+            },
+            "noCancel": {
+              "type": "boolean"
+            },
+            "update": {
+              "type": "boolean"
+            },
+            "wait": {
+              "const": true
+            }
+          },
+          "required": [
+            "side",
+            "wait"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "player_view": {
+      "type": "object",
+      "properties": {
+        "viewer": {
+          "enum": [
+            "p1",
+            "p2"
+          ]
+        },
+        "request_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "phase": {
+          "enum": [
+            "move",
+            "switch",
+            "wait"
+          ]
+        },
+        "request": {
+          "$ref": "#/$defs/request"
+        },
+        "visible_protocol": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "admissible_actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action"
+          },
+          "uniqueItems": true
+        },
+        "action_mask": {
+          "type": "array",
+          "items": {
+            "type": "boolean"
+          },
+          "minItems": 14,
+          "maxItems": 14
+        },
+        "opponent_private_state": {
+          "$ref": "#/$defs/unknown"
+        }
+      },
+      "required": [
+        "viewer",
+        "request_id",
+        "turn",
+        "phase",
+        "request",
+        "visible_protocol",
+        "admissible_actions",
+        "action_mask",
+        "opponent_private_state"
+      ],
+      "additionalProperties": false
+    },
+    "manifest": {
+      "type": "object",
+      "properties": {
+        "reference_manifest": {
+          "$ref": "#/$defs/reference_manifest"
+        },
+        "canonical_version": {
+          "const": "pokemon-json-integers-v1"
+        },
+        "action_version": {
+          "const": "gen9-singles-request-v1"
+        },
+        "observation_version": {
+          "const": "player-protocol-v1"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "node": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "node"
+          ],
+          "additionalProperties": false
+        },
+        "contract_hashes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+          }
+        },
+        "vocabulary_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "reference_manifest",
+        "canonical_version",
+        "action_version",
+        "observation_version",
+        "producer",
+        "contract_hashes",
+        "vocabulary_hash"
+      ],
+      "additionalProperties": false
+    },
+    "team": {
+      "type": "object",
+      "properties": {
+        "generator_seed": {
+          "$ref": "#/$defs/seed"
+        },
+        "source_team_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "pokemon": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/generated_pokemon"
+          },
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "species": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+$(?![\\s\\S])"
+              },
+              "base_species": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+$(?![\\s\\S])"
+              },
+              "ability": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+$(?![\\s\\S])"
+              },
+              "item": {
+                "type": "string",
+                "pattern": "^[a-z0-9]*$(?![\\s\\S])"
+              },
+              "moves": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+$(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "maxItems": 4
+              },
+              "tera_type": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+$(?![\\s\\S])"
+              }
+            },
+            "required": [
+              "species",
+              "base_species",
+              "ability",
+              "item",
+              "moves",
+              "tera_type"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 6,
+          "maxItems": 6
+        }
+      },
+      "required": [
+        "generator_seed",
+        "source_team_hash",
+        "pokemon",
+        "ids"
+      ],
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "episode_key": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "view_id": {
+          "type": "string",
+          "pattern": "^player_view:[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "side": {
+          "enum": [
+            "p1",
+            "p2"
+          ]
+        },
+        "request_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "phase": {
+          "enum": [
+            "move",
+            "switch"
+          ]
+        },
+        "submitted_action": {
+          "$ref": "#/$defs/action"
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "feedback": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "side": {
+                "enum": [
+                  "p1",
+                  "p2"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "side",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "episode_key",
+        "sequence",
+        "view_id",
+        "side",
+        "request_id",
+        "turn",
+        "phase",
+        "submitted_action",
+        "accepted",
+        "feedback"
+      ],
+      "additionalProperties": false
+    },
+    "episode": {
+      "type": "object",
+      "properties": {
+        "episode_key": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "format_id": {
+          "const": "gen9randombattle"
+        },
+        "team_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^team:[0-9a-f]{64}$(?![\\s\\S])"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "mechanics_seed": {
+          "$ref": "#/$defs/seed"
+        },
+        "policy_seeds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/seed"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "policy_id": {
+          "type": "string"
+        },
+        "split": {
+          "const": "unassigned"
+        },
+        "decision_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^decision:[0-9a-f]{64}$(?![\\s\\S])"
+          },
+          "uniqueItems": true
+        },
+        "input_tape": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "outcome": {
+          "type": "object",
+          "properties": {
+            "winner": {
+              "enum": [
+                "p1",
+                "p2",
+                null
+              ]
+            },
+            "turns": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "remaining_pokemon": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 6
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "reason": {
+              "enum": [
+                "win",
+                "tie"
+              ]
+            }
+          },
+          "required": [
+            "winner",
+            "turns",
+            "remaining_pokemon",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "source_r1_content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "source_raw_output_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "source_normalized_output_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "episode_key",
+        "format_id",
+        "team_ids",
+        "mechanics_seed",
+        "policy_seeds",
+        "policy_id",
+        "split",
+        "decision_ids",
+        "input_tape",
+        "outcome",
+        "source_r1_content_hash",
+        "source_raw_output_hash",
+        "source_normalized_output_hash"
+      ],
+      "additionalProperties": false
+    },
+    "reference_manifest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "r1-manifest-1"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$(?![\\s\\S])"
+        },
+        "source_dirty": {
+          "const": false
+        },
+        "lock_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "build": {
+          "type": "object",
+          "properties": {
+            "commit": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$(?![\\s\\S])"
+            },
+            "lock_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "node": {
+              "type": "string"
+            },
+            "npm": {
+              "type": "string"
+            },
+            "platform": {
+              "type": "string"
+            },
+            "arch": {
+              "type": "string"
+            },
+            "build_command": {
+              "type": "string"
+            },
+            "dependency_install": {
+              "type": "string"
+            },
+            "dist_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "prng_dependency_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            }
+          },
+          "required": [
+            "commit",
+            "lock_sha256",
+            "node",
+            "npm",
+            "platform",
+            "arch",
+            "build_command",
+            "dependency_install",
+            "dist_sha256",
+            "prng_dependency_sha256"
+          ],
+          "additionalProperties": false
+        },
+        "harness_source_hashes": {
+          "type": "object",
+          "properties": {
+            "provenance.mjs": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "engine.mjs": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "observations.mjs": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "runner.mjs": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            }
+          },
+          "required": [
+            "provenance.mjs",
+            "engine.mjs",
+            "observations.mjs",
+            "runner.mjs"
+          ],
+          "additionalProperties": false
+        },
+        "format": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "const": "gen9randombattle"
+            },
+            "name": {
+              "type": "string"
+            },
+            "mod": {
+              "const": "gen9"
+            },
+            "game_type": {
+              "const": "singles"
+            },
+            "team": {
+              "const": "random"
+            },
+            "ruleset": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "resolved_rules": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "value_rules": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "mod",
+            "game_type",
+            "team",
+            "ruleset",
+            "resolved_rules",
+            "value_rules"
+          ],
+          "additionalProperties": false
+        },
+        "configuration": {
+          "type": "object",
+          "properties": {
+            "potd": {
+              "const": ""
+            },
+            "server_config_loaded": {
+              "const": false
+            },
+            "custom_formats": {
+              "const": false
+            }
+          },
+          "required": [
+            "potd",
+            "server_config_loaded",
+            "custom_formats"
+          ],
+          "additionalProperties": false
+        },
+        "source_hashes": {
+          "type": "object",
+          "properties": {
+            "LICENSE": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "config/formats.ts": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "data/rulesets.ts": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "sim/prng.ts": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "data/random-battles/gen9/teams.ts": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "data/random-battles/gen9/sets.json": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+            }
+          },
+          "required": [
+            "LICENSE",
+            "config/formats.ts",
+            "data/rulesets.ts",
+            "sim/prng.ts",
+            "data/random-battles/gen9/teams.ts",
+            "data/random-battles/gen9/sets.json"
+          ],
+          "additionalProperties": false
+        },
+        "seed_encoding": {
+          "type": "string"
+        },
+        "observation_version": {
+          "const": "r1-player-protocol-1"
+        },
+        "normalization_version": {
+          "const": "r1-timestamps-1"
+        },
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "schema_version",
+        "repository",
+        "commit",
+        "source_dirty",
+        "lock_sha256",
+        "build",
+        "harness_source_hashes",
+        "format",
+        "configuration",
+        "source_hashes",
+        "seed_encoding",
+        "observation_version",
+        "normalization_version",
+        "manifest_id"
+      ],
+      "additionalProperties": false
+    },
+    "generated_pokemon": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "species": {
+          "type": "string"
+        },
+        "speciesId": {
+          "type": "string"
+        },
+        "gender": {
+          "enum": [
+            "M",
+            "F",
+            "N",
+            ""
+          ]
+        },
+        "shiny": {
+          "type": "boolean"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "moves": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+$(?![\\s\\S])"
+          },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "ability": {
+          "type": "string"
+        },
+        "item": {
+          "type": "string"
+        },
+        "teraType": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "evs": {
+          "type": "object",
+          "properties": {
+            "hp": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 252
+            },
+            "atk": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 252
+            },
+            "def": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 252
+            },
+            "spa": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 252
+            },
+            "spd": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 252
+            },
+            "spe": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 252
+            }
+          },
+          "required": [
+            "hp",
+            "atk",
+            "def",
+            "spa",
+            "spd",
+            "spe"
+          ],
+          "additionalProperties": false
+        },
+        "ivs": {
+          "type": "object",
+          "properties": {
+            "hp": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 31
+            },
+            "atk": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 31
+            },
+            "def": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 31
+            },
+            "spa": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 31
+            },
+            "spd": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 31
+            },
+            "spe": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 31
+            }
+          },
+          "required": [
+            "hp",
+            "atk",
+            "def",
+            "spa",
+            "spd",
+            "spe"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "name",
+        "species",
+        "speciesId",
+        "gender",
+        "shiny",
+        "level",
+        "moves",
+        "ability",
+        "item",
+        "teraType",
+        "role",
+        "evs",
+        "ivs"
+      ],
+      "additionalProperties": false
+    },
+    "submission": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "side": {
+          "enum": [
+            "p1",
+            "p2"
+          ]
+        },
+        "request_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "view_id": {
+          "type": "string",
+          "pattern": "^player_view:[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "action": {
+          "$ref": "#/$defs/action"
+        }
+      },
+      "required": [
+        "schema_version",
+        "side",
+        "request_id",
+        "view_id",
+        "action"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

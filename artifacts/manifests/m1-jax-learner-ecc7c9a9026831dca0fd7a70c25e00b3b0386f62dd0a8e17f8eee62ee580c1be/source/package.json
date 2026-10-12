@@ -1,0 +1,33 @@
+{
+  "name": "pokemon-reference",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "setup": "node scripts/bootstrap.mjs",
+    "reference": "node packages/reference-node/cli.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "test": "node scripts/test.mjs",
+    "contract": "node packages/battle-contract/cli.mjs",
+    "contract:fixtures": "node scripts/contract-fixtures.mjs",
+    "contract:smoke": "node scripts/contract-smoke.mjs",
+    "corpus": "node packages/corpus/cli.mjs",
+    "episodes": "node packages/episodes/cli.mjs",
+    "features:catalog": "node scripts/player-feature-catalog.mjs",
+    "features:fixtures": "node scripts/player-feature-fixtures.mjs",
+    "mechanics:setup": "npm ci --prefix tools/mechanics-deps --ignore-scripts --no-audit --no-fund",
+    "mechanics": "node scripts/mechanics-inventory.mjs",
+    "dataset:collect": "node packages/dataset/collect.mjs",
+    "learner:canaries": "PYTHONPATH=python .venv/bin/python -m pokemon_learner.canaries",
+    "slice:reference": "node packages/slice/reference.mjs",
+    "jax:reference": "node packages/jax-slice/reference.mjs",
+    "jax:campaign": "PYTHONPATH=python .venv/bin/python -m pokemon_jax.campaign",
+    "jax:learner": "PYTHONPATH=python .venv/bin/python -m pokemon_jax_learner.campaign"
+  },
+  "dependencies": {
+    "ajv": "8.17.1"
+  }
+}

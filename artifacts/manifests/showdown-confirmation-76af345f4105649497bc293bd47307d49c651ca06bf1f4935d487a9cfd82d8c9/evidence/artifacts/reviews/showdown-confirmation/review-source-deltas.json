@@ -1,0 +1,22 @@
+{
+  "packages/showdown-confirmation/client.mjs": {
+    "reviewed": "52bd0e23096563a5c1d48ae91ef926ff287ebcc4f4dfe534387f7ad00f127747",
+    "current": "f16dfb87253d39daa7c81cacde9aeb2b1c4cfff4ddf852b850c1fc62d6e90a45"
+  },
+  "packages/showdown-confirmation/plan.json": {
+    "reviewed": "22283496f6a4ecd41daddaa40e60fdfe8960da029807850f7fd4c51bdc12a1ac",
+    "current": "00eeb5162137eb252b3d6d17da7872722aded46f432983b6bead604987d4a9c6"
+  },
+  "packages/showdown-confirmation/teams.mjs": {
+    "reviewed": "c77ad9acda58323df03473e63aa5176b12639661ce41a762148e7f4e4f042a3c",
+    "current": "c91ce708c3a606c3e69a97a8808f793cffa92931cd6550e0a6cd55bf6016aa8d"
+  },
+  "scripts/seal-showdown-confirmation.py": {
+    "reviewed": "7d7543af34ffd1ec8aa6f977413f0b54c0ddb3d45005310449bc7127c6d9a952",
+    "current": "bb042e50c9434feebfd7de07e93623ae98b3ce764dfd386847360adaa4e0e5be"
+  },
+  "tests/showdown-confirmation/client.test.mjs": {
+    "reviewed": "33e037d43367f19cea1ceca56d32f265a46453c7859dad6c0a866f5bce576fb5",
+    "current": "81bee437119a8947d068c324700599230b0eaef9f5466545a26c7e40186f95ae"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "showdown-opponent-panel-plan-1",
+  "format": "gen9randombattle",
+  "policy_ids": ["baseline-v1", "random-v1", "damage-v1", "tactical-v1"],
+  "candidate": "baseline-v1",
+  "pairs": 64,
+  "namespace": "showdown-opponent-panel-qualified-v1",
+  "pairing": "Hold two admitted development teams and a mechanics seed fixed; swap policy seats. Reuse each pair across every unordered policy matchup.",
+  "matchups": [["baseline-v1", "random-v1"], ["baseline-v1", "damage-v1"], ["baseline-v1", "tactical-v1"], ["random-v1", "damage-v1"], ["random-v1", "tactical-v1"], ["damage-v1", "tactical-v1"]],
+  "max_decisions_per_game": 20000,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 73291,
+  "interval": "Descriptive 95% percentile bootstrap of whole team-seed pairs. Common resampled pair indices across matchups preserve cross-matchup dependence. No promotion or multiple-comparison significance claim.",
+  "stopping": "Complete all 768 planned games and replay each exactly. A simulator/protocol/cap failure invalidates completion; do not score it as a loss or replace a difficult pair.",
+  "selection": "Freeze source and plan before the production run. No tuning or opponent replacement after inspecting production outcomes. Any improvement gets a new version and fresh development namespace.",
+  "split": "development",
+  "final_evaluation_used": false,
+  "public_server_used": false,
+  "training_performed": false
+}

@@ -1,0 +1,641 @@
+diff --git a/packages/showdown-soak/schedule.mjs b/packages/showdown-soak/schedule.mjs
+new file mode 100644
+index 0000000..017e343
+--- /dev/null
++++ b/packages/showdown-soak/schedule.mjs
+@@ -0,0 +1,153 @@
++// Pure, deterministic schedule helper for the frozen showdown network-soak plan.
++//
++// Node builtins only. No simulator, no network, no I/O beyond reading the
++// sibling plan.json once at module load. Every exported function returns fresh
++// objects; the loaded plan is deep-frozen so it can never be mutated.
++
++import { readFileSync } from 'node:fs';
++
++const PLAN = deepFreeze(
++  JSON.parse(readFileSync(new URL('./plan.json', import.meta.url), 'utf8')),
++);
++
++const NORMAL_SCENARIO = 'normal';
++const SEAT_P1 = 'p1';
++const SEAT_P2 = 'p2';
++
++function deepFreeze(value) {
++  if (value !== null && typeof value === 'object' && !Object.isFrozen(value)) {
++    Object.freeze(value);
++    for (const key of Object.keys(value)) deepFreeze(value[key]);
++  }
++  return value;
++}
++
++function assertBoolean(smoke, name) {
++  if (typeof smoke !== 'boolean') {
++    throw new TypeError(`${name} must be a boolean, received ${describe(smoke)}`);
++  }
++}
++
++function describe(value) {
++  if (value === null) return 'null';
++  if (typeof value === 'string') return JSON.stringify(value);
++  if (typeof value === 'number' || typeof value === 'bigint') return String(value);
++  return typeof value;
++}
++
++/**
++ * Returns a fresh deep copy of the top-level plan with smoke overrides
++ * applied (when `smoke` is true), the `smoke` sub-object removed, and a
++ * derived `games = sessions * games_per_session` field.
++ *
++ * @param {boolean} [smoke=false]
++ */
++export function planFor(smoke = false) {
++  assertBoolean(smoke, 'smoke');
++  const { smoke: smokeOverrides, ...base } = PLAN;
++  const merged = smoke ? { ...base, ...smokeOverrides } : base;
++  const plan = structuredClone(merged);
++  plan.games = plan.sessions * plan.games_per_session;
++  return plan;
++}
++
++/**
++ * Returns the fully-resolved spec for a single scheduled game.
++ *
++ * @param {number} index safe integer in [0, games)
++ * @param {boolean} [smoke=false]
++ */
++export function gameSpec(index, smoke = false) {
++  const plan = planFor(smoke);
++  if (!Number.isSafeInteger(index)) {
++    throw new RangeError(`index must be a safe integer, received ${describe(index)}`);
++  }
++  if (index < 0 || index >= plan.games) {
++    throw new RangeError(`index must be in [0, ${plan.games}), received ${index}`);
++  }
++  // -0 is a safe integer that passes the range check; canonicalize it to +0
++  // before deriving any fields so every emitted number is strictly equal to 0.
++  if (Object.is(index, -0)) index = 0;
++
++  const session = Math.floor(index / plan.games_per_session);
++  const within_session = index % plan.games_per_session;
++  const pair = Math.floor(index / 2);
++  const mirror = index % 2;
++  const tactical_team = pair * 2 + mirror;
++  const baseline_team = pair * 2 + 1 - mirror;
++  const tactical_seat = mirror ? SEAT_P2 : SEAT_P1;
++  const challenger = mirror ? 'baseline' : 'tactical';
++
++  const parity = session % 2;
++  let scenario = NORMAL_SCENARIO;
++  for (let k = 0; k < plan.fault_offsets.length; k += 1) {
++    if (plan.fault_offsets[k] + parity === within_session) {
++      scenario = plan.faults[k];
++      break;
++    }
++  }
++
++  const file = `game-${String(index).padStart(4, '0')}.json.gz`;
++  const names = {
++    tactical: `SoakTac${session}`,
++    baseline: `SoakBase${session}`,
++  };
++
++  return {
++    index,
++    session,
++    within_session,
++    pair,
++    mirror,
++    tactical_team,
++    baseline_team,
++    tactical_seat,
++    challenger,
++    scenario,
++    file,
++    names,
++  };
++}
++
++/**
++ * Derives the expected coverage totals by walking the full schedule.
++ *
++ * - rematches: every game that is not the first game of its session
++ * - faults: games whose scenario is not "normal"
++ * - tactical_connections: one initial login per session plus one new
++ *   connection per fault recovery
++ * - baseline_connections: one per session (baseline transport stays connected)
++ *
++ * @param {boolean} [smoke=false]
++ */
++export function expectedCoverage(smoke = false) {
++  const plan = planFor(smoke);
++  const scenarios = { [NORMAL_SCENARIO]: 0 };
++  for (const fault of plan.faults) scenarios[fault] = 0;
++
++  let rematches = 0;
++  let faults = 0;
++  let tactical_p1 = 0;
++  let tactical_p2 = 0;
++
++  for (let index = 0; index < plan.games; index += 1) {
++    const spec = gameSpec(index, smoke);
++    if (spec.within_session !== 0) rematches += 1;
++    if (spec.scenario !== NORMAL_SCENARIO) faults += 1;
++    if (spec.tactical_seat === SEAT_P1) tactical_p1 += 1;
++    else tactical_p2 += 1;
++    scenarios[spec.scenario] = (scenarios[spec.scenario] ?? 0) + 1;
++  }
++
++  return {
++    games: plan.games,
++    sessions: plan.sessions,
++    rematches,
++    faults,
++    tactical_connections: plan.sessions + faults,
++    baseline_connections: plan.sessions,
++    tactical_p1,
++    tactical_p2,
++    scenarios,
++  };
++}
+diff --git a/tests/showdown-soak/schedule.test.mjs b/tests/showdown-soak/schedule.test.mjs
+new file mode 100644
+index 0000000..aad0439
+--- /dev/null
++++ b/tests/showdown-soak/schedule.test.mjs
+@@ -0,0 +1,476 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
++
++import {
++  planFor,
++  gameSpec,
++  expectedCoverage,
++} from '../../packages/showdown-soak/schedule.mjs';
++
++const PLAN_URL = new URL('../../packages/showdown-soak/plan.json', import.meta.url);
++const readRawPlan = () => JSON.parse(readFileSync(PLAN_URL, 'utf8'));
++
++const SPEC_KEYS = [
++  'index',
++  'session',
++  'within_session',
++  'pair',
++  'mirror',
++  'tactical_team',
++  'baseline_team',
++  'tactical_seat',
++  'challenger',
++  'scenario',
++  'file',
++  'names',
++];
++
++const COVERAGE_KEYS = [
++  'games',
++  'sessions',
++  'rematches',
++  'faults',
++  'tactical_connections',
++  'baseline_connections',
++  'tactical_p1',
++  'tactical_p2',
++  'scenarios',
++];
++
++// ---------------------------------------------------------------------------
++// planFor
++// ---------------------------------------------------------------------------
++
++test('planFor(false) mirrors top-level plan, drops smoke, adds games', () => {
++  const raw = readRawPlan();
++  const plan = planFor(false);
++  const { smoke: _smoke, ...expected } = raw;
++  expected.games = raw.sessions * raw.games_per_session;
++
++  assert.deepEqual(plan, expected);
++  assert.equal('smoke' in plan, false);
++  assert.equal(plan.games, 1000);
++  assert.equal(plan.sessions, 20);
++  assert.equal(plan.games_per_session, 50);
++  assert.equal(plan.namespace, 'showdown-network-soak-v1');
++  assert.deepEqual(plan.fault_offsets, [10, 20, 30]);
++});
++
++test('planFor() defaults to production', () => {
++  assert.deepEqual(planFor(), planFor(false));
++});
++
++test('planFor(true) applies smoke overrides and keeps unoverridden fields', () => {
++  const raw = readRawPlan();
++  const plan = planFor(true);
++
++  assert.equal('smoke' in plan, false);
++  assert.equal(plan.namespace, raw.smoke.namespace);
++  assert.equal(plan.sessions, 2);
++  assert.equal(plan.games_per_session, 4);
++  assert.deepEqual(plan.fault_offsets, [0, 1, 2]);
++  assert.equal(plan.games, 8);
++
++  // Non-overridden fields are inherited unchanged.
++  assert.deepEqual(plan.faults, raw.faults);
++  assert.deepEqual(plan.policies, raw.policies);
++  assert.equal(plan.schema, raw.schema);
++  assert.equal(plan.decision_delay_ms, raw.decision_delay_ms);
++  assert.equal(plan.game_timeout_ms, raw.game_timeout_ms);
++  assert.equal(plan.max_client_rss_mib, raw.max_client_rss_mib);
++  assert.equal(plan.design, raw.design);
++});
++
++test('planFor returns a fresh deep copy each call and never mutates the source', () => {
++  const before = readRawPlan();
++  const a = planFor(false);
++  const b = planFor(false);
++
++  assert.notEqual(a, b);
++  assert.notEqual(a.fault_offsets, b.fault_offsets);
++  assert.notEqual(a.faults, b.faults);
++  assert.notEqual(a.policies, b.policies);
++
++  // Mutate the returned copy aggressively.
++  a.sessions = 1;
++  a.games = -1;
++  a.fault_offsets.push(999);
++  a.faults.length = 0;
++  a.policies.tactical = 'tampered';
++  delete a.namespace;
++
++  const c = planFor(false);
++  assert.deepEqual(c, b);
++  assert.equal(c.sessions, 20);
++  assert.deepEqual(c.fault_offsets, [10, 20, 30]);
++  assert.equal(c.faults.length, 3);
++  assert.equal(c.policies.tactical, 'tactical-v1');
++  assert.equal(c.namespace, 'showdown-network-soak-v1');
++
++  // Smoke copy is also independent.
++  const s = planFor(true);
++  s.fault_offsets[0] = 42;
++  assert.deepEqual(planFor(true).fault_offsets, [0, 1, 2]);
++
++  // Downstream helpers are unaffected by mutated copies.
++  assert.equal(expectedCoverage(false).games, 1000);
++  assert.equal(gameSpec(999, false).session, 19);
++
++  // The file on disk is untouched.
++  assert.deepEqual(readRawPlan(), before);
++});
++
++test('planFor rejects non-boolean input', () => {
++  for (const bad of ['true', 'false', 1, 0, null, {}, [], () => {}, Symbol('x'), 1n]) {
++    assert.throws(() => planFor(bad), TypeError, `planFor(${String(bad)})`);
++  }
++});
++
++// ---------------------------------------------------------------------------
++// gameSpec
++// ---------------------------------------------------------------------------
++
++test('gameSpec returns exactly the specified keys', () => {
++  for (const [index, smoke] of [[0, false], [999, false], [0, true], [7, true]]) {
++    const spec = gameSpec(index, smoke);
++    assert.deepEqual(Object.keys(spec).sort(), [...SPEC_KEYS].sort());
++    assert.deepEqual(Object.keys(spec.names).sort(), ['baseline', 'tactical']);
++  }
++});
++
++test('gameSpec() defaults smoke to false', () => {
++  assert.deepEqual(gameSpec(0), gameSpec(0, false));
++  assert.deepEqual(gameSpec(999), gameSpec(999, false));
++});
++
++test('gameSpec pair mapping: fixed teams in fixed seats, swapped policies', () => {
++  // Pair 0: team 0 stays in p1 and team 1 stays in p2 across both games.
++  assert.deepEqual(gameSpec(0, false), {
++    index: 0,
++    session: 0,
++    within_session: 0,
++    pair: 0,
++    mirror: 0,
++    tactical_team: 0,
++    baseline_team: 1,
++    tactical_seat: 'p1',
++    challenger: 'tactical',
++    scenario: 'normal',
++    file: 'game-0000.json.gz',
++    names: { tactical: 'SoakTac0', baseline: 'SoakBase0' },
++  });
++  assert.deepEqual(gameSpec(1, false), {
++    index: 1,
++    session: 0,
++    within_session: 1,
++    pair: 0,
++    mirror: 1,
++    tactical_team: 1,
++    baseline_team: 0,
++    tactical_seat: 'p2',
++    challenger: 'baseline',
++    scenario: 'normal',
++    file: 'game-0001.json.gz',
++    names: { tactical: 'SoakTac0', baseline: 'SoakBase0' },
++  });
++
++  // Mid-schedule pair crossing a session boundary.
++  assert.deepEqual(gameSpec(50, false), {
++    index: 50,
++    session: 1,
++    within_session: 0,
++    pair: 25,
++    mirror: 0,
++    tactical_team: 50,
++    baseline_team: 51,
++    tactical_seat: 'p1',
++    challenger: 'tactical',
++    scenario: 'normal',
++    file: 'game-0050.json.gz',
++    names: { tactical: 'SoakTac1', baseline: 'SoakBase1' },
++  });
++
++  // Last game.
++  assert.deepEqual(gameSpec(999, false), {
++    index: 999,
++    session: 19,
++    within_session: 49,
++    pair: 499,
++    mirror: 1,
++    tactical_team: 999,
++    baseline_team: 998,
++    tactical_seat: 'p2',
++    challenger: 'baseline',
++    scenario: 'normal',
++    file: 'game-0999.json.gz',
++    names: { tactical: 'SoakTac19', baseline: 'SoakBase19' },
++  });
++});
++
++test('gameSpec: every pair has the same two teams in the same seats', () => {
++  for (let pair = 0; pair < 500; pair += 1) {
++    const a = gameSpec(pair * 2, false);
++    const b = gameSpec(pair * 2 + 1, false);
++    assert.equal(a.pair, pair);
++    assert.equal(b.pair, pair);
++    assert.equal(a.mirror, 0);
++    assert.equal(b.mirror, 1);
++    assert.equal(a.tactical_team, pair * 2);
++    assert.equal(a.baseline_team, pair * 2 + 1);
++    assert.equal(b.tactical_team, pair * 2 + 1);
++    assert.equal(b.baseline_team, pair * 2);
++    // Seat held by team (pair*2) is p1 in both games.
++    assert.equal(a.tactical_seat, 'p1');
++    assert.equal(b.tactical_seat, 'p2');
++    assert.equal(a.challenger, 'tactical');
++    assert.equal(b.challenger, 'baseline');
++    // Teams are never reused across pairs.
++    assert.equal(new Set([a.tactical_team, a.baseline_team]).size, 2);
++  }
++});
++
++test('gameSpec: index/session/within_session/file/names are consistent', () => {
++  for (let index = 0; index < 1000; index += 1) {
++    const spec = gameSpec(index, false);
++    assert.equal(spec.index, index);
++    assert.equal(spec.session, Math.floor(index / 50));
++    assert.equal(spec.within_session, index % 50);
++    assert.equal(spec.session * 50 + spec.within_session, index);
++    assert.equal(spec.file, `game-${String(index).padStart(4, '0')}.json.gz`);
++    assert.match(spec.file, /^game-\d{4}\.json\.gz$/);
++    assert.equal(spec.names.tactical, `SoakTac${spec.session}`);
++    assert.equal(spec.names.baseline, `SoakBase${spec.session}`);
++  }
++});
++
++test('gameSpec production fault placement: offset + session parity', () => {
++  // Even session: faults at within 10/20/30 (mirror 0, p1).
++  assert.equal(gameSpec(10, false).scenario, 'before-choice');
++  assert.equal(gameSpec(20, false).scenario, 'lost-write');
++  assert.equal(gameSpec(30, false).scenario, 'accepted-choice');
++  assert.equal(gameSpec(10, false).tactical_seat, 'p1');
++  assert.equal(gameSpec(11, false).scenario, 'normal');
++  assert.equal(gameSpec(9, false).scenario, 'normal');
++
++  // Odd session: faults at within 11/21/31 (mirror 1, p2).
++  assert.equal(gameSpec(61, false).scenario, 'before-choice');
++  assert.equal(gameSpec(71, false).scenario, 'lost-write');
++  assert.equal(gameSpec(81, false).scenario, 'accepted-choice');
++  assert.equal(gameSpec(61, false).tactical_seat, 'p2');
++  assert.equal(gameSpec(60, false).scenario, 'normal');
++  assert.equal(gameSpec(62, false).scenario, 'normal');
++});
++
++test('gameSpec smoke fault placement', () => {
++  const smokeScenarios = Array.from({ length: 8 }, (_, i) => gameSpec(i, true).scenario);
++  assert.deepEqual(smokeScenarios, [
++    'before-choice', // s0 w0
++    'lost-write', // s0 w1
++    'accepted-choice', // s0 w2
++    'normal', // s0 w3
++    'normal', // s1 w0
++    'before-choice', // s1 w1
++    'lost-write', // s1 w2
++    'accepted-choice', // s1 w3
++  ]);
++  assert.deepEqual(gameSpec(7, true), {
++    index: 7,
++    session: 1,
++    within_session: 3,
++    pair: 3,
++    mirror: 1,
++    tactical_team: 7,
++    baseline_team: 6,
++    tactical_seat: 'p2',
++    challenger: 'baseline',
++    scenario: 'accepted-choice',
++    file: 'game-0007.json.gz',
++    names: { tactical: 'SoakTac1', baseline: 'SoakBase1' },
++  });
++});
++
++function strata(smoke) {
++  const { games, faults } = planFor(smoke);
++  const counts = new Map();
++  for (const fault of faults) {
++    counts.set(`${fault}/p1`, 0);
++    counts.set(`${fault}/p2`, 0);
++  }
++  for (let index = 0; index < games; index += 1) {
++    const spec = gameSpec(index, smoke);
++    if (spec.scenario === 'normal') continue;
++    const key = `${spec.scenario}/${spec.tactical_seat}`;
++    assert.ok(counts.has(key), `unexpected stratum ${key}`);
++    counts.set(key, counts.get(key) + 1);
++  }
++  return Object.fromEntries(counts);
++}
++
++test('all six fault/seat strata are covered in production (10 each)', () => {
++  assert.deepEqual(strata(false), {
++    'before-choice/p1': 10,
++    'before-choice/p2': 10,
++    'lost-write/p1': 10,
++    'lost-write/p2': 10,
++    'accepted-choice/p1': 10,
++    'accepted-choice/p2': 10,
++  });
++});
++
++test('all six fault/seat strata are covered in smoke (1 each)', () => {
++  assert.deepEqual(strata(true), {
++    'before-choice/p1': 1,
++    'before-choice/p2': 1,
++    'lost-write/p1': 1,
++    'lost-write/p2': 1,
++    'accepted-choice/p1': 1,
++    'accepted-choice/p2': 1,
++  });
++});
++
++test('every session has exactly three faults, one of each type', () => {
++  for (const smoke of [false, true]) {
++    const plan = planFor(smoke);
++    for (let session = 0; session < plan.sessions; session += 1) {
++      const seen = [];
++      for (let w = 0; w < plan.games_per_session; w += 1) {
++        const spec = gameSpec(session * plan.games_per_session + w, smoke);
++        if (spec.scenario !== 'normal') seen.push(spec.scenario);
++      }
++      assert.deepEqual(seen, plan.faults, `session ${session} smoke=${smoke}`);
++    }
++  }
++});
++
++test('gameSpec returns fresh objects; mutating one does not affect another', () => {
++  const a = gameSpec(10, false);
++  a.scenario = 'tampered';
++  a.names.tactical = 'tampered';
++  a.tactical_seat = 'p9';
++  const b = gameSpec(10, false);
++  assert.equal(b.scenario, 'before-choice');
++  assert.equal(b.names.tactical, 'SoakTac0');
++  assert.equal(b.tactical_seat, 'p1');
++  assert.notEqual(a.names, b.names);
++});
++
++test('gameSpec rejects out-of-range and unsafe indices', () => {
++  const bad = [
++    -1,
++    1000,
++    1001,
++    1.5,
++    0.1,
++    -0.5,
++    NaN,
++    Infinity,
++    -Infinity,
++    Number.MAX_SAFE_INTEGER + 1,
++    2 ** 53,
++    '0',
++    '10',
++    null,
++    undefined,
++    true,
++    [],
++    {},
++    10n,
++  ];
++  for (const index of bad) {
++    assert.throws(() => gameSpec(index, false), RangeError, `gameSpec(${String(index)})`);
++  }
++  // Smoke range is tighter.
++  assert.throws(() => gameSpec(8, true), RangeError);
++  assert.throws(() => gameSpec(-1, true), RangeError);
++  assert.doesNotThrow(() => gameSpec(7, true));
++  assert.doesNotThrow(() => gameSpec(999, false));
++  assert.doesNotThrow(() => gameSpec(0, false));
++  // -0 is a safe integer equal to 0; accept it as index 0.
++  assert.equal(gameSpec(-0, false).index, 0);
++});
++
++test('gameSpec rejects non-boolean smoke', () => {
++  for (const bad of ['true', 1, 0, null, {}, []]) {
++    assert.throws(() => gameSpec(0, bad), TypeError);
++  }
++});
++
++// ---------------------------------------------------------------------------
++// expectedCoverage
++// ---------------------------------------------------------------------------
++
++test('expectedCoverage production known answer', () => {
++  const coverage = expectedCoverage(false);
++  assert.deepEqual(Object.keys(coverage).sort(), [...COVERAGE_KEYS].sort());
++  assert.deepEqual(coverage, {
++    games: 1000,
++    sessions: 20,
++    rematches: 980,
++    faults: 60,
++    tactical_connections: 80,
++    baseline_connections: 20,
++    tactical_p1: 500,
++    tactical_p2: 500,
++    scenarios: {
++      normal: 940,
++      'before-choice': 20,
++      'lost-write': 20,
++      'accepted-choice': 20,
++    },
++  });
++  assert.deepEqual(expectedCoverage(), coverage);
++});
++
++test('expectedCoverage smoke known answer', () => {
++  const coverage = expectedCoverage(true);
++  assert.deepEqual(Object.keys(coverage).sort(), [...COVERAGE_KEYS].sort());
++  assert.deepEqual(coverage, {
++    games: 8,
++    sessions: 2,
++    rematches: 6,
++    faults: 6,
++    tactical_connections: 8,
++    baseline_connections: 2,
++    tactical_p1: 4,
++    tactical_p2: 4,
++    scenarios: {
++      normal: 2,
++      'before-choice': 2,
++      'lost-write': 2,
++      'accepted-choice': 2,
++    },
++  });
++});
++
++test('expectedCoverage internal consistency', () => {
++  for (const smoke of [false, true]) {
++    const plan = planFor(smoke);
++    const c = expectedCoverage(smoke);
++    assert.equal(c.games, plan.sessions * plan.games_per_session);
++    assert.equal(c.rematches, c.games - c.sessions);
++    assert.equal(c.faults, 3 * c.sessions);
++    assert.equal(c.tactical_connections, c.sessions + c.faults);
++    assert.equal(c.baseline_connections, c.sessions);
++    assert.equal(c.tactical_p1 + c.tactical_p2, c.games);
++    assert.equal(c.tactical_p1, c.tactical_p2);
++    const scenarioTotal = Object.values(c.scenarios).reduce((s, n) => s + n, 0);
++    assert.equal(scenarioTotal, c.games);
++    assert.equal(c.scenarios.normal, c.games - c.faults);
++  }
++});
++
++test('expectedCoverage returns fresh objects', () => {
++  const a = expectedCoverage(false);
++  a.games = 0;
++  a.scenarios.normal = 0;
++  const b = expectedCoverage(false);
++  assert.equal(b.games, 1000);
++  assert.equal(b.scenarios.normal, 940);
++});
++
++test('expectedCoverage rejects non-boolean input', () => {
++  for (const bad of ['false', 0, 1, null, {}]) {
++    assert.throws(() => expectedCoverage(bad), TypeError);
++  }
++});

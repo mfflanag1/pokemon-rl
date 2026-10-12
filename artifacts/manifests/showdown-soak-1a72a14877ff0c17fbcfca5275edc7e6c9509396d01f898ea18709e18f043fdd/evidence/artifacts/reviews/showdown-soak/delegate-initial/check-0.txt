@@ -1,0 +1,56 @@
+✔ planFor(false) mirrors top-level plan, drops smoke, adds games (1.981333ms)
+✔ planFor() defaults to production (0.109666ms)
+✔ planFor(true) applies smoke overrides and keeps unoverridden fields (0.163334ms)
+✔ planFor returns a fresh deep copy each call and never mutates the source (6.517792ms)
+✔ planFor rejects non-boolean input (0.527709ms)
+✔ gameSpec returns exactly the specified keys (0.16275ms)
+✔ gameSpec() defaults smoke to false (0.096792ms)
+✔ gameSpec pair mapping: fixed teams in fixed seats, swapped policies (0.111375ms)
+✔ gameSpec: every pair has the same two teams in the same seats (4.695541ms)
+✔ gameSpec: index/session/within_session/file/names are consistent (6.511417ms)
+✔ gameSpec production fault placement: offset + session parity (0.181667ms)
+✔ gameSpec smoke fault placement (0.19625ms)
+✔ all six fault/seat strata are covered in production (10 each) (4.3145ms)
+✔ all six fault/seat strata are covered in smoke (1 each) (0.115ms)
+✔ every session has exactly three faults, one of each type (4.116083ms)
+✔ gameSpec returns fresh objects; mutating one does not affect another (0.075208ms)
+✖ gameSpec rejects out-of-range and unsafe indices (1.532958ms)
+✔ gameSpec rejects non-boolean smoke (0.0915ms)
+✔ expectedCoverage production known answer (8.778458ms)
+✔ expectedCoverage smoke known answer (0.202125ms)
+✔ expectedCoverage internal consistency (4.825042ms)
+✔ expectedCoverage returns fresh objects (8.36325ms)
+✔ expectedCoverage rejects non-boolean input (0.215666ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 22
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 166.906542
+
+✖ failing tests:
+
+test at tests/showdown-soak/schedule.test.mjs:358:1
+✖ gameSpec rejects out-of-range and unsafe indices (1.532958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + -0
+  - 0
+  
+      at TestContext.<anonymous> (file:///Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261011-145210-26ef7028/workspace/tests/showdown-soak/schedule.test.mjs:390:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: -0,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

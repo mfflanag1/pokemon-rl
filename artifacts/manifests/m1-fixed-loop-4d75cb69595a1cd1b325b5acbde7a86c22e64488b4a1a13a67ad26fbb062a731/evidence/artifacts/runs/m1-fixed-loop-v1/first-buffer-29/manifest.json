@@ -1,0 +1,1 @@
+{"actor_fields":["features","mask","actions","old_logp","old_values","game_id","side","turn"],"actor_has_targets":false,"capacity":512,"files":{"actor.npz":"528984a77d774c3bd3c02738444614c15997300b3a0b57d83af561a5b351e31f","targets.npz":"2c99adebc8bf8dbcbf11c65a7a287f465fe156ec0191dd06a11e82d1f3fc563b"},"valid":402}

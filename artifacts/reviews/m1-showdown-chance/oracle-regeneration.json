@@ -1,0 +1,11 @@
+{
+  "byte_identical": true,
+  "sha256": "0321da68a47c637a793821cb4a93dbc699bf3246e09044318cf8e69518013a34",
+  "source_files": {
+    "contracts/showdown-chance-v1/contract.json": "8160e0b6c7a272aea5b95bbe609fe7bf08909354b926d0788a8d605827a1955e",
+    "packages/showdown-chance/word-oracle.mjs": "a87750acd4a4db08f1c3c2d3b6bc32c2de4ef15256479bec8b1a28042461055b",
+    "vendor/pokemon-showdown/sim/prng.ts": "faff50532b3fde14de1a544f759acf466649279f6640e1a3fd0f7dff6fa538bc"
+  },
+  "status": "passed",
+  "words": 100096
+}

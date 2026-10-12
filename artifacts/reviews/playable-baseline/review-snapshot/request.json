@@ -1,0 +1,21 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new playable Showdown baseline for correctness and information-boundary risks. Scope: Node native WebSocket client for gen9randombattle, explicit challenge allowlist, heuristic observing only own request plus public protocol, local copied stock server for full-network tests, paired development-team evaluation. Already completed 8 direct full-format games and two actual local WebSocket games in drafts; 14 focused tests pass before latest own-name validation. Independent protocol exploration found modern PM challenges; verified in pinned ladders-challenges.ts. Inspect duplicate/stale/revoked requests, unavailable-choice refresh, sentchoice replay, global authentication and errors, client lifecycle, legal moves/revival/Tera, benchmark scoring/mirroring and local-only server isolation. No public login or ladder tested, no competitive-strength claim, no JAX changes. Find actionable correctness bugs; give concrete triggering sequences. Review is a snapshot, not an executed test.",
+  "files_sha256": {
+    "packages/showdown-bot/protocol.mjs": "11e811d67fa2969479eccf9caed06831fd6d81fd0522599d1d6a55ae9c6017eb",
+    "packages/showdown-bot/policy.mjs": "ce2181ca4f860781e4be4968ff009b03d4922a58cf14ec90c0d2b5026131134b",
+    "packages/showdown-bot/client.mjs": "8779f2d380d1f0a7efd18cd70ee2e3709c927fbf1c62388baba507a33630c716",
+    "packages/showdown-bot/cli.mjs": "43bdeb9ab1a69477fe2f5b27ad45385e831e1ca1118229d591c00e973f3d256b",
+    "packages/showdown-bot/development.mjs": "59ece1e1d5870c9d303f61dad76fad03a94c5ad243204a6526171b97bcfbaf62",
+    "packages/showdown-bot/local-server.mjs": "4004fc05eb6a0793349c76d357277e26c9072472545e887bf35276a9a5d1d5ee",
+    "packages/showdown-bot/campaign.mjs": "72717be75fbfeb3a6ee7e8b24abd11cd2f7d2b6aad9bacefa4513c52a15fbc72",
+    "packages/showdown-bot/network-smoke.mjs": "9db90229e9c9d761845a6fd02537975555573347a1b7c1f38f5080fc9c440990",
+    "packages/showdown-bot/audit.mjs": "41169aef6b83e40d41e1d9f9d31a8adc3148b0c7e185faef8e654a463e7b555d",
+    "tests/showdown-bot/bot.test.mjs": "4053cda001ab5ca7529e4ec2ee7445bc3df4c8ee1d3753baf0959168384af579"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

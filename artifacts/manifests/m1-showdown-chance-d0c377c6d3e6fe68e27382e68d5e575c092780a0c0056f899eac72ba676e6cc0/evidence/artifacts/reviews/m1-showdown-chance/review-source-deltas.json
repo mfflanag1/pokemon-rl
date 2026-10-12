@@ -1,0 +1,15 @@
+{
+  "main": {
+    "changed_since_review": [
+      "tests/showdown-chance/test_campaign.py"
+    ],
+    "reviewed_files": 15
+  },
+  "sealer": {
+    "changed_since_review": [
+      "scripts/seal-showdown-chance.py",
+      "docs/M1_SHOWDOWN_CHANCE.md"
+    ],
+    "reviewed_files": 10
+  }
+}

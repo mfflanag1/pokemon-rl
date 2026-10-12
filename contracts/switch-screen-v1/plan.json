@@ -1,0 +1,17 @@
+{
+  "format": "switch-screen-plan-1",
+  "predecessor": "49c31e920b5a1bc0da512777f355067126e5f2b387288968055f97c712c4d1bb",
+  "training_seeds": [1009, 2027, 3037],
+  "checkpoint_updates": [0, 2048, 8192],
+  "opponents": ["random", "damage-greedy", "frozen-initial"],
+  "pairs_per_cell": 576,
+  "evaluation_batch_games": 32,
+  "seed_namespace": "m3-switch-screen-v1",
+  "action_key_seed": 1297302354,
+  "family_alpha": 0.05,
+  "primary_family_size": 6,
+  "minimum_secured_win_fraction": 0.55,
+  "minimum_secured_win_lower_bound": 0.5,
+  "minimum_worst_case_improvement_lower_bound": 0.0,
+  "final_reserved_data_used": false
+}

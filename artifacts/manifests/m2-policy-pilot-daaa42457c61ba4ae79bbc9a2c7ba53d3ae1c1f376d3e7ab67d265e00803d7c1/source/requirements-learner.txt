@@ -1,0 +1,2 @@
+# CPU G1 reference learner; does not alter the sealed R1–R7 dependencies.
+numpy==2.5.4

@@ -1,0 +1,16 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused review of coordinator-written confirmation statistics (short module) after a separate Fable implementation timed out unaccepted. Inspect orientation and common-pair deltas, Bonferroni lower quantile, strict lower thresholds vs inclusive point floor, validation and whether claims stay approximate. Scope only provided computation/tests/plan; do not recursively delegate. Fresh confirmation not run yet; all four policies frozen from predecessor. Seven local tests including literal independent seed0 three-metric lower bounds pass before a one-line quantile-underflow guard. Inputs are six full summarizeMatrix edges; expected frozen 1000 pairs, 30000 replicates, family alpha .05, 3 comparisons. Small literal case uses B5 and known seed0 index sequence [2,1,1,0,0,2,2,2,0,0,2,0,1,0,2], direct lower1/3, random delta lower-1/6, damage delta lower-1/3. This is development selection, not exact confidence coverage or final evaluation. Identify concrete bugs or no findings; reviewer cannot execute.",
+  "files_sha256": {
+    "packages/showdown-confirmation/statistics.mjs": "997fe6efc70a353749c761255195df877a138cbe18d3de54e5caae7267b25fe6",
+    "tests/showdown-confirmation/statistics.test.mjs": "366e65980b3f7fd70cbb983721bf8597aea70661f3eac324a2d65e53d9b40d95",
+    "tests/showdown-confirmation/decision-fixture.test.mjs": "a43453a592fbcad205e3473f7c00aef3f4998b382ae09be307e8702d541fcfc2",
+    "packages/showdown-confirmation/plan.json": "00eeb5162137eb252b3d6d17da7872722aded46f432983b6bead604987d4a9c6",
+    "packages/showdown-panel/statistics.mjs": "e059affa6ed0100d2c4958bcc19d8cdac5263ef9f54ebf21f918ca6122afee88"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

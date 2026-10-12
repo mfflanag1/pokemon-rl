@@ -1,0 +1,27 @@
+{
+  "version": "policy-chance-soak-1",
+  "predecessor": "d0c377c6d3e6fe68e27382e68d5e575c092780a0c0056f899eac72ba676e6cc0",
+  "profile": "gen9-rattata-duel-v1",
+  "policy": "binary-policy-1",
+  "chance": "showdown-chance-1",
+  "qualification_seconds": 7200,
+  "seed": 73,
+  "warmup_cycles": 8,
+  "telemetry_seconds": 60,
+  "checkpoint_seconds": 600,
+  "maximum_host_gap_seconds": 30,
+  "minimum_cycles": 1000,
+  "smoke": {
+    "seconds": 10,
+    "telemetry_seconds": 2,
+    "checkpoint_seconds": 4
+  },
+  "timing": "Continuous monotonic elapsed time after compile/warmup. Includes synchronized cycle validation, bounded aggregation, telemetry and periodic replay audits; excludes the final replay. Cross-check wall-clock deltas to detect suspension when monotonic time pauses. Any host-loop gap or wall/monotonic discrepancy above 30 seconds fails. Final replay is also gap-checked. Audit cycles are excluded from primary counters.",
+  "checkpoint": "Reuse the sealed showdown-chance-checkpoint-1 format and unchanged learner plan. Compare original versus restored next learner and metrics; persist exact fingerprints for later verification.",
+  "memory": "Process peak/current RSS telemetry; no certified device-memory or system headroom claim.",
+  "full_g2": "open",
+  "full_g3": "open",
+  "strength_evaluation": false,
+  "prime_used": false,
+  "final_evaluation": "reserved and unused"
+}

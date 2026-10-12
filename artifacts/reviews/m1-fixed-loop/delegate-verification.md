@@ -1,0 +1,27 @@
+# Fixed-loop numerical helper delegation
+
+Run: `20261010-185251-3046a01e`, Fable 5.1, engine selected by `auto`.
+Ownership: only `python/pokemon_fixed/math.py`. The coordinator supplied the
+frozen plan and three immutable acceptance tests. No sealed files were edited.
+
+Fable delivered in 201.24 seconds; all three tests passed in the controller's check. Opposite-model
+Codex QA accepted the implementation and explicitly stated that it had not rerun
+the tests. The coordinator inspected the entire helper against the sealed PPO and
+Adam functions, verified every selected input SHA-256 still matched `request.json`,
+and ran `git apply --check` before applying the single-file patch.
+
+Independent local execution after integration: all 10 then-present fixed-loop
+tests passed in 5.361 seconds (`initial-tests.log`). These include poisoned padded
+rows, zero gradients from empty rows, 256 accumulated Adam updates, late bias-table
+indices, nine collections compared with the sealed collector, compacted-reference
+PPO update parity, fused/separate cycle parity, padding-independent parameter
+gradients, empty-minibatch Adam skipping, checkpoint tampering, interrupted atomic
+publication, and exact boundary replay after discarded collection/update work.
+
+The bias lookup constants equal the reference's Python-double-to-FP32 rounding;
+at step 20001 the remaining beta2 power is below half the spacing below 1.0, so
+returning FP32 one thereafter is valid. The helper's positive-step and nonempty
+padded-shape preconditions are enforced by the fixed caller and documented.
+
+Verdict: accepted, zero implementation rework minutes. Tests and direct source
+inspection support this outcome; QA opinion alone was not treated as success.

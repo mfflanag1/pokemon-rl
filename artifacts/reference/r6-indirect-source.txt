@@ -1,0 +1,786 @@
+FILE data/moves.ts sha256 738b8cfc1ca491537c0188546ab697942aaa313c5e6be83a5432edd5dd8997f7
+
+608: 	assist: {
+609: 		num: 274,
+610: 		accuracy: true,
+611: 		basePower: 0,
+612: 		category: "Status",
+613: 		isNonstandard: "Past",
+614: 		name: "Assist",
+615: 		pp: 20,
+616: 		priority: 0,
+617: 		flags: { failencore: 1, nosleeptalk: 1, noassist: 1, failcopycat: 1, failmimic: 1, failinstruct: 1 },
+618: 		onHit(target) {
+619: 			const moves = [];
+620: 			for (const pokemon of target.side.pokemon) {
+621: 				if (pokemon === target) continue;
+622: 				for (const moveSlot of pokemon.moveSlots) {
+623: 					const moveid = moveSlot.id;
+624: 					const move = this.dex.moves.get(moveid);
+625: 					if (move.flags['noassist'] || move.isZ || move.isMax) {
+626: 						continue;
+627: 					}
+628: 					moves.push(moveid);
+629: 				}
+630: 			}
+631: 			let randomMove = '';
+632: 			if (moves.length) randomMove = this.sample(moves);
+633: 			if (!randomMove) {
+634: 				return false;
+635: 			}
+636: 			this.actions.useMove(randomMove, target);
+637: 		},
+638: 		callsMove: true,
+639: 		target: "self",
+640: 		type: "Normal",
+641: 		contestType: "Cute",
+642: 	},
+
+2849: 	copycat: {
+2850: 		num: 383,
+2851: 		accuracy: true,
+2852: 		basePower: 0,
+2853: 		category: "Status",
+2854: 		name: "Copycat",
+2855: 		pp: 20,
+2856: 		priority: 0,
+2857: 		flags: { failencore: 1, nosleeptalk: 1, noassist: 1, failcopycat: 1, failmimic: 1, failinstruct: 1 },
+2858: 		onHit(pokemon) {
+2859: 			let move: Move | ActiveMove | null = this.lastMove;
+2860: 			if (!move) return;
+2861: 
+2862: 			if (move.isMax && move.baseMove) move = this.dex.moves.get(move.baseMove);
+2863: 			if (move.flags['failcopycat'] || move.isZ || move.isMax) {
+2864: 				return false;
+2865: 			}
+2866: 			this.actions.useMove(move.id, pokemon);
+2867: 		},
+2868: 		callsMove: true,
+2869: 		target: "self",
+2870: 		type: "Normal",
+2871: 		zMove: { boost: { accuracy: 1 } },
+2872: 		contestType: "Cute",
+2873: 	},
+
+4859: 	entrainment: {
+4860: 		num: 494,
+4861: 		accuracy: 100,
+4862: 		basePower: 0,
+4863: 		category: "Status",
+4864: 		name: "Entrainment",
+4865: 		pp: 15,
+4866: 		priority: 0,
+4867: 		flags: { protect: 1, reflectable: 1, mirror: 1, allyanim: 1, metronome: 1 },
+4868: 		onTryHit(target, source) {
+4869: 			if (target === source || target.volatiles['dynamax']) return false;
+4870: 			if (
+4871: 				target.ability === source.ability ||
+4872: 				target.getAbility().flags['cantsuppress'] || target.ability === 'truant' ||
+4873: 				source.getAbility().flags['noentrain']
+4874: 			) {
+4875: 				return false;
+4876: 			}
+4877: 		},
+4878: 		onHit(target, source) {
+4879: 			const oldAbility = target.setAbility(source.ability, source);
+4880: 			if (!oldAbility) return oldAbility as false | null;
+4881: 			if (!target.isAlly(source)) target.volatileStaleness = 'external';
+4882: 		},
+4883: 		target: "normal",
+4884: 		type: "Normal",
+4885: 		zMove: { boost: { spd: 1 } },
+4886: 		contestType: "Cute",
+4887: 	},
+
+5733: 	fling: {
+5734: 		num: 374,
+5735: 		accuracy: 100,
+5736: 		basePower: 0,
+5737: 		category: "Physical",
+5738: 		name: "Fling",
+5739: 		pp: 10,
+5740: 		priority: 0,
+5741: 		flags: { protect: 1, mirror: 1, allyanim: 1, metronome: 1, noparentalbond: 1 },
+5742: 		onPrepareHit(target, source, move) {
+5743: 			if (source.ignoringItem(true)) return false;
+5744: 			const item = source.getItem();
+5745: 			if (!this.singleEvent('TakeItem', item, source.itemState, source, source, move, item)) return false;
+5746: 			if (!item.fling) return false;
+5747: 			move.basePower = item.fling.basePower;
+5748: 			this.debug(`BP: ${move.basePower}`);
+5749: 			if (item.isBerry) {
+5750: 				if (source.hasAbility('cudchew')) {
+5751: 					this.singleEvent('EatItem', source.getAbility(), source.abilityState, source, source, move, item);
+5752: 				}
+5753: 				move.onHit = function (foe) {
+5754: 					if (this.singleEvent('Eat', item, source.itemState, foe, source, move)) {
+5755: 						this.runEvent('EatItem', foe, source, move, item);
+5756: 						if (item.id === 'leppaberry') foe.staleness = 'external';
+5757: 					}
+5758: 					if (item.onEat) foe.ateBerry = true;
+5759: 				};
+5760: 			} else if (item.fling.effect) {
+5761: 				move.onHit = item.fling.effect;
+5762: 			} else {
+5763: 				if (!move.secondaries) move.secondaries = [];
+5764: 				if (item.fling.status) {
+5765: 					move.secondaries.push({ status: item.fling.status });
+5766: 				} else if (item.fling.volatileStatus) {
+5767: 					move.secondaries.push({ volatileStatus: item.fling.volatileStatus });
+5768: 				}
+5769: 			}
+5770: 			source.addVolatile('fling');
+5771: 		},
+5772: 		condition: {
+5773: 			onUpdate(pokemon) {
+5774: 				const item = pokemon.getItem();
+5775: 				pokemon.setItem('');
+5776: 				pokemon.lastItem = item.id;
+5777: 				pokemon.usedItemThisTurn = true;
+5778: 				this.add('-enditem', pokemon, item.name, '[from] move: Fling');
+5779: 				this.runEvent('AfterUseItem', pokemon, null, null, item);
+5780: 				pokemon.removeVolatile('fling');
+5781: 			},
+5782: 		},
+5783: 		target: "normal",
+5784: 		type: "Dark",
+5785: 		contestType: "Cute",
+5786: 	},
+
+9641: 	instruct: {
+9642: 		num: 689,
+9643: 		accuracy: true,
+9644: 		basePower: 0,
+9645: 		category: "Status",
+9646: 		name: "Instruct",
+9647: 		pp: 15,
+9648: 		priority: 0,
+9649: 		flags: { protect: 1, bypasssub: 1, allyanim: 1, failinstruct: 1 },
+9650: 		onHit(target, source) {
+9651: 			if (!target.lastMove || target.volatiles['dynamax']) return false;
+9652: 			const lastMove = target.lastMove;
+9653: 			const moveSlot = target.getMoveData(lastMove.id);
+9654: 			if (
+9655: 				lastMove.flags['failinstruct'] || lastMove.isZ || lastMove.isMax ||
+9656: 				lastMove.flags['charge'] || lastMove.flags['recharge'] ||
+9657: 				target.volatiles['beakblast'] || target.volatiles['focuspunch'] || target.volatiles['shelltrap'] ||
+9658: 				(moveSlot && moveSlot.pp <= 0)
+9659: 			) {
+9660: 				return false;
+9661: 			}
+9662: 			this.add('-singleturn', target, 'move: Instruct', `[of] ${source}`);
+9663: 			this.queue.prioritizeAction(this.queue.resolveAction({
+9664: 				choice: 'move',
+9665: 				pokemon: target,
+9666: 				moveid: target.lastMove.id,
+9667: 				targetLoc: target.lastMoveTargetLoc!,
+9668: 			})[0] as MoveAction);
+9669: 		},
+9670: 		target: "normal",
+9671: 		type: "Psychic",
+9672: 		zMove: { boost: { spa: 1 } },
+9673: 		contestType: "Clever",
+9674: 	},
+
+11527: 	mefirst: {
+11528: 		num: 382,
+11529: 		accuracy: true,
+11530: 		basePower: 0,
+11531: 		category: "Status",
+11532: 		isNonstandard: "Past",
+11533: 		name: "Me First",
+11534: 		pp: 20,
+11535: 		priority: 0,
+11536: 		flags: {
+11537: 			protect: 1, bypasssub: 1,
+11538: 			failencore: 1, failmefirst: 1, nosleeptalk: 1, noassist: 1,
+11539: 			failcopycat: 1, failmimic: 1, failinstruct: 1,
+11540: 		},
+11541: 		onTryHit(target, pokemon) {
+11542: 			const action = this.queue.willMove(target);
+11543: 			if (!action) return false;
+11544: 			const move = this.dex.getActiveMove(action.move.id);
+11545: 			if (action.zmove || move.isZ || move.isMax) return false;
+11546: 			if (target.volatiles['mustrecharge']) return false;
+11547: 			if (move.category === 'Status' || move.flags['failmefirst']) return false;
+11548: 
+11549: 			pokemon.addVolatile('mefirst');
+11550: 			this.actions.useMove(move, pokemon, { target });
+11551: 			return null;
+11552: 		},
+11553: 		condition: {
+11554: 			duration: 1,
+11555: 			onBasePowerPriority: 12,
+11556: 			onBasePower(basePower) {
+11557: 				return this.chainModify(1.5);
+11558: 			},
+11559: 		},
+11560: 		callsMove: true,
+11561: 		target: "adjacentFoe",
+11562: 		type: "Normal",
+11563: 		zMove: { boost: { spe: 2 } },
+11564: 		contestType: "Clever",
+11565: 	},
+
+11784: 	metronome: {
+11785: 		num: 118,
+11786: 		accuracy: true,
+11787: 		basePower: 0,
+11788: 		category: "Status",
+11789: 		name: "Metronome",
+11790: 		pp: 10,
+11791: 		priority: 0,
+11792: 		flags: { failencore: 1, nosleeptalk: 1, noassist: 1, failcopycat: 1, failmimic: 1, failinstruct: 1 },
+11793: 		onHit(pokemon) {
+11794: 			const moves = this.dex.moves.all().filter(move => (
+11795: 				(!move.isNonstandard || move.isNonstandard === 'Unobtainable') &&
+11796: 				move.flags['metronome']
+11797: 			));
+11798: 			let randomMove = '';
+11799: 			if (moves.length) {
+11800: 				moves.sort((a, b) => a.num - b.num);
+11801: 				randomMove = this.sample(moves).id;
+11802: 			}
+11803: 			if (!randomMove) return false;
+11804: 			this.actions.useMove(randomMove, pokemon);
+11805: 		},
+11806: 		callsMove: true,
+11807: 		target: "self",
+11808: 		type: "Normal",
+11809: 		contestType: "Cute",
+11810: 	},
+
+11838: 	mimic: {
+11839: 		num: 102,
+11840: 		accuracy: true,
+11841: 		basePower: 0,
+11842: 		category: "Status",
+11843: 		name: "Mimic",
+11844: 		pp: 10,
+11845: 		priority: 0,
+11846: 		flags: {
+11847: 			protect: 1, bypasssub: 1, allyanim: 1,
+11848: 			failencore: 1, nosleeptalk: 1, noassist: 1, failcopycat: 1, failmimic: 1, failinstruct: 1,
+11849: 		},
+11850: 		onHit(target, source) {
+11851: 			const move = target.lastMove;
+11852: 			if (source.transformed || !move || move.flags['failmimic'] || source.moves.includes(move.id)) {
+11853: 				return false;
+11854: 			}
+11855: 			if (move.isZ || move.isMax) return false;
+11856: 			const mimicIndex = source.moves.indexOf('mimic');
+11857: 			if (mimicIndex < 0) return false;
+11858: 
+11859: 			source.moveSlots[mimicIndex] = {
+11860: 				move: move.name,
+11861: 				id: move.id,
+11862: 				pp: move.pp,
+11863: 				maxpp: move.pp,
+11864: 				target: move.target,
+11865: 				disabled: false,
+11866: 				used: false,
+11867: 				virtual: true,
+11868: 			};
+11869: 			this.add('-start', source, 'Mimic', move.name);
+11870: 		},
+11871: 		target: "normal",
+11872: 		type: "Normal",
+11873: 		zMove: { boost: { accuracy: 1 } },
+11874: 		contestType: "Cute",
+11875: 	},
+
+12027: 	mirrormove: {
+12028: 		num: 119,
+12029: 		accuracy: true,
+12030: 		basePower: 0,
+12031: 		category: "Status",
+12032: 		isNonstandard: "Past",
+12033: 		name: "Mirror Move",
+12034: 		pp: 20,
+12035: 		priority: 0,
+12036: 		flags: { failencore: 1, nosleeptalk: 1, noassist: 1, failcopycat: 1, failmimic: 1, failinstruct: 1 },
+12037: 		onTryHit(target, pokemon) {
+12038: 			const move = target.lastMove;
+12039: 			if (!move?.flags['mirror'] || move.isZ || move.isMax) {
+12040: 				return false;
+12041: 			}
+12042: 			this.actions.useMove(move.id, pokemon, { target });
+12043: 			return null;
+12044: 		},
+12045: 		callsMove: true,
+12046: 		target: "normal",
+12047: 		type: "Flying",
+12048: 		zMove: { boost: { atk: 2 } },
+12049: 		contestType: "Clever",
+12050: 	},
+
+12598: 	naturepower: {
+12599: 		num: 267,
+12600: 		accuracy: true,
+12601: 		basePower: 0,
+12602: 		category: "Status",
+12603: 		isNonstandard: "Past",
+12604: 		name: "Nature Power",
+12605: 		pp: 20,
+12606: 		priority: 0,
+12607: 		flags: { failencore: 1, nosleeptalk: 1, noassist: 1, failcopycat: 1, failmimic: 1, failinstruct: 1 },
+12608: 		onTryHit(target, pokemon) {
+12609: 			let move = 'triattack';
+12610: 			if (this.field.isTerrain('electricterrain')) {
+12611: 				move = 'thunderbolt';
+12612: 			} else if (this.field.isTerrain('grassyterrain')) {
+12613: 				move = 'energyball';
+12614: 			} else if (this.field.isTerrain('mistyterrain')) {
+12615: 				move = 'moonblast';
+12616: 			} else if (this.field.isTerrain('psychicterrain')) {
+12617: 				move = 'psychic';
+12618: 			}
+12619: 			this.actions.useMove(move, pokemon, { target });
+12620: 			return null;
+12621: 		},
+12622: 		callsMove: true,
+12623: 		target: "normal",
+12624: 		type: "Normal",
+12625: 		contestType: "Beautiful",
+12626: 	},
+
+14821: 	recycle: {
+14822: 		num: 278,
+14823: 		accuracy: true,
+14824: 		basePower: 0,
+14825: 		category: "Status",
+14826: 		name: "Recycle",
+14827: 		pp: 10,
+14828: 		priority: 0,
+14829: 		flags: { snatch: 1, metronome: 1 },
+14830: 		onHit(pokemon, source, move) {
+14831: 			if (pokemon.item || !pokemon.lastItem) return false;
+14832: 			const item = pokemon.lastItem;
+14833: 			pokemon.lastItem = '';
+14834: 			this.add('-item', pokemon, this.dex.items.get(item), '[from] move: Recycle');
+14835: 			pokemon.setItem(item, source, move);
+14836: 		},
+14837: 		target: "self",
+14838: 		type: "Normal",
+14839: 		zMove: { boost: { spe: 2 } },
+14840: 		contestType: "Clever",
+14841: 	},
+
+15323: 	roleplay: {
+15324: 		num: 272,
+15325: 		accuracy: true,
+15326: 		basePower: 0,
+15327: 		category: "Status",
+15328: 		name: "Role Play",
+15329: 		pp: 10,
+15330: 		priority: 0,
+15331: 		flags: { bypasssub: 1, allyanim: 1, metronome: 1 },
+15332: 		onTryHit(target, source) {
+15333: 			if (target.ability === source.ability) return false;
+15334: 			if (target.getAbility().flags['failroleplay'] || source.getAbility().flags['cantsuppress']) return false;
+15335: 		},
+15336: 		onHit(target, source) {
+15337: 			const oldAbility = source.setAbility(target.ability, target);
+15338: 			if (!oldAbility) return oldAbility as false | null;
+15339: 		},
+15340: 		target: "normal",
+15341: 		type: "Psychic",
+15342: 		zMove: { boost: { spe: 1 } },
+15343: 		contestType: "Cute",
+15344: 	},
+
+16482: 	simplebeam: {
+16483: 		num: 493,
+16484: 		accuracy: 100,
+16485: 		basePower: 0,
+16486: 		category: "Status",
+16487: 		name: "Simple Beam",
+16488: 		pp: 15,
+16489: 		priority: 0,
+16490: 		flags: { protect: 1, reflectable: 1, mirror: 1, allyanim: 1, metronome: 1 },
+16491: 		onTryHit(target) {
+16492: 			if (target.getAbility().flags['cantsuppress'] || target.ability === 'simple' || target.ability === 'truant') {
+16493: 				return false;
+16494: 			}
+16495: 		},
+16496: 		onHit(target, source) {
+16497: 			const oldAbility = target.setAbility('simple');
+16498: 			if (!oldAbility) return oldAbility as false | null;
+16499: 		},
+16500: 		target: "normal",
+16501: 		type: "Normal",
+16502: 		zMove: { boost: { spa: 1 } },
+16503: 		contestType: "Cute",
+16504: 	},
+
+16553: 	sketch: {
+16554: 		num: 166,
+16555: 		accuracy: true,
+16556: 		basePower: 0,
+16557: 		category: "Status",
+16558: 		name: "Sketch",
+16559: 		pp: 1,
+16560: 		noPPBoosts: true,
+16561: 		priority: 0,
+16562: 		flags: {
+16563: 			bypasssub: 1, allyanim: 1, failencore: 1, nosleeptalk: 1, noassist: 1,
+16564: 			failcopycat: 1, failmimic: 1, failinstruct: 1, nosketch: 1,
+16565: 		},
+16566: 		onHit(target, source) {
+16567: 			const move = target.lastMove;
+16568: 			if (source.transformed || !move || source.moves.includes(move.id)) return false;
+16569: 			if (move.flags['nosketch'] || move.isZ || move.isMax) return false;
+16570: 			const sketchIndex = source.moves.indexOf('sketch');
+16571: 			if (sketchIndex < 0) return false;
+16572: 			const sketchedMove = {
+16573: 				move: move.name,
+16574: 				id: move.id,
+16575: 				pp: move.pp,
+16576: 				maxpp: move.pp,
+16577: 				target: move.target,
+16578: 				disabled: false,
+16579: 				used: false,
+16580: 			};
+16581: 			source.moveSlots[sketchIndex] = sketchedMove;
+16582: 			source.baseMoveSlots[sketchIndex] = sketchedMove;
+16583: 			this.add('-activate', source, 'move: Sketch', move.name);
+16584: 		},
+16585: 		target: "normal",
+16586: 		type: "Normal",
+16587: 		zMove: { boost: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 } },
+16588: 		contestType: "Clever",
+16589: 	},
+
+16590: 	skillswap: {
+16591: 		num: 285,
+16592: 		accuracy: true,
+16593: 		basePower: 0,
+16594: 		category: "Status",
+16595: 		name: "Skill Swap",
+16596: 		pp: 10,
+16597: 		priority: 0,
+16598: 		flags: { protect: 1, mirror: 1, bypasssub: 1, allyanim: 1, metronome: 1 },
+16599: 		onHit(target, source, move) {
+16600: 			return this.skillSwap(source, target);
+16601: 		},
+16602: 		target: "normal",
+16603: 		type: "Psychic",
+16604: 		zMove: { boost: { spe: 1 } },
+16605: 		contestType: "Clever",
+16606: 	},
+
+16866: 	sleeptalk: {
+16867: 		num: 214,
+16868: 		accuracy: true,
+16869: 		basePower: 0,
+16870: 		category: "Status",
+16871: 		name: "Sleep Talk",
+16872: 		pp: 10,
+16873: 		priority: 0,
+16874: 		flags: { failencore: 1, nosleeptalk: 1, noassist: 1, failcopycat: 1, failmimic: 1, failinstruct: 1 },
+16875: 		sleepUsable: true,
+16876: 		onTry(source) {
+16877: 			return source.status === 'slp' || source.hasAbility('comatose');
+16878: 		},
+16879: 		onHit(pokemon) {
+16880: 			const moves = [];
+16881: 			for (const moveSlot of pokemon.moveSlots) {
+16882: 				const moveid = moveSlot.id;
+16883: 				if (!moveid) continue;
+16884: 				const move = this.dex.moves.get(moveid);
+16885: 				if (move.flags['nosleeptalk'] || move.flags['charge'] || (move.isZ && move.basePower !== 1) || move.isMax) {
+16886: 					continue;
+16887: 				}
+16888: 				moves.push(moveid);
+16889: 			}
+16890: 			let randomMove = '';
+16891: 			if (moves.length) randomMove = this.sample(moves);
+16892: 			if (!randomMove) {
+16893: 				return false;
+16894: 			}
+16895: 			this.actions.useMove(randomMove, pokemon);
+16896: 		},
+16897: 		callsMove: true,
+16898: 		target: "self",
+16899: 		type: "Normal",
+16900: 		zMove: { effect: 'crit2' },
+16901: 		contestType: "Cute",
+16902: 	},
+
+18644: 	switcheroo: {
+18645: 		num: 415,
+18646: 		accuracy: 100,
+18647: 		basePower: 0,
+18648: 		category: "Status",
+18649: 		name: "Switcheroo",
+18650: 		pp: 10,
+18651: 		priority: 0,
+18652: 		flags: { protect: 1, mirror: 1, allyanim: 1, noassist: 1, failcopycat: 1 },
+18653: 		onTryImmunity(target) {
+18654: 			return !target.hasAbility('stickyhold');
+18655: 		},
+18656: 		onHit(target, source, move) {
+18657: 			const yourItem = target.takeItem(source);
+18658: 			const myItem = source.takeItem();
+18659: 			if (yourItem === false || myItem === false || (!yourItem && !myItem)) {
+18660: 				if (yourItem) target.item = yourItem.id;
+18661: 				if (myItem) source.item = myItem.id;
+18662: 				return false;
+18663: 			}
+18664: 			if (
+18665: 				(myItem && !this.singleEvent('TakeItem', myItem, source.itemState, target, source, move, myItem)) ||
+18666: 				(yourItem && !this.singleEvent('TakeItem', yourItem, target.itemState, source, target, move, yourItem))
+18667: 			) {
+18668: 				if (yourItem) target.item = yourItem.id;
+18669: 				if (myItem) source.item = myItem.id;
+18670: 				return false;
+18671: 			}
+18672: 			this.add('-activate', source, 'move: Trick', `[of] ${target}`);
+18673: 			if (myItem) {
+18674: 				target.setItem(myItem);
+18675: 				this.add('-item', target, myItem, '[from] move: Switcheroo');
+18676: 			} else {
+18677: 				this.add('-enditem', target, yourItem, '[silent]', '[from] move: Switcheroo');
+18678: 			}
+18679: 			if (yourItem) {
+18680: 				source.setItem(yourItem);
+18681: 				this.add('-item', source, yourItem, '[from] move: Switcheroo');
+18682: 			} else {
+18683: 				this.add('-enditem', source, myItem, '[silent]', '[from] move: Switcheroo');
+18684: 			}
+18685: 		},
+18686: 		target: "normal",
+18687: 		type: "Dark",
+18688: 		zMove: { boost: { spe: 2 } },
+18689: 		contestType: "Clever",
+18690: 	},
+
+19828: 	transform: {
+19829: 		num: 144,
+19830: 		accuracy: true,
+19831: 		basePower: 0,
+19832: 		category: "Status",
+19833: 		name: "Transform",
+19834: 		pp: 10,
+19835: 		priority: 0,
+19836: 		flags: { allyanim: 1, failencore: 1, noassist: 1, failcopycat: 1, failmimic: 1, failinstruct: 1 },
+19837: 		onHit(target, pokemon) {
+19838: 			return pokemon.transformInto(target);
+19839: 		},
+19840: 		target: "normal",
+19841: 		type: "Normal",
+19842: 		zMove: { effect: 'heal' },
+19843: 		contestType: "Clever",
+19844: 	},
+
+19865: 	trick: {
+19866: 		num: 271,
+19867: 		accuracy: 100,
+19868: 		basePower: 0,
+19869: 		category: "Status",
+19870: 		name: "Trick",
+19871: 		pp: 10,
+19872: 		priority: 0,
+19873: 		flags: { protect: 1, mirror: 1, allyanim: 1, noassist: 1, failcopycat: 1 },
+19874: 		onTryImmunity(target) {
+19875: 			return !target.hasAbility('stickyhold');
+19876: 		},
+19877: 		onHit(target, source, move) {
+19878: 			const yourItem = target.takeItem(source);
+19879: 			const myItem = source.takeItem();
+19880: 			if (yourItem === false || myItem === false || (!yourItem && !myItem)) {
+19881: 				if (yourItem) target.item = yourItem.id;
+19882: 				if (myItem) source.item = myItem.id;
+19883: 				return false;
+19884: 			}
+19885: 			if (
+19886: 				(myItem && !this.singleEvent('TakeItem', myItem, source.itemState, target, source, move, myItem)) ||
+19887: 				(yourItem && !this.singleEvent('TakeItem', yourItem, target.itemState, source, target, move, yourItem))
+19888: 			) {
+19889: 				if (yourItem) target.item = yourItem.id;
+19890: 				if (myItem) source.item = myItem.id;
+19891: 				return false;
+19892: 			}
+19893: 			this.add('-activate', source, 'move: Trick', `[of] ${target}`);
+19894: 			if (myItem) {
+19895: 				target.setItem(myItem);
+19896: 				this.add('-item', target, myItem, '[from] move: Trick');
+19897: 			} else {
+19898: 				this.add('-enditem', target, yourItem, '[silent]', '[from] move: Trick');
+19899: 			}
+19900: 			if (yourItem) {
+19901: 				source.setItem(yourItem);
+19902: 				this.add('-item', source, yourItem, '[from] move: Trick');
+19903: 			} else {
+19904: 				this.add('-enditem', source, myItem, '[silent]', '[from] move: Trick');
+19905: 			}
+19906: 		},
+19907: 		target: "normal",
+19908: 		type: "Psychic",
+19909: 		zMove: { boost: { spe: 2 } },
+19910: 		contestType: "Clever",
+19911: 	},
+
+21050: 	worryseed: {
+21051: 		num: 388,
+21052: 		accuracy: 100,
+21053: 		basePower: 0,
+21054: 		category: "Status",
+21055: 		name: "Worry Seed",
+21056: 		pp: 10,
+21057: 		priority: 0,
+21058: 		flags: { protect: 1, reflectable: 1, mirror: 1, allyanim: 1, metronome: 1 },
+21059: 		onTryImmunity(target) {
+21060: 			// Truant and Insomnia have special treatment; they fail before
+21061: 			// checking accuracy and will double Stomping Tantrum's BP
+21062: 			if (target.ability === 'truant' || target.ability === 'insomnia') {
+21063: 				return false;
+21064: 			}
+21065: 		},
+21066: 		onTryHit(target) {
+21067: 			if (target.getAbility().flags['cantsuppress']) {
+21068: 				return false;
+21069: 			}
+21070: 		},
+21071: 		onHit(target, source) {
+21072: 			const oldAbility = target.setAbility('insomnia');
+21073: 			if (!oldAbility) return oldAbility as false | null;
+21074: 			if (target.status === 'slp') target.cureStatus();
+21075: 		},
+21076: 		target: "normal",
+21077: 		type: "Grass",
+21078: 		zMove: { boost: { spe: 1 } },
+21079: 		contestType: "Clever",
+21080: 	},
+
+FILE data/abilities.ts sha256 53d8558979e337c675907b76b5375185b28a0877f770d7456025b94535e1064d
+
+829: 	dancer: {
+830: 		flags: {},
+831: 		name: "Dancer",
+832: 		// implemented in runMove in scripts.js
+833: 		rating: 1.5,
+834: 		num: 216,
+835: 	},
+
+2116: 	imposter: {
+2117: 		onSwitchIn(pokemon) {
+2118: 			// Imposter does not activate when Skill Swapped or when Neutralizing Gas leaves the field
+2119: 			// Imposter copies across in doubles/triples
+2120: 			// (also copies across in multibattle and diagonally in free-for-all,
+2121: 			// but side.foe already takes care of those)
+2122: 			const target = pokemon.side.foe.active[pokemon.side.foe.active.length - 1 - pokemon.position];
+2123: 			if (target) {
+2124: 				pokemon.transformInto(target, this.dex.abilities.get('imposter'));
+2125: 			}
+2126: 		},
+2127: 		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1 },
+2128: 		name: "Imposter",
+2129: 		rating: 5,
+2130: 		num: 150,
+2131: 	},
+
+5120: 	trace: {
+5121: 		onStart(pokemon) {
+5122: 			this.effectState.seek = true;
+5123: 			// n.b. only affects Hackmons
+5124: 			// interaction with No Ability is complicated: https://www.smogon.com/forums/threads/pokemon-sun-moon-battle-mechanics-research.3586701/page-76#post-7790209
+5125: 			if (pokemon.adjacentFoes().some(foeActive => foeActive.ability === 'noability')) {
+5126: 				this.effectState.seek = false;
+5127: 			}
+5128: 			// interaction with Ability Shield is similar to No Ability
+5129: 			if (pokemon.hasItem('Ability Shield')) {
+5130: 				this.add('-block', pokemon, 'item: Ability Shield');
+5131: 				this.effectState.seek = false;
+5132: 			}
+5133: 			if (this.effectState.seek) {
+5134: 				this.singleEvent('Update', this.effect, this.effectState, pokemon);
+5135: 			}
+5136: 		},
+5137: 		onUpdate(pokemon) {
+5138: 			if (!this.effectState.seek) return;
+5139: 
+5140: 			const possibleTargets = pokemon.adjacentFoes().filter(
+5141: 				target => !target.getAbility().flags['notrace'] && target.ability !== 'noability'
+5142: 			);
+5143: 			if (!possibleTargets.length) return;
+5144: 
+5145: 			const target = this.sample(possibleTargets);
+5146: 			const ability = target.getAbility();
+5147: 			pokemon.setAbility(ability, target);
+5148: 		},
+5149: 		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1 },
+5150: 		name: "Trace",
+5151: 		rating: 2.5,
+5152: 		num: 36,
+5153: 	},
+
+2780: 	mummy: {
+2781: 		onDamagingHit(damage, target, source, move) {
+2782: 			const sourceAbility = source.getAbility();
+2783: 			if (sourceAbility.flags['cantsuppress'] || sourceAbility.id === 'mummy') {
+2784: 				return;
+2785: 			}
+2786: 			if (this.checkMoveMakesContact(move, source, target, !source.isAlly(target))) {
+2787: 				source.setAbility('mummy', target);
+2788: 			}
+2789: 		},
+2790: 		flags: {},
+2791: 		name: "Mummy",
+2792: 		rating: 2,
+2793: 		num: 152,
+2794: 	},
+
+5356: 	wanderingspirit: {
+5357: 		onDamagingHit(damage, target, source, move) {
+5358: 			if (this.checkMoveMakesContact(move, source, target)) this.skillSwap(source, target);
+5359: 		},
+5360: 		flags: {},
+5361: 		name: "Wandering Spirit",
+5362: 		rating: 2.5,
+5363: 		num: 254,
+5364: 	},
+
+3788: 	receiver: {
+3789: 		onAllyFaint(target) {
+3790: 			if (!this.effectState.target.hp) return;
+3791: 			const ability = target.getAbility();
+3792: 			if (ability.flags['noreceiver'] || ability.id === 'noability') return;
+3793: 			this.effectState.target.setAbility(ability, target);
+3794: 		},
+3795: 		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1 },
+3796: 		name: "Receiver",
+3797: 		rating: 0,
+3798: 		num: 222,
+3799: 	},
+
+3401: 	powerofalchemy: {
+3402: 		onAllyFaint(target) {
+3403: 			if (!this.effectState.target.hp) return;
+3404: 			const ability = target.getAbility();
+3405: 			if (ability.flags['noreceiver'] || ability.id === 'noability') return;
+3406: 			this.effectState.target.setAbility(ability, target);
+3407: 		},
+3408: 		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1 },
+3409: 		name: "Power of Alchemy",
+3410: 		rating: 0,
+3411: 		num: 223,
+3412: 	},
+
+2388: 	lingeringaroma: {
+2389: 		onDamagingHit(damage, target, source, move) {
+2390: 			const sourceAbility = source.getAbility();
+2391: 			if (sourceAbility.flags['cantsuppress'] || sourceAbility.id === 'lingeringaroma') {
+2392: 				return;
+2393: 			}
+2394: 			if (this.checkMoveMakesContact(move, source, target, !source.isAlly(target))) {
+2395: 				source.setAbility('lingeringaroma', target);
+2396: 			}
+2397: 		},
+2398: 		flags: {},
+2399: 		name: "Lingering Aroma",
+2400: 		rating: 2,
+2401: 		num: 268,
+2402: 	},
+
+Observed initial IDs: {"moves": ["accelerock", "acrobatics", "aeroblast", "agility", "airslash", "alluringvoice", "appleacid", "aquacutter", "aquajet", "aquastep", "armorcannon", "astralbarrage", "aurasphere", "aurawheel", "auroraveil", "avalanche", "beakblast", "beatup", "behemothblade", "bellydrum", "bite", "bitterblade", "bittermalice", "bleakwindstorm", "blizzard", "bloodmoon", "blueflare", "bodypress", "bodyslam", "boltstrike", "boomburst", "bravebird", "brickbreak", "bugbite", "bugbuzz", "bulkup", "bulletpunch", "bulletseed", "burningjealousy", "calmmind", "ceaselessedge", "chillyreception", "circlethrow", "clangingscales", "clangoroussoul", "clearsmog", "closecombat", "coil", "collisioncourse", "cosmicpower", "courtchange", "crabhammer", "crunch", "curse", "darkpulse", "dazzlinggleam", "defog", "destinybond", "diamondstorm", "direclaw", "discharge", "doubleedge", "doubleshock", "dracometeor", "dragonascent", "dragonclaw", "dragondance", "dragondarts", "dragonenergy", "dragonpulse", "dragontail", "drainingkiss", "drainpunch", "drillrun", "dualwingbeat", "dynamaxcannon", "dynamicpunch", "earthpower", "earthquake", "electrodrift", "encore", "endeavor", "energyball", "eruption", "esperwing", "expandingforce", "explosion", "extremespeed", "facade", "fakeout", "ficklebeam", "fierydance", "fierywrath", "filletaway", "fireblast", "firefang", "firepunch", "firstimpression", "flamecharge", "flamethrower", "flareblitz", "flashcannon", "fleurcannon", "flipturn", "flowertrick", "focusblast", "focuspunch", "foulplay", "freezedry", "fusionbolt", "fusionflare", "futuresight", "gigadrain", "gigaimpact", "gigatonhammer", "glaciallance", "glaiverush", "glare", "grassknot", "grassyglide", "gravapple", "gunkshot", "haze", "headbutt", "headlongrush", "headsmash", "healbell", "healingwish", "heatcrash", "heatwave", "heavyslam", "hex", "highhorsepower", "highjumpkick", "hornleech", "hurricane", "hydropump", "hydrosteam", "hyperspacefury", "hypervoice", "hypnosis", "icebeam", "icefang", "icehammer", "icepunch", "iceshard", "icespinner", "iciclecrash", "iciclespear", "irondefense", "ironhead", "irontail", "ivycudgel", "jetpunch", "judgment", "knockoff", "kowtowcleave", "lashout", "lavaplume", "leafblade", "leafstorm", "leechlife", "leechseed", "lightscreen", "liquidation", "lowkick", "luminacrash", "lunge", "lusterpurge", "machpunch", "magmastorm", "magnetrise", "makeitrain", "malignantchain", "matchagotcha", "megahorn", "meteorbeam", "meteormash", "mightycleave", "milkdrink", "mirrorcoat", "moonblast", "moongeistbeam", "moonlight", "morningsun", "mortalspin", "muddywater", "mudshot", "mysticalfire", "nastyplot", "nightshade", "nightslash", "noretreat", "nuzzle", "originpulse", "outrage", "overdrive", "overheat", "painsplit", "partingshot", "payback", "petalblizzard", "petaldance", "photongeyser", "playrough", "poisonfang", "poisonjab", "pollenpuff", "poltergeist", "populationbomb", "pounce", "powergem", "powertrip", "powerwhip", "precipiceblades", "protect", "psyblade", "psychic", "psychicfangs", "psychicnoise", "psychoboost", "psychocut", "psyshock", "psystrike", "pyroball", "quickattack", "quiverdance", "ragefist", "ragingbull", "raindance", "rapidspin", "razorshell", "recover", "reflect", "relicsong", "rest", "revelationdance", "revivalblessing", "roar", "rockblast", "rockpolish", "rockslide", "rocktomb", "roost", "ruination", "sacredfire", "sacredsword", "saltcure", "scald", "scaleshot", "scorchingsands", "secretsword", "seedbomb", "seedflare", "seismictoss", "shadowball", "shadowclaw", "shadowsneak", "shedtail", "shellsidearm", "shellsmash", "shiftgear", "shoreup", "slackoff", "sleeppowder", "sleeptalk", "sludgebomb", "sludgewave", "snowscape", "softboiled", "solarbeam", "spacialrend", "sparklingaria", "spikes", "spiritbreak", "spiritshackle", "spore", "stealthrock", "steameruption", "stickyweb", "stompingtantrum", "stoneaxe", "stoneedge", "storedpower", "strangesteam", "strengthsap", "stunspore", "substitute", "suckerpunch", "sunnyday", "sunsteelstrike", "supercellslam", "superfang", "superpower", "surf", "surgingstrikes", "switcheroo", "swordsdance", "synthesis", "tachyoncutter", "tailglow", "tailslap", "tailwind", "takeheart", "taunt", "teleport", "temperflare", "terablast", "terastarstorm", "throatchop", "thunder", "thunderbolt", "thunderclap", "thunderpunch", "thunderwave", "tidyup", "torchsong", "toxic", "toxicspikes", "trailblaze", "transform", "triattack", "trick", "trickroom", "triplearrows", "tripleaxel", "uturn", "vacuumwave", "victorydance", "voltswitch", "volttackle", "waterfall", "waterpulse", "waterspout", "wavecrash", "weatherball", "whirlpool", "whirlwind", "wickedblow", "wildcharge", "willowisp", "wish", "woodhammer", "workup", "xscissor", "yawn", "zenheadbutt", "zingzap"], "abilities": ["adaptability", "aftermath", "airlock", "analytic", "angershell", "arenatrap", "aromaveil", "asoneglastrier", "asonespectrier", "baddreams", "battlebond", "beadsofruin", "berserk", "bigpecks", "blaze", "bulletproof", "cheekpouch", "chillingneigh", "chlorophyll", "clearbody", "cloudnine", "comatose", "competitive", "compoundeyes", "contrary", "corrosion", "cudchew", "cursedbody", "cutecharm", "damp", "dancer", "dauntlessshield", "defiant", "disguise", "download", "dragonsmaw", "drizzle", "drought", "dryskin", "earlybird", "eartheater", "effectspore", "electricsurge", "electromorphosis", "filter", "flamebody", "flashfire", "flowerveil", "fluffy", "frisk", "fullmetalbody", "furcoat", "galewings", "galvanize", "goodasgold", "gooey", "grassysurge", "grimneigh", "gulpmissile", "guts", "hadronengine", "harvest", "heatproof", "heavymetal", "hugepower", "hungerswitch", "hustle", "hydration", "icebody", "iceface", "icescales", "illusion", "imposter", "infiltrator", "innerfocus", "insomnia", "intimidate", "intrepidsword", "ironfist", "justified", "keeneye", "leafguard", "levitate", "libero", "lightmetal", "lightningrod", "limber", "liquidooze", "liquidvoice", "magicbounce", "magicguard", "magician", "magnetpull", "megalauncher", "mindseye", "mirrorarmor", "moldbreaker", "motordrive", "moxie", "multiscale", "multitype", "myceliummight", "naturalcure", "noguard", "oblivious", "orichalcumpulse", "overcoat", "overgrow", "owntempo", "pickpocket", "pixilate", "poisonheal", "poisonpuppeteer", "poisontouch", "powerspot", "prankster", "pressure", "prismarmor", "protean", "protosynthesis", "psychicsurge", "punkrock", "purepower", "purifyingsalt", "quarkdrive", "queenlymajesty", "quickfeet", "rattled", "reckless", "regenerator", "rockhead", "rockypayload", "roughskin", "sandforce", "sandrush", "sandstream", "sapsipper", "scrappy", "seedsower", "serenegrace", "shadowshield", "shadowtag", "sharpness", "shedskin", "sheerforce", "shellarmor", "shielddust", "shieldsdown", "skilllink", "slowstart", "slushrush", "sniper", "snowwarning", "solidrock", "soulheart", "soundproof", "speedboost", "stakeout", "stamina", "static", "stickyhold", "stormdrain", "strongjaw", "sturdy", "supremeoverlord", "surgesurfer", "swarm", "swiftswim", "swordofruin", "synchronize", "tabletsofruin", "tanglinghair", "technician", "terashift", "teravolt", "thermalexchange", "thickfat", "tintedlens", "torrent", "toughclaws", "toxicboost", "toxicchain", "toxicdebris", "trace", "transistor", "triage", "truant", "turboblaze", "unaware", "unburden", "unnerve", "unseenfist", "vesselofruin", "vitalspirit", "voltabsorb", "waterabsorb", "waterbubble", "watercompaction", "waterveil", "weakarmor", "wellbakedbody", "windrider", "zerotohero"], "items": ["<none>", "adamantcrystal", "airballoon", "assaultvest", "boosterenergy", "chestoberry", "choiceband", "choicescarf", "choicespecs", "cornerstonemask", "custapberry", "dracoplate", "dreadplate", "earthplate", "eviolite", "expertbelt", "fistplate", "flameorb", "flameplate", "focussash", "griseouscore", "hearthflamemask", "heavydutyboots", "icicleplate", "insectplate", "ironplate", "leftovers", "leppaberry", "lifeorb", "lightball", "lightclay", "loadeddice", "lumberry", "lustrousglobe", "lustrousorb", "magnet", "meadowplate", "mindplate", "pixieplate", "powerherb", "rockyhelmet", "rustedshield", "rustedsword", "scopelens", "silkscarf", "silverpowder", "sitrusberry", "skyplate", "souldew", "splashplate", "spookyplate", "stoneplate", "throatspray", "toxicorb", "toxicplate", "weaknesspolicy", "wellspringmask", "whiteherb", "widelens", "zapplate"], "forms": ["abomasnow", "alcremie", "alcremiecaramelswirl", "alcremielemoncream", "alcremiematchacream", "alcremiemintcream", "alcremierainbowswirl", "alcremierubycream", "alcremierubyswirl", "alcremiesaltedcream", "alomomola", "altaria", "ambipom", "amoonguss", "ampharos", "annihilape", "appletun", "araquanid", "arbok", "arboliva", "arcanine", "arcaninehisui", "arceus", "arceusbug", "arceusdark", "arceusdragon", "arceuselectric", "arceusfairy", "arceusfighting", "arceusfire", "arceusflying", "arceusghost", "arceusgrass", "arceusground", "arceusice", "arceuspoison", "arceuspsychic", "arceusrock", "arceussteel", "arceuswater", "archaludon", "ariados", "armarouge", "articuno", "articunogalar", "avalugg", "avalugghisui", "azelf", "azumarill", "banette", "barraskewda", "basculegion", "basculegionf", "basculin", "basculinbluestriped", "bastiodon", "baxcalibur", "beartic", "bellibolt", "bellossom", "bisharp", "blastoise", "blaziken", "blissey", "bombirdier", "brambleghast", "braviary", "braviaryhisui", "breloom", "bronzong", "brutebonnet", "bruxish", "cacturne", "calyrex", "calyrexice", "calyrexshadow", "camerupt", "carbink", "ceruledge", "cetitan", "chandelure", "chansey", "charizard", "chesnaught", "chienpao", "chimecho", "chiyu", "cinccino", "cinderace", "clawitzer", "clefable", "clodsire", "cloyster", "coalossal", "cobalion", "comfey", "conkeldurr", "copperajah", "corviknight", "crabominable", "cramorant", "crawdaunt", "cresselia", "cryogonal", "cyclizar", "dachsbun", "darkrai", "decidueye", "decidueyehisui", "dedenne", "delibird", "delphox", "deoxys", "deoxysattack", "deoxysdefense", "deoxysspeed", "dewgong", "dialga", "dialgaorigin", "diancie", "dipplin", "ditto", "dodrio", "dondozo", "donphan", "dragalge", "dragapult", "dragonite", "drednaw", "drifblim", "dudunsparce", "dudunsparcethreesegment", "dugtrio", "dugtrioalola", "dunsparce", "duraludon", "dusknoir", "eelektross", "eiscue", "electivire", "electrode", "electrodehisui", "emboar", "empoleon", "enamorus", "enamorustherian", "entei", "espathra", "espeon", "eternatus", "excadrill", "exeggutor", "exeggutoralola", "falinks", "farigiraf", "feraligatr", "fezandipiti", "flamigo", "flapple", "flareon", "floatzel", "florges", "florgesblue", "florgesorange", "florgeswhite", "florgesyellow", "fluttermane", "flygon", "forretress", "froslass", "frosmoth", "furret", "gallade", "galvantula", "garchomp", "gardevoir", "garganacl", "gastrodon", "gastrodoneast", "gengar", "gholdengo", "girafarig", "giratina", "giratinaorigin", "glaceon", "glalie", "glastrier", "glimmora", "gliscor", "gogoat", "golduck", "golem", "golemalola", "golurk", "goodra", "goodrahisui", "gothitelle", "gougingfire", "grafaiai", "granbull", "greattusk", "greedent", "greninja", "greninjabond", "grimmsnarl", "groudon", "grumpig", "gumshoos", "gurdurr", "gyarados", "hariyama", "hatterene", "hawlucha", "haxorus", "heatran", "heracross", "hippowdon", "hitmonchan", "hitmonlee", "hitmontop", "honchkrow", "hooh", "hoopa", "hoopaunbound", "houndoom", "houndstone", "hydrapple", "hydreigon", "hypno", "illumise", "incineroar", "indeedee", "indeedeef", "infernape", "inteleon", "ironboulder", "ironbundle", "ironcrown", "ironhands", "ironjugulis", "ironleaves", "ironmoth", "ironthorns", "irontreads", "ironvaliant", "jirachi", "jolteon", "jumpluff", "keldeoresolute", "kilowattrel", "kingambit", "kingdra", "klawf", "kleavor", "klefki", "komala", "kommoo", "koraidon", "kricketune", "krookodile", "kyogre", "kyurem", "kyuremblack", "kyuremwhite", "landorus", "landorustherian", "lanturn", "lapras", "latias", "latios", "leafeon", "leavanny", "lilligant", "lilliganthisui", "lokix", "lucario", "ludicolo", "lugia", "lumineon", "lunala", "lurantis", "luvdisc", "luxray", "lycanroc", "lycanrocdusk", "lycanrocmidnight", "mabosstiff", "magcargo", "magearna", "magearnaoriginal", "magmortar", "magnezone", "malamar", "mamoswine", "manaphy", "mandibuzz", "masquerain", "maushold", "mausholdfour", "medicham", "meganium", "meloetta", "meowscarada", "meowstic", "meowsticf", "mesprit", "metagross", "mew", "mewtwo", "mienshao", "mightyena", "milotic", "mimikyu", "minior", "miniorblue", "miniorgreen", "miniorindigo", "miniororange", "miniorviolet", "minioryellow", "minun", "miraidon", "misdreavus", "mismagius", "moltres", "moltresgalar", "morpeko", "mudsdale", "muk", "mukalola", "munkidori", "necrozma", "necrozmadawnwings", "necrozmaduskmane", "ninetales", "ninetalesalola", "noctowl", "noivern", "ogerpon", "ogerponcornerstone", "ogerponhearthflame", "ogerponwellspring", "oinkologne", "oinkolognef", "okidogi", "oranguru", "oricorio", "oricoriopau", "oricoriopompom", "oricoriosensu", "orthworm", "overqwil", "pachirisu", "palafin", "palkia", "palkiaorigin", "palossand", "passimian", "pawmot", "pecharunt", "pelipper", "perrserker", "persian", "persianalola", "phione", "pikachu", "pikachualola", "pikachuhoenn", "pikachukalos", "pikachuoriginal", "pikachupartner", "pikachusinnoh", "pikachuunova", "pikachuworld", "piloswine", "pincurchin", "plusle", "politoed", "poliwrath", "polteageist", "polteageistantique", "porygon2", "porygonz", "primarina", "probopass", "pyroar", "quagsire", "quaquaval", "qwilfish", "qwilfishhisui", "rabsca", "ragingbolt", "raichu", "raichualola", "raikou", "rampardos", "rayquaza", "regice", "regidrago", "regieleki", "regigigas", "regirock", "registeel", "reshiram", "reuniclus", "revavroom", "rhydon", "rhyperior", "ribombee", "rillaboom", "roaringmoon", "rotom", "rotomfan", "rotomfrost", "rotomheat", "rotommow", "rotomwash", "sableye", "salamence", "salazzle", "samurott", "samurotthisui", "sandaconda", "sandslash", "sandslashalola", "sandyshocks", "sawsbuck", "sawsbuckautumn", "sawsbucksummer", "sawsbuckwinter", "sceptile", "scizor", "scovillain", "scrafty", "screamtail", "scyther", "serperior", "seviper", "shaymin", "shayminsky", "shiftry", "sinistcha", "sinistchamasterpiece", "skarmory", "skeledirge", "skuntank", "slaking", "slitherwing", "slowbro", "slowbrogalar", "slowking", "slowkinggalar", "smeargle", "sneasler", "snorlax", "solgaleo", "spectrier", "spidops", "spiritomb", "squawkabilly", "squawkabillyblue", "squawkabillywhite", "squawkabillyyellow", "stantler", "staraptor", "stonjourner", "sudowoodo", "suicune", "sunflora", "swalot", "swampert", "swanna", "sylveon", "talonflame", "tatsugiri", "tauros", "taurospaldeaaqua", "taurospaldeablaze", "taurospaldeacombat", "tentacruel", "terapagos", "terrakion", "thundurus", "thundurustherian", "tinglu", "tinkaton", "toedscruel", "torkoal", "tornadus", "tornadustherian", "torterra", "toucannon", "toxapex", "toxicroak", "toxtricity", "trevenant", "tropius", "tsareena", "typhlosion", "typhlosionhisui", "tyranitar", "umbreon", "ursaluna", "ursalunabloodmoon", "ursaring", "urshifu", "urshifurapidstrike", "uxie", "vaporeon", "veluza", "venomoth", "venusaur", "vespiquen", "victreebel", "vigoroth", "vikavolt", "vileplume", "virizion", "vivillon", "vivillonarchipelago", "vivilloncontinental", "vivillonelegant", "vivillongarden", "vivillonhighplains", "vivillonicysnow", "vivillonjungle", "vivillonmarine", "vivillonmodern", "vivillonmonsoon", "vivillonocean", "vivillonpolar", "vivillonriver", "vivillonsandstorm", "vivillonsavanna", "vivillonsun", "vivillontundra", "volbeat", "volcanion", "volcarona", "walkingwake", "weavile", "weezing", "weezinggalar", "whimsicott", "whiscash", "wigglytuff", "wochien", "wugtrio", "wyrdeer", "yanmega", "zacian", "zamazenta", "zangoose", "zapdos", "zapdosgalar", "zarude", "zarudedada", "zebstrika", "zekrom", "zoroark", "zoroarkhisui"]}

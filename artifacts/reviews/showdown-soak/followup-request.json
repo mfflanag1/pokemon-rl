@@ -1,0 +1,19 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused follow-up to review145757 after material fixes. Review only the new controlled hold/release of one baseline action, own-team receipt channel, exact received-team comparison, and JSON representability check. Prior frozen clients/policies unchanged. Real smoke now completes8games2sessions6faults302actions; wire audit passes148 tactical154 baseline. /showteam failed for unregistered local guests; evidence retained. New local-only plugin /soakteam calls original RoomBattle.getTeam(actual user) and privately returns their own packed original side.team, denies targets/outsiders/non-loopback config, no engine mutation. Validator canonicalizes neutral nature and Ogerpon event HiddenPower metadata before comparison; no fields omitted. Pinned source confirms requestteam returns side.team; team constructor normalizes default nickname. Auditor checks exact received receipt plus outgoing upload and actual player seat. Fixed800ms race replaced with baseline socket wrapper holding at most one attempted action until tactical restored committed; separate deliver event, no extra decision, both inputs still own views. Sealer now reruns wire audit write=false and compares result; Node test count will be set before regression/production. Old-session observers ignored after rotation; received JSON type checks rejectMap/Set/nonfinite/undefined. New targeted tests in progress, no production yet. Find concrete flaws in changed logic; no need re-review unchanged ledger or suggest policy/engine redesign. No tools or executed tests implied.",
+  "files_sha256": {
+    "packages/showdown-soak/campaign.mjs": "f461567a97c01752cf03c8361c606bc3ba84bc52c97dadf0e974f45117129b04",
+    "packages/showdown-soak/audit.mjs": "c984c0a8aede832dd7e52490456cd8b948db74f4a46e93ee15830504adc68f9a",
+    "packages/showdown-soak/teams.mjs": "76b3f92c6f090389bdcfc04d3e9c615172bd452b18f2361a61ae5b70a128d46a",
+    "packages/showdown-soak/wire.mjs": "7f43614cd9c508b44d97f9f3791cc8ceeca037a5a79318602ba8588a52ce5719",
+    "packages/showdown-soak/team-receipt.cjs": "552993bbee95bb07bac71eedd0f944ccf11bb2f2472f0786364180bdd35c4f53",
+    "packages/showdown-soak/local-server.mjs": "b2b71e887d18230caa9e668c6d04b99fe8caadcd87a49fc08fb1aa57ec418db9",
+    "tests/showdown-soak/wire.test.mjs": "98426720c38b5db14510bb126ad195dd957e471579796be10790f437ad318424",
+    "tests/showdown-soak/audit.test.mjs": "61c5e497c1bf2c805ffb89d8014d5a7b3e6cf880bc63e80375c62a697e7faf17"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

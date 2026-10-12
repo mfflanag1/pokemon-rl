@@ -1,0 +1,782 @@
+Task and review objective:
+Review the initial restricted CPU transition specification and Showdown fixture capture. It is ONLY fixed Rattata 1v1, explicit no-Tera format, Tackle/Quick Attack, fullHP/fullPP level50 EV0 IV31 Serious Run Away, no items. Events are semantically recorded from Showdown; parity is conditional on those chance outcomes, not RNG distribution parity, not public history, not JAX or full G2. Independently check damage rounding, four-turn bound excluding PP exhaustion/Struggle, action order and KO cancellation, admission and trace verification. Find concrete unsafe assumptions or missing validation before a 10000-case conditional-parity campaign. Source excerpt has exact pinned damage/stat/ability context but does not claim full reachability analysis.
+
+
+FILE packages/slice/reference.mjs
+1: import assert from 'node:assert/strict';
+2: import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+3: import path from 'node:path';
+4: import {performance} from 'node:perf_hooks';
+5: import {BattleStream,Dex,seedFor,describe} from '../reference-node/engine.mjs';
+6: import {ROOT,fileHash} from '../reference-node/provenance.mjs';
+7: import {hashJSON,canonical} from '../battle-contract/canonical.mjs';
+8: 
+9: export const PROFILE=JSON.parse(readFileSync(path.join(ROOT,'contracts/slice-v1/profile.json')));
+10: export function team(){return [{species:PROFILE.species,name:PROFILE.species,ability:PROFILE.ability,item:PROFILE.item,
+11:   moves:PROFILE.moves,level:PROFILE.level,nature:PROFILE.nature,gender:PROFILE.gender,teraType:PROFILE.tera_type,
+12:   evs:PROFILE.evs,ivs:PROFILE.ivs}];}
+13: export function admit(teams){assert.deepEqual(teams,[team(),team()],'Unsupported fixed-team profile');}
+14: class Capture extends BattleStream{constructor(){super({noCatch:true,keepAlive:true});this.messages=[];}push(m){this.messages.push(m);}}
+15: function snapshot(b){return {turn:b.turn,phase:b.ended?'terminal':b.requestState,winner:b.ended?Number(b.winner.slice(1))-1:null,
+16:   hp:b.sides.map(s=>s.pokemon[0].hp),pp:b.sides.map(s=>s.pokemon[0].moveSlots.map(m=>m.pp)),
+17:   requests:b.ended?[]:b.sides.map(s=>{const r=s.activeRequest;assert.equal(r.active.length,1);assert.equal(r.active[0].canTerastallize,undefined);
+18:     return {own_hp:s.pokemon[0].hp,moves:r.active[0].moves.map(m=>({id:m.id,pp:m.pp,maxpp:m.maxpp,disabled:m.disabled}))};})};}
+19: async function start(seed){const s=new Capture();const teams=[team(),team()];admit(teams);
+20:   await s.write(`>start ${JSON.stringify({formatid:PROFILE.reference_format,seed})}`);
+21:   for(let i=0;i<2;i++)await s.write(`>player p${i+1} ${JSON.stringify({name:`P${i+1}`,team:teams[i]})}`);
+22:   assert.equal(s.battle.turn,1);assert.equal(s.battle.requestState,'move');
+23:   for(const side of s.battle.sides){const p=side.pokemon[0];assert.equal(p.maxhp,105);assert.deepEqual([p.storedStats.atk,p.storedStats.def,p.storedStats.spe],[76,55,92]);}
+24:   return s;}
+25: export async function battleCase(number){
+26:   const seed=seedFor(`m1-slice-reference-v1/${number}`),s=await start(seed),b=s.battle;
+27:   const frames=[snapshot(b)],turns=[];let current=null,events=[];
+28:   const getDamage=b.actions.getDamage.bind(b.actions),random=b.random.bind(b);
+29:   b.random=function(...args){const x=random(...args);if(current&&args.length===1&&args[0]===16){assert.equal(current.roll,undefined);current.roll=100-x;}return x;};
+30:   b.actions.getDamage=function(source,target,move,...args){assert.equal(current,null);const event={actor:source.side.n,move:move.id};current=event;
+31:     const result=getDamage(source,target,move,...args);event.crit=target.getMoveHitData(move).crit;event.damage=result;
+32:     assert.equal(typeof event.crit,'boolean');assert.ok(event.roll>=85&&event.roll<=100);events.push(event);current=null;return result;};
+33:   try{
+34:     while(!b.ended){assert.ok(turns.length<PROFILE.max_turns,'Turn bound violated');const turn=b.turn;
+35:       // Action tape is independent of the battle's mechanics RNG.
+36:       const hex=hashJSON(['m1-slice-actions-1',number,turn]);const actions=[parseInt(hex[0],16)%2,parseInt(hex[1],16)%2];
+37:       events=[];await s.write(`>p1 move ${actions[0]+1}\n>p2 move ${actions[1]+1}`);
+38:       assert.ok(events.length>=1&&events.length<=2);turns.push({turn,actions,tie_first:actions[0]===actions[1]?events[0].actor:null,events});frames.push(snapshot(b));
+39:     }
+40:     assert.ok(!s.messages.some(m=>m.includes('|error|')));
+41:     return {id:number,seed,frames,turns};
+42:   }finally{s.destroy();}
+43: }
+44: export async function damageTable(){const s=await start(seedFor('m1-slice-damage-enumeration'));const b=s.battle;
+45:   try{const rows=[];for(const crit of [false,true])for(let roll=85;roll<=100;roll++){
+46:     const move=Dex.getActiveMove('tackle');move.willCrit=crit;b.randomizer=base=>Math.trunc(base*roll/100);
+47:     rows.push({crit,roll,damage:b.actions.getDamage(b.p1.active[0],b.p2.active[0],move,true)});
+48:   }return rows;}finally{s.destroy();}}
+49: export async function capture(out,count=10000){assert.ok(Number.isSafeInteger(count)&&count>0);mkdirSync(out);
+50:   const sources=Object.fromEntries(['packages/slice/reference.mjs','contracts/slice-v1/profile.json'].map(p=>[p,fileHash(path.join(ROOT,p))]));
+51:   const reference=describe();const plan={version:'m1-slice-campaign-1',profile:PROFILE,count,sources,reference,scope:'Conditional CPU transition parity using semantic outcomes recorded from Showdown; not JAX or unconditional RNG parity.'};
+52:   writeFileSync(path.join(out,'plan.json'),canonical(plan)+'\n',{flag:'wx'});
+53:   const started=performance.now(),cases=[];
+54:   for(let i=0;i<count;i++){cases.push(await battleCase(i));if((i+1)%1000===0)console.log(JSON.stringify({completed:i+1,requested:count}));}
+55:   const damage=await damageTable();assert.deepEqual(describe(),reference);for(const[p,h]of Object.entries(sources))assert.equal(fileHash(path.join(ROOT,p)),h);
+56:   const body={version:'m1-slice-reference-1',plan_hash:hashJSON(plan),cases,damage_table:damage,elapsed_ms:Math.round(performance.now()-started)};
+57:   const result={...body,content_hash:hashJSON(body)};writeFileSync(path.join(out,'reference.json'),canonical(result)+'\n',{flag:'wx'});return result;
+58: }
+59: if(process.argv[1]===new URL(import.meta.url).pathname)await capture(path.resolve(process.argv[2]),Number(process.argv[3]??10000));
+60: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_slice/engine.py
+1: """Gen9 fixed Rattata duel: two attacks, explicit semantic chance inputs.
+2: 
+3: This independent CPU specification is the next JAX port's test oracle, not a
+4: replacement for the pinned Showdown reference or an official random-battle engine.
+5: """
+6: from dataclasses import dataclass
+7: import json
+8: from pathlib import Path
+9: 
+10: ROOT=Path(__file__).resolve().parents[2]
+11: PROFILE=json.loads((ROOT/'contracts/slice-v1/profile.json').read_text())
+12: MOVES=('tackle','quickattack')
+13: 
+14: 
+15: def require(ok,message):
+16:     if not ok:raise ValueError(message)
+17: 
+18: 
+19: def damage(crit,roll):
+20:     require(type(crit) is bool and type(roll) is int and 85<=roll<=100,'Unsupported chance outcome')
+21:     base=((2*50//5+2)*40*76//55)//50+2
+22:     if crit:base=base*3//2
+23:     base=base*roll//100
+24:     return (base*6144+2047)//4096  # Gen9 STAB rounds exact halves down.
+25: 
+26: 
+27: @dataclass(frozen=True)
+28: class State:
+29:     turn:int=1
+30:     hp:tuple=(105,105)
+31:     pp:tuple=((56,48),(56,48))
+32:     winner:int|None=None
+33: 
+34:     def snapshot(self):
+35:         return {'turn':self.turn,'phase':'terminal' if self.winner is not None else 'move','winner':self.winner,
+36:             'hp':list(self.hp),'pp':[list(p) for p in self.pp],
+37:             'requests':[] if self.winner is not None else [{'own_hp':self.hp[i],
+38:                 'moves':[{'id':m,'pp':self.pp[i][j],'maxpp':(56,48)[j],'disabled':False} for j,m in enumerate(MOVES)]} for i in (0,1)]}
+39: 
+40: 
+41: def initial(profile):
+42:     require(profile==PROFILE,'Unsupported profile/configuration')
+43:     return State()
+44: 
+45: 
+46: def step(state,actions,events,tie_first):
+47:     require(state.winner is None,'Terminal state')
+48:     require(1<=state.turn<=4 and all(0<h<=105 for h in state.hp),'Unsupported state')
+49:     require(len(actions)==2 and all(type(a) is int and a in (0,1) for a in actions),'Unsupported action')
+50:     require(all(state.pp[i][a]>0 for i,a in enumerate(actions)),'PP exhausted outside reachable slice')
+51:     if actions[0]==actions[1]:
+52:         require(type(tie_first) is int and tie_first in (0,1),'Tied order needs explicit chance outcome');first=tie_first
+53:     else:
+54:         require(tie_first is None,'Unexpected order chance');first=0 if actions[0]>actions[1] else 1
+55:     hp=list(state.hp);pp=[list(p) for p in state.pp];used=0;winner=None
+56:     for actor in (first,1-first):
+57:         require(used<len(events),'Missing semantic chance event');event=events[used];used+=1
+58:         require(set(event)=={'actor','move','crit','roll','damage'} and event['actor']==actor and event['move']==MOVES[actions[actor]],'Wrong chance event identity/order')
+59:         amount=damage(event['crit'],event['roll']);require(event['damage']==amount,'Damage parity mismatch')
+60:         pp[actor][actions[actor]]-=1;hp[1-actor]=max(0,hp[1-actor]-amount)
+61:         if hp[1-actor]==0:winner=actor;break
+62:     require(used==len(events),'Unused semantic events after KO')
+63:     require(winner is not None or state.turn<4,'Proven duration bound violated')
+64:     return State(state.turn if winner is not None else state.turn+1,tuple(hp),tuple(tuple(p) for p in pp),winner)
+65: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_slice/verify.py
+1: """Independently compare every recorded reference transition and damage outcome."""
+2: import argparse
+3: from collections import Counter
+4: from pathlib import Path
+5: from pokemon_reference.corpus import read_json, verify_seal, sealed, file_digest
+6: from pokemon_reference.contract import canonical,hash_json
+7: from .engine import ROOT,PROFILE,initial,step,damage,require
+8: 
+9: 
+10: def verify(directory):
+11:     directory=Path(directory);plan=read_json(directory/'plan.json');reference=verify_seal(read_json(directory/'reference.json'))
+12:     require(reference['plan_hash']==hash_json(plan) and plan['profile']==PROFILE,'Profile/plan linkage')
+13:     for name,expected in plan['sources'].items():require(file_digest(ROOT/name)==expected,'Reference producer drift')
+14:     require([c['id'] for c in reference['cases']]==list(range(plan['count'])),'Case completeness')
+15:     require(len({c['seed'] for c in reference['cases']})==plan['count'],'Repeated battle seed')
+16:     expected={(crit,roll) for crit in (False,True) for roll in range(85,101)}
+17:     require({(r['crit'],r['roll']) for r in reference['damage_table']}==expected and len(reference['damage_table'])==32,'Damage enumeration completeness')
+18:     for row in reference['damage_table']:require(damage(row['crit'],row['roll'])==row['damage'],'Enumerated damage mismatch')
+19:     phases=Counter();winners=Counter();events=turns=0
+20:     for case in reference['cases']:
+21:         state=initial(PROFILE);require(state.snapshot()==case['frames'][0],'Initial snapshot mismatch')
+22:         require(len(case['frames'])==len(case['turns'])+1,'Frame count')
+23:         for frame,tape in zip(case['frames'][1:],case['turns']):
+24:             require(tape['turn']==state.turn,'Turn mismatch')
+25:             state=step(state,tape['actions'],tape['events'],tape['tie_first'])
+26:             require(state.snapshot()==frame,f"Transition/request mismatch: case {case['id']}, turn {tape['turn']}")
+27:             events+=len(tape['events']);turns+=1;phases[frame['phase']]+=1
+28:         require(state.winner in (0,1),'Nonterminal case');winners[str(state.winner)]+=1
+29:     report=sealed({'version':'m1-slice-parity-1','profile':PROFILE['id'],'reference_hash':reference['content_hash'],
+30:         'plan_hash':reference['plan_hash'],'battles':len(reference['cases']),'turns':turns,'damage_events':events,
+31:         'damage_enumeration':32,'disagreements':0,'phases':dict(phases),'winners':dict(winners),
+32:         'source_hashes':{str(p.relative_to(ROOT)):file_digest(p) for p in sorted((ROOT/'python/pokemon_slice').glob('*.py'))},
+33:         'scope':'Conditional transition and normalized own-request parity. Oracle-sampled semantic chance. No JAX, independent RNG-distribution, public-history or full G2 certification.'})
+34:     output=directory/'parity.json'
+35:     with output.open('x') as f:f.write(canonical(report)+'\n')
+36:     print(canonical(report));return report
+37: 
+38: if __name__=='__main__':
+39:     p=argparse.ArgumentParser();p.add_argument('directory');verify(p.parse_args().directory)
+40: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/slice-v1/profile.json
+1: {"ability":"Run Away","actions":["move 1","move 2"],"chance_contract":"semantic critical-hit, damage-percent and tied-order outcomes; no shared raw-seed claim","evs":{"atk":0,"def":0,"hp":0,"spa":0,"spd":0,"spe":0},"gender":"M","id":"gen9-rattata-duel-v1","initial_hp":105,"initial_pp":[56,48],"item":"","ivs":{"atk":31,"def":31,"hp":31,"spa":31,"spd":31,"spe":31},"level":50,"max_turns":4,"moves":["Tackle","Quick Attack"],"nature":"Serious","production_ready":false,"reference_format":"gen9customgame@@@!Team Preview,Terastal Clause","rules":["!Team Preview","Terastal Clause"],"showdown_commit":"942cda71d14bf0618bd57991708a2e2734b6daba","species":"Rattata","team_size":1,"tera_type":"Normal","unsupported_action_policy":"reject-before-transition","version":"m1-slice-profile-1"}
+2: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/slice/test_slice.py
+1: from dataclasses import replace
+2: import copy
+3: import unittest
+4: from pokemon_slice.engine import PROFILE,State,initial,step,damage
+5: 
+6: 
+7: def event(actor,action,crit=False,roll=85):
+8:     return {'actor':actor,'move':('tackle','quickattack')[action],'crit':crit,'roll':roll,'damage':damage(crit,roll)}
+9: 
+10: 
+11: class SliceTest(unittest.TestCase):
+12:     def test_damage_rounding_and_all_outcomes(self):
+13:         self.assertEqual(damage(False,85),33);self.assertEqual(damage(False,100),39)
+14:         self.assertEqual(damage(True,85),49);self.assertEqual(damage(True,100),58)
+15:         outcomes=[damage(c,r) for c in [False,True] for r in range(85,101)]
+16:         self.assertEqual((min(outcomes),max(outcomes)),(33,58))
+17:         for crit,roll in [(1,85),(False,84),(False,101),(False,85.)]:
+18:             with self.assertRaises(ValueError):damage(crit,roll)
+19: 
+20:     def test_priority_both_seats_and_tie_orders(self):
+21:         for first in [0,1]:
+22:             actions=[0,0];actions[first]=1
+23:             s=step(initial(PROFILE),actions,[event(first,1),event(1-first,0)],None)
+24:             self.assertEqual(s.hp,(72,72));self.assertEqual(s.turn,2)
+25:             self.assertEqual(s.pp[first],(56,47));self.assertEqual(s.pp[1-first],(55,48))
+26:             s=step(initial(PROFILE),[0,0],[event(first,0),event(1-first,0)],first)
+27:             self.assertEqual(s.hp,(72,72))
+28: 
+29:     def test_ko_cancels_second_move_no_pp_and_terminal_has_no_requests(self):
+30:         for first in [0,1]:
+31:             hp=[105,105];hp[1-first]=33
+32:             s=replace(initial(PROFILE),hp=tuple(hp),turn=3)
+33:             actions=[0,0];actions[first]=1
+34:             after=step(s,actions,[event(first,1)],None)
+35:             self.assertEqual(after.winner,first);self.assertEqual(after.turn,3)
+36:             self.assertEqual(after.pp[1-first],(56,48));self.assertEqual(after.snapshot()['requests'],[])
+37:             with self.assertRaisesRegex(ValueError,'Terminal'):step(after,actions,[],None)
+38: 
+39:     def test_duration_pp_bound(self):
+40:         s=initial(PROFILE)
+41:         for turn in range(4):
+42:             events=[event(0,0)] if turn==3 else [event(0,0),event(1,0)]
+43:             s=step(s,[0,0],events,0)
+44:         self.assertEqual(s.winner,0);self.assertEqual(s.pp,((52,48),(53,48)))
+45: 
+46:     def test_unsupported_config_action_stale_or_extra_event_rejects(self):
+47:         p=copy.deepcopy(PROFILE);p['item']='Leftovers'
+48:         with self.assertRaisesRegex(ValueError,'Unsupported profile'):initial(p)
+49:         s=initial(PROFILE)
+50:         for actions,events,tie in [(['move 1',0],[],0),([0,0],[],0),([0,0],[event(1,0),event(0,0)],0),
+51:                 ([1,0],[event(0,1),event(1,0)],1),([0,0],[event(0,0),event(1,0),event(0,0)],0)]:
+52:             with self.assertRaises(ValueError):step(s,actions,events,tie)
+53:         self.assertEqual(s,initial(PROFILE))
+54:         with self.assertRaisesRegex(ValueError,'PP exhausted'):step(replace(s,pp=((0,48),(56,48))),[0,0],[],0)
+55: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/slice/slice.test.mjs
+1: import test from 'node:test';
+2: import assert from 'node:assert/strict';
+3: import {admit,team,battleCase,damageTable} from '../../packages/slice/reference.mjs';
+4: test('restricted admission rejects items, abilities, Tera fields and extra team members',()=>{
+5:   admit([team(),team()]);
+6:   for(const edit of [t=>{t[0][0].item='Leftovers'},t=>{t[0][0].ability='Hustle'},t=>{t[0][0].terastallized='Normal'},t=>t[0].push(t[0][0])]){
+7:     const t=[structuredClone(team()),structuredClone(team())];edit(t);assert.throws(()=>admit(t));
+8:   }
+9: });
+10: test('restricted reference replays exactly, cannot Tera, and enumerates damage',async()=>{
+11:   const a=await battleCase(77),b=await battleCase(77);assert.deepEqual(a,b);assert.ok(a.turns.length<=4);
+12:   const rows=await damageTable();assert.equal(rows.length,32);assert.equal(Math.min(...rows.map(x=>x.damage)),33);assert.equal(Math.max(...rows.map(x=>x.damage)),58);
+13: });
+14: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE artifacts/reviews/m1-g1/slice-source-excerpts.md
+1: 
+2: ## vendor/pokemon-showdown/data/moves.ts SHA256 738b8cfc1ca491537c0188546ab697942aaa313c5e6be83a5432edd5dd8997f7
+3: 
+4: 14476: 	quickattack: {
+5: 14477: 		num: 98,
+6: 14478: 		accuracy: 100,
+7: 14479: 		basePower: 40,
+8: 14480: 		category: "Physical",
+9: 14481: 		name: "Quick Attack",
+10: 14482: 		pp: 30,
+11: 14483: 		priority: 1,
+12: 14484: 		flags: { contact: 1, protect: 1, mirror: 1, metronome: 1 },
+13: 14485: 		target: "normal",
+14: 14486: 		type: "Normal",
+15: 14487: 		contestType: "Cool",
+16: 14488: 	},
+17: 14489: 	quickguard: {
+18: 14490: 		num: 501,
+19: 14491: 		accuracy: true,
+20: 14492: 		basePower: 0,
+21: 14493: 		category: "Status",
+22: 14494: 		name: "Quick Guard",
+23: 14495: 		pp: 15,
+24: 18812: 	tackle: {
+25: 18813: 		num: 33,
+26: 18814: 		accuracy: 100,
+27: 18815: 		basePower: 40,
+28: 18816: 		category: "Physical",
+29: 18817: 		name: "Tackle",
+30: 18818: 		pp: 35,
+31: 18819: 		priority: 0,
+32: 18820: 		flags: { contact: 1, protect: 1, mirror: 1, metronome: 1 },
+33: 18821: 		target: "normal",
+34: 18822: 		type: "Normal",
+35: 18823: 		contestType: "Tough",
+36: 18824: 	},
+37: 18825: 	tailglow: {
+38: 18826: 		num: 294,
+39: 18827: 		accuracy: true,
+40: 18828: 		basePower: 0,
+41: 18829: 		category: "Status",
+42: 18830: 		name: "Tail Glow",
+43: 18831: 		pp: 20,
+44: 18832: 		priority: 0,
+45: 18833: 		flags: { snatch: 1, metronome: 1 },
+46: 18834: 		boosts: {
+47: 
+48: ## vendor/pokemon-showdown/data/abilities.ts SHA256 53d8558979e337c675907b76b5375185b28a0877f770d7456025b94535e1064d
+49: 
+50: 3951: 	runaway: {
+51: 3952: 		flags: {},
+52: 3953: 		name: "Run Away",
+53: 3954: 		rating: 0,
+54: 3955: 		num: 50,
+55: 3956: 	},
+56: 3957: 	sandforce: {
+57: 3958: 		onBasePowerPriority: 21,
+58: 3959: 		onBasePower(basePower, attacker, defender, move) {
+59: 3960: 			if (this.field.isWeather('sandstorm')) {
+60: 3961: 				if (move.type === 'Rock' || move.type === 'Ground' || move.type === 'Steel') {
+61: 3962: 					this.debug('Sand Force boost');
+62: 3963: 					return this.chainModify([5325, 4096]);
+63: 3964: 				}
+64: 
+65: ## vendor/pokemon-showdown/data/pokedex.ts SHA256 73048386b864be5aff093e9393acf32e8016299e9d7b76078bf5120b769e2fe0
+66: 
+67: 410: 	rattata: {
+68: 411: 		num: 19,
+69: 412: 		name: "Rattata",
+70: 413: 		types: ["Normal"],
+71: 414: 		baseStats: { hp: 30, atk: 56, def: 35, spa: 25, spd: 35, spe: 72 },
+72: 415: 		abilities: { 0: "Run Away", 1: "Guts", H: "Hustle" },
+73: 416: 		heightm: 0.3,
+74: 417: 		weightkg: 3.5,
+75: 418: 		color: "Purple",
+76: 419: 		evos: ["Raticate"],
+77: 420: 		eggGroups: ["Field"],
+78: 421: 		otherFormes: ["Rattata-Alola"],
+79: 422: 		formeOrder: ["Rattata", "Rattata-Alola"],
+80: 423: 	},
+81: 424: 	rattataalola: {
+82: 425: 		num: 19,
+83: 426: 		name: "Rattata-Alola",
+84: 427: 		baseSpecies: "Rattata",
+85: 428: 		forme: "Alola",
+86: 429: 		types: ["Dark", "Normal"],
+87: 430: 		baseStats: { hp: 30, atk: 56, def: 35, spa: 25, spd: 35, spe: 72 },
+88: 431: 		abilities: { 0: "Gluttony", 1: "Hustle", H: "Thick Fat" },
+89: 432: 		heightm: 0.3,
+90: 433: 		weightkg: 3.8,
+91: 434: 		color: "Black",
+92: 435: 		evos: ["Raticate-Alola"],
+93: 436: 		eggGroups: ["Field"],
+94: 437: 	},
+95: 438: 	raticate: {
+96: 439: 		num: 20,
+97: 440: 		name: "Raticate",
+98: 441: 		types: ["Normal"],
+99: 442: 		baseStats: { hp: 55, atk: 81, def: 60, spa: 50, spd: 70, spe: 97 },
+100: 443: 		abilities: { 0: "Run Away", 1: "Guts", H: "Hustle" },
+101: 444: 		heightm: 0.7,
+102: 445: 		weightkg: 18.5,
+103: 446: 		color: "Brown",
+104: 447: 		prevo: "Rattata",
+105: 448: 		evoLevel: 20,
+106: 449: 		eggGroups: ["Field"],
+107: 450: 		otherFormes: ["Raticate-Alola", "Raticate-Alola-Totem"],
+108: 451: 		formeOrder: ["Raticate", "Raticate-Alola", "Raticate-Alola-Totem"],
+109: 452: 	},
+110: 453: 	raticatealola: {
+111: 454: 		num: 20,
+112: 455: 		name: "Raticate-Alola",
+113: 456: 		baseSpecies: "Raticate",
+114: 457: 		forme: "Alola",
+115: 458: 		types: ["Dark", "Normal"],
+116: 459: 		baseStats: { hp: 75, atk: 71, def: 70, spa: 40, spd: 80, spe: 77 },
+117: 460: 		abilities: { 0: "Gluttony", 1: "Hustle", H: "Thick Fat" },
+118: 461: 		heightm: 0.7,
+119: 462: 		weightkg: 25.5,
+120: 
+121: ## vendor/pokemon-showdown/sim/battle-actions.ts SHA256 4342d03aa909875ce0a4c4f3f54027ae1933b60e22be778409cef992300ecb9d
+122: 
+123: 1576: 	getDamage(
+124: 1577: 		source: Pokemon, target: Pokemon, move: string | number | ActiveMove,
+125: 1578: 		suppressMessages = false
+126: 1579: 	): number | undefined | null | false {
+127: 1580: 		if (typeof move === 'string') move = this.dex.getActiveMove(move);
+128: 1581: 
+129: 1582: 		if (typeof move === 'number') {
+130: 1583: 			const basePower = move;
+131: 1584: 			move = new Dex.Move({
+132: 1585: 				basePower,
+133: 1586: 				type: '???',
+134: 1587: 				category: 'Physical',
+135: 1588: 				willCrit: false,
+136: 1589: 			}) as ActiveMove;
+137: 1590: 			move.hit = 0;
+138: 1591: 		}
+139: 1592: 
+140: 1593: 		if (!target.runImmunity(move, !suppressMessages)) {
+141: 1594: 			return false;
+142: 1595: 		}
+143: 1596: 
+144: 1597: 		if (move.ohko) return this.battle.gen === 3 ? target.hp : target.maxhp;
+145: 1598: 		if (move.damageCallback) return move.damageCallback.call(this.battle, source, target);
+146: 1599: 		if (move.damage === 'level') {
+147: 1600: 			return source.level;
+148: 1601: 		} else if (move.damage) {
+149: 1602: 			return move.damage;
+150: 1603: 		}
+151: 1604: 
+152: 1605: 		const category = this.battle.getCategory(move);
+153: 1606: 
+154: 1607: 		let basePower: number | false | null = move.basePower;
+155: 1608: 		if (move.basePowerCallback) {
+156: 1609: 			basePower = move.basePowerCallback.call(this.battle, source, target, move);
+157: 1610: 		}
+158: 1611: 		if (!basePower) return basePower === 0 ? undefined : basePower;
+159: 1612: 		basePower = this.battle.clampIntRange(basePower, 1);
+160: 1613: 
+161: 1614: 		let critMult;
+162: 1615: 		let critRatio = this.battle.runEvent('ModifyCritRatio', source, target, move, move.critRatio || 0);
+163: 1616: 		if (this.battle.gen <= 5) {
+164: 1617: 			critRatio = this.battle.clampIntRange(critRatio, 0, 5);
+165: 1618: 			critMult = [0, 16, 8, 4, 3, 2];
+166: 1619: 		} else {
+167: 1620: 			critRatio = this.battle.clampIntRange(critRatio, 0, 4);
+168: 1621: 			if (this.battle.gen === 6) {
+169: 1622: 				critMult = [0, 16, 8, 2, 1];
+170: 1623: 			} else {
+171: 1624: 				critMult = [0, 24, 8, 2, 1];
+172: 1625: 			}
+173: 1626: 		}
+174: 1627: 
+175: 1628: 		const moveHit = target.getMoveHitData(move);
+176: 1629: 		moveHit.crit = move.willCrit || false;
+177: 1630: 		if (move.willCrit === undefined) {
+178: 1631: 			if (critRatio) {
+179: 1632: 				moveHit.crit = this.battle.randomChance(1, critMult[critRatio]);
+180: 1633: 			}
+181: 1634: 		}
+182: 1635: 
+183: 1636: 		if (moveHit.crit) {
+184: 1637: 			moveHit.crit = this.battle.runEvent('CriticalHit', target, null, move);
+185: 1638: 		}
+186: 1639: 
+187: 1640: 		// happens after crit calculation
+188: 1641: 		basePower = this.battle.runEvent('BasePower', source, target, move, basePower, true);
+189: 1642: 
+190: 1643: 		if (!basePower) return 0;
+191: 1644: 		basePower = this.battle.clampIntRange(basePower, 1);
+192: 1645: 		// Hacked Max Moves have 0 base power, even if you Dynamax
+193: 1646: 		if ((!source.volatiles['dynamax'] && move.isMax) || (move.isMax && this.dex.moves.get(move.baseMove).isMax)) {
+194: 1647: 			basePower = 0;
+195: 1648: 		}
+196: 1649: 
+197: 1650: 		const dexMove = this.dex.moves.get(move.id);
+198: 1651: 		if (source.terastallized && (source.terastallized === 'Stellar' ?
+199: 1652: 			!source.stellarBoostedTypes.includes(move.type) : source.hasType(move.type)) &&
+200: 1653: 			basePower < 60 && dexMove.priority <= 0 && !dexMove.multihit &&
+201: 1654: 			// Hard move.basePower check for moves like Dragon Energy that have variable BP
+202: 1655: 			!((move.basePower === 0 || move.basePower === 150) && move.basePowerCallback)
+203: 1656: 		) {
+204: 1657: 			basePower = 60;
+205: 1658: 		}
+206: 1659: 
+207: 1660: 		const level = source.level;
+208: 1661: 
+209: 1662: 		const attacker = move.overrideOffensivePokemon === 'target' ? target : source;
+210: 1663: 		const defender = move.overrideDefensivePokemon === 'source' ? source : target;
+211: 1664: 
+212: 1665: 		const isPhysical = move.category === 'Physical';
+213: 1666: 		let attackStat: StatIDExceptHP = move.overrideOffensiveStat || (isPhysical ? 'atk' : 'spa');
+214: 1667: 		const defenseStat: StatIDExceptHP = move.overrideDefensiveStat || (isPhysical ? 'def' : 'spd');
+215: 1668: 
+216: 1669: 		const statTable = { atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+217: 1670: 
+218: 1671: 		let atkBoosts = attacker.boosts[attackStat];
+219: 1672: 		let defBoosts = defender.boosts[defenseStat];
+220: 1673: 
+221: 1674: 		let ignoreNegativeOffensive = !!move.ignoreNegativeOffensive;
+222: 1675: 		let ignorePositiveDefensive = !!move.ignorePositiveDefensive;
+223: 1676: 
+224: 1677: 		if (moveHit.crit) {
+225: 1678: 			ignoreNegativeOffensive = true;
+226: 1679: 			ignorePositiveDefensive = true;
+227: 1680: 		}
+228: 1681: 		const ignoreOffensive = !!(move.ignoreOffensive || (ignoreNegativeOffensive && atkBoosts < 0));
+229: 1682: 		const ignoreDefensive = !!(move.ignoreDefensive || (ignorePositiveDefensive && defBoosts > 0));
+230: 1683: 
+231: 1684: 		if (ignoreOffensive) {
+232: 1685: 			this.battle.debug('Negating (sp)atk boost/penalty.');
+233: 1686: 			atkBoosts = 0;
+234: 1687: 		}
+235: 1688: 		if (ignoreDefensive) {
+236: 1689: 			this.battle.debug('Negating (sp)def boost/penalty.');
+237: 1690: 			defBoosts = 0;
+238: 1691: 		}
+239: 1692: 
+240: 1693: 		let attack = attacker.calculateStat(attackStat, atkBoosts, 1, source);
+241: 1694: 		let defense = defender.calculateStat(defenseStat, defBoosts, 1, target);
+242: 1695: 
+243: 1696: 		attackStat = (category === 'Physical' ? 'atk' : 'spa');
+244: 1697: 
+245: 1698: 		// Apply Stat Modifiers
+246: 1699: 		attack = this.battle.runEvent('Modify' + statTable[attackStat], source, target, move, attack);
+247: 1700: 		defense = this.battle.runEvent('Modify' + statTable[defenseStat], target, source, move, defense);
+248: 1701: 
+249: 1702: 		if (this.battle.gen <= 4 && ['explosion', 'selfdestruct'].includes(move.id) && defenseStat === 'def') {
+250: 1703: 			defense = this.battle.clampIntRange(Math.floor(defense / 2), 1);
+251: 1704: 		}
+252: 1705: 
+253: 1706: 		const tr = this.battle.trunc;
+254: 1707: 
+255: 1708: 		// int(int(int(2 * L / 5 + 2) * A * P / D) / 50);
+256: 1709: 		const baseDamage = tr(tr(tr(tr(2 * level / 5 + 2) * basePower * attack) / defense) / 50);
+257: 1710: 
+258: 1711: 		// Calculate damage modifiers separately (order differs between generations)
+259: 1712: 		return this.modifyDamage(baseDamage, source, target, move, suppressMessages);
+260: 1713: 	}
+261: 1714: 
+262: 1715: 	modifyDamage(
+263: 1716: 		baseDamage: number, pokemon: Pokemon, target: Pokemon, move: ActiveMove, suppressMessages = false
+264: 1717: 	) {
+265: 1718: 		const tr = this.battle.trunc;
+266: 1719: 		if (!move.type) move.type = '???';
+267: 1720: 		const type = move.type;
+268: 1721: 
+269: 1722: 		baseDamage += 2;
+270: 1723: 
+271: 1724: 		if (move.spreadHit) {
+272: 1725: 			// multi-target modifier (doubles only)
+273: 1726: 			const spreadModifier = this.battle.gameType === 'freeforall' ? 0.5 : 0.75;
+274: 1727: 			this.battle.debug(`Spread modifier: ${spreadModifier}`);
+275: 1728: 			baseDamage = this.battle.modify(baseDamage, spreadModifier);
+276: 1729: 		} else if (move.multihitType === 'parentalbond' && move.hit > 1) {
+277: 1730: 			// Parental Bond modifier
+278: 1731: 			const bondModifier = this.battle.gen > 6 ? 0.25 : 0.5;
+279: 1732: 			this.battle.debug(`Parental Bond modifier: ${bondModifier}`);
+280: 1733: 			baseDamage = this.battle.modify(baseDamage, bondModifier);
+281: 1734: 		}
+282: 1735: 
+283: 1736: 		// weather modifier
+284: 1737: 		baseDamage = this.battle.priorityEvent('WeatherModifyDamage', pokemon, target, move, baseDamage);
+285: 1738: 
+286: 1739: 		// crit - not a modifier
+287: 1740: 		const isCrit = target.getMoveHitData(move).crit;
+288: 1741: 		if (isCrit) {
+289: 1742: 			baseDamage = tr(baseDamage * (move.critModifier || (this.battle.gen >= 6 ? 1.5 : 2)));
+290: 1743: 		}
+291: 1744: 
+292: 1745: 		// random factor - also not a modifier
+293: 1746: 		baseDamage = this.battle.randomizer(baseDamage);
+294: 1747: 
+295: 1748: 		// STAB
+296: 1749: 		// The "???" type never gets STAB
+297: 1750: 		// Not even if you Roost in Gen 4 and somehow manage to use
+298: 1751: 		// Struggle in the same turn.
+299: 1752: 		// (On second thought, it might be easier to get a MissingNo.)
+300: 1753: 		if (type !== '???') {
+301: 1754: 			let stab: number | [number, number] = 1;
+302: 1755: 
+303: 1756: 			const isSTAB = move.forceSTAB || pokemon.hasType(type) || pokemon.getTypes(false, true).includes(type);
+304: 1757: 			if (isSTAB) {
+305: 1758: 				stab = 1.5;
+306: 1759: 			}
+307: 1760: 
+308: 1761: 			// The Stellar tera type makes this incredibly confusing
+309: 1762: 			// If the move's type does not match one of the user's base types,
+310: 1763: 			// the Stellar tera type applies a one-time 1.2x damage boost for that type.
+311: 1764: 			//
+312: 1765: 			// If the move's type does match one of the user's base types,
+313: 1766: 			// then the Stellar tera type applies a one-time 2x STAB boost for that type,
+314: 1767: 			// and then goes back to using the regular 1.5x STAB boost for those types.
+315: 1768: 			if (pokemon.terastallized === 'Stellar') {
+316: 1769: 				if (!pokemon.stellarBoostedTypes.includes(type) || move.stellarBoosted) {
+317: 1770: 					stab = isSTAB ? 2 : [4915, 4096];
+318: 1771: 					move.stellarBoosted = true;
+319: 1772: 					if (pokemon.species.name !== 'Terapagos-Stellar') {
+320: 1773: 						pokemon.stellarBoostedTypes.push(type);
+321: 1774: 					}
+322: 1775: 				}
+323: 1776: 			} else {
+324: 1777: 				if (pokemon.terastallized === type && pokemon.getTypes(false, true).includes(type)) {
+325: 1778: 					stab = 2;
+326: 1779: 				}
+327: 1780: 				stab = this.battle.runEvent('ModifySTAB', pokemon, target, move, stab);
+328: 1781: 			}
+329: 1782: 
+330: 1783: 			baseDamage = this.battle.modify(baseDamage, stab);
+331: 1784: 		}
+332: 1785: 
+333: 1786: 		// types
+334: 1787: 		let typeMod = target.runEffectiveness(move);
+335: 1788: 		typeMod = this.battle.clampIntRange(typeMod, -6, 6);
+336: 1789: 		target.getMoveHitData(move).typeMod = typeMod;
+337: 1790: 		if (typeMod > 0) {
+338: 1791: 			if (!suppressMessages) this.battle.add('-supereffective', target);
+339: 1792: 
+340: 1793: 			for (let i = 0; i < typeMod; i++) {
+341: 1794: 				baseDamage *= 2;
+342: 1795: 			}
+343: 1796: 		}
+344: 1797: 		if (typeMod < 0) {
+345: 1798: 			if (!suppressMessages) this.battle.add('-resisted', target);
+346: 1799: 
+347: 1800: 			for (let i = 0; i > typeMod; i--) {
+348: 1801: 				baseDamage = tr(baseDamage / 2);
+349: 1802: 			}
+350: 1803: 		}
+351: 1804: 
+352: 1805: 		if (isCrit && !suppressMessages) this.battle.add('-crit', target);
+353: 1806: 
+354: 1807: 		if (pokemon.status === 'brn' && move.category === 'Physical' && !pokemon.hasAbility('guts')) {
+355: 1808: 			if (this.battle.gen < 6 || move.id !== 'facade') {
+356: 1809: 				baseDamage = this.battle.modify(baseDamage, 0.5);
+357: 1810: 			}
+358: 1811: 		}
+359: 1812: 
+360: 1813: 		// Generation 5, but nothing later, sets damage to 1 before the final damage modifiers
+361: 1814: 		if (this.battle.gen === 5 && !baseDamage) baseDamage = 1;
+362: 1815: 
+363: 1816: 		// Final modifier. Modifiers that modify damage after min damage check, such as Life Orb.
+364: 1817: 		baseDamage = this.battle.runEvent('ModifyDamage', pokemon, target, move, baseDamage);
+365: 1818: 
+366: 1819: 		const bypassProtect = target.getMoveHitData(move).bypassProtect;
+367: 1820: 		if (bypassProtect) {
+368: 1821: 			baseDamage = this.battle.modify(baseDamage, 0.25);
+369: 1822: 			if (bypassProtect !== true && bypassProtect.effectType === 'Ability') {
+370: 1823: 				this.battle.add('-ability', pokemon, bypassProtect.name);
+371: 1824: 			}
+372: 1825: 			this.battle.add('-zbroken', target);
+373: 1826: 		}
+374: 1827: 
+375: 1828: 		// Generation 6-7 moves the check for minimum 1 damage after the final modifier...
+376: 1829: 		if (this.battle.gen !== 5 && !baseDamage) return 1;
+377: 1830: 
+378: 
+379: ## vendor/pokemon-showdown/sim/battle.ts SHA256 3eb941313832729ee043407c39ced894b4338301fed5d29a45ae8b36e49a09f2
+380: 
+381: 400: 	 * 1. Order, low to high (default last)
+382: 401: 	 * 2. Priority, high to low (default 0)
+383: 402: 	 * 3. Speed, high to low (default 0)
+384: 403: 	 * 4. SubOrder, low to high (default 0)
+385: 404: 	 * 5. EffectOrder, low to high (default 0)
+386: 405: 	 *
+387: 406: 	 * Doesn't reference `this` so doesn't need to be bound.
+388: 407: 	 */
+389: 408: 	comparePriority(this: void, a: AnyObject, b: AnyObject) {
+390: 409: 		return -((b.order || 4294967296) - (a.order || 4294967296)) ||
+391: 410: 			((b.priority || 0) - (a.priority || 0)) ||
+392: 411: 			((b.speed || 0) - (a.speed || 0)) ||
+393: 412: 			-((b.subOrder || 0) - (a.subOrder || 0)) ||
+394: 413: 			-((b.effectOrder || 0) - (a.effectOrder || 0)) ||
+395: 414: 			0;
+396: 415: 	}
+397: 416: 
+398: 417: 	static compareRedirectOrder(this: void, a: AnyObject, b: AnyObject) {
+399: 418: 		return ((b.priority || 0) - (a.priority || 0)) ||
+400: 419: 			((b.speed || 0) - (a.speed || 0)) ||
+401: 420: 			((a.effectHolder?.abilityState && b.effectHolder?.abilityState) ?
+402: 421: 				-(b.effectHolder.abilityState.effectOrder - a.effectHolder.abilityState.effectOrder) : 0) ||
+403: 422: 				0;
+404: 423: 	}
+405: 424: 
+406: 425: 	static compareLeftToRightOrder(this: void, a: AnyObject, b: AnyObject) {
+407: 426: 		return -((b.order || 4294967296) - (a.order || 4294967296)) ||
+408: 427: 			((b.priority || 0) - (a.priority || 0)) ||
+409: 428: 			-((b.index || 0) - (a.index || 0)) ||
+410: 429: 			0;
+411: 430: 	}
+412: 431: 
+413: 432: 	/** Sort a list, resolving speed ties the way the games do. */
+414: 433: 	speedSort<T extends AnyObject>(list: T[], comparator: (a: T, b: T) => number = this.comparePriority) {
+415: 434: 		if (list.length < 2) return;
+416: 435: 		let sorted = 0;
+417: 436: 		// This is a Selection Sort - not the fastest sort in general, but
+418: 437: 		// actually faster than QuickSort for small arrays like the ones
+419: 438: 		// `speedSort` is used for.
+420: 439: 		// More importantly, it makes it easiest to resolve speed ties
+421: 440: 		// properly.
+422: 441: 		while (sorted + 1 < list.length) {
+423: 442: 			let nextIndexes = [sorted];
+424: 443: 			// grab list of next indexes
+425: 444: 			for (let i = sorted + 1; i < list.length; i++) {
+426: 445: 				const delta = comparator(list[nextIndexes[0]], list[i]);
+427: 446: 				if (delta < 0) continue;
+428: 447: 				if (delta > 0) nextIndexes = [i];
+429: 448: 				if (delta === 0) nextIndexes.push(i);
+430: 449: 			}
+431: 450: 			// put list of next indexes where they belong
+432: 451: 			for (let i = 0; i < nextIndexes.length; i++) {
+433: 452: 				const index = nextIndexes[i];
+434: 453: 				if (index !== sorted + i) {
+435: 454: 					// nextIndexes is guaranteed to be in order, so it will never have
+436: 455: 					// been disturbed by an earlier swap
+437: 456: 					[list[sorted + i], list[index]] = [list[index], list[sorted + i]];
+438: 457: 				}
+439: 458: 			}
+440: 459: 			if (nextIndexes.length > 1) {
+441: 460: 				this.prng.shuffle(list, sorted, sorted + nextIndexes.length);
+442: 461: 			}
+443: 462: 			sorted += nextIndexes.length;
+444: 2635: 			if (action.maxMove) {
+445: 2636: 				const maxMoveName = this.actions.getMaxMove(action.maxMove, action.pokemon);
+446: 2637: 				if (maxMoveName) {
+447: 2638: 					const maxMove = this.actions.getActiveMaxMove(action.move, action.pokemon);
+448: 2639: 					if (maxMove.exists && maxMove.isMax) {
+449: 2640: 						move = maxMove;
+450: 2641: 					}
+451: 2642: 				}
+452: 2643: 			}
+453: 2644: 			// take priority from the base move, so abilities like Prankster only apply once
+454: 2645: 			// (instead of compounding every time `getActionSpeed` is called)
+455: 2646: 			let priority = this.dex.moves.get(move.id).priority;
+456: 2647: 			// Grassy Glide priority
+457: 2648: 			const target = this.getTarget(action.pokemon, action.move, action.targetLoc);
+458: 2649: 			priority = this.singleEvent('ModifyPriority', move, null, action.pokemon, target, null, priority);
+459: 2650: 			priority = this.runEvent('ModifyPriority', action.pokemon, target, move, priority);
+460: 2651: 			action.priority = priority + action.fractionalPriority;
+461: 2652: 			// In Gen 6, Quick Guard blocks moves with artificially enhanced priority.
+462: 2653: 			if (this.gen > 5) action.move.priority = priority;
+463: 2654: 		}
+464: 2655: 
+465: 2656: 		if (!action.pokemon) {
+466: 2657: 			action.speed = 1;
+467: 2658: 		} else {
+468: 2659: 			if (this.gen <= 4 && action.choice === 'move' && action.fractionalPriority < 0) {
+469: 2660: 				// in Gen 4, Pokemon with decrease fractional priority act in reverse speed order
+470: 2661: 				// ignores Trick Room, does not ignore boosts and Simple
+471: 2662: 				action.speed = -action.pokemon.getStat('spe', false, false);
+472: 2663: 			} else {
+473: 2664: 				action.speed = action.pokemon.getActionSpeed();
+474: 2665: 			}
+475: 2666: 		}
+476: 2667: 	}
+477: 2668: 
+478: 2669: 	runAction(action: Action) {
+479: 2670: 		const pokemonOriginalHP = action.pokemon?.hp;
+480: 2671: 		let residualPokemon: (readonly [Pokemon, number])[] = [];
+481: 2672: 		// returns whether or not we ended in a callback
+482: 2673: 		switch (action.choice) {
+483: 2674: 		case 'start': {
+484: 2675: 			for (const side of this.sides) {
+485: 2676: 				if (side.pokemonLeft) side.pokemonLeft = side.pokemon.length;
+486: 2677: 				this.add('teamsize', side.id, side.pokemon.length);
+487: 2678: 			}
+488: 2679: 
+489: 2680: 			this.add('start');
+490: 2681: 
+491: 2682: 			for (const pokemon of this.getAllPokemon()) {
+492: 2683: 				this.singleEvent('BattleStart', this.dex.conditions.getByID(pokemon.species.id), pokemon.speciesState, pokemon);
+493: 2684: 			}
+494: 2685: 
+495: 2686: 			this.format.onBattleStart?.call(this);
+496: 2687: 			for (const rule of this.ruleTable.keys()) {
+497: 2688: 				if ('+*-!'.includes(rule.charAt(0))) continue;
+498: 2689: 				const subFormat = this.dex.formats.get(rule);
+499: 2690: 				subFormat.onBattleStart?.call(this);
+500: 2691: 			}
+501: 2692: 
+502: 2693: 			for (const side of this.sides) {
+503: 2694: 				for (let i = 0; i < side.active.length; i++) {
+504: 2695: 					if (!side.pokemonLeft) {
+505: 2696: 						// forfeited before starting
+506: 2697: 						side.active[i] = side.pokemon[i];
+507: 2698: 						side.active[i].fainted = true;
+508: 2699: 						side.active[i].hp = 0;
+509: 2700: 					} else {
+510: 2701: 						this.actions.switchIn(side.pokemon[i], i);
+511: 2702: 					}
+512: 2703: 				}
+513: 2704: 			}
+514: 2705: 			this.midTurn = true;
+515: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

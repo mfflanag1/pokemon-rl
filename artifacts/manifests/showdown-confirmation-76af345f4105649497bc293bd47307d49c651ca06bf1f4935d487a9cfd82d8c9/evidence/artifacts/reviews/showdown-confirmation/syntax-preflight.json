@@ -1,0 +1,14 @@
+{
+  "status": "pass",
+  "files": [
+    "packages/showdown-confirmation/network.mjs",
+    "packages/showdown-confirmation/network-audit.mjs",
+    "packages/showdown-confirmation/client.mjs",
+    "packages/showdown-confirmation/teams.mjs",
+    "packages/showdown-confirmation/report.mjs",
+    "packages/showdown-confirmation/campaign.mjs",
+    "packages/showdown-confirmation/audit.mjs",
+    "packages/showdown-confirmation/cli.mjs"
+  ],
+  "python_sealer": "pass"
+}

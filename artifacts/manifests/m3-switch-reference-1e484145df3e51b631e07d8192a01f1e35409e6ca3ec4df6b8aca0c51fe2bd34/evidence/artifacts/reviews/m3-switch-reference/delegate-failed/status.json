@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "error": "Output violated ownership or created symlinks; see changes.patch",
+  "elapsed_seconds": 436.15
+}

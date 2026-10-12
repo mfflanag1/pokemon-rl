@@ -1,0 +1,24 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "research",
+  "category": "mechanics-reachability",
+  "task": "Audit the pinned Gen9 Random Battle mechanics scope for R6. Own this bounded source analysis only; do not edit files or delegate. Use supplied local source excerpts and generator; do not infer current upstream behavior. Identify which indirect move/copy/repeat/ability paths are rooted in the observed/declarative singles generator, what they can introduce, and where conservative finite bounds are needed. Audit generator item-return and emitted-form alternatives beyond the observed inventory, including requiredItems, template strings, cosmetic forms and transformed initial battleOnly identities. Distinguish exact source facts, conservative supersets, and unresolved feasibility. Propose a small discriminating fixture matrix. Avoid claiming unobserved means unreachable or that reference execution certifies an accelerated engine.",
+  "criteria": "Return source-line-supported pathway and generator-bound tables, explicit counterexamples to naive closure, uncertainty and 8-12 fixture obligations. No whole-program reachability proof or implementation claims. Sources must be pinned supplied files; status means observed, declared candidate, conservative possible, or excluded with an actual source reason.",
+  "owned": [],
+  "checks": [],
+  "files_sha256": {
+    "artifacts/reference/r6-indirect-source.txt": "1e4235daa9d00510afbd066a221e4251a1c8e9181a4e3a8e5105ac744102343a",
+    "vendor/pokemon-showdown/data/random-battles/gen9/teams.ts": "15141a127c310b4bc4ad6d4c25c34598edb425e65b7286f83d6b50aec00c1374",
+    "docs/SPRINT_01.md": "348d338e52dc4faf61950112d9d8ee82dd8863d9d4124c892dde6ba1e8e68899",
+    "docs/R3_INVENTORY.md": "011fb12205a03f5891973b159d26386015affc16c19128adff8b1e8409011742"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "6bc12695429b78dc431775d78d283154c20282b7",
+  "created_at": "2026-10-10T19:46:53.611027+00:00",
+  "test_run": false
+}

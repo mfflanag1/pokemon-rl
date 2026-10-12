@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 99695,
+  "stop_reason": "end_turn",
+  "session_id": "167d044c-1f66-4fb1-982a-8be2cd14d9e3",
+  "total_cost_usd": 1.1447,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 41464,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6308,
+    "output_tokens_details": {
+      "thinking_tokens": 4695
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 41464,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 6308,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 41464,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 41464
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 6308,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 41464,
+      "webSearchRequests": 0,
+      "costUSD": 1.1447,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 4695,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: no blocking findings in reviewed scope; two low-severity reporting/claim-fidelity issues and one test-fidelity issue.**\n\nMost important: the campaign's \"seven exact resumed updates\" per seed rests on a single checkpoint load (after update 0), with updates 2\u20137 compared against a continuing in-memory `replay` object, not fresh loads at each boundary.\n\n## Findings\n\n**1. Low \u2014 Resume claim overstated (campaign.py:146\u2013152).** `replay=load(...)` happens only when `update==0`; later iterations call `replay.collect()/update()` on that same live object. So per seed there is one real disk-resume followed by seven in-process matched updates, plus a final `load` that only compares `state()` without further training (line 158). The code is correct, but \"seven exact resumed updates\" should read \"one resume, seven subsequent matched updates.\" Verification: load `boundary.checkpoint.json` fresh before each of updates 1\u20137 (or save/load at every boundary) and compare `content_hash`/diagnostics.\n\n**2. Low \u2014 Hardcoded report assertions (campaign.py:160, 163; 135).** `'terminal_score_pair_sum': trainer.games` is tautologically `trainer.games`, not a measurement; `'all_buffers_observation_only': True` and `'actor_has_targets': False` are constants. The underlying properties *are* enforced (`collector.py:116` requires `sum(rewards)==games`; `ActorTape` has no target fields; `encode` only accepts `PlayerView`), but the report fields do not derive from data. Suggest computing `sum(buffer.targets.rewards)` across the trace and listing `fields(ActorTape)` in the report.\n\n**3. Low \u2014 `crash_before_linkage` misnamed (trainer.py:39).** The injected crash fires *after* `collect()` returns (linkage, GAE, hashing all complete) and after counters were advanced (line 38). The rollback path is still exercised correctly because `save` refuses non-idle phase and `load` replays from disk; but no mid-collection failure (e.g., between step and record append) is tested. Not a correctness bug; the test label is inaccurate.\n\n**4. Info \u2014 Chance stream differs from `chance.sample` (collector.py:78 vs chance.py:56).** Collector folds `0x454e56` into the master key; `chance.sample(seed,...)` does not. Collector chance is deterministic and separated from the action domain (correct), but is not reproducible via the public `sample()` helper. Document or reconcile.\n\n**Verified assumptions (positive):**\n- Leakage: features are built only from `PlayerView` (header 11 + relativized public history); terminal/winner header columns are zero for recorded rows (rows filtered by `live`, test asserts `features[:,1:3]==0`); opponent PP hidden; actor is row-independent (linear, tested). Chance keys (`env_key`, roles 0\u20134) and action keys (`action_key`, roles 0\u20131) use distinct masters.\n- Timing: both seats' views projected before either action is sampled (collector.py:85\u201389); dead games get mask all-False \u2192 action \u22121 \u2192 excluded.\n- PPO: `where(active, ratio, stop_gradient(clipped))*A` equals `min(ratio\u00b7A, clipped\u00b7A)` in all four sign/clip cases and matches the reference `active` gradient rule; targets stop-gradient (tested).\n- GAE: whole-episode, bootstrap 0, same (game,seat) forward links, `turn[j]==turn[i]+1`, terminal\u21d4`next==-1`; reverse scan reads only already-computed `advantages[j]` (j>i).\n- Provenance: `buffer is self._buffer`, version, content_hash recompute, policy_hash, and behavior-ratio recomputation (\u22641e-6) all enforced before updating.\n- Checkpoint: step/m/v/params/counters/ledger serialized; `state(trainer)==b` roundtrip; shuffle keys derived from `(seed, version, epoch)` with no mutable cursor.\n- No promotion claims; `full_g2`/`g3` marked open.\n\n## Scope limitations\nNot in packet: `pokemon_learner.checkpoint` (`digest`, `wire`, `read_array`), `pokemon_learner.trainer` (Canary base, `shuffle_rng`), `pokemon_slice.engine`, `canaries.json`, `dataset_gate`. Cannot confirm `read_array` dtype enforcement or `digest` canonicalization. No tests executed; reported pass counts (96/384/96, 3\u00d7512 games) unverified.\n\n## Verdict\nFindings \u2014 low severity only; numerical core, leakage boundaries, and buffer provenance appear sound. Tighten the resume claim wording and derive report flags from data.",
+  "ttft_ms": 76369,
+  "type": "result",
+  "duration_ms": 99736,
+  "uuid": "2e2a0af3-2ea9-48dd-8152-30bccc98cc2b",
+  "ttft_stream_ms": 2727,
+  "time_to_request_ms": 41,
+  "first_content_frame_ms": 2728,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

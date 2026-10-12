@@ -1,0 +1,13 @@
+{
+  "artifacts/runs/showdown-session-draft-v1/trace.json": "7930c914c365a625850ba202de510c7af95a8eb8cb2d34175ac3f197ced1f5d4",
+  "artifacts/runs/showdown-session-draft-v1/report.json": "499e4a5e061b0ebfe92b24a4cf489ad51dff0213d564597beef30a22c85b065f",
+  "artifacts/runs/showdown-session-draft-v1/teams.json": "efc4ddfd318d161d4224e3f1b97af2057ef0ab4b4f9dc94e8d31160505d97b0a",
+  "artifacts/runs/showdown-session-draft-v1/progress.json": "3b1171b363e2f621a807249965c533b6f7c1879cb3e042e740ff9992c3cbe287",
+  "artifacts/runs/showdown-session-draft-v1/admission.json": "2edd81861151f48cd35db2b991184061c28cefa558ac544f4ab9e7a15469ee6b",
+  "artifacts/runs/showdown-session-draft-v2/trace.json": "420040dd77d918b22abf453ce9edb37352599c5929641dc44390c0634a11f65c",
+  "artifacts/runs/showdown-session-draft-v2/audit.json": "7fd2437d51b341241505c4529ee9efabd12d3d9a335a85c2914c97b7b9f347e8",
+  "artifacts/runs/showdown-session-draft-v2/report.json": "e51b67d64079f837fb04f8630ee9f328521a01e34b5e6c75f450da442ba3e8e0",
+  "artifacts/runs/showdown-session-draft-v2/teams.json": "efc4ddfd318d161d4224e3f1b97af2057ef0ab4b4f9dc94e8d31160505d97b0a",
+  "artifacts/runs/showdown-session-draft-v2/progress.json": "c9b227da5f857cf70c8168310bc580756698b70a9df5453b40b491342273995e",
+  "artifacts/runs/showdown-session-draft-v2/admission.json": "17bebfd4e4aee0f206358453fc94779234c7a3675dabb7bee3db2373cf31cc5a"
+}

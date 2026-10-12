@@ -1,0 +1,1 @@
+exports.Formats = [{"name":"[Gen 9] Bot Baseline Development","mod":"gen9","gameType":"singles","searchShow":false,"rated":false,"ruleset":["PotD","Obtainable","Species Clause","HP Percentage Mod","Cancel Mod","Sleep Clause Mod","Illusion Level Mod"]}];

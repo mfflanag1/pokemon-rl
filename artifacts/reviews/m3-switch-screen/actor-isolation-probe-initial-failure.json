@@ -1,0 +1,4 @@
+{
+  "status": "failed-probe-selection",
+  "reason": "The last selected mutation, record48/pair24, leaves opponent team0 unchanged. The explicit non-vacuity assertion correctly rejected it; this is probe input selection, not an actor inequality or production failure. Replaced only this probe record with46/pair23; frozen experiment source unchanged."
+}

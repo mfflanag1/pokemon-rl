@@ -1,0 +1,70 @@
+{
+  "pin": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "files": {
+    "vendor/pokemon-showdown/server/room-battle.ts": {
+      "sha256": "b96e84d1add9f2c1ae20e447afd03c5db511ddd8e09abbf8d304b8206769e29c",
+      "excerpts": [
+        {
+          "start": 627,
+          "end": 639,
+          "text": "\t\tif (request.isWait !== false && request.isWait !== true) {\n\t\t\tplayer.sendRoom(`|error|[Invalid choice] There's nothing to choose`);\n\t\t\treturn;\n\t\t}\n\t\tconst allPlayersWait = this.players.every(p => !!p.request.isWait);\n\t\tif (allPlayersWait || // too late\n\t\t\t(rqid && rqid !== `${request.rqid}`)) { // WAY too late\n\t\t\tplayer.sendRoom(`|error|[Invalid choice] Sorry, too late to make a different move; the next turn has already started`);\n\t\t\treturn;\n\t\t}\n\t\trequest.isWait = true;\n\t\trequest.choice = choice;\n"
+        },
+        {
+          "start": 793,
+          "end": 818,
+          "text": "\t\tcase 'sideupdate': {\n\t\t\tconst slot = lines[1] as SideID;\n\t\t\tconst player = this[slot];\n\t\t\tif (lines[2].startsWith(`|error|[Invalid choice] Can't do anything`)) {\n\t\t\t\t// ... should not happen\n\t\t\t} else if (lines[2].startsWith(`|error|[Invalid choice]`)) {\n\t\t\t\tconst undoFailed = lines[2].includes(`Can't undo`);\n\t\t\t\tconst request = this[slot].request;\n\t\t\t\trequest.isWait = undoFailed ? 'cantUndo' : false;\n\t\t\t\trequest.choice = '';\n\t\t\t} else if (lines[2].startsWith(`|request|`)) {\n\t\t\t\tthis.rqid++;\n\t\t\t\tconst request = JSON.parse(lines[2].slice(9));\n\t\t\t\trequest.rqid = this.rqid;\n\t\t\t\tconst requestJSON = JSON.stringify(request);\n\t\t\t\tthis[slot].request = {\n\t\t\t\t\trqid: this.rqid,\n\t\t\t\t\trequest: requestJSON,\n\t\t\t\t\tisWait: request.wait ? 'cantUndo' : false,\n\t\t\t\t\tchoice: '',\n\t\t\t\t};\n\t\t\t\tthis.requestCount++;\n\t\t\t\tplayer?.sendRoom(`|request|${requestJSON}`);\n\t\t\t\tif (!request.update) this.timer.nextRequest(player);\n\t\t\t\tbreak;\n\t\t\t}"
+        },
+        {
+          "start": 946,
+          "end": 962,
+          "text": "\toverride onConnect(user: User, connection: Connection | null = null) {\n\t\tif (this.ended && this.room.parent?.game?.constructor.name === 'BestOfGame') {\n\t\t\tconst parentGame = this.room.parent.game as BestOfGame;\n\t\t\tparentGame.playerTable[user.id]?.updateReadyButton();\n\t\t}\n\t\t// this handles joining a battle in which a user is a participant,\n\t\t// where the user has already identified before attempting to join\n\t\t// the battle\n\t\tconst player = this.playerTable[user.id];\n\t\tif (!player) return;\n\t\tplayer.updateChannel(connection || user);\n\t\tconst request = player.request;\n\t\tif (request.request) {\n\t\t\tlet data = `|request|${request.request}`;\n\t\t\tif (request.choice) data += `\\n|sentchoice|${request.choice}`;\n\t\t\t(connection || user).sendTo(this.roomid, data);\n\t\t}"
+        }
+      ]
+    },
+    "vendor/pokemon-showdown/server/rooms.ts": {
+      "sha256": "6c5b05d16dd5df4131922f541460d60beda1760cc76d5b6b2014388c7b347b9d",
+      "excerpts": [
+        {
+          "start": 1939,
+          "end": 1943,
+          "text": "\tconstructor(roomid: RoomID, title: string, options: Partial<RoomSettings & RoomBattleOptions>) {\n\t\toptions.noLogTimes = true;\n\t\toptions.noAutoTruncate = true;\n\t\toptions.isMultichannel = true;\n\t\tsuper(roomid, title, options);"
+        },
+        {
+          "start": 1978,
+          "end": 1982,
+          "text": "\tgetLogForUser(user: User) {\n\t\tif (!(user.id in this.game.playerTable)) return this.getLog();\n\t\treturn this.getLog(this.game.playerTable[user.id].num as 0);\n\t}\n\toverride update(excludeUser: User | null = null) {"
+        },
+        {
+          "start": 2011,
+          "end": 2014,
+          "text": "\toverride onConnect(user: User, connection: Connection) {\n\t\tthis.sendUser(connection, '|init|battle\\n|title|' + this.title + '\\n' + this.getLogForUser(user));\n\t\tthis.game?.onConnect?.(user, connection);\n\t}"
+        }
+      ]
+    },
+    "vendor/pokemon-showdown/server/roomlogs.ts": {
+      "sha256": "9f43d30cde463594320526d419a7be1d657030433e304b677ba6d35102e99ed9",
+      "excerpts": [
+        {
+          "start": 107,
+          "end": 129,
+          "text": "\tgetScrollback(channel = 0) {\n\t\tlet log = this.log;\n\t\tif (!this.noLogTimes) log = [`|:|${~~(Date.now() / 1000)}`].concat(log);\n\t\tif (!this.isMultichannel) {\n\t\t\treturn log.join('\\n') + '\\n';\n\t\t}\n\t\tlog = [];\n\t\tfor (let i = 0; i < this.log.length; ++i) {\n\t\t\tconst line = this.log[i];\n\t\t\tconst split = /\\|split\\|p(\\d)/g.exec(line);\n\t\t\tif (split) {\n\t\t\t\tconst canSeePrivileged = (channel === Number(split[1]) || channel === -1);\n\t\t\t\tconst ownLine = this.log[i + (canSeePrivileged ? 1 : 2)];\n\t\t\t\tif (ownLine) log.push(ownLine);\n\t\t\t\ti += 2;\n\t\t\t} else {\n\t\t\t\tlog.push(line);\n\t\t\t}\n\t\t}\n\t\treturn log.join('\\n') + '\\n';\n\t}\n\tsetupRoomlogStream() {\n\t\tif (this.roomlogStream === null) return;"
+        },
+        {
+          "start": 345,
+          "end": 351,
+          "text": "\ttruncate() {\n\t\tif (this.noAutoTruncate) return;\n\t\tif (this.log.length > 100) {\n\t\t\tconst truncationLength = this.log.length - 100;\n\t\t\tthis.log.splice(0, truncationLength);\n\t\t\tthis.numTruncatedLines += truncationLength;\n\t\t}"
+        }
+      ]
+    },
+    "vendor/pokemon-showdown/sim/side.ts": {
+      "sha256": "a18946aefe31018162956b1c708a9cce27bb33fe0f098cb58c44d8521d53b1f1",
+      "excerpts": [
+        {
+          "start": 521,
+          "end": 539,
+          "text": "\temitRequest(update: ChoiceRequest = this.activeRequest!, updatedRequest = false) {\n\t\tif (updatedRequest) (this.activeRequest as MoveRequest | SwitchRequest).update = true;\n\t\tthis.battle.send('sideupdate', `${this.id}\\n|request|${JSON.stringify(update)}`);\n\t\tthis.activeRequest = update;\n\t}\n\n\temitChoiceError(\n\t\tmessage: string, update?: { pokemon: Pokemon, update: (req: PokemonMoveRequestData) => boolean | void }\n\t) {\n\t\tthis.choice.error = message;\n\t\tconst updated = update ? this.updateRequestForPokemon(update.pokemon, update.update) : null;\n\t\tconst type = `[${updated ? 'Unavailable' : 'Invalid'} choice]`;\n\t\tthis.battle.send('sideupdate', `${this.id}\\n|error|${type} ${message}`);\n\t\tif (updated) this.emitRequest(this.activeRequest!, true);\n\t\tif (this.battle.strictChoices) throw new Error(`${type} ${message}`);\n\t\treturn false;\n\t}\n\n\tisChoiceDone() {"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "lock_sha256": "fd89ae0129d1855edb63f9d23d99bf67bc894a3f5be882f8c486041d8662b702",
+  "node": "v25.6.1",
+  "npm": "11.9.0",
+  "platform": "darwin",
+  "arch": "arm64",
+  "dist_sha256": "e65fb25c0aeed57ea58d81dc69a2185476975fb0984cc2d857e92277514724db",
+  "prng_dependency_sha256": "0617b3b17739402e75ad2d7ceaa160c078329dff78280bf20f28d5e356f48d60",
+  "build_command": "node build",
+  "dependency_install": "npm ci --omit=dev --ignore-scripts --no-audit --no-fund"
+}

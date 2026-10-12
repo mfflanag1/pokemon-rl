@@ -1,0 +1,25 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new preregistered restricted switching learning screen before production. Find concrete statistical/censoring, hidden-info, action/request, checkpoint/source-binding or evidence-audit defects. The predecessor learner/engine are sealed and cannot change. All 13 new Python and 2 Node tests pass; only smoke outcomes may run before freeze. Statistics delegate got opposite-family QA and local tests. Check conservative unresolved-outcome handling and whether claims are limited correctly. Do not request unrelated broader simulator work.",
+  "files_sha256": {
+    "contracts/switch-screen-v1/README.md": "3b3df863667723d71ae74a90f68273b2f354d919075ad506e6ac0f607ca26188",
+    "contracts/switch-screen-v1/plan.json": "c594b6a2acb85a296376f14268436e914865ff775e7136c9d2b7c1b52623eac4",
+    "python/pokemon_switch_screen/provenance.py": "b459e7191973a5b328beaad72b88be226889405ab06ed6810d848fc596445c81",
+    "python/pokemon_switch_screen/checkpoint.py": "9aae4336460ee29d0d6b08838fdad1115b7db2860fae649e910352eb91e87dd8",
+    "python/pokemon_switch_screen/inference.py": "64d0ab9d712207e03ee9f6159d5544bc32ce795b5dcbcce0c93108e7f35b5b21",
+    "python/pokemon_switch_screen/campaign.py": "d1df7bc8e9899ad04d2f486eb2a79aec74c3b4a0d970138aee234a8cd5149d79",
+    "python/pokemon_switch_screen/statistics.py": "a4934377aa849b9ee19f4103c13a09c01eefe602b226f74d986c064e991f689d",
+    "scripts/seal-switch-screen.py": "893f0a194208cd6d0da80081e935f80fce67ce4bc3bc3a16f03d5e5057c7cb72",
+    "packages/switch-screen/worker.mjs": "9bf08480de70c6be9a78a6644a76d885f6bcb99790fc285de41fe624d29e0df3",
+    "python/pokemon_switch_engine/views.py": "46641241add460b13dbd6f10da15e4c9e5fd0de94bef20db81d5fe7ef94f14e7",
+    "python/pokemon_switch_engine/learner.py": "c21000b6cf1c652c4ee9555cfb35ce5ce1c125348f9dd203304b32fc5211e344",
+    "tests/switch-screen/test_campaign.py": "543c3eda9356180f6d0c0b326a20ca2f62741e09d66c142e1b0866c56be9f417",
+    "tests/switch-screen/test_checkpoint.py": "c2e6496b55eb96ad84a125406c9f12612361db9dc2a0e8eca6b92878b473f7dd",
+    "tests/switch-screen/test_statistics.py": "d5fe9ebfb40ef51832c4b0bc9033fd1711833c7c11b43a59d942a860c7364044"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

@@ -1,0 +1,27 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new additive fixed-shape complete collect/update loop, checkpoint boundary, and 7200-second CPU soak/profile campaign. Prior sealed learner/simulator modules must remain unchanged. Full G2/G3 stay open; no strength claim. Look for material correctness or false evidence claims: padding affecting loss/gradients/optimizer counters, actor exposure to targets or future state, own-player GAE/terminal linkage, same-turn frozen two-player selection, random/counter reuse, byte-exact disk recovery, overflow, growing memory, misleading compilation or timing telemetry, and report/source drift. New math helper was delegated to Fable, independently reviewed by Codex, and 10 local numerical/integration tests passed (5.36s). New campaign adds 3 telemetry/admission tests pending full regression. Scope is fixed public Rattata 1v1 duel only; fixed full-capacity shuffle intentionally differs from old variable-length permutation. CPU memory stats may be unavailable and process RSS is labeled as such. Verify reasoning from supplied code; do not claim executed tests. Give actionable blockers with file/line evidence; no stylistic review.",
+  "files_sha256": {
+    "contracts/fixed-loop-v1/plan.json": "fb9de93cb7e18338fcb2a4341904d949a0ddb6a1e1bd8910f5d749f767c0ed1c",
+    "python/pokemon_fixed/__init__.py": "5ce0e28d586286386e2c6d9a1dbcc859b74c1b9bca35b6de0272f539c9520b27",
+    "python/pokemon_fixed/math.py": "2442da19684ece79e9aa11c0287ba722f2b31178b0ef67faa681b23c898e86fb",
+    "python/pokemon_fixed/loop.py": "c2f56692e140705b92bfa3a1a30da5448600c22a8d6d54bd26f9bef96e264046",
+    "python/pokemon_fixed/checkpoint.py": "eb8b29f79e6b342f9e240e7baacf438113f3aefb84cff2a49ded147dd4c875fa",
+    "python/pokemon_fixed/campaign.py": "2f664f70b22f08cb9953841aefe894caf1f06d0c2a628a3724ed47913ac539fb",
+    "tests/fixed-loop/test_math.py": "cab6d37a9aab00dcb23d334da37e7551906aaf3df750cf37c48a980fac20f669",
+    "tests/fixed-loop/test_loop.py": "2d99db4523bb8f91fdbe053d5ea548076645b9868b081927efc195c866057db4",
+    "tests/fixed-loop/test_campaign.py": "062d0a7e2e407bc7d4627c65c030c211d9b2e2473849833cb2f58ad4eb09a1df",
+    "python/pokemon_jax/engine.py": "da278cf797f6d691e1d2674544d9a6fab5ef6bb6eb282b07deac09d070e5c262",
+    "python/pokemon_jax/chance.py": "d2b4191cb48fac8b47819db529ffb7deea622c9a352e8a5daf641d791af47454",
+    "python/pokemon_jax_learner/core.py": "0aecb281b433b16c68cd188b00e763b69f9b17b149f15f4e4e0f6804bb84f3ba",
+    "python/pokemon_jax_learner/model.py": "2ce02061d9932bbbab287833be5302aa1f50d58dbdcb8344933045b033500b6e",
+    "python/pokemon_jax_learner/collector.py": "7585d02a945a086d8d4aa4b7fdba5b421ab4518e93d898ea4c8a39a8a457c0df",
+    "python/pokemon_jax_learner/checkpoint.py": "e4d2a80b1b4ee452523baeb01cc5cb5c614f599cd5b2f7ecf65e591ecac16649",
+    "python/pokemon_learner/checkpoint.py": "0f8a4f05a97f0af6ddba77f0c95158a74e8287af98c76181a961fb6fd85841dc"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

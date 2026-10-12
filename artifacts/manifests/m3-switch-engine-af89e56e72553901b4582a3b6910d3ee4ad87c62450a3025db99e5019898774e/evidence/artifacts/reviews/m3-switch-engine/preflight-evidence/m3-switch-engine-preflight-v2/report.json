@@ -1,0 +1,1 @@
+{"status":"complete","plan_sha256":"dd6e1f247d4023b49159d0e5a45a71fe9c73c79d986680de8b18e132778304b7","count":24,"shards":[{"file":"cases-0000.json.gz","sha256":"b8cbb67fee73cc9f49b4880aff17e3b183bf456bc896072693368172ef1b94e0","count":24,"first":0}],"legacy":72,"passivity":24,"elapsed_ms":1571.099917}

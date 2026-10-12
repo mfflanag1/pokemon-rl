@@ -1,0 +1,1 @@
+{"byte_identical_files": {"catalog.json": true, "fixtures.json": true, "manifest.json": true, "report.json": true}, "checks": "Independent fresh generation after all regression tests; 16 cases each replayed twice."}

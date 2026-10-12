@@ -1,0 +1,1698 @@
+[
+  {
+    "seed": "sodium,24f0c94092b1a63aee9415d1aa0f9ca0f50a86c5af1948016ea0ec26c99c1551",
+    "team": [
+      {
+        "name": "Infernape",
+        "species": "Infernape",
+        "speciesId": "infernape",
+        "gender": "F",
+        "shiny": false,
+        "level": 82,
+        "moves": [
+          "stoneedge",
+          "flareblitz",
+          "knockoff",
+          "closecombat"
+        ],
+        "ability": "Blaze",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Scarf",
+        "teraType": "Dark",
+        "role": "Fast Support"
+      },
+      {
+        "name": "Ursaring",
+        "species": "Ursaring",
+        "speciesId": "ursaring",
+        "gender": "F",
+        "shiny": false,
+        "level": 84,
+        "moves": [
+          "rest",
+          "sleeptalk",
+          "bodyslam",
+          "earthquake"
+        ],
+        "ability": "Guts",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Eviolite",
+        "teraType": "Ground",
+        "role": "Bulky Attacker"
+      },
+      {
+        "name": "Vaporeon",
+        "species": "Vaporeon",
+        "speciesId": "vaporeon",
+        "gender": "F",
+        "shiny": false,
+        "level": 86,
+        "moves": [
+          "scald",
+          "protect",
+          "flipturn",
+          "wish"
+        ],
+        "ability": "Water Absorb",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Poison",
+        "role": "Bulky Support"
+      },
+      {
+        "name": "Flamigo",
+        "species": "Flamigo",
+        "speciesId": "flamigo",
+        "gender": "M",
+        "shiny": false,
+        "level": 82,
+        "moves": [
+          "throatchop",
+          "closecombat",
+          "uturn",
+          "bravebird"
+        ],
+        "ability": "Scrappy",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Scarf",
+        "teraType": "Fighting",
+        "role": "Fast Attacker"
+      },
+      {
+        "name": "Necrozma",
+        "species": "Necrozma",
+        "speciesId": "necrozma",
+        "gender": "N",
+        "shiny": false,
+        "level": 80,
+        "moves": [
+          "knockoff",
+          "swordsdance",
+          "photongeyser",
+          "earthquake"
+        ],
+        "ability": "Prism Armor",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Life Orb",
+        "teraType": "Dark",
+        "role": "Setup Sweeper"
+      },
+      {
+        "name": "Walking Wake",
+        "species": "Walking Wake",
+        "speciesId": "walkingwake",
+        "gender": "N",
+        "shiny": false,
+        "level": 79,
+        "moves": [
+          "hydrosteam",
+          "flamethrower",
+          "dracometeor",
+          "sunnyday"
+        ],
+        "ability": "Protosynthesis",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Life Orb",
+        "teraType": "Fire",
+        "role": "Fast Attacker"
+      }
+    ],
+    "team_hash": "f64536ae1e4908470c005a5e0329ec2002eb65260796dc94a5c9e578b46336a6",
+    "partition": "development",
+    "team_key": "e8b60503430f79eaaa32b5819be34b5c7652df992c0ae31b9309bae7a08037a2"
+  },
+  {
+    "seed": "sodium,c8ead675d6bcd686496765a6a795a682f0611f7e1060602d6a7a80bedce0d43c",
+    "team": [
+      {
+        "name": "Sudowoodo",
+        "species": "Sudowoodo",
+        "speciesId": "sudowoodo",
+        "gender": "M",
+        "shiny": false,
+        "level": 94,
+        "moves": [
+          "woodhammer",
+          "earthquake",
+          "suckerpunch",
+          "headsmash"
+        ],
+        "ability": "Rock Head",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Band",
+        "teraType": "Rock",
+        "role": "Bulky Attacker"
+      },
+      {
+        "name": "Seviper",
+        "species": "Seviper",
+        "speciesId": "seviper",
+        "gender": "F",
+        "shiny": false,
+        "level": 93,
+        "moves": [
+          "gunkshot",
+          "flamethrower",
+          "gigadrain",
+          "switcheroo"
+        ],
+        "ability": "Infiltrator",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Scarf",
+        "teraType": "Fire",
+        "role": "Fast Attacker"
+      },
+      {
+        "name": "Flareon",
+        "species": "Flareon",
+        "speciesId": "flareon",
+        "gender": "M",
+        "shiny": false,
+        "level": 90,
+        "moves": [
+          "quickattack",
+          "facade",
+          "trailblaze",
+          "flareblitz"
+        ],
+        "ability": "Guts",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Toxic Orb",
+        "teraType": "Normal",
+        "role": "Setup Sweeper"
+      },
+      {
+        "name": "Iron Jugulis",
+        "species": "Iron Jugulis",
+        "speciesId": "ironjugulis",
+        "gender": "N",
+        "shiny": false,
+        "level": 77,
+        "moves": [
+          "hurricane",
+          "earthpower",
+          "darkpulse",
+          "fireblast"
+        ],
+        "ability": "Quark Drive",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Specs",
+        "teraType": "Ground",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Rillaboom",
+        "species": "Rillaboom",
+        "speciesId": "rillaboom",
+        "gender": "M",
+        "shiny": false,
+        "level": 79,
+        "moves": [
+          "knockoff",
+          "woodhammer",
+          "grassyglide",
+          "uturn"
+        ],
+        "ability": "Grassy Surge",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Band",
+        "teraType": "Grass",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Manaphy",
+        "species": "Manaphy",
+        "speciesId": "manaphy",
+        "gender": "N",
+        "shiny": false,
+        "level": 78,
+        "moves": [
+          "energyball",
+          "icebeam",
+          "hydropump",
+          "tailglow"
+        ],
+        "ability": "Hydration",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Water",
+        "role": "Bulky Setup"
+      }
+    ],
+    "team_hash": "39dd003fabfe6e49007c7347f0e6696a9eb96c69bd85b5c18db78ffff2176b44",
+    "partition": "development",
+    "team_key": "019a75c3ff1443a3770c7d4c2b33ae3d273e6feb59685ac19c8a3f70be6cf8e7"
+  },
+  {
+    "seed": "sodium,34933d11e6c2ea36fbfe379c3c479180691b632a8efc86aa8be312e77e3a2271",
+    "team": [
+      {
+        "name": "Dedenne",
+        "species": "Dedenne",
+        "speciesId": "dedenne",
+        "gender": "F",
+        "shiny": false,
+        "level": 88,
+        "moves": [
+          "nuzzle",
+          "dazzlinggleam",
+          "thunderbolt",
+          "superfang"
+        ],
+        "ability": "Cheek Pouch",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Sitrus Berry",
+        "teraType": "Flying",
+        "role": "Fast Support"
+      },
+      {
+        "name": "Dipplin",
+        "species": "Dipplin",
+        "speciesId": "dipplin",
+        "gender": "M",
+        "shiny": false,
+        "level": 88,
+        "moves": [
+          "recover",
+          "gigadrain",
+          "suckerpunch",
+          "dragonpulse"
+        ],
+        "ability": "Sticky Hold",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Eviolite",
+        "teraType": "Steel",
+        "role": "Bulky Attacker"
+      },
+      {
+        "name": "Tauros",
+        "species": "Tauros",
+        "speciesId": "tauros",
+        "gender": "M",
+        "shiny": false,
+        "level": 82,
+        "moves": [
+          "bodyslam",
+          "closecombat",
+          "zenheadbutt",
+          "throatchop"
+        ],
+        "ability": "Sheer Force",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Life Orb",
+        "teraType": "Psychic",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Iron Hands",
+        "species": "Iron Hands",
+        "speciesId": "ironhands",
+        "gender": "N",
+        "shiny": false,
+        "level": 79,
+        "moves": [
+          "drainpunch",
+          "swordsdance",
+          "icepunch",
+          "wildcharge"
+        ],
+        "ability": "Quark Drive",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Fighting",
+        "role": "Bulky Attacker"
+      },
+      {
+        "name": "Iron Jugulis",
+        "species": "Iron Jugulis",
+        "speciesId": "ironjugulis",
+        "gender": "N",
+        "shiny": false,
+        "level": 77,
+        "moves": [
+          "darkpulse",
+          "hurricane",
+          "earthpower",
+          "hydropump"
+        ],
+        "ability": "Quark Drive",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Specs",
+        "teraType": "Ground",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Ogerpon",
+        "species": "Ogerpon-Cornerstone",
+        "speciesId": "ogerponcornerstone",
+        "gender": "F",
+        "shiny": false,
+        "level": 76,
+        "moves": [
+          "hornleech",
+          "ivycudgel",
+          "swordsdance",
+          "superpower"
+        ],
+        "ability": "Sturdy",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Cornerstone Mask",
+        "teraType": "Rock",
+        "role": "Setup Sweeper"
+      }
+    ],
+    "team_hash": "808df54494e64125fa16f856c4c5e8bd1bc2d89fcf0c3116e9397763d5033604",
+    "partition": "development",
+    "team_key": "d254ac06c6fbcb2c826b544155dcde685444baeaca271b21a35e04c31d8741f6"
+  },
+  {
+    "seed": "sodium,8196ccfa1cb071fe72c728954bdf66bab709e80e4e53ece31bc5cbdc4474a666",
+    "team": [
+      {
+        "name": "Rabsca",
+        "species": "Rabsca",
+        "speciesId": "rabsca",
+        "gender": "M",
+        "shiny": false,
+        "level": 91,
+        "moves": [
+          "bugbuzz",
+          "revivalblessing",
+          "psychic",
+          "trickroom"
+        ],
+        "ability": "Synchronize",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 0
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 0
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Steel",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Swalot",
+        "species": "Swalot",
+        "speciesId": "swalot",
+        "gender": "F",
+        "shiny": false,
+        "level": 90,
+        "moves": [
+          "protect",
+          "earthquake",
+          "toxic",
+          "sludgebomb"
+        ],
+        "ability": "Liquid Ooze",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Ground",
+        "role": "Bulky Support"
+      },
+      {
+        "name": "Dewgong",
+        "species": "Dewgong",
+        "speciesId": "dewgong",
+        "gender": "F",
+        "shiny": false,
+        "level": 94,
+        "moves": [
+          "knockoff",
+          "surf",
+          "encore",
+          "tripleaxel"
+        ],
+        "ability": "Thick Fat",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Poison",
+        "role": "Bulky Attacker"
+      },
+      {
+        "name": "Araquanid",
+        "species": "Araquanid",
+        "speciesId": "araquanid",
+        "gender": "M",
+        "shiny": false,
+        "level": 82,
+        "moves": [
+          "leechlife",
+          "hydropump",
+          "liquidation",
+          "stickyweb"
+        ],
+        "ability": "Water Bubble",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Ground",
+        "role": "Bulky Attacker"
+      },
+      {
+        "name": "Sudowoodo",
+        "species": "Sudowoodo",
+        "speciesId": "sudowoodo",
+        "gender": "M",
+        "shiny": false,
+        "level": 94,
+        "moves": [
+          "stealthrock",
+          "headsmash",
+          "woodhammer",
+          "suckerpunch"
+        ],
+        "ability": "Rock Head",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Rock",
+        "role": "Bulky Attacker"
+      },
+      {
+        "name": "Bastiodon",
+        "species": "Bastiodon",
+        "speciesId": "bastiodon",
+        "gender": "F",
+        "shiny": false,
+        "level": 89,
+        "moves": [
+          "foulplay",
+          "rest",
+          "irondefense",
+          "bodypress"
+        ],
+        "ability": "Soundproof",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Chesto Berry",
+        "teraType": "Fighting",
+        "role": "Bulky Setup"
+      }
+    ],
+    "team_hash": "c1706d503f9d74bd614580f42d2906bcd5aecbde7f510f9fede902ea5db62c48",
+    "partition": "development",
+    "team_key": "7cc56dd30d327976fedb35391154f47705765e2b9bbacf87cdfb961eb0aa6fc2"
+  },
+  {
+    "seed": "sodium,19c4eafbd1df051a6cf5adf7294c5973b5b58cc0657edf21563b58a60c10f214",
+    "team": [
+      {
+        "name": "Reshiram",
+        "species": "Reshiram",
+        "speciesId": "reshiram",
+        "gender": "N",
+        "shiny": false,
+        "level": 76,
+        "moves": [
+          "blueflare",
+          "earthpower",
+          "dragontail",
+          "dracometeor"
+        ],
+        "ability": "Turboblaze",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Ground",
+        "role": "Fast Attacker"
+      },
+      {
+        "name": "Toxtricity",
+        "species": "Toxtricity",
+        "speciesId": "toxtricity",
+        "gender": "M",
+        "shiny": false,
+        "level": 82,
+        "moves": [
+          "sludgewave",
+          "voltswitch",
+          "overdrive",
+          "boomburst"
+        ],
+        "ability": "Punk Rock",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Scarf",
+        "teraType": "Normal",
+        "role": "Fast Attacker"
+      },
+      {
+        "name": "Porygon-Z",
+        "species": "Porygon-Z",
+        "speciesId": "porygonz",
+        "gender": "N",
+        "shiny": false,
+        "level": 83,
+        "moves": [
+          "terablast",
+          "shadowball",
+          "agility",
+          "nastyplot"
+        ],
+        "ability": "Adaptability",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Life Orb",
+        "teraType": "Fighting",
+        "role": "Tera Blast user"
+      },
+      {
+        "name": "Tornadus",
+        "species": "Tornadus",
+        "speciesId": "tornadus",
+        "gender": "M",
+        "shiny": false,
+        "level": 82,
+        "moves": [
+          "heatwave",
+          "bleakwindstorm",
+          "uturn",
+          "focusblast"
+        ],
+        "ability": "Defiant",
+        "evs": {
+          "hp": 81,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Specs",
+        "teraType": "Fighting",
+        "role": "Fast Attacker"
+      },
+      {
+        "name": "Scovillain",
+        "species": "Scovillain",
+        "speciesId": "scovillain",
+        "gender": "M",
+        "shiny": false,
+        "level": 91,
+        "moves": [
+          "stompingtantrum",
+          "energyball",
+          "sunnyday",
+          "fireblast"
+        ],
+        "ability": "Chlorophyll",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Fire",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Gurdurr",
+        "species": "Gurdurr",
+        "speciesId": "gurdurr",
+        "gender": "M",
+        "shiny": false,
+        "level": 85,
+        "moves": [
+          "knockoff",
+          "bulkup",
+          "drainpunch",
+          "machpunch"
+        ],
+        "ability": "Guts",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Eviolite",
+        "teraType": "Steel",
+        "role": "Bulky Attacker"
+      }
+    ],
+    "team_hash": "2eb12d71e151eeb6c61135cc8cb067ca9d682db26689e07253bc324268d3a48d",
+    "partition": "development",
+    "team_key": "b5426246b7cbc7aece6678012d3dfa6862ac3399247fee6dd8b0ef50c005e6a3"
+  },
+  {
+    "seed": "sodium,d4ad7ce553657196ffa770138058c544b859f48f3ce3533902e5d4badd977ad3",
+    "team": [
+      {
+        "name": "Blissey",
+        "species": "Blissey",
+        "speciesId": "blissey",
+        "gender": "F",
+        "shiny": false,
+        "level": 85,
+        "moves": [
+          "softboiled",
+          "seismictoss",
+          "healbell",
+          "thunderwave"
+        ],
+        "ability": "Natural Cure",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Fairy",
+        "role": "Bulky Support"
+      },
+      {
+        "name": "Cramorant",
+        "species": "Cramorant",
+        "speciesId": "cramorant",
+        "gender": "F",
+        "shiny": false,
+        "level": 86,
+        "moves": [
+          "roost",
+          "bravebird",
+          "surf",
+          "defog"
+        ],
+        "ability": "Gulp Missile",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Ground",
+        "role": "Bulky Support"
+      },
+      {
+        "name": "Beartic",
+        "species": "Beartic",
+        "speciesId": "beartic",
+        "gender": "F",
+        "shiny": false,
+        "level": 91,
+        "moves": [
+          "swordsdance",
+          "earthquake",
+          "closecombat",
+          "iciclecrash"
+        ],
+        "ability": "Slush Rush",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Ground",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Metagross",
+        "species": "Metagross",
+        "speciesId": "metagross",
+        "gender": "N",
+        "shiny": false,
+        "level": 79,
+        "moves": [
+          "agility",
+          "earthquake",
+          "knockoff",
+          "heavyslam"
+        ],
+        "ability": "Clear Body",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Weakness Policy",
+        "teraType": "Ground",
+        "role": "Bulky Setup"
+      },
+      {
+        "name": "Leavanny",
+        "species": "Leavanny",
+        "speciesId": "leavanny",
+        "gender": "M",
+        "shiny": false,
+        "level": 86,
+        "moves": [
+          "knockoff",
+          "stickyweb",
+          "bulletseed",
+          "tripleaxel"
+        ],
+        "ability": "Chlorophyll",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Loaded Dice",
+        "teraType": "Rock",
+        "role": "Fast Attacker"
+      },
+      {
+        "name": "Tauros",
+        "species": "Tauros-Paldea-Blaze",
+        "speciesId": "taurospaldeablaze",
+        "gender": "M",
+        "shiny": false,
+        "level": 81,
+        "moves": [
+          "bulkup",
+          "closecombat",
+          "substitute",
+          "ragingbull"
+        ],
+        "ability": "Cud Chew",
+        "evs": {
+          "hp": 73,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Sitrus Berry",
+        "teraType": "Water",
+        "role": "Fast Bulky Setup"
+      }
+    ],
+    "team_hash": "ed5bc20e5edc95f0c849b113c91498c50e90f30511ea13181b1946f18ffa4ef0",
+    "partition": "development",
+    "team_key": "bf1564cef2a9499858e68aa716414be782bd2fa6e7c519dca5dfb91404632336"
+  },
+  {
+    "seed": "sodium,19c9a2840072b3a101786fb2be4d0835d65dea3f805f1437c281c9988f7db511",
+    "team": [
+      {
+        "name": "Gyarados",
+        "species": "Gyarados",
+        "speciesId": "gyarados",
+        "gender": "M",
+        "shiny": false,
+        "level": 79,
+        "moves": [
+          "earthquake",
+          "waterfall",
+          "dragondance",
+          "terablast"
+        ],
+        "ability": "Moxie",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Flying",
+        "role": "Tera Blast user"
+      },
+      {
+        "name": "Reuniclus",
+        "species": "Reuniclus",
+        "speciesId": "reuniclus",
+        "gender": "F",
+        "shiny": false,
+        "level": 88,
+        "moves": [
+          "recover",
+          "focusblast",
+          "psyshock",
+          "calmmind"
+        ],
+        "ability": "Magic Guard",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Life Orb",
+        "teraType": "Fighting",
+        "role": "Bulky Setup"
+      },
+      {
+        "name": "Volcarona",
+        "species": "Volcarona",
+        "speciesId": "volcarona",
+        "gender": "F",
+        "shiny": false,
+        "level": 77,
+        "moves": [
+          "morningsun",
+          "gigadrain",
+          "quiverdance",
+          "fireblast"
+        ],
+        "ability": "Flame Body",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Grass",
+        "role": "Fast Bulky Setup"
+      },
+      {
+        "name": "Manaphy",
+        "species": "Manaphy",
+        "speciesId": "manaphy",
+        "gender": "N",
+        "shiny": false,
+        "level": 78,
+        "moves": [
+          "surf",
+          "icebeam",
+          "energyball",
+          "tailglow"
+        ],
+        "ability": "Hydration",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Water",
+        "role": "Bulky Setup"
+      },
+      {
+        "name": "Noivern",
+        "species": "Noivern",
+        "speciesId": "noivern",
+        "gender": "F",
+        "shiny": false,
+        "level": 82,
+        "moves": [
+          "uturn",
+          "dracometeor",
+          "boomburst",
+          "hurricane"
+        ],
+        "ability": "Infiltrator",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Specs",
+        "teraType": "Normal",
+        "role": "Fast Attacker"
+      },
+      {
+        "name": "Glimmora",
+        "species": "Glimmora",
+        "speciesId": "glimmora",
+        "gender": "M",
+        "shiny": false,
+        "level": 75,
+        "moves": [
+          "sludgewave",
+          "earthpower",
+          "mortalspin",
+          "spikes"
+        ],
+        "ability": "Toxic Debris",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Ground",
+        "role": "Fast Support"
+      }
+    ],
+    "team_hash": "cec062c8f1062e51914c697428c4891f5e5bdaf64386ba035149455ce8e31b00",
+    "partition": "development",
+    "team_key": "27117041bb6cfbd8765448b8922430eefcd352922e7d59bdbd1154a5d00ca092"
+  },
+  {
+    "seed": "sodium,aa78419f3e66099c3fd8ae11c4a555c273faa1d79695ac0cb9ec695235a964b8",
+    "team": [
+      {
+        "name": "Empoleon",
+        "species": "Empoleon",
+        "speciesId": "empoleon",
+        "gender": "F",
+        "shiny": false,
+        "level": 84,
+        "moves": [
+          "flipturn",
+          "roost",
+          "surf",
+          "stealthrock"
+        ],
+        "ability": "Competitive",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Flying",
+        "role": "Bulky Support"
+      },
+      {
+        "name": "Regirock",
+        "species": "Regirock",
+        "speciesId": "regirock",
+        "gender": "N",
+        "shiny": false,
+        "level": 83,
+        "moves": [
+          "bodypress",
+          "irondefense",
+          "stoneedge",
+          "rest"
+        ],
+        "ability": "Clear Body",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Chesto Berry",
+        "teraType": "Fighting",
+        "role": "Bulky Setup"
+      },
+      {
+        "name": "Lycanroc",
+        "species": "Lycanroc-Dusk",
+        "speciesId": "lycanrocdusk",
+        "gender": "F",
+        "shiny": false,
+        "level": 81,
+        "moves": [
+          "psychicfangs",
+          "closecombat",
+          "stoneedge",
+          "accelerock"
+        ],
+        "ability": "Tough Claws",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Choice Band",
+        "teraType": "Fighting",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Haxorus",
+        "species": "Haxorus",
+        "speciesId": "haxorus",
+        "gender": "F",
+        "shiny": false,
+        "level": 78,
+        "moves": [
+          "ironhead",
+          "swordsdance",
+          "scaleshot",
+          "earthquake"
+        ],
+        "ability": "Mold Breaker",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Loaded Dice",
+        "teraType": "Steel",
+        "role": "Fast Bulky Setup"
+      },
+      {
+        "name": "Leavanny",
+        "species": "Leavanny",
+        "speciesId": "leavanny",
+        "gender": "M",
+        "shiny": false,
+        "level": 86,
+        "moves": [
+          "stickyweb",
+          "leafblade",
+          "knockoff",
+          "lunge"
+        ],
+        "ability": "Swarm",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Rock",
+        "role": "Fast Support"
+      },
+      {
+        "name": "Sunflora",
+        "species": "Sunflora",
+        "speciesId": "sunflora",
+        "gender": "M",
+        "shiny": false,
+        "level": 100,
+        "moves": [
+          "weatherball",
+          "sunnyday",
+          "solarbeam",
+          "earthpower"
+        ],
+        "ability": "Chlorophyll",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Life Orb",
+        "teraType": "Fire",
+        "role": "Setup Sweeper"
+      }
+    ],
+    "team_hash": "dfcc9693c402b9c1d41624638a4924455c1611cac55e9d3457d2e084489f646b",
+    "partition": "development",
+    "team_key": "7f607799b713fc3b5f20608ceec3684240bbcd254bd499a6f328000b2acc830e"
+  }
+]

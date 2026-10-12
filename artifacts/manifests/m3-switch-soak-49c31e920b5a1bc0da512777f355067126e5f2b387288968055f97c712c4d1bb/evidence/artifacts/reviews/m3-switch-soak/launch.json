@@ -1,0 +1,13 @@
+{
+  "automation_id": "finish-pok-mon-switching-qualification",
+  "earliest_timed_completion": "2026-10-12T00:46:36.106976+00:00",
+  "idle_sleep_prevention": "caffeinate -i for qualification process",
+  "local_earliest_completion": "2026-10-11T20:46:36.106976-04:00",
+  "pid": 97632,
+  "run": "artifacts/runs/m3-switch-soak-v1",
+  "session": "pokemon-switch-soak-v1",
+  "status": "running",
+  "tested_source_files": 331,
+  "tests": 460,
+  "timed_start": "2026-10-11T22:46:36.106976+00:00"
+}

@@ -1,0 +1,22 @@
+{
+  "packages/showdown-session/client.mjs": {
+    "reviewed": "2ffca5f81816e42136e0f6692c75b39ccbec08ba1d463e138c3f9d40958a9ec8",
+    "final": "27f24d3d33595ec7bcec40f2e502198dc66e894389b96dbec1034f1090c59311",
+    "changed": true
+  },
+  "tests/showdown-session/session.test.mjs": {
+    "reviewed": "896e373f571e3020a81690a1c32e51f8ebd8d1e3d882c004a8f1d1a57d375c71",
+    "final": "7559abad733c6bdf0917bf02cc5c117755ba26f727d57166bc399b8b162ac2c0",
+    "changed": true
+  },
+  "packages/showdown-bot/client.mjs": {
+    "reviewed": "9cfbb0b85904953504399acf9e1c2643c6ad0bbc006b96d09b70eaadd5610c8c",
+    "final": "9cfbb0b85904953504399acf9e1c2643c6ad0bbc006b96d09b70eaadd5610c8c",
+    "changed": false
+  },
+  "packages/showdown-bot/protocol.mjs": {
+    "reviewed": "5203d70b9891b97c7e0b79d77efd10fcaa3b7d651f1f982f8151efd55cbceb54",
+    "final": "5203d70b9891b97c7e0b79d77efd10fcaa3b7d651f1f982f8151efd55cbceb54",
+    "changed": false
+  }
+}

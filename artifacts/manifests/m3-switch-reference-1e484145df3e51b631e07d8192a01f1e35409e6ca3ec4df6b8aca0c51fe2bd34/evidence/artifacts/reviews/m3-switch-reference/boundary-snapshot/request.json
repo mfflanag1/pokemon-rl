@@ -1,0 +1,24 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused follow-up for a substantive change after review 20261011-112205-7dd4c5e9. Verified old R5 schema actually requires six members (not one); do not edit it. New local Python codec and structured ActorInput adapter now use only R5 PublicHistory reducer and independently validate four-action requests/history. Review the new player information boundary, Node/Python codec equivalence, audit/source-admission/sealer and specific overclaim risks. Seven Node and six Python tests passed, live comparison/actor construction passed all 1826 saved views; fresh generator draft-v4 completed 72 real fixtures plus reversed-submission replay, 1152 counterfactual starts, 1008 initial and 864 post-turn invariances, 3456 conditional damage values. Independent Python full-audit is now running. Changes since earlier review: strict request field whitelist in both codecs, own-view variant grouping and paired reserve-reveal controls in audit, per-view negative opponent HP check, battle.dex for conditional moves, separate adapter because old schema is incompatible. Failed delegation was caused by my repeated --owned options (controller kept only test path); no candidate integrated, QA and adjudication refused failed run. This code is coordinator-authored and needs your independent review. No new JAX/training or full-format closure. Flag only actionable correctness issues or important limits; do not presume unseen executions.",
+  "files_sha256": {
+    "contracts/switch-v1/profile.json": "1b9b65d92b13c45f3425081a650e8750013f7d1d93dbbcbfd0012bb60a171df5",
+    "contracts/switch-v1/README.md": "f9483e2d0a9a85637f1cbe01995e42e79a3b4cd4a8176c72ca16b3cd078e7744",
+    "python/pokemon_switch/contract.py": "46664fac067c05468294547e06e332be401e7421435f9fb3f40ae5ff353bb834",
+    "python/pokemon_switch/views.py": "67009d7a837e38337f8d7c803cc66b92379b75fc75ac85ef2f499d0e3af184d5",
+    "python/pokemon_switch/audit.py": "9d6553a444b56f00f4c8b09b6d3d571dbd6846076f120d1e2cbce67dab83c1da",
+    "python/pokemon_switch/provenance.py": "8b107b785f1fe4383817786012ab1f9ae1082369aabb88e5fca0138708ebd5d4",
+    "python/pokemon_switch/campaign.py": "d0ef857476d159b14e110db1e5b223317f4faa174c930e32044317ee3c64046e",
+    "packages/switch-reference/actions.mjs": "bade2c75cae2ffa09ef75cf0b29e94c80df99206c811abe7e78107b5d095ee9e",
+    "packages/switch-reference/session.mjs": "21e754ffeae4ee931667bcb40b6a97254eede7af23bbc107df8d7b73c085eeda",
+    "scripts/seal-switch-reference.py": "b78c15c4f0a68ef8b8257c0aa61ebf2ec9a88ca6df15396a707b55109833e8b9",
+    "tests/switch-reference/test_contract.py": "f37da2a44d2ae07c04544f2a770eea6cb55df128c8db17a80d694d4c18d8e0e4",
+    "python/pokemon_reference/public_history.py": "7a4600d13a6a26bf33ce2c7fd43fe31a89a05bf03213b5e2f240c9be671abf7c",
+    "artifacts/runs/m3-switch-reference-draft-v4/summary.json": "47435e9d98d6c57d3b3ed45672ee0181b9972d36f885570e5ba9821bfd23c239"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

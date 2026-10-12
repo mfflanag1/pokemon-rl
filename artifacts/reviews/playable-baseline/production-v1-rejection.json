@@ -1,0 +1,8 @@
+{
+  "run": "artifacts/runs/playable-baseline-v1",
+  "status": "not-qualified",
+  "reason": "Replay found undefined condition after Illusion replace; JSON dropped the field. Fixed by preserving visible HP; v2 requires fresh complete replay.",
+  "report_sha256": "406a58a92d830f57bf10f16c54037c78f96b8e018efa359c75f83618577a0fff",
+  "regression_interrupted": true,
+  "regression_reason": "Coordinator shell used cat after audit, masking its nonzero exit. Interrupted immediately on observing replay failure; only final source-bound regression will count."
+}

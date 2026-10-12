@@ -1,0 +1,11 @@
+{
+  "status": "pass",
+  "games_replayed": 12000,
+  "actor_inputs_and_actions_reproduced": 564379,
+  "report_sha256": "7db4801455664e9cc4da9ac92c94f08921b4ba780e43cecb8d2a7d94f3added5",
+  "preregistration_sha256": "ae49b984e0fe0e8faf68f799db3e5918a97703a1881f442f72bbceebd9b788f5",
+  "teams_sha256": "15d1323d8d4e2574ac68b35d6bb57773d669a403b9bea739ee3bdf6bb64e4b99",
+  "final_teams_used": 0,
+  "admitted_development_teams": 2000,
+  "pairing_seeds_policy_seats_and_intervals_verified": true
+}

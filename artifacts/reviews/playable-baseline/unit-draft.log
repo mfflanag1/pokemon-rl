@@ -1,0 +1,65 @@
+✔ frame parser isolates rooms, including global messages and malicious room IDs (3.19575ms)
+✔ legal singles choices handle Tera, disabled moves, trapping, wait and Struggle (0.487625ms)
+✔ forced switch/revival use current request positions and opposite eligibility (0.169958ms)
+✔ foreign requests and unsupported battle types reject (0.311792ms)
+✖ heuristic responds to revealed type but not unobserved opponent state (281.496417ms)
+✖ duplicate/stale requests submit once; wait and terminal submit nothing (14.390459ms)
+✔ unavailable choice waits for a fresh request, then uses its new rqid (16.216875ms)
+✔ sentchoice history and revoked requests suppress replay (13.245541ms)
+✔ two rooms never share request IDs or public state (6.182375ms)
+✔ modern challenge PMs and legacy notifications require an allowlisted sender and exact format (0.907792ms)
+✔ remote transport requires encrypted authenticated connection; usernames cannot inject commands (0.253292ms)
+✔ authentication uses exact challenge, strips JSON prefix and does not echo credentials on failure (0.75625ms)
+✔ explicit invalid choices and foreign battle formats fail visibly (0.50325ms)
+✔ disconnect fails without replaying a pending choice or reconnecting (46.552875ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 12
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1013.135209
+
+✖ failing tests:
+
+test at tests/showdown-bot/bot.test.mjs:58:1
+✖ heuristic responds to revealed type but not unobserved opponent state (281.496417ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'move 1 terastallize'
+  - 'move 1'
+           ^
+  
+      at TestContext.<anonymous> (file:///Users/maxf/Documents/ChatGPT/Pokemon/tests/showdown-bot/bot.test.mjs:60:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'move 1 terastallize',
+    expected: 'move 1',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/showdown-bot/bot.test.mjs:68:1
+✖ duplicate/stale requests submit once; wait and terminal submit nothing (14.390459ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /\|\/choose move 1\|4$/. Input:
+  
+  'battle-gen9randombattle-1|/choose move 1 terastallize|4'
+  
+      at TestContext.<anonymous> (file:///Users/maxf/Documents/ChatGPT/Pokemon/tests/showdown-bot/bot.test.mjs:73:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'battle-gen9randombattle-1|/choose move 1 terastallize|4',
+    expected: /\|\/choose move 1\|4$/,
+    operator: 'match',
+    diff: 'simple'
+  }

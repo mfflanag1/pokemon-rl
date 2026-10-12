@@ -1,0 +1,17 @@
+[
+  {
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/pilot",
+      "-p",
+      "test_statistics.py"
+    ],
+    "returncode": 0
+  }
+]

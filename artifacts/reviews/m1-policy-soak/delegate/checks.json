@@ -1,0 +1,17 @@
+[
+  {
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/soak",
+      "-p",
+      "test_gates.py"
+    ],
+    "returncode": 0
+  }
+]

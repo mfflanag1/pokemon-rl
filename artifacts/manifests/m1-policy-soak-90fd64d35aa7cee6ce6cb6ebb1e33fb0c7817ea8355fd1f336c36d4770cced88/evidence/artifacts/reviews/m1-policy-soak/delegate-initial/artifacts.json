@@ -1,0 +1,14 @@
+{
+  "changed": [
+    "python/pokemon_soak/gates.py"
+  ],
+  "outside_owned": [],
+  "symlinks": [],
+  "output_hashes": {
+    "artifacts/reviews/m1-policy-soak/delegate-task.md": "a9847f1a174e21d6412e046671708fdb5460bed244ec36281fdcdb48b9bc5661",
+    "contracts/soak-v1/plan.json": "7ade630a7a84ae68107138942b938c5675fa138f4b3552d2355dd15810ffe727",
+    "python/pokemon_soak/__init__.py": "788bc62ab5c0f9169d4d678ffc1d87e45c64c244f1e52c906187fcc95dde1b33",
+    "python/pokemon_soak/gates.py": "735fd1353b041bc06a83199b031ba01bb9ec44ce6d19ffdccf2ff377c06df17d",
+    "tests/soak/test_gates.py": "8c8de6a88344c80a4e4c858b2018e7d3639c556da5c0d29145472a06f885eec7"
+  }
+}

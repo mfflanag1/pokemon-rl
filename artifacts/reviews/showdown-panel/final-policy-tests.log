@@ -1,0 +1,19 @@
+✔ public damage proxies respond to observed stages, known items and defender typing (141.378708ms)
+✔ only revealed moves/items/abilities enter opponent memory; switches reset stat stages (0.855625ms)
+✔ Illusion reveal preserves observed moves and stages; public statuses and hazards update (0.342958ms)
+✔ selective stage clears, Psych Up and swaps follow pinned public events (0.125208ms)
+✔ Illusion keeps earlier disguise knowledge separate from the current appearance (0.141ms)
+✔ entry cost is charged only when entering, and first-turn moves work for incoming mons (0.299917ms)
+✔ accuracy uses the 3-based combined stage and always-hit moves ignore stages (0.108417ms)
+✔ opponents honor masks, refrain from input mutation and choose legal Tera or forced switches (0.597292ms)
+✔ known ability immunity changes choice while unknown abilities stay explicit assumptions (0.134125ms)
+✔ the richer driver preserves the sealed baseline/random trajectories (23.590833ms)
+✔ both new policies have identical actual player inputs/actions under hidden-reserve mutation (3.426042ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 447.400541

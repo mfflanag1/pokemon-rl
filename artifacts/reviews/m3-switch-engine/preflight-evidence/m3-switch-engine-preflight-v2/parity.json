@@ -1,0 +1,33 @@
+{
+  "status": "pass",
+  "legacy": {
+    "games": 72,
+    "frames": 937,
+    "player_views": 1874,
+    "decisions": 1656,
+    "replacement_frames": 74,
+    "truncated": 48,
+    "terminal": 24,
+    "events": 1596,
+    "chance_draws": 1826
+  },
+  "fresh": {
+    "games": 24,
+    "frames": 327,
+    "player_views": 654,
+    "decisions": 581,
+    "replacement_frames": 25,
+    "truncated": 20,
+    "terminal": 4,
+    "events": 567,
+    "chance_draws": 847
+  },
+  "information": {
+    "encoded_views": 3552,
+    "hidden_initial_equal": 1008,
+    "hidden_after_equal": 864,
+    "own_speed_positive": 576,
+    "reserve_reveal_pairs": 24
+  },
+  "report_sha256": "64c2cd30f97e081bfea6794709f481b5be69c8e7333c95e1f3c7e2902dd4560e"
+}

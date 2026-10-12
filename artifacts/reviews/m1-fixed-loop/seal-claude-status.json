@@ -1,0 +1,58 @@
+{
+  "status": "completed",
+  "note": "Review completed; this is not an approval verdict.",
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 34587,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 5467,
+    "output_tokens_details": {
+      "thinking_tokens": 4007
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34587,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 5467,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 34587,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 34587
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "model_usage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 5467,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 34587,
+      "webSearchRequests": 0,
+      "costUSD": 0.96511,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 4007,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "cost_usd": 0.96511,
+  "effective_model": "claude-fable-5-1",
+  "partial_available": true,
+  "elapsed_seconds": 83.07
+}

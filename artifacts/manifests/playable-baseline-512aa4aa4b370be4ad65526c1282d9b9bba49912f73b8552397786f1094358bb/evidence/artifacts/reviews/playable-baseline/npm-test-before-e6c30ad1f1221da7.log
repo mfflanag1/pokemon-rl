@@ -1,0 +1,100 @@
+
+> pokemon-reference@0.1.0 test
+> node scripts/test.mjs
+
+✔ canonical bytes are portable, including Unicode scalar ordering and integer boundaries (152.476583ms)
+✔ strict wire decoders reject ambiguous numbers, duplicate keys, malformed Unicode and trailing data (155.600667ms)
+✔ shared artifact goldens validate independently and preserve all bytes through Python hashing (469.540458ms)
+✔ all 14 policy indices are bijective; pass and wait have no trainable index (157.632041ms)
+✔ captured and constructed requests agree across semantic, protocol and tensor codecs (259.961334ms)
+✔ known zero, absent item and unknown knowledge are distinct (158.096458ms)
+✔ malformed choices, unknown versions and unsupported phases fail in both languages (921.249125ms)
+✔ actor loader rejects privileged artifacts, wrong manifest, wrong viewer and inconsistent masks (40.631958ms)
+✔ natural hidden-trapping attempts and re-requests preserve semantic choices and history boundaries (1331.979792ms)
+✔ live semantic submission executes Tera, rejects stale requests and invalid visible actions before engine input (28.999333ms)
+✔ switch slot is the current request order after a live switch (6.868375ms)
+✔ constructed hidden-disabled live state resolves to Struggle before any re-request (5.282584ms)
+✔ pinned upstream AI includes slot zero in constructed revival target requests (4.208708ms)
+✔ vocabulary includes lazily resolved cosmetic forms and templates retain distinct identities (238.537459ms)
+✔ whole teams are complete, ordered, deterministic across shards, and replay exactly (714.596625ms)
+✔ failed shard is never committed or skipped; resume records the failure and reproduces content (953.159334ms)
+✔ wrong resume configuration and corrupt shards fail without rewriting a completed corpus (432.517709ms)
+✔ active writer lock prevents a second writer (66.580625ms)
+✔ checkpoint failure reports the durable prefix and resumes through an orphan shard (469.904334ms)
+✔ dead local writer is recovered only with exclusive recovery ownership (377.757125ms)
+✔ leftover recovery guard does not prevent a fresh exclusive writer acquisition (250.936584ms)
+✖ tests/dataset/dataset.test.mjs (880.606625ms)
+✖ tests/episodes/campaign.test.mjs
+✖ tests/episodes/episodes.test.mjs
+✖ tests/features/live.test.mjs
+✖ tests/jax-slice/reference.test.mjs
+✖ tests/mechanics/mechanics.test.mjs
+✖ tests/pilot/worker.test.mjs
+✖ tests/reference/reference.test.mjs
+✖ tests/showdown-bot/bot.test.mjs
+✖ tests/showdown-bot/oracle.test.mjs
+✖ tests/showdown-chance/reference.test.mjs
+✖ tests/slice/slice.test.mjs
+✖ tests/switch-reference/session.test.mjs
+ℹ tests 34
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 13
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9170.24375
+
+✖ failing tests:
+
+test at tests/dataset/dataset.test.mjs:1:1
+✖ tests/dataset/dataset.test.mjs (880.606625ms)
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/episodes/campaign.test.mjs:1:1
+✖ tests/episodes/campaign.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/episodes/episodes.test.mjs:1:1
+✖ tests/episodes/episodes.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/features/live.test.mjs:1:1
+✖ tests/features/live.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/jax-slice/reference.test.mjs:1:1
+✖ tests/jax-slice/reference.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/mechanics/mechanics.test.mjs:1:1
+✖ tests/mechanics/mechanics.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/pilot/worker.test.mjs:1:1
+✖ tests/pilot/worker.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/reference/reference.test.mjs:1:1
+✖ tests/reference/reference.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/showdown-bot/bot.test.mjs:1:1
+✖ tests/showdown-bot/bot.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/showdown-bot/oracle.test.mjs:1:1
+✖ tests/showdown-bot/oracle.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/showdown-chance/reference.test.mjs:1:1
+✖ tests/showdown-chance/reference.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/slice/slice.test.mjs:1:1
+✖ tests/slice/slice.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at tests/switch-reference/session.test.mjs:1:1
+✖ tests/switch-reference/session.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'

@@ -1,0 +1,6 @@
+{
+  "packages/showdown-session/client.mjs": "27f24d3d33595ec7bcec40f2e502198dc66e894389b96dbec1034f1090c59311",
+  "tests/showdown-session/session.test.mjs": "7559abad733c6bdf0917bf02cc5c117755ba26f727d57166bc399b8b162ac2c0",
+  "packages/showdown-bot/client.mjs": "9cfbb0b85904953504399acf9e1c2643c6ad0bbc006b96d09b70eaadd5610c8c",
+  "packages/showdown-bot/protocol.mjs": "5203d70b9891b97c7e0b79d77efd10fcaa3b7d651f1f982f8151efd55cbceb54"
+}

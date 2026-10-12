@@ -1,0 +1,12 @@
+/Users/maxf/Documents/ChatGPT/Pokemon/vendor/pokemon-showdown/dist/lib/streams.js:540
+    if (!this.nextPushResolver) throw new Error(`Push after end of read stream`);
+                                      ^
+
+Error: Push after end of read stream
+    at Capture.resolvePush (/Users/maxf/Documents/ChatGPT/Pokemon/vendor/pokemon-showdown/dist/lib/streams.js:540:39)
+    at Capture.destroy (/Users/maxf/Documents/ChatGPT/Pokemon/vendor/pokemon-showdown/dist/lib/streams.js:606:10)
+    at battleCase (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/slice/reference.mjs:42:14)
+    at async capture (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/slice/reference.mjs:54:39)
+    at async file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/slice/reference.mjs:59:56
+
+Node.js v25.6.1

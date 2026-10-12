@@ -1,0 +1,10 @@
+{
+  "tmux": [
+    "/opt/homebrew/bin/tmux",
+    "-L",
+    "cross-model-7e99fc4ca2",
+    "-f",
+    "/dev/null"
+  ],
+  "session": "cross-model-7e99fc4ca2"
+}

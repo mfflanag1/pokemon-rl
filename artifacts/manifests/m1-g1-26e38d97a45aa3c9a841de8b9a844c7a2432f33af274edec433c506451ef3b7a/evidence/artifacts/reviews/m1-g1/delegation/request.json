@@ -1,0 +1,24 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "research",
+  "category": "simulator-scope",
+  "task": "Design a bounded first restricted fixed-team Gen9 1v1 slice using Rattata/Run Away/no item/Tackle+Quick Attack/level50 neutral nature/no EVs/31 IVs/no Tera. Read pinned source excerpts. Determine exact damage/crit/order/PP obligations and whether full-HP games have a strict duration bound excluding Struggle. Explain missing context or blockers instead of assuming no-ops. Give an explicit profile ID and semantic chance events strategy. Do not implement or delegate. You are not alone in the codebase; do not edit other work.",
+  "criteria": "Source-backed mechanics and arithmetic; explicit separation from official Random Battles; fail-closed unsupported configurations; known limits of excerpts; planned edge-case and differential fixtures. This is design input, not parity evidence.",
+  "owned": [],
+  "checks": [],
+  "files_sha256": {
+    "docs/ACCEPTANCE_GATES.md": "adf29b2d094daabaa5f4ecad89500565b4263282d1fbff29ad1041bb4008641b",
+    "docs/R6_MECHANICS.md": "41747c819a0b7b5bde69878ac4382a4e0ee4074cc8879c2c7155e40aa58a8c7e",
+    "showdown.pin.json": "8fed8a8c06edcdbf97ee7dcf05348de4417861417cdd4d8484fb2429ad6f6ea1",
+    "artifacts/reviews/m1-g1/slice-source-excerpts.md": "6e7d1f0fbd7eaec16305e567e1b0d4c718a6330d6db61e23b33aab4bb9f7fb90"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "a3b9d25b6dee95d66f410c0de525ab6eac9a2d28",
+  "created_at": "2026-10-10T21:07:29.232655+00:00",
+  "test_run": false
+}

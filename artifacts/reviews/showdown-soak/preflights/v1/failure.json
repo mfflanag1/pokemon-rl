@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "error": "AssertionError [ERR_ASSERTION]: Missing server team receipts\n    at campaign (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/campaign.mjs:130:7)\n    at async file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/campaign.mjs:159:3",
+  "completed": 0,
+  "failures": []
+}

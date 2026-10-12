@@ -1,0 +1,14 @@
+F....
+======================================================================
+FAIL: test_each_mechanical_field_and_order_changes_identity (test_identity.IdentityTest.test_each_mechanical_field_and_order_changes_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261010-164058-372b5b33/workspace/tests/dataset/test_identity.py", line 34, in test_each_mechanical_field_and_order_changes_identity
+    self.assertNotEqual(team_key(p, POLICY), original)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'c8e46b0b49a3bb9db21974f6e4ad772e1645bb5d7b0a22fdf9b87d682e98cf9c' == 'c8e46b0b49a3bb9db21974f6e4ad772e1645bb5d7b0a22fdf9b87d682e98cf9c'
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.179s
+
+FAILED (failures=1)

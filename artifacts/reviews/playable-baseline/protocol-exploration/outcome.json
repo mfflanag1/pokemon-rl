@@ -1,0 +1,8 @@
+{
+  "verdict": "rejected",
+  "evidence": "evidence-f4970a30790c464dbb262f78ddd32d25.md",
+  "evidence_sha256": "3fbcb124957e6402bdb58c1644b52152b539ac4bf086083c3f026fd12f3729ba",
+  "artifact_sha256": "542f595515ed262351b195fbaab6193f32001ab37cc66ac31528b681e15df868",
+  "rework_minutes": 10.0,
+  "recorded_at": "2026-10-11T16:20:56.047407+00:00"
+}

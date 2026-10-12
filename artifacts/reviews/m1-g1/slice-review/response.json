@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 95054,
+  "stop_reason": "end_turn",
+  "session_id": "38e11be9-0fae-4dca-ad0a-13b9d77d5cf6",
+  "total_cost_usd": 0.7434700000000001,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 20800,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6549,
+    "output_tokens_details": {
+      "thinking_tokens": 4976
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20800,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 6549,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 20800,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 20800
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 6549,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 20800,
+      "webSearchRequests": 0,
+      "costUSD": 0.7434700000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 4976,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: no blocking findings in reviewed scope; two validation gaps worth closing before the 10 000-case run.** Most important: `verify.py` never ties the captured reference back to the pinned Showdown commit in `profile.json`.\n\n## Independent checks (hand-computed, not executed)\n\n- **Damage**: `tr(2\u00b750/5+2)=22`; `22\u00b740\u00b776/55 = 1216`; `/50 \u2192 24`; `+2 \u2192 26`. Crit `tr(26\u00b71.5)=39`. Roll via `tr(base\u00b7roll/100)`, then STAB via Showdown `modify` = `tr((v\u00b76144+2047)/4096)`. Yields 33/39 (no crit, roll 85/100) and 49/58 (crit): 39\u00b76144+2047 = 241663 < 59\u00b74096 = 241664 \u2192 58. Python `engine.py:21-24` matches the excerpted `battle-actions.ts:1709,1722,1742,1746,1783` order (crit before roll before STAB). No type mod, burn, item or ability hook in this profile.\n- **Four-turn bound**: min hit 33, 3\u00b733 = 99 < 105 \u2264 4\u00b733, so every surviving Pok\u00e9mon has \u22646 HP entering turn 4 and the first mover KOs. Min PP 48 \u226b 4; PP exhaustion/Struggle unreachable. `engine.py:48,50,63` encode exactly this.\n- **Order**: QA priority 1 > Tackle 0 (`moves.ts:14483,18819`); equal Spe 92 \u2192 `speedSort` shuffle. `engine.py:51-54` and `reference.mjs:38` (`tie_first = events[0].actor`) agree. KO cancels second move with no PP deduction; `engine.py:61-62` enforces exact event consumption.\n- **Capture self-validation**: `reference.mjs:29-32` asserts roll captured exactly once in [85,100], crit boolean, `current===null` on entry \u2014 a mis-hooked `random`/`randomizer` would throw rather than silently record. `snapshot()` asserts `canTerastallize===undefined` every request, so Terastal Clause is runtime-checked.\n\n## Findings\n\n1. **Medium \u2014 Showdown commit pin not cross-verified.** `profile.json` pins `showdown_commit: 942cda7\u2026`, `plan.json` records `reference: describe()`, but `verify.py:12-13` only checks `plan_hash`, `profile==PROFILE`, and hashes of `reference.mjs`/`profile.json`. Nothing asserts `plan['reference']` (or vendor file digests) equals the profile's pinned commit. A capture against a different vendor checkout would pass verification. *Verify*: add `require(plan['reference'][commit_key]==PROFILE['showdown_commit'])` and confirm `describe()` includes the commit.\n\n2. **Low \u2014 Winner derived from player display name.** `reference.mjs:15` parses `b.winner.slice(1)`; this depends on names `P1`/`P2` set at line 21. Correct today, but a rename silently breaks seat indexing. *Verify*: derive from `b.sides.findIndex(s=>s.name===b.winner)` or the `|win|` message.\n\n3. **Low \u2014 Verifier trusts the tape's provenance.** `verify.py` checks internal consistency only; it does not recompute `seed` from `seedFor` or `actions` from `hashJSON([...])`, nor check `plan['count']==10000`. Acceptable for conditional parity, but the \"independent\" claim should state that action/seed selection is taken from the fixture unverified.\n\n4. **Note \u2014 Hard-coded constants.** `engine.py:21,30,38` embed 76/55/105/(56,48) rather than deriving from `PROFILE`. Frame equality would catch drift, but any profile edit requires manual edits here; consider asserting `PROFILE['initial_hp']==105` and `initial_pp==[56,48]` at import.\n\n## Scope limitations\n\n- Could not run tests or inspect `engine.mjs`, `provenance.mjs`, `canonical.mjs`, or `pokemon_reference.corpus`; `seedFor`, `describe`, `verify_seal` behavior unverified.\n- Showdown `randomizer`/`randomChance` implementations not in excerpt; relied on the capture's runtime assertions.\n- Terastal Clause semantics taken from the runtime `canTerastallize` check, not source.\n\n## Verdict\n\nFindings (non-blocking): rounding, order, KO cancellation, and the 4-turn bound check out; close finding 1 before treating the campaign as pinned-reference evidence.",
+  "ttft_ms": 71950,
+  "type": "result",
+  "duration_ms": 95086,
+  "uuid": "432a9b1a-c24b-49d8-9e42-31548a3a2b10",
+  "ttft_stream_ms": 833,
+  "time_to_request_ms": 31,
+  "first_content_frame_ms": 833,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

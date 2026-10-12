@@ -1,0 +1,24 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new observation-only JAX learner pipeline for concrete information leakage, PPO/GAE target mistakes, simultaneous-choice timing, behavior-buffer provenance, checkpoint exactness and false promotion claims. Fixed immutable Rattata duel only, full G2 and G3 remain open. Numerical core was independently delegated and passed opposite-model QA plus 96 PPO/GAE cases, 384 Adam steps, 96 table updates; six G1 canaries pass original budgets. Collector completed 3 seeds x 512 games with seven exact resumed updates each. Core is JAX autodiff, not analytic gradients. Inspect bounded whole-episode CPU trainer; targets are separate from ActorInput, behavior freezes per collection, no live-state checkpoint support. Return actionable findings and verify assumptions from the packet. No recursive delegation or unexecuted-test claims.",
+  "files_sha256": {
+    "python/pokemon_jax_learner/core.py": "0aecb281b433b16c68cd188b00e763b69f9b17b149f15f4e4e0f6804bb84f3ba",
+    "python/pokemon_jax_learner/model.py": "2ce02061d9932bbbab287833be5302aa1f50d58dbdcb8344933045b033500b6e",
+    "python/pokemon_jax_learner/collector.py": "7585d02a945a086d8d4aa4b7fdba5b421ab4518e93d898ea4c8a39a8a457c0df",
+    "python/pokemon_jax_learner/trainer.py": "884164d2e03ee1f969ab92b3cf26527b50793186b714b624200895beda48b080",
+    "python/pokemon_jax_learner/checkpoint.py": "c2ceefdd6c147f8e90f4d2de843c0fc47e418be39c2918841830c85cf4ed30a0",
+    "python/pokemon_jax_learner/campaign.py": "2f9e24524f4c1c1226287a91f8ea1bd3297969467c2a6b3833c29197267369f1",
+    "python/pokemon_jax_learner/canaries.py": "f7f1b1f8aa1021ad2a39440d334ec995ad8b7fb1eb969682268e0e3f4887c91a",
+    "tests/jax-learner/test_core.py": "bfdc3647ac9c8d6c12e5be904645306658817916ec3bf5cd14f2170da9497920",
+    "tests/jax-learner/test_collector.py": "d854bcff7ee569c93f539b903d4e2799334ea5b596b3be6cb06855566c292d75",
+    "contracts/jax-learner-v1/plan.json": "a80d8b40e6da0778ddeb9fefe00de40c2d2462b33751298f2f69e4f414f8ec09",
+    "python/pokemon_learner/core.py": "db814827cd5a80957a54bf629c048979e370f5c14529bde4580722d2aee1adde",
+    "python/pokemon_jax/engine.py": "da278cf797f6d691e1d2674544d9a6fab5ef6bb6eb282b07deac09d070e5c262",
+    "python/pokemon_jax/chance.py": "d2b4191cb48fac8b47819db529ffb7deea622c9a352e8a5daf641d791af47454"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

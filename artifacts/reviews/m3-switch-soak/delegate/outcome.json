@@ -1,0 +1,8 @@
+{
+  "verdict": "accepted",
+  "evidence": "evidence-e589c7f6306d494eb21e916633db880f.md",
+  "evidence_sha256": "bcf23bf64462e93e6bd4521886f92cab846856c4ed21d09b927f98a50d68e4d0",
+  "artifact_sha256": "d8bc84f80dea4499c21c0b41fc90e2c2f456651c8c41ffa84a5953d6306ef92f",
+  "rework_minutes": 0.0,
+  "recorded_at": "2026-10-11T22:37:02.157413+00:00"
+}

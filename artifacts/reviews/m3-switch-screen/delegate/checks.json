@@ -1,0 +1,10 @@
+[
+  {
+    "argv": [
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-c",
+      "import sys,unittest;sys.path.insert(0,\"python\");r=unittest.TextTestRunner().run(unittest.defaultTestLoader.discover(\"tests/switch-screen\"));sys.exit(not r.wasSuccessful())"
+    ],
+    "returncode": 0
+  }
+]

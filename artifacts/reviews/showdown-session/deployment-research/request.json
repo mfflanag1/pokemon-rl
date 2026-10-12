@@ -1,0 +1,22 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "research",
+  "category": "showdown-deployment-policy",
+  "task": "Find current official Pokemon Showdown/Smogon requirements for a named automated bot doing direct challenges and later ladder games. Starting lead https://www.smogon.com/forums/threads/initial-policy-on-bots.3789528/ and https://pokemonshowdown.com/rules . Read-only research, no logins, contacts, registrations or challenges. Distinguish official policy from third-party claims; if a primary page is inaccessible explicitly mark its requirement unverified. Do not recursively delegate. Return a concise deployment checklist with precise primary URLs and quoted support (brief quotes), publication dates where visible, and remaining unknowns. Do not claim local project implementation behavior beyond supplied handoff.",
+  "criteria": "Every asserted binding rule has directly inspected official primary support; direct challenge versus ladder distinctions are explicit or unknown; blocked pages are recorded honestly; no speculative requirements presented as rules; no external mutations.",
+  "owned": [],
+  "checks": [],
+  "files_sha256": {
+    "docs/PLAYABLE_BASELINE.md": "5ffda069e36ce593db0acc0b7cf8456586cb5c2162b2e4495db290edd50f9ded",
+    "showdown.pin.json": "8fed8a8c06edcdbf97ee7dcf05348de4417861417cdd4d8484fb2429ad6f6ea1"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "3d321d35c28b7ff6f6ada2faa7d3b72b0fe231f0",
+  "created_at": "2026-10-11T16:47:35.547415+00:00",
+  "test_run": false
+}

@@ -1,0 +1,10 @@
+{
+  "status": "pass",
+  "games": 6,
+  "faults": 7,
+  "actor_inputs_and_actions_checked": 120,
+  "sentchoice_frames": 1,
+  "report_sha256": "6cf97058d25d79e843e1d1a762ec049e1a60c5748c54195a5a9a7b7bd960d050",
+  "trace_sha256": "1e12e03f26e77a47af2459c56684e353eed6d51562c8a63e3574a7edac1c2205",
+  "teams_sha256": "efc4ddfd318d161d4224e3f1b97af2057ef0ab4b4f9dc94e8d31160505d97b0a"
+}

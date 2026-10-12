@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 143138,
+  "stop_reason": "end_turn",
+  "session_id": "80250551-b3c7-47c6-86b7-bd437b630449",
+  "total_cost_usd": 0.9643200000000001,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 24060,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 9662,
+    "output_tokens_details": {
+      "thinking_tokens": 8197
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 24060,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 9662,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 24060,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 24060
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 9662,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 24060,
+      "webSearchRequests": 0,
+      "costUSD": 0.9643200000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 8197,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (none blocking in reviewed scope); most important: the 1152\u2011start / 1008 / 864 / 576 invariance evidence is hash bookkeeping over Node\u2011produced hashes, not Python recomputation.**\n\n## Findings\n\n**1. Medium \u2014 counterfactual invariance is not independently reproduced** (`python/pokemon_switch/audit.py:59\u201369`, `94\u201397`)\n`validate` groups `c['initial_hash']`, `c['after_hash']`, `c['opponent_own_hash']` taken verbatim from the fixture and checks equality/inequality within groups. Only the 48 probes (`audit.py:71\u201379`) are rebuilt through `check_view`/`actor`. The report's `hidden_initial_equal:1008`, `hidden_post_equal:864`, `own_variant_positive_controls:576`, `different_reserve_reveals:24` are literal constants (`audit.py:96\u201397`), not counted. README line 40\u201341 (\"Python must independently reproduce \u2026 reconstruct structured player inputs from full player-only snapshots\") is therefore true for the 1826 golden views but not for the comparison roster. Verification: either store the comparison views (or at least the `initial`/`after` views for a sampled subset) and recompute `actor(...).feature_id` in Python, or word the claim as \"Node-hashed; Python-verified structure only\".\n\n**2. Low \u2014 coverage counters are unaudited** (`audit.py`, `campaign.py:25`, `seal-switch-reference.py:26`)\n`coverage` (critical_hits 31, speed_tie_turns 138, low_hp_ability_attacks 85, \u2026) is copied from `summary.json` and only checked for equality with itself. No Python code counts `|-crit|`, speed-tie or \u22641/3\u2011HP attacks from the protocol, and no minimums are required. The sealer would accept a run with `critical_hits:0`. Treat these numbers as producer-reported.\n\n**3. Low \u2014 opponent-HP leak check is narrower than the reducer** (`audit.py:17\u201319`)\nOnly `switch/-damage/-heal` lines are checked; `drag`, `replace`, `-sethp`, `detailschange` are not. In practice `PublicHistory._hp` (`public_history.py:40`, `percent=True` for non-viewer) rejects a non\u2011/100 denominator for those too, so coverage is adequate, but the test at `test_contract.py:62\u201365` only exercises the `switch` path. A `-damage|p2a:\u2026|58/119` negative test would pin the reducer path.\n\n**4. Low \u2014 roster/manifest composition unchecked** (`audit.py:26`)\nOnly `len(roster)==24` is required; distinct species, A/B names and profile variants per roster entry are not verified in Python (they are enforced indirectly by `mask` on each request, so a bad roster would fail downstream, but not at the manifest).\n\n## Codec equivalence (Node \u2194 Python)\nCompared `actions.mjs:6\u201341` with `contract.py:22\u201366` field by field: identical whitelists (request/side/mon/move keys), identical wait/forceSwitch/active branching, same bool-rejection (`type(x) is int` vs `Number.isSafeInteger`), same `[True]` strictness (Python adds explicit bool check to defeat `1==True`), same A/B lookup by ident and 1\u2011based switch position. No divergence found. `test_contract.py:18\u201319` correctly infers `switch 2` from mask `[T,T,T,F]`.\n\n## Player boundary\n`views.py:26\u201346` enforces exact key set, rejects foreign-side requests, requires request count/turn/request to match the own channel. `Session.stepOnce:52` checks the pending choice doesn't leak into the other view. Audit fields never enter `actor`. OK as far as visible.\n\n## Scope limitations\n`PlayerProjection` (the actual channel splitter), `pokemon_reference.contract`, `dataset_gate`, `profile.mjs`, `fixtures.mjs`, the generator's seeding of comparisons, and the fixture bundle itself are not in the packet; test/run outcomes are as reported, not verified. The running full audit was not observed.\n\n## Verdict\nFindings \u2014 no correctness defects in the reviewed code; one overclaim risk (Finding 1) should be fixed or reworded before sealing.",
+  "ttft_ms": 123525,
+  "type": "result",
+  "duration_ms": 143182,
+  "uuid": "756f5d43-5473-4f70-8234-763818b26fc0",
+  "ttft_stream_ms": 2819,
+  "time_to_request_ms": 41,
+  "first_content_frame_ms": 2820,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

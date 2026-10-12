@@ -1,0 +1,12 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+Error: Push after end of read stream
+    at BattleStream.resolvePush (/Users/maxf/Documents/ChatGPT/Pokemon/vendor/pokemon-showdown/dist/lib/streams.js:540:39)
+    at BattleStream.destroy (/Users/maxf/Documents/ChatGPT/Pokemon/vendor/pokemon-showdown/dist/lib/streams.js:606:10)
+    at playGame (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-bot/campaign.mjs:50:28)
+    at async runCampaign (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-bot/campaign.mjs:63:20)
+    at async file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-bot/campaign.mjs:92:30
+
+Node.js v25.6.1

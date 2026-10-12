@@ -1,0 +1,21 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new M3 reference-only restricted profile, session adapter, fixtures, and conditional damage oracle for blocking correctness/information leaks and overclaims. Existing frozen M1/M2 is untouched; no JAX/training or full G2/G3 closure. Profile is 24 fixed two-member teams, private reserves/speed variants; standard non-debug Anything Goes instead of exact-HP Custom Game. Node seven focused tests passed. Draft 72 natural fixtures replay with opposite submission order; 1152 counterfactual starts give 1008 initial and 864 one-turn equal-view comparisons, plus 48 positive reserve reveal examples. 3456 damage calls inject private HP, willCrit, and bounded random(16) only, not natural roll-frequency or JAX parity. Review request binding, four-action original A/B mapping, phase/wait/truncation handling, prospective failure modes, conditional oracle validity and whether those claims are supported. Python codec and full regression are still in progress. Do not assume tests beyond those stated have run. Return only actionable issues and essential caveats.",
+  "files_sha256": {
+    "contracts/switch-v1/profile.json": "1b9b65d92b13c45f3425081a650e8750013f7d1d93dbbcbfd0012bb60a171df5",
+    "contracts/switch-v1/README.md": "79f900a1059c73d3d5fad50590d9db6ffe7743c7d0442cddb5ee0d5bf9e1dc36",
+    "packages/switch-reference/profile.mjs": "e80631ddf203b5092963153640e67912d59497787b30eec050ecec7674014f30",
+    "packages/switch-reference/actions.mjs": "5899bbaaef63f0cc054106c708e80e89fb24a23146b1c5a506ea39a22842a85f",
+    "packages/switch-reference/session.mjs": "21e754ffeae4ee931667bcb40b6a97254eede7af23bbc107df8d7b73c085eeda",
+    "packages/switch-reference/fixtures.mjs": "6820c6cfcb51b05d421d29e1189bdc8e1156b3e400863936c609b1687edcab04",
+    "packages/switch-reference/damage.mjs": "4b28368d6b53dd29bad3c7805ab5326194a5e3390a509a95ae48ac2d0077b2b5",
+    "tests/switch-reference/session.test.mjs": "63d385fcda56102c24e844d102dc3f4757af1e1d12fb6ef579f1d811baaaa0c9",
+    "python/pokemon_switch/views.py": "52213d585aa92e1089d4e78eafe7a5863d04660e45a67e8bfa5b730e3e280bb0",
+    "packages/reference-node/observations.mjs": "8f2cda2cc71d688a7232e3aa66671335b5324f50f1783f44052995241faa1e8d"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

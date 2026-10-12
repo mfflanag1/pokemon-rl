@@ -1,0 +1,145 @@
+"""Exact finite-word chance mapping pinned to Showdown ``sim/prng.ts``.
+
+Contract: ``contracts/showdown-chance-v1/contract.json`` (``showdown-chance-1``,
+commit ``942cda71d14bf0618bd57991708a2e2734b6daba``).
+
+Law
+---
+For a uint32 word ``w`` upstream computes ``random(n) = floor(w * n / 2**32)``.
+The supported ``n`` are 24 (critical hit), 16 (damage roll) and 2 (speed tie).
+This module maps *already produced* uint32 words to those outcomes with exact
+uint32 integer arithmetic on the CPU backend with x64 disabled.  It makes no
+claim about the sodium PRNG itself, raw seeds, the consumed-word schedule, or
+whole-trajectory RNG equivalence; only the finite word -> outcome mapping is
+asserted (see ``contract.json["streams"]``).
+
+Outputs of :func:`kernel` / :func:`map_words`
+--------------------------------------------
+``bucket24`` int32  ``floor(w*24/2**32)`` in ``0..23``
+``crit``     bool   ``bucket24 == 0`` (``randomChance(1, 24)``)
+``roll``     int32  ``100 - (w >> 28)``, i.e. ``100 - random(16)``, 100 down to 85
+``tie0``     int32  ``w >> 31`` (index chosen by the two-element shuffle)
+``tie1``     int32  ``1 - (w >> 31)``
+
+Proof of exactness for ``bucket24`` (no overflow, no float, no biased modulo)
+----------------------------------------------------------------------------
+Split ``w = hi * 2**16 + lo`` with ``hi = w >> 16`` and ``lo = w & 0xFFFF``,
+so ``hi, lo < 2**16``.  Then
+
+    w * 24 = hi*24 * 2**16 + lo*24.
+
+Let ``m = lo * 24``.  ``m < 2**16 * 24 = 1_572_864 < 2**21`` so it fits a
+uint32.  Write ``m = m_hi * 2**16 + m_lo`` with ``m_hi = m >> 16`` and
+``m_lo = m & 0xFFFF``; ``m_hi <= 23``.  Then
+
+    w * 24 = (hi*24 + m_hi) * 2**16 + m_lo,         0 <= m_lo < 2**16.
+
+Let ``s = hi*24 + m_hi``.  ``s <= (2**16 - 1) * 24 + 23 = 1_572_863 < 2**21``,
+again a uint32 with no overflow.  Write ``s = q * 2**16 + r`` with
+``q = s >> 16`` and ``r = s & 0xFFFF``.  Then
+
+    w * 24 = q * 2**32 + (r * 2**16 + m_lo),  and  0 <= r*2**16 + m_lo < 2**32,
+
+so ``q = floor(w * 24 / 2**32)`` exactly.  Every intermediate
+(``hi*24``, ``lo*24``, ``s``) is below 2**21, so nothing wraps in uint32 and
+no 64-bit type, float conversion or modulo reduction is involved.
+
+The critical-hit threshold follows: ``bucket24 == 0`` iff ``w*24 < 2**32`` iff
+``w < 2**32/24 = 178_956_970.666...`` iff ``w <= 178_956_970`` iff
+``w < 178_956_971``.  Under uniform words the conditional mass is therefore
+``178_956_971 / 2**32``, matching ``contract.json["critical"]``.
+
+``random(16) = floor(w*16/2**32) = w >> 28`` and
+``random(2) = floor(w*2/2**32) = w >> 31`` are exact power-of-two shifts.
+``tie0``/``tie1`` are for the canonical ordered seats ``[0, 1]``; the first
+seat upstream is ``first XOR (w >> 31)`` and captured orderings must be kept.
+"""
+
+from __future__ import annotations
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+__all__ = ["kernel", "map_words"]
+
+_UINT32 = np.dtype(np.uint32)
+
+
+def _check_uint32_vector(words, where: str) -> None:
+    """Trace-/call-time check: 1-D, nonempty, dtype uint32.  No coercion."""
+    dtype = getattr(words, "dtype", None)
+    if dtype is None or np.dtype(dtype) != _UINT32:
+        raise TypeError(f"{where}: expected dtype uint32, got {dtype!r}")
+    if words.ndim != 1:
+        raise ValueError(f"{where}: expected a 1-D array, got shape {tuple(words.shape)}")
+    if words.shape[0] == 0:
+        raise ValueError(f"{where}: expected a nonempty array")
+
+
+@jax.jit
+def kernel(words):
+    """Pure jit-compiled mapping of a 1-D uint32 word array to chance outcomes.
+
+    Only uint32 arithmetic is used; see the module docstring for the proof.
+    """
+    _check_uint32_vector(words, "kernel")
+    w = words  # uint32
+
+    hi = jnp.right_shift(w, jnp.uint32(16))                 # < 2**16
+    lo = jnp.bitwise_and(w, jnp.uint32(0xFFFF))             # < 2**16
+    m = lo * jnp.uint32(24)                                 # < 2**21
+    m_hi = jnp.right_shift(m, jnp.uint32(16))               # <= 23
+    s = hi * jnp.uint32(24) + m_hi                          # < 2**21
+    bucket24_u32 = jnp.right_shift(s, jnp.uint32(16))       # floor(w*24/2**32), 0..23
+
+    bucket24 = bucket24_u32.astype(jnp.int32)
+    crit = bucket24_u32 == jnp.uint32(0)
+
+    r16 = jnp.right_shift(w, jnp.uint32(28)).astype(jnp.int32)   # 0..15
+    roll = jnp.int32(100) - r16                                  # 100..85
+
+    tie0 = jnp.right_shift(w, jnp.uint32(31)).astype(jnp.int32)  # 0/1
+    tie1 = jnp.int32(1) - tie0
+
+    return {
+        "bucket24": bucket24,
+        "crit": crit,
+        "roll": roll,
+        "tie0": tie0,
+        "tie1": tie1,
+    }
+
+
+def _check_environment() -> None:
+    if jax.config.read("jax_enable_x64"):
+        raise RuntimeError("showdown-chance-1 requires jax_enable_x64=False")
+    backend = jax.default_backend()
+    if backend != "cpu":
+        raise RuntimeError(f"showdown-chance-1 requires the cpu backend, got {backend!r}")
+
+
+def map_words(words):
+    """Strictly checked wrapper around :func:`kernel`.
+
+    Accepts a nonempty 1-D ``numpy.ndarray`` of dtype uint32 or a corresponding
+    JAX uint32 array.  Any other type, dtype or shape is rejected with
+    ``TypeError``/``ValueError``; nothing is coerced.  Also verifies the pinned
+    environment (CPU backend, x64 disabled) and raises ``RuntimeError`` otherwise.
+    """
+    _check_environment()
+    if isinstance(words, np.ndarray):
+        _check_uint32_vector(words, "map_words")
+        arr = jnp.asarray(words)
+    elif isinstance(words, jax.Array):
+        _check_uint32_vector(words, "map_words")
+        arr = words
+    else:
+        raise TypeError(
+            "map_words: expected a numpy.ndarray or jax.Array of dtype uint32, "
+            f"got {type(words).__name__}"
+        )
+    if arr.dtype != jnp.uint32:
+        # Defensive: never let a dtype change slip through conversion.
+        raise TypeError(f"map_words: conversion changed dtype to {arr.dtype}")
+    return kernel(arr)

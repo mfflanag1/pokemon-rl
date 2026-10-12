@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 50459,
+  "stop_reason": "end_turn",
+  "session_id": "0bdffe69-8133-4594-b315-2b9596af19e3",
+  "total_cost_usd": 0.36361999999999994,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 9040,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 3656,
+    "output_tokens_details": {
+      "thinking_tokens": 2179
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 9040,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 3656,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 9040,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 9040
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 3656,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 9040,
+      "webSearchRequests": 0,
+      "costUSD": 0.36361999999999994,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 2179,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (minor) \u2014 the reasoning is mathematically sound and appropriately qualified; the one substantive gap is that the audit only characterizes the first-action tail, while the inherited kernel's last-action tail has a sharper (zero-mass) limitation that the conclusion should name.**\n\n## Findings\n\n**1. Low \u2014 First-action enumeration is correct and matches the kernel.**\n`model.py:77-79`: for two actions `cdf=[p0, 1.0]`, `actions = (u>=p0) + (u>=1.0)`. Since `u \u2264 (2^23\u22121)/2^23 < 1`, action 0 is chosen iff `u < p0`, i.e. `k < p0\u00b72^23`. All three audit cases check out: p0=1.8e-12 \u2192 k=0 only (1 point, mass 2^-23 = 1.1920929e-07); p0=1e-6 \u2192 k<8.39 \u2192 9 points; p0=0.5 \u2192 2^22 points. The \"exactly u=0 selects it\" statement and the ~6.6\u00d710^4 over-representation versus nominal mass are correct, conditional on the inspected `_uniform` construction (k/2^23, zero included).\n\n**2. Medium \u2014 Audit omits the last-action tail, which is not symmetric and is strictly worse.**\nIf the rare action is the *second* one with nominal p1\u22481.8e-12, then p0 = 1\u2212p1 rounds to exactly 1.0 in FP32 (ulp below 1 is 2^-24 \u2248 6e-8), giving `cdf=[1.0,1.0]`; no grid point satisfies `u>=1.0`, so the finite-grid mass is **0**, not 2^-23. More generally, last-action nominal masses below ~2^-24 are unreachable, while first-action masses in (0, 2^-23] are inflated to exactly 2^-23. The proposed conclusion (\"tail sampling precision needs an explicit decision\") still holds, but the audit JSON's `cases` and the written claim present only the first-action construction. Suggested verification: add the mirrored last-action case (nominal p1 = observed minimum) to the audit; expected `selecting_uniform_grid_points: 0`. (Incidentally, this implies the observed soak minimum, if it was an actually sampled action with that nominal mass, was most plausibly a first-action/u=0 event \u2014 but the audit correctly refrains from reconstructing it, and `distribution_kernel` is not in the packet, so logp/probability consistency cannot be checked here.)\n\n**3. Low \u2014 Research-validity framing could be sharper.**\nThe recorded `old_logp` is the *nominal* log-probability, not the probability under the realized FP32 sampler. PPO's importance ratio therefore uses a behavior density that is understated by up to ~6.6\u00d710^4 in the tail (or undefined where mass is zero). This is the actual reason the limitation matters for strength promotion; the claim says \"precision limitation\" but does not state the on/off-policy mismatch explicitly. No numerical gate (NaN/finiteness) is implicated, consistent with the claim; `soak.json` shows `status:\"passed\"`, `full_g2/full_g3:\"open\"`, and `entropy.min_minibatch\u22482.6e-10`, which is consistent with near-deterministic rows existing.\n\nNo mathematical or semantic error found in the stated enumeration. \"Exhaustively enumerated\" is a model of `_uniform` (default minval=0,maxval=1, so the affine/clamp steps are identity); the claim is correctly conditioned on the cited source hash/lines.\n\n## Scope limitations\n- `distribution_kernel`/`loss_kernel` (`.core`) not supplied; cannot verify how `probabilities` vs `logp` are computed or whether probabilities can round to 0 while logp stays finite.\n- JAX `_uniform` source not in packet; relying on coordinator's description and hash.\n- Cannot execute enumeration; arithmetic checked by hand for the three listed cases only.\n\n## Verdict\n**Findings.** Reasoning and qualifications are sound for the first-action case; the conclusion (milestone passed under sealed recipe, G2/G3 open, explicit decision required before strength promotion) is appropriate. Recommend extending the audit to the last-action zero-mass case and naming the behavior-vs-nominal density mismatch explicitly, without changing the sealed recipe.",
+  "ttft_ms": 29482,
+  "type": "result",
+  "duration_ms": 50502,
+  "uuid": "9a6b30b3-5d1b-43f9-ac60-2a0859076c0d",
+  "ttft_stream_ms": 771,
+  "time_to_request_ms": 42,
+  "first_content_frame_ms": 771,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

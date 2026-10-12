@@ -1,0 +1,32 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "scalar-damage",
+  "task": "Fresh validation after a coordinator test correction. The earlier scalar damage candidate in artifacts/reviews/m3-switch-engine/damage-candidate.py correctly computes swift Fennekin Speed112, but the coordinator supplied an incorrect expected111; pinned Showdown fixtures verify112. Implement the same damage helper at the owned path using this candidate, changing only if required by corrected tests. Do not edit tests, inputs, other files or delegate. You are not alone; ownership only python/pokemon_switch_engine/damage.py.",
+  "criteria": "Corrected tests all pass including the full 3456-value unchanged Showdown damage fixture, strict arguments and primary-source speed stats. Minimal candidate changes only.",
+  "owned": [
+    "python/pokemon_switch_engine/damage.py"
+  ],
+  "checks": [
+    [
+      "python3",
+      "tests/switch-engine/test_damage.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/switch-engine-v1/damage-task.md": "10f19f86d1732466524fb3ee6a865d4c8075abcfcab5afc121ae1b167c264c48",
+    "python/pokemon_switch_engine/__init__.py": "07a03df3d700f45b8b9d25f291345695baa4366ec1e0095a44a4e05c0eb6415d",
+    "tests/switch-engine/test_damage.py": "8a0b6da5d38cd68523db791808b958f25321a7e0c426a286778b59785ffe6b31",
+    "tests/switch-engine/fixtures/damage.json": "7976291fa3bf9031e22f432c4b59f5ef8de25a90c20f64f6be31a2ec068d7d55",
+    "artifacts/reviews/m3-switch-engine/damage-candidate.py": "6f9a69f0d9992150145377f56b37de5b270767a438dd69d667621f8fda987c8d"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "50ed1585d9ea122a6bf2d683ca981c46a8239712",
+  "created_at": "2026-10-11T20:30:29.488797+00:00",
+  "test_run": false
+}

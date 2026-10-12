@@ -1,0 +1,56 @@
+{
+  "capture_content_hash": "f8318dcfe8fbf9cc21335f287592502aef48e894becadeaac8e3d7366365e491",
+  "consecutive_shuffle_input_output_checks": 15626,
+  "observed_counts": {
+    "crit": {
+      "False": 52884,
+      "True": 2178
+    },
+    "damage_roll": {
+      "100": 3476,
+      "85": 3442,
+      "86": 3485,
+      "87": 3438,
+      "88": 3442,
+      "89": 3516,
+      "90": 3366,
+      "91": 3409,
+      "92": 3501,
+      "93": 3516,
+      "94": 3398,
+      "95": 3366,
+      "96": 3433,
+      "97": 3377,
+      "98": 3431,
+      "99": 3466
+    },
+    "effective_first_seat": {
+      "0": 7786,
+      "1": 7840
+    },
+    "joint_actions": {
+      "[0, 0]": 7821,
+      "[0, 1]": 7941,
+      "[1, 0]": 7804,
+      "[1, 1]": 7805
+    },
+    "shuffle_input_order": {
+      "[0, 1]": 23516,
+      "[1, 0]": 7736
+    },
+    "shuffles_per_tied_turn": {
+      "2": 15626
+    },
+    "submitted_first": {
+      "0": 15687,
+      "1": 15684
+    },
+    "turns_per_game": {
+      "2": 18,
+      "3": 8593,
+      "4": 1389
+    }
+  },
+  "scope": "Descriptive coverage inventory, not a statistical independence or PRNG-quality test.",
+  "shuffle_chain_disagreements": 0
+}

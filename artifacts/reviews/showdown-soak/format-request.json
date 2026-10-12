@@ -1,0 +1,20 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused review of the material format-admission revision before a fixed 1,000-game local network soak. Pinned normal Random Battle format bypasses constructed-team validation, but our initial explicit-team format did not: 164 of 1,000 official generated development teams are rejected under constructed legality. We must preserve all original set values and all battle rules. The new loopback format admits only exact packed teams from the regenerated pool. Review allowlist identity, actual TeamValidator integration, rules parity, expected private original-team receipts and audit source binding for concrete correctness risks. Full-pool canonical roundtrips and no-mutation admission pass; v3 actual server smoke passes 8 games, 6 faults, 324 decisions. Tests use the actual first constructed-rejection fixture. No policy or sealed predecessor changes. Snapshot review only; do not claim executed tests.",
+  "files_sha256": {
+    "packages/showdown-soak/teams.mjs": "d32f7327aedd2784e982aa56f5463ee56a3087e8ccf270ae089a2634ed3b1cf3",
+    "packages/showdown-soak/local-server.mjs": "09aaa3c230716f7e223a8a108a84a5ac39a3bd99fa509b44f841a64271aedeff",
+    "packages/showdown-soak/team-receipt.cjs": "552993bbee95bb07bac71eedd0f944ccf11bb2f2472f0786364180bdd35c4f53",
+    "packages/showdown-soak/audit.mjs": "da55d5576edf9cb177484a2977bf1be44f83bd7ff4aa922288dc0d915cb6d285",
+    "tests/showdown-soak/format.test.mjs": "56ef609d733304a97c3f5ad5b173a983d8f82f2a0ca4e6b10f7b0cd235fa25cc",
+    "tests/showdown-soak/fixtures/constructed-rejection.json": "723809c9fad1137d5a09728ecb93071937e9bb6a22e77cb012a62973009fc114",
+    "packages/showdown-soak/plan.json": "0f4a2b817b2ae4c6bb91b0e604e52eeec2b8cc65afc0829b3e2be3d0c1cc54d7",
+    "artifacts/reviews/showdown-soak/pinned-format-evidence.md": "dced8cc912d4da935b10e02a12092e89db4ec4c4d052649e221acd1d2167227e",
+    "artifacts/reviews/showdown-soak/production-team-normalization.json": "4ee0e8d7c3b57ddd05d25339485a06aefdd630901fe8eeddddc98902ffb6435b"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

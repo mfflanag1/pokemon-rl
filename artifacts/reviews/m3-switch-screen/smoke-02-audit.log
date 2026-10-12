@@ -1,0 +1,7 @@
+{"phase": "audit", "seed": 1009, "update": 0, "opponent": "random"}
+{"phase": "audit", "seed": 1009, "update": 0, "opponent": "damage-greedy"}
+{"phase": "audit", "seed": 1009, "update": 0, "opponent": "frozen-initial"}
+{"phase": "audit", "seed": 1009, "update": 2, "opponent": "random"}
+{"phase": "audit", "seed": 1009, "update": 2, "opponent": "damage-greedy"}
+{"phase": "audit", "seed": 1009, "update": 2, "opponent": "frozen-initial"}
+{"status": "verified", "mode": "smoke", "games": 48, "checkpoint_replays": 2, "reference_game_replays": 48, "report_sha256": "6815a09dd89649f84b30b27a1845bd3a2c45a9b3221151b2dcc25832c15cd2e8", "all_seed_screen_passed": false}

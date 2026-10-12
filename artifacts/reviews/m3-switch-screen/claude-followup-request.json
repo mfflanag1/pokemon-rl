@@ -1,0 +1,23 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused follow-up before freeze: inspect the newly added all-game unpatched Showdown replay auditor and pre-training freeze hash binding, and verify disposition of original review findings. damage.py third argument is source_hp; all stat variants change only speed, so passing own HP is intentional. Horizon now derives learner.GROUPS=14. Ties fail closed and unreachable effects are documented. Initial snapshot had no blocking statistics/info findings. Look for material replay or provenance defects only. Do not recursively delegate.",
+  "files_sha256": {
+    "packages/switch-screen/audit.mjs": "531cac14fbd00c0e55f911234554c0a98df3975b7388eeaac5d5f9291cb79747",
+    "packages/switch-screen/worker.mjs": "9bf08480de70c6be9a78a6644a76d885f6bcb99790fc285de41fe624d29e0df3",
+    "packages/switch-reference/session.mjs": "21e754ffeae4ee931667bcb40b6a97254eede7af23bbc107df8d7b73c085eeda",
+    "python/pokemon_switch_screen/campaign.py": "6bb3749b45fc972879f7a4034d26b1169a9a370318b35a49c66ebd7155312a5f",
+    "python/pokemon_switch_screen/inference.py": "64d0ab9d712207e03ee9f6159d5544bc32ce795b5dcbcce0c93108e7f35b5b21",
+    "python/pokemon_switch_screen/provenance.py": "b459e7191973a5b328beaad72b88be226889405ab06ed6810d848fc596445c81",
+    "scripts/seal-switch-screen.py": "d2f67851d74c21dc228fc8a13bd1a4272cba7ea1ef39580d48ef1821ac0c425b",
+    "python/pokemon_switch_engine/damage.py": "6f9a69f0d9992150145377f56b37de5b270767a438dd69d667621f8fda987c8d",
+    "contracts/switch-engine-v1/plan.json": "336775382719b2b922cdd297789f08e48ea897be7721b3ad201b9fe50d2a1311",
+    "contracts/switch-v1/profile.json": "1b9b65d92b13c45f3425081a650e8750013f7d1d93dbbcbfd0012bb60a171df5",
+    "contracts/switch-screen-v1/README.md": "f2aeba81c2cb962555f608002df372a97c6756f036f3349b4227527e38f0410e",
+    "tests/switch-screen/worker.test.mjs": "e00594f6e1825351c835232f277cbf432c4cf637b4bf1fdc96da04c518723fb6"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

@@ -1,0 +1,25 @@
+Compiling jit(<lambda>) with global shapes and types (ShapedArray(float32[3]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_threefry_seed) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_normal) with global shapes and types (ShapedArray(key<fry>[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(multiply) with global shapes and types (ShapedArray(float32[59,2]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(uint32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(int32[]), ShapedArray(int32[]), ShapedArray(uint32[]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(uint32[]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(int32[]), ShapedArray(int32[]), ShapedArray(uint32[]), ShapedArray(float32[512,59]), ShapedArray(bool[512,2]), ShapedArray(int32[512]), ShapedArray(float32[512]), ShapedArray(float32[512]), ShapedArray(float32[512]), ShapedArray(bool[512]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[59,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[59]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+{"phase": "soak", "mode": "smoke", "target_seconds": 10, "started_at": "2026-10-11T12:01:10.465269+00:00", "pid": 90604}
+{"elapsed_seconds": 2.0, "cycles": 2749, "decisions": 1102456, "peak_rss_bytes": 500809728}
+{"elapsed_seconds": 4.0, "cycles": 5508, "decisions": 2209088, "peak_rss_bytes": 500809728}
+{"elapsed_seconds": 6.0, "cycles": 8243, "decisions": 3305712, "peak_rss_bytes": 500809728}
+{"elapsed_seconds": 8.0, "cycles": 10999, "decisions": 4410662, "peak_rss_bytes": 500809728}
+{"elapsed_seconds": 10.0, "cycles": 13587, "decisions": 5448940, "peak_rss_bytes": 500809728}
+{"status": "passed", "mode": "smoke", "report": "/Users/maxf/Documents/ChatGPT/Pokemon/artifacts/runs/m1-policy-soak-smoke-v2/report.json"}

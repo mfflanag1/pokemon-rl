@@ -1,0 +1,33 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "benchmark-statistics",
+  "task": "Implement only packages/showdown-confirmation/statistics.mjs and tests/showdown-confirmation/statistics.test.mjs. You are not alone; do not modify others files or recursively delegate. Export confirm(matrix, options) using plan.confirmation options. matrix is the full six-edge summarizeMatrix output in policy order baseline-v1,random-v1,damage-v1,tactical-v1. Validate exact unique canonical edges, equal positive pairs and pair_scores lengths with scores in [0,.25,.5,.75,1], reject nonfinite and incomplete inputs/options. Derive three per-pair metrics: 1 - baseline/tactical pair score; (1-random/tactical) - baseline/random; (1-damage/tactical) - baseline/damage. Resample whole pairs with common indices across all metrics using imported mulberry32 and uniformIndex from ../showdown-panel/statistics.mjs. For B replicates sort each and take ceil(B*family_alpha/comparisons)-th smallest as nominal one-sided Bonferroni lower. Require comparisons exactly3; validate all numeric options, alpha in(0,1), bootstrap_samples positive safe integer, seed uint32, thresholds in metric ranges, minimum_direct_score in[0,1]. Return {status: all conditions ? \"pass\" : \"not-passed\",pairs,bootstrap_samples,seed,family_alpha,comparisons,metrics:[{name,mean,lower,threshold,passed}],minimum_direct_score,direct_point_passed,interpretation}. Names exactly direct, random_delta, damage_delta. Direct lower threshold separate from >=minimum direct point; deltas strict > thresholds. Include per-metric paired_scores if useful but document exact interface in result. Interpretation states approximate nominal development screen only, no finite-sample/final/G2/G3/ladder guarantee. Pure no mutations. Tests must independently verify orientation, paired differencing versus pooling, shared index resampling, complete validation, deterministic pass/fail at boundaries, and literal bootstrap known answer (can use known seed0 words in sealed tests). No engine dependency. Do not invent alternative inferential methods or change the plan.",
+  "criteria": "Only owned files; deterministic validated common-pair bootstrap; literal known-answer and negative tests pass; exact metric orientation and strict threshold rules; no changes to sealed dependencies.",
+  "owned": [
+    "packages/showdown-confirmation/statistics.mjs",
+    "tests/showdown-confirmation/statistics.test.mjs"
+  ],
+  "checks": [
+    [
+      "node",
+      "--test",
+      "tests/showdown-confirmation/statistics.test.mjs"
+    ]
+  ],
+  "files_sha256": {
+    "packages/showdown-confirmation/plan.json": "22283496f6a4ecd41daddaa40e60fdfe8960da029807850f7fd4c51bdc12a1ac",
+    "packages/showdown-panel/statistics.mjs": "e059affa6ed0100d2c4958bcc19d8cdac5263ef9f54ebf21f918ca6122afee88",
+    "tests/showdown-panel/statistics.test.mjs": "bd2af14ecd5e757e1138b2c5a2e71f700c031c4b7b20d63aa4bc6c557fff659d",
+    "package.json": "bbff7c3ccb3a650f1d8fdf7366a0b87f23bc0a04498888b33e9b2f5458917998"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "66964c171bdceed4b43547d1bb9a9e60fff522ee",
+  "created_at": "2026-10-11T18:15:20.701332+00:00",
+  "test_run": false
+}

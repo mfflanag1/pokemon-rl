@@ -1,0 +1,9 @@
+{
+  "reviewed_files": 9,
+  "deltas": {
+    "artifacts/reviews/showdown-soak/pinned-format-evidence.md": {
+      "reviewed": "dced8cc912d4da935b10e02a12092e89db4ec4c4d052649e221acd1d2167227e",
+      "current": "288b76fa56d71f690c38ba8a9cf9f9a25e5df924f2a8ed7926e2f681c15b1a4a"
+    }
+  }
+}

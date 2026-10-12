@@ -1,0 +1,24 @@
+✔ fresh official development panel reproduces every input, action, outcome and interval (1030.6625ms)
+✔ replay rejects an altered actor-visible request (129.630917ms)
+✔ replay rejects altered mechanics seeds and policy seats (233.895542ms)
+✔ recount rejects a changed score even if the aggregate is left intact (483.671459ms)
+✔ recomputed pair bootstrap rejects a changed interval (474.021833ms)
+✔ regenerated development-team admission rejects a changed team (101.247167ms)
+✔ public damage proxies respond to observed stages, known items and defender typing (142.274375ms)
+✔ only revealed moves/items/abilities enter opponent memory; switches reset stat stages (0.852458ms)
+✔ Illusion reveal preserves observed moves and stages; public statuses and hazards update (0.413875ms)
+✔ selective stage clears, Psych Up and swaps follow pinned public events (0.208167ms)
+✔ entry cost is charged only when entering, and first-turn moves work for incoming mons (0.362209ms)
+✔ accuracy uses the 3-based combined stage and always-hit moves ignore stages (0.111416ms)
+✔ opponents honor masks, refrain from input mutation and choose legal Tera or forced switches (0.608583ms)
+✔ known ability immunity changes choice while unknown abilities stay explicit assumptions (0.128458ms)
+✔ the richer driver preserves the sealed baseline/random trajectories (23.895667ms)
+✔ both new policies have identical actual player inputs/actions under hidden-reserve mutation (3.147125ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6397.821583

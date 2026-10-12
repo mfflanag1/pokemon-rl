@@ -1,0 +1,16 @@
+{
+  "changed": [
+    "python/pokemon_showdown/mapping.py"
+  ],
+  "outside_owned": [],
+  "symlinks": [],
+  "output_hashes": {
+    ".gitignore": "5e5a628809e3b82bbeab2b6cb385767cd551f83e8316137ea0cba96da42c1771",
+    "artifacts/reviews/m1-showdown-chance/delegate-task.md": "5bd66a06d96d8915dcd8e7dc0d31db9a958a1618f83e393534a57d42c68c99af",
+    "contracts/showdown-chance-v1/contract.json": "8160e0b6c7a272aea5b95bbe609fe7bf08909354b926d0788a8d605827a1955e",
+    "python/pokemon_showdown/__init__.py": "5b2fd4f265ad0ec644f2669729ec8c48f201189c6066434173898e3cc066bd04",
+    "python/pokemon_showdown/mapping.py": "3cd15dcb3b23e36463142ab0abc0b7f7461363457b6d3ece998e21c6c8fb3af1",
+    "tests/showdown-chance/fixtures/word-oracle.json": "a0c7d739d33e3e41d632b8e9700a8b879c5bb9c20ce860ebe2094deb59042a11",
+    "tests/showdown-chance/test_mapping.py": "6ef7c4a151c985ee18802984ec85ed3b15492b68dee5e8d5cf4085361a69ecad"
+  }
+}

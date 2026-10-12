@@ -1,0 +1,20 @@
+test_boundary_rejects_final_and_unknown_purpose_before_opening_files (test_gate.GateTest.test_boundary_rejects_final_and_unknown_purpose_before_opening_files) ... ok
+test_changed_bytes_and_path_escape_reject (test_gate.GateTest.test_changed_bytes_and_path_escape_reject) ... ok
+test_full_digest_boundary_in_python (test_gate.GateTest.test_full_digest_boundary_in_python) ... ok
+test_shared_teams_seeds_episodes_and_mirrors_fail_across_splits (test_gate.GateTest.test_shared_teams_seeds_episodes_and_mirrors_fail_across_splits) ... ok
+test_untrusted_resealed_dataset_hash_rejects (test_gate.GateTest.test_untrusted_resealed_dataset_hash_rejects) ... ok
+test_each_mechanical_field_and_order_changes_identity (test_identity.IdentityTest.test_each_mechanical_field_and_order_changes_identity) ... ok
+test_full_digest_exact_threshold_assignment (test_identity.IdentityTest.test_full_digest_exact_threshold_assignment) ... ok
+test_metadata_and_seed_do_not_change_group (test_identity.IdentityTest.test_metadata_and_seed_do_not_change_group) ... ok
+test_mixed_partition_is_rejected (test_identity.IdentityTest.test_mixed_partition_is_rejected) ... ok
+test_unknown_mechanical_fields_versions_and_policy_changes_reject (test_identity.IdentityTest.test_unknown_mechanical_fields_versions_and_policy_changes_reject) ... ok
+test_privileged_wire_and_rehashed_extra_field_are_rejected (test_integration.IntegrationTest.test_privileged_wire_and_rehashed_extra_field_are_rejected) ... ok
+test_real_dataset_purpose_gate_and_policy_value_inputs (test_integration.IntegrationTest.test_real_dataset_purpose_gate_and_policy_value_inputs) ... ok
+test_resealed_final_job_rejects (test_integration.IntegrationTest.test_resealed_final_job_rejects) ... ok
+test_resealed_missing_episode_rejects (test_integration.IntegrationTest.test_resealed_missing_episode_rejects) ... ok
+test_resealed_wrong_team_partition_rejects (test_integration.IntegrationTest.test_resealed_wrong_team_partition_rejects) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 5.965s
+
+OK

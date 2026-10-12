@@ -1,0 +1,19 @@
+{
+  "status": "pass",
+  "receipt": "artifacts/reports/showdown-confirmation.json",
+  "content_hash": "76af345f4105649497bc293bd47307d49c651ca06bf1f4935d487a9cfd82d8c9",
+  "receipt_sha256": "7c487db263a92aeb8d9be5756b5c877cd9a11c09fd0d3fec570d6e7bbcb7d2eb",
+  "source_files": 326,
+  "evidence_files": 12058,
+  "live_and_archived_hash_checks": 24768,
+  "canonical_content_hash_verified": true,
+  "archive_receipt_byte_identical": true,
+  "repeat_seal_byte_identical": true,
+  "repeat_seal": {
+    "status": "complete-tactical-confirmation",
+    "hash": "76af345f4105649497bc293bd47307d49c651ca06bf1f4935d487a9cfd82d8c9",
+    "tests": 380
+  },
+  "elapsed_seconds": 4.584184667095542,
+  "scope": "Post-seal verification is intentionally outside the sealed review directory to avoid mutating bound evidence."
+}

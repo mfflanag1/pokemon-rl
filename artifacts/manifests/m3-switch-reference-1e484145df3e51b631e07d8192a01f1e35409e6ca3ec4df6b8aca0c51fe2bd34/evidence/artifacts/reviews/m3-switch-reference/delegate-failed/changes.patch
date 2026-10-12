@@ -1,0 +1,969 @@
+diff --git a/python/pokemon_switch/contract.py b/python/pokemon_switch/contract.py
+new file mode 100644
+index 0000000..6ac006f
+--- /dev/null
++++ b/python/pokemon_switch/contract.py
+@@ -0,0 +1,478 @@
++"""Independent four-action codec for the switch-reference-1 scope.
++
++Standard library only. The codec consumes one side's stock Showdown private
++request and produces either a four-boolean legality mask or a Showdown choice
++string. It knows nothing about the opponent, request ids, or submission; those
++belong to the caller. Zero-based action indices follow contracts/switch-v1:
++
++    0 / 1 -> the active request's first / second move      ("move 1" / "move 2")
++    2 / 3 -> switch to original member A / B               ("switch <position>")
++
++Original members are located by exact own ident suffix (``"p1: A"``), never by
++list position, because Showdown reorders ``side.pokemon`` after a switch. The
++switch command carries that member's *current* 1-based request position.
++"""
++from __future__ import annotations
++
++import json
++import re
++from dataclasses import dataclass
++from pathlib import Path
++from typing import Any, Mapping, Optional, Sequence, Tuple
++
++__all__ = [
++    "ACTION_COUNT",
++    "Codec",
++    "ContractError",
++    "Decoded",
++    "IllegalActionError",
++    "Member",
++    "PROFILE_PATH",
++    "Profile",
++    "SpeciesSet",
++    "VERSION",
++    "command",
++    "decode",
++    "load_profile",
++    "mask",
++    "parse_profile",
++    "to_id",
++]
++
++VERSION = "switch-reference-1"
++ACTION_COUNT = 4
++EXPECTED_NAMES: Tuple[str, str] = ("A", "B")
++EXPECTED_ACTIONS: Tuple[str, str, str, str] = (
++    "move-slot-1",
++    "move-slot-2",
++    "switch-original-A",
++    "switch-original-B",
++)
++SIDE_IDS = ("p1", "p2")
++PROFILE_PATH = (
++    Path(__file__).resolve().parents[2] / "contracts" / "switch-v1" / "profile.json"
++)
++
++# Active-slot flags that signal mechanics the reference scope excludes.
++_FORBIDDEN_ACTIVE_FLAGS = (
++    "canTerastallize",
++    "trapped",
++    "maybeTrapped",
++    "maybeDisabled",
++    "canDynamax",
++    "canMegaEvo",
++    "canMegaEvoX",
++    "canMegaEvoY",
++    "canUltraBurst",
++    "canZMove",
++)
++# Per-pokemon flags that signal excluded mechanics when truthy.
++_FORBIDDEN_POKEMON_FLAGS = ("reviving", "commanding", "terastallized")
++# Top-level request keys that only appear in excluded request types.
++_FORBIDDEN_REQUEST_KEYS = ("teamPreview", "maxChosenTeamSize")
++
++_CONDITION_RE = re.compile(r"^(\d+)/(\d+)(?: [a-z]{3})?$")
++_FAINTED_RE = re.compile(r"^0 fnt$")
++_NON_ID_RE = re.compile(r"[^a-z0-9]")
++
++
++class ContractError(ValueError):
++    """The request, index, or profile is malformed or outside the admitted scope."""
++
++
++class IllegalActionError(ContractError):
++    """The index is well-formed but names an action that is not legal right now."""
++
++
++def to_id(text: Any) -> str:
++    """Showdown ``toID``: lowercase and strip everything but ``[a-z0-9]``."""
++    if not isinstance(text, str):
++        raise ContractError(f"expected a string to normalise, got {type(text).__name__}")
++    return _NON_ID_RE.sub("", text.lower())
++
++
++# --------------------------------------------------------------------------- #
++# Profile
++# --------------------------------------------------------------------------- #
++
++
++@dataclass(frozen=True)
++class SpeciesSet:
++    """One admitted set: species id/name and its two move ids in declared order."""
++
++    id: str
++    species: str
++    moves: Tuple[str, str]
++
++
++@dataclass(frozen=True)
++class Profile:
++    version: str
++    level: int
++    gender: str
++    names: Tuple[str, str]
++    actions: Tuple[str, str, str, str]
++    species: Mapping[str, SpeciesSet]  # keyed by species id
++
++    def details_for(self, species_id: str) -> str:
++        """The exact Showdown ``details`` string an admitted member must carry."""
++        return f"{self.species[species_id].species}, L{self.level}, {self.gender}"
++
++
++def parse_profile(raw: Any) -> Profile:
++    """Validate the parts of profile.json this codec depends on."""
++    raw = _expect_mapping(raw, "profile")
++    if raw.get("version") != VERSION:
++        raise ContractError(f"profile version must be {VERSION!r}")
++    if raw.get("team_size") != 2:
++        raise ContractError("profile team_size must be 2")
++    names = raw.get("names")
++    if not (isinstance(names, list) and tuple(names) == EXPECTED_NAMES):
++        raise ContractError(f"profile names must be {list(EXPECTED_NAMES)}")
++    actions = raw.get("actions")
++    if not (isinstance(actions, list) and tuple(actions) == EXPECTED_ACTIONS):
++        raise ContractError(f"profile actions must be {list(EXPECTED_ACTIONS)}")
++    level = raw.get("level")
++    if type(level) is not int or level < 1 or level > 100:
++        raise ContractError("profile level must be an int in 1..100")
++    gender = raw.get("gender")
++    if gender not in ("M", "F", "N"):
++        raise ContractError("profile gender must be one of M/F/N")
++
++    species_raw = raw.get("species")
++    if not isinstance(species_raw, list) or not species_raw:
++        raise ContractError("profile species must be a non-empty list")
++    species: dict[str, SpeciesSet] = {}
++    for entry in species_raw:
++        entry = _expect_mapping(entry, "profile species entry")
++        sid = entry.get("id")
++        name = entry.get("species")
++        moves = entry.get("moves")
++        if not isinstance(sid, str) or not isinstance(name, str) or to_id(name) != sid:
++            raise ContractError(f"profile species id/name mismatch: {entry!r}")
++        if not (isinstance(moves, list) and len(moves) == 2 and all(isinstance(m, str) for m in moves)):
++            raise ContractError(f"profile species {sid!r} must declare exactly two moves")
++        move_ids = (to_id(moves[0]), to_id(moves[1]))
++        if move_ids[0] == move_ids[1] or "struggle" in move_ids:
++            raise ContractError(f"profile species {sid!r} has invalid moves {moves!r}")
++        if sid in species:
++            raise ContractError(f"profile species {sid!r} declared twice")
++        species[sid] = SpeciesSet(id=sid, species=name, moves=move_ids)
++
++    return Profile(
++        version=VERSION,
++        level=level,
++        gender=gender,
++        names=EXPECTED_NAMES,
++        actions=EXPECTED_ACTIONS,
++        species=species,
++    )
++
++
++def load_profile(path: Optional[Path] = None) -> Profile:
++    with open(path or PROFILE_PATH, encoding="utf-8") as handle:
++        return parse_profile(json.load(handle))
++
++
++# --------------------------------------------------------------------------- #
++# Decoded request
++# --------------------------------------------------------------------------- #
++
++
++@dataclass(frozen=True)
++class Member:
++    """One own team member as seen in the current request."""
++
++    name: str  # original name, "A" or "B"
++    position: int  # current 1-based position in side.pokemon
++    species: SpeciesSet
++    active: bool
++    fainted: bool
++
++    @property
++    def switchable(self) -> bool:
++        return not self.active and not self.fainted
++
++
++@dataclass(frozen=True)
++class Decoded:
++    kind: str  # "wait" | "move" | "switch"
++    side: Optional[str]  # "p1" / "p2"; None only for a bare wait request
++    members: Tuple[Member, ...]  # ordered by original name (A, B); empty for bare wait
++    mask: Tuple[bool, bool, bool, bool]
++
++    def member(self, name: str) -> Member:
++        for member in self.members:
++            if member.name == name:
++                return member
++        raise ContractError(f"no member named {name!r} in decoded request")
++
++
++# --------------------------------------------------------------------------- #
++# Low-level shape checks
++# --------------------------------------------------------------------------- #
++
++
++def _expect_mapping(value: Any, what: str) -> Mapping[str, Any]:
++    if not isinstance(value, Mapping):
++        raise ContractError(f"{what} must be an object, got {type(value).__name__}")
++    return value
++
++
++def _expect_list(value: Any, what: str) -> Sequence[Any]:
++    if not isinstance(value, list):
++        raise ContractError(f"{what} must be a list, got {type(value).__name__}")
++    return value
++
++
++def _expect_bool(value: Any, what: str) -> bool:
++    if type(value) is not bool:
++        raise ContractError(f"{what} must be a boolean, got {value!r}")
++    return value
++
++
++def _expect_int(value: Any, what: str) -> int:
++    # bool is a subclass of int; a boolean PP is malformed, not zero/one.
++    if type(value) is not int:
++        raise ContractError(f"{what} must be an integer, got {value!r}")
++    return value
++
++
++def _expect_str(value: Any, what: str) -> str:
++    if not isinstance(value, str):
++        raise ContractError(f"{what} must be a string, got {value!r}")
++    return value
++
++
++# --------------------------------------------------------------------------- #
++# Side parsing
++# --------------------------------------------------------------------------- #
++
++
++def _parse_condition(text: Any) -> bool:
++    """Return whether the member is fainted; reject anything but stock HP text."""
++    text = _expect_str(text, "pokemon condition")
++    if _FAINTED_RE.match(text):
++        return True
++    match = _CONDITION_RE.match(text)
++    if not match:
++        raise ContractError(f"unrecognised condition {text!r}")
++    hp, max_hp = int(match.group(1)), int(match.group(2))
++    if max_hp <= 0 or hp <= 0 or hp > max_hp:
++        raise ContractError(f"inconsistent condition {text!r}")
++    return False
++
++
++def _parse_details(text: Any, profile: Profile) -> SpeciesSet:
++    text = _expect_str(text, "pokemon details")
++    parts = text.split(", ")
++    species = profile.species.get(to_id(parts[0]))
++    if species is None:
++        raise ContractError(f"species {parts[0]!r} is not in the admitted profile")
++    if parts[1:] != [f"L{profile.level}", profile.gender]:
++        raise ContractError(
++            f"details {text!r} must be exactly {profile.details_for(species.id)!r}"
++        )
++    return species
++
++
++def _parse_pokemon(entry: Any, position: int, side_id: str, profile: Profile) -> Member:
++    entry = _expect_mapping(entry, f"side.pokemon[{position - 1}]")
++    ident = _expect_str(entry.get("ident"), "pokemon ident")
++    prefix = f"{side_id}: "
++    if not ident.startswith(prefix):
++        raise ContractError(f"ident {ident!r} does not belong to side {side_id!r}")
++    name = ident[len(prefix):]
++    if name not in profile.names:
++        raise ContractError(f"ident {ident!r} is not an original member name")
++
++    species = _parse_details(entry.get("details"), profile)
++    fainted = _parse_condition(entry.get("condition"))
++    active = _expect_bool(entry.get("active"), f"{ident} active flag")
++
++    for flag in _FORBIDDEN_POKEMON_FLAGS:
++        if entry.get(flag):
++            raise ContractError(f"{ident} carries out-of-scope flag {flag!r}")
++    if "item" in entry and entry["item"] not in ("", None):
++        raise ContractError(f"{ident} holds an item, which the profile excludes")
++    if "moves" in entry:
++        moves = _expect_list(entry["moves"], f"{ident} moves")
++        if tuple(moves) != species.moves:
++            raise ContractError(
++                f"{ident} move set {moves!r} is not the admitted set {list(species.moves)!r}"
++            )
++
++    return Member(name=name, position=position, species=species, active=active, fainted=fainted)
++
++
++def _parse_side(side: Any, profile: Profile) -> Tuple[str, Tuple[Member, Member]]:
++    side = _expect_mapping(side, "side")
++    side_id = side.get("id")
++    if side_id not in SIDE_IDS:
++        raise ContractError(f"side.id must be one of {SIDE_IDS}, got {side_id!r}")
++    pokemon = _expect_list(side.get("pokemon"), "side.pokemon")
++    if len(pokemon) != 2:
++        raise ContractError(f"side must list exactly two pokemon, got {len(pokemon)}")
++
++    members = [
++        _parse_pokemon(entry, index + 1, side_id, profile) for index, entry in enumerate(pokemon)
++    ]
++    names = [member.name for member in members]
++    if sorted(names) != sorted(profile.names):
++        raise ContractError(f"side must contain exactly one each of {profile.names}, got {names}")
++    if members[0].species.id == members[1].species.id:
++        raise ContractError("duplicate species are excluded by the profile")
++    if sum(member.active for member in members) != 1:
++        raise ContractError("exactly one own pokemon must be active")
++
++    by_name = {member.name: member for member in members}
++    return side_id, (by_name[profile.names[0]], by_name[profile.names[1]])
++
++
++# --------------------------------------------------------------------------- #
++# Active slot parsing
++# --------------------------------------------------------------------------- #
++
++
++def _parse_active(active: Any, member: Member) -> Tuple[bool, bool]:
++    """Return per-move legality for the single active slot."""
++    active = _expect_list(active, "active")
++    if len(active) != 1:
++        raise ContractError(f"singles request must have exactly one active slot, got {len(active)}")
++    slot = _expect_mapping(active[0], "active[0]")
++
++    for flag in _FORBIDDEN_ACTIVE_FLAGS:
++        if slot.get(flag):
++            raise ContractError(f"active slot carries out-of-scope flag {flag!r}")
++
++    moves = _expect_list(slot.get("moves"), "active[0].moves")
++    if len(moves) != 2:
++        raise ContractError(f"active slot must offer exactly two moves, got {len(moves)}")
++
++    legal = []
++    for index, raw in enumerate(moves):
++        raw = _expect_mapping(raw, f"active[0].moves[{index}]")
++        move_id = _expect_str(raw.get("id"), f"move {index + 1} id")
++        if move_id == "struggle":
++            raise ContractError("Struggle is excluded from the reference scope")
++        expected = member.species.moves[index]
++        if move_id != expected:
++            raise ContractError(
++                f"move {index + 1} is {move_id!r}; {member.species.species} must offer {expected!r}"
++            )
++        if "move" in raw and to_id(raw["move"]) != move_id:
++            raise ContractError(f"move {index + 1} display name {raw['move']!r} does not match {move_id!r}")
++
++        pp = _expect_int(raw.get("pp"), f"move {index + 1} pp")
++        maxpp = _expect_int(raw.get("maxpp"), f"move {index + 1} maxpp")
++        if maxpp <= 0 or pp < 0 or pp > maxpp:
++            raise ContractError(f"move {index + 1} pp {pp}/{maxpp} is malformed")
++        disabled = _expect_bool(raw.get("disabled"), f"move {index + 1} disabled flag")
++        legal.append(pp > 0 and not disabled)
++
++    return legal[0], legal[1]
++
++
++# --------------------------------------------------------------------------- #
++# Public decoding
++# --------------------------------------------------------------------------- #
++
++
++def decode(request: Any, profile: Profile) -> Decoded:
++    """Fully validate a request and compute its legality mask.
++
++    Every out-of-scope or malformed feature raises :class:`ContractError`
++    before any mask or command is produced.
++    """
++    request = _expect_mapping(request, "request")
++    for key in _FORBIDDEN_REQUEST_KEYS:
++        if key in request:
++            raise ContractError(f"request key {key!r} is outside the reference scope")
++
++    has_wait = "wait" in request
++    has_force = "forceSwitch" in request
++    has_active = "active" in request
++
++    if has_wait:
++        if request["wait"] is not True:
++            raise ContractError("wait must be exactly true when present")
++        if has_force or has_active:
++            raise ContractError("a wait request cannot carry active or forceSwitch")
++        side_id: Optional[str] = None
++        members: Tuple[Member, ...] = ()
++        if "side" in request:
++            side_id, members = _parse_side(request["side"], profile)
++        return Decoded(kind="wait", side=side_id, members=members, mask=(False, False, False, False))
++
++    side_id, members = _parse_side(request.get("side"), profile)
++    switch_mask = tuple(member.switchable for member in members)
++
++    if has_force:
++        if has_active:
++            raise ContractError("a forceSwitch request cannot carry active")
++        force = _expect_list(request["forceSwitch"], "forceSwitch")
++        if len(force) != 1:
++            raise ContractError(f"singles forceSwitch must have one slot, got {len(force)}")
++        if force[0] is not True:
++            raise ContractError("forceSwitch[0] must be exactly true")
++        if not any(switch_mask):
++            raise ContractError("forceSwitch with no living bench member cannot occur in scope")
++        return Decoded(kind="switch", side=side_id, members=members, mask=(False, False) + switch_mask)
++
++    if not has_active:
++        raise ContractError("request must be a wait, forceSwitch, or move request")
++    active_member = next(member for member in members if member.active)
++    if active_member.fainted:
++        raise ContractError("a move request cannot have a fainted active pokemon")
++    move_mask = _parse_active(request["active"], active_member)
++    return Decoded(kind="move", side=side_id, members=members, mask=move_mask + switch_mask)
++
++
++class Codec:
++    """Four-action codec bound to one admitted profile."""
++
++    def __init__(self, profile: Optional[Profile] = None) -> None:
++        self.profile = profile if profile is not None else load_profile()
++
++    def decode(self, request: Any) -> Decoded:
++        return decode(request, self.profile)
++
++    def mask(self, request: Any) -> Tuple[bool, bool, bool, bool]:
++        return self.decode(request).mask
++
++    def command(self, request: Any, index: Any) -> str:
++        # Validate the whole request first so malformed input is rejected even
++        # when the index would otherwise be legal.
++        decoded = self.decode(request)
++        if type(index) is not int:
++            raise ContractError(f"action index must be an int (not bool), got {index!r}")
++        if not 0 <= index < ACTION_COUNT:
++            raise ContractError(f"action index {index} is outside 0..{ACTION_COUNT - 1}")
++        if not decoded.mask[index]:
++            raise IllegalActionError(
++                f"action {self.profile.actions[index]!r} is not legal for this {decoded.kind} request"
++            )
++        if index < 2:
++            return f"move {index + 1}"
++        member = decoded.member(self.profile.names[index - 2])
++        return f"switch {member.position}"
++
++
++_DEFAULT: Optional[Codec] = None
++
++
++def _default() -> Codec:
++    global _DEFAULT
++    if _DEFAULT is None:
++        _DEFAULT = Codec()
++    return _DEFAULT
++
++
++def mask(request: Any) -> Tuple[bool, bool, bool, bool]:
++    """Legality mask for ``request`` under the repository profile."""
++    return _default().mask(request)
++
++
++def command(request: Any, index: Any) -> str:
++    """Showdown choice string for action ``index`` under the repository profile."""
++    return _default().command(request, index)
+diff --git a/tests/switch-reference/test_contract.py b/tests/switch-reference/test_contract.py
+new file mode 100644
+index 0000000..2141d3e
+--- /dev/null
++++ b/tests/switch-reference/test_contract.py
+@@ -0,0 +1,479 @@
++"""Focused unittest for the switch-reference-1 four-action codec.
++
++Run from the repository root with either:
++    python -m unittest tests/switch-reference/test_contract.py
++    python tests/switch-reference/test_contract.py
++"""
++from __future__ import annotations
++
++import copy
++import sys
++import unittest
++from pathlib import Path
++
++_ROOT = Path(__file__).resolve().parents[2]
++_PY = _ROOT / "python"
++if str(_PY) not in sys.path:
++    sys.path.insert(0, str(_PY))
++
++from pokemon_switch import contract  # noqa: E402
++from pokemon_switch.contract import (  # noqa: E402
++    ACTION_COUNT,
++    Codec,
++    ContractError,
++    IllegalActionError,
++    load_profile,
++)
++
++PROFILE = load_profile()
++CODEC = Codec(PROFILE)
++
++# Species -> (display names in declared order) straight from the profile so the
++# fixtures cannot drift from the admitted sets.
++_DISPLAY = {
++    "bulbasaur": ("Vine Whip", "Tackle"),
++    "squirtle": ("Water Gun", "Tackle"),
++    "fennekin": ("Incinerate", "Scratch"),
++}
++
++
++def pokemon(name, species_id, *, side="p1", active=False, condition="105/105", **extra):
++    """A stock-looking side.pokemon entry for original member ``name``."""
++    species = PROFILE.species[species_id]
++    entry = {
++        "ident": f"{side}: {name}",
++        "details": PROFILE.details_for(species_id),
++        "condition": condition,
++        "active": active,
++        "stats": {"atk": 70, "def": 70, "spa": 80, "spd": 80, "spe": 65},
++        "moves": list(species.moves),
++        "baseAbility": "overgrow",
++        "item": "",
++        "pokeball": "pokeball",
++        "ability": "overgrow",
++        "commanding": False,
++        "reviving": False,
++        "teraType": "Grass",
++        "terastallized": "",
++    }
++    entry.update(extra)
++    return entry
++
++
++def active_slot(species_id, pp=(35, 35), disabled=(False, False)):
++    species = PROFILE.species[species_id]
++    moves = []
++    for index, move_id in enumerate(species.moves):
++        moves.append(
++            {
++                "move": _DISPLAY[species_id][index],
++                "id": move_id,
++                "pp": pp[index],
++                "maxpp": 35,
++                "target": "normal",
++                "disabled": disabled[index],
++            }
++        )
++    return {"moves": moves}
++
++
++def move_request(order=("A", "B"), species=("bulbasaur", "squirtle"), active="A", side="p1", **kw):
++    """Singles move request; ``order`` is the current request order of A/B.
++
++    ``species`` is always bound to original names (A, B) so that reordering the
++    request never changes which species A and B are.
++    """
++    by_name = dict(zip(("A", "B"), species))
++    mons = [
++        pokemon(name, by_name[name], side=side, active=(name == active))
++        for name in order
++    ]
++    return {
++        "active": [active_slot(by_name[active], **kw)],
++        "side": {"name": "Max", "id": side, "pokemon": mons},
++        "rqid": 7,
++    }
++
++
++def force_request(order=("A", "B"), species=("bulbasaur", "squirtle"), fainted="A", side="p1"):
++    by_name = dict(zip(("A", "B"), species))
++    mons = [
++        pokemon(
++            name,
++            by_name[name],
++            side=side,
++            active=(name == fainted),
++            condition="0 fnt" if name == fainted else "105/105",
++        )
++        for name in order
++    ]
++    return {
++        "forceSwitch": [True],
++        "side": {"name": "Max", "id": side, "pokemon": mons},
++        "noCancel": True,
++        "rqid": 9,
++    }
++
++
++def wait_request(order=("A", "B"), species=("bulbasaur", "squirtle"), active="A", side="p1"):
++    by_name = dict(zip(("A", "B"), species))
++    mons = [pokemon(name, by_name[name], side=side, active=(name == active)) for name in order]
++    return {"wait": True, "side": {"name": "Max", "id": side, "pokemon": mons}, "rqid": 11}
++
++
++class MaskShapeTest(unittest.TestCase):
++    def test_mask_is_exactly_four_booleans(self):
++        for req in (move_request(), force_request(), wait_request(), {"wait": True}):
++            with self.subTest(kind=list(req)[0]):
++                m = CODEC.mask(req)
++                self.assertIsInstance(m, tuple)
++                self.assertEqual(len(m), ACTION_COUNT)
++                self.assertTrue(all(type(b) is bool for b in m))
++
++    def test_module_level_api_matches_codec(self):
++        req = move_request()
++        self.assertEqual(contract.mask(req), CODEC.mask(req))
++        self.assertEqual(contract.command(req, 3), CODEC.command(req, 3))
++
++
++class MoveRequestTest(unittest.TestCase):
++    def test_initial_order_mask_and_commands(self):
++        req = move_request()  # A active at position 1, B bench at position 2
++        self.assertEqual(CODEC.mask(req), (True, True, False, True))
++        self.assertEqual(CODEC.command(req, 0), "move 1")
++        self.assertEqual(CODEC.command(req, 1), "move 2")
++        self.assertEqual(CODEC.command(req, 3), "switch 2")
++        with self.assertRaises(IllegalActionError):
++            CODEC.command(req, 2)  # A is already active
++
++    def test_reordered_request_keeps_original_identities(self):
++        # After a switch Showdown lists the active mon first: [B, A].
++        req = move_request(order=("B", "A"), active="B")
++        self.assertEqual(req["side"]["pokemon"][0]["ident"], "p1: B")
++        self.assertEqual(CODEC.mask(req), (True, True, True, False))
++        # Index 2 is still "switch to original A", now sitting at position 2.
++        self.assertEqual(CODEC.command(req, 2), "switch 2")
++        with self.assertRaises(IllegalActionError):
++            CODEC.command(req, 3)
++        # Moves come from the *active* member's set (Squirtle), in declared order.
++        ids = [m["id"] for m in req["active"][0]["moves"]]
++        self.assertEqual(ids, ["watergun", "tackle"])
++        self.assertEqual(CODEC.command(req, 0), "move 1")
++
++    def test_reordered_with_bench_first_still_resolves_position(self):
++        # Hypothetical ordering where the bench mon is listed first.
++        req = move_request(order=("B", "A"), active="A")
++        self.assertEqual(CODEC.mask(req), (True, True, False, True))
++        self.assertEqual(CODEC.command(req, 3), "switch 1")
++
++    def test_p2_side_idents_accepted(self):
++        req = move_request(side="p2", species=("fennekin", "bulbasaur"))
++        self.assertEqual(CODEC.mask(req), (True, True, False, True))
++        self.assertEqual(CODEC.command(req, 3), "switch 2")
++
++    def test_fainted_bench_cannot_be_switched_to(self):
++        req = move_request()
++        req["side"]["pokemon"][1]["condition"] = "0 fnt"
++        self.assertEqual(CODEC.mask(req), (True, True, False, False))
++        with self.assertRaises(IllegalActionError):
++            CODEC.command(req, 3)
++
++    def test_pp_zero_and_disabled_mask_moves(self):
++        zero = move_request(pp=(0, 35))
++        self.assertEqual(CODEC.mask(zero), (False, True, False, True))
++        with self.assertRaises(IllegalActionError):
++            CODEC.command(zero, 0)
++        self.assertEqual(CODEC.command(zero, 1), "move 2")
++
++        disabled = move_request(disabled=(False, True))
++        self.assertEqual(CODEC.mask(disabled), (True, False, False, True))
++        with self.assertRaises(IllegalActionError):
++            CODEC.command(disabled, 1)
++
++    def test_stock_metadata_is_tolerated(self):
++        req = move_request()
++        req["side"]["pokemon"][0]["stats"] = {"atk": 1, "def": 1, "spa": 1, "spd": 1, "spe": 1}
++        req["side"]["pokemon"][1]["condition"] = "57/105"
++        req["active"][0]["moves"][0]["target"] = "normal"
++        req["rqid"] = 42
++        req["side"]["name"] = "someone else"
++        self.assertEqual(CODEC.mask(req), (True, True, False, True))
++
++
++class ForceSwitchTest(unittest.TestCase):
++    def test_force_switch_only_offers_living_bench(self):
++        req = force_request()  # A fainted active at 1, B living bench at 2
++        self.assertEqual(CODEC.mask(req), (False, False, False, True))
++        self.assertEqual(CODEC.command(req, 3), "switch 2")
++        for bad in (0, 1, 2):
++            with self.assertRaises(IllegalActionError):
++                CODEC.command(req, bad)
++
++    def test_force_switch_after_reorder(self):
++        req = force_request(order=("B", "A"), fainted="B")
++        self.assertEqual(CODEC.mask(req), (False, False, True, False))
++        self.assertEqual(CODEC.command(req, 2), "switch 2")
++
++    def test_force_switch_with_no_living_bench_is_rejected(self):
++        req = force_request()
++        req["side"]["pokemon"][1]["condition"] = "0 fnt"
++        with self.assertRaises(ContractError):
++            CODEC.mask(req)
++
++    def test_force_switch_shape_is_strict(self):
++        for value in ([True, True], [], [False], [1], True, "true"):
++            req = force_request()
++            req["forceSwitch"] = value
++            with self.subTest(forceSwitch=value), self.assertRaises(ContractError):
++                CODEC.mask(req)
++        both = force_request()
++        both["active"] = [active_slot("bulbasaur")]
++        with self.assertRaises(ContractError):
++            CODEC.mask(both)
++
++
++class WaitRequestTest(unittest.TestCase):
++    def test_wait_has_no_legal_action(self):
++        for req in (wait_request(), {"wait": True}, {"wait": True, "rqid": 3}):
++            with self.subTest(req=sorted(req)):
++                self.assertEqual(CODEC.mask(req), (False, False, False, False))
++                for index in range(ACTION_COUNT):
++                    with self.assertRaises(IllegalActionError):
++                        CODEC.command(req, index)
++
++    def test_wait_must_be_exactly_true_and_alone(self):
++        for value in (1, "true", False, None):
++            with self.subTest(wait=value), self.assertRaises(ContractError):
++                CODEC.mask({"wait": value})
++        with_active = wait_request()
++        with_active["active"] = [active_slot("bulbasaur")]
++        with self.assertRaises(ContractError):
++            CODEC.mask(with_active)
++        with_force = wait_request()
++        with_force["forceSwitch"] = [True]
++        with self.assertRaises(ContractError):
++            CODEC.mask(with_force)
++
++    def test_wait_side_is_still_validated(self):
++        req = wait_request()
++        req["side"]["pokemon"][0]["ident"] = "p2: A"
++        with self.assertRaises(ContractError):
++            CODEC.mask(req)
++
++
++class MalformedMoveDataTest(unittest.TestCase):
++    def _assert_rejected(self, mutate, msg):
++        req = move_request()
++        mutate(req)
++        with self.subTest(msg):
++            with self.assertRaises(ContractError) as ctx:
++                CODEC.mask(req)
++            # Malformed input is a contract violation, not merely an illegal action.
++            self.assertNotIsInstance(ctx.exception, IllegalActionError)
++
++    def test_malformed_pp(self):
++        slot = lambda r: r["active"][0]["moves"][0]  # noqa: E731
++        cases = {
++            "bool pp": lambda r: slot(r).update(pp=True),
++            "string pp": lambda r: slot(r).update(pp="35"),
++            "negative pp": lambda r: slot(r).update(pp=-1),
++            "pp above max": lambda r: slot(r).update(pp=36),
++            "missing pp": lambda r: slot(r).pop("pp"),
++            "bool maxpp": lambda r: slot(r).update(maxpp=True),
++            "zero maxpp": lambda r: slot(r).update(pp=0, maxpp=0),
++            "float pp": lambda r: slot(r).update(pp=35.0),
++        }
++        for msg, mutate in cases.items():
++            self._assert_rejected(mutate, msg)
++
++    def test_malformed_disabled(self):
++        slot = lambda r: r["active"][0]["moves"][1]  # noqa: E731
++        cases = {
++            "hidden disabled": lambda r: slot(r).update(disabled="hidden"),
++            "none disabled": lambda r: slot(r).update(disabled=None),
++            "int disabled": lambda r: slot(r).update(disabled=0),
++            "missing disabled": lambda r: slot(r).pop("disabled"),
++        }
++        for msg, mutate in cases.items():
++            self._assert_rejected(mutate, msg)
++
++    def test_move_identity_and_count(self):
++        def set_ids(r, ids):
++            moves = r["active"][0]["moves"]
++            for move, new in zip(moves, ids):
++                move["id"] = new
++                move.pop("move", None)
++
++        cases = {
++            "struggle": lambda r: r["active"][0].update(
++                moves=[{"move": "Struggle", "id": "struggle", "pp": 1, "maxpp": 1, "disabled": False}]
++            ),
++            "struggle in slot": lambda r: set_ids(r, ["struggle", "tackle"]),
++            "unknown move": lambda r: set_ids(r, ["ember", "tackle"]),
++            "wrong order": lambda r: set_ids(r, ["tackle", "vinewhip"]),
++            "other species' move": lambda r: set_ids(r, ["watergun", "tackle"]),
++            "three moves": lambda r: r["active"][0]["moves"].append(
++                dict(r["active"][0]["moves"][1], id="growl", move="Growl")
++            ),
++            "one move": lambda r: r["active"][0]["moves"].pop(),
++            "no moves key": lambda r: r["active"][0].pop("moves"),
++            "display name mismatch": lambda r: r["active"][0]["moves"][0].update(move="Razor Leaf"),
++            "missing id": lambda r: r["active"][0]["moves"][0].pop("id"),
++            "side move set mismatch": lambda r: r["side"]["pokemon"][0].update(moves=["tackle", "vinewhip"]),
++        }
++        for msg, mutate in cases.items():
++            self._assert_rejected(mutate, msg)
++
++    def test_out_of_scope_active_flags(self):
++        for flag, value in (
++            ("canTerastallize", "Grass"),
++            ("trapped", True),
++            ("maybeTrapped", True),
++            ("maybeDisabled", True),
++            ("canDynamax", True),
++            ("canMegaEvo", True),
++            ("canZMove", [None, None]),
++        ):
++            self._assert_rejected(lambda r, f=flag, v=value: r["active"][0].update({f: v}), flag)
++
++    def test_extra_active_dimensions(self):
++        self._assert_rejected(lambda r: r["active"].append(active_slot("squirtle")), "two active slots")
++        self._assert_rejected(lambda r: r["active"].clear(), "zero active slots")
++        self._assert_rejected(lambda r: r.update(active=active_slot("bulbasaur")), "active not a list")
++
++    def test_fainted_active_in_move_request(self):
++        self._assert_rejected(lambda r: r["side"]["pokemon"][0].update(condition="0 fnt"), "fainted active")
++
++
++class MalformedSideTest(unittest.TestCase):
++    def _assert_rejected(self, mutate, msg):
++        req = move_request()
++        mutate(req)
++        with self.subTest(msg):
++            with self.assertRaises(ContractError) as ctx:
++                CODEC.mask(req)
++            self.assertNotIsInstance(ctx.exception, IllegalActionError)
++
++    def test_ident_and_side_consistency(self):
++        mons = lambda r: r["side"]["pokemon"]  # noqa: E731
++        cases = {
++            "ident on wrong side": lambda r: mons(r)[0].update(ident="p2: A"),
++            "side id invalid": lambda r: r["side"].update(id="p3"),
++            "side id missing": lambda r: r["side"].pop("id"),
++            "unknown name": lambda r: mons(r)[1].update(ident="p1: C"),
++            "duplicate name": lambda r: mons(r)[1].update(ident="p1: A"),
++            "nickname-like ident": lambda r: mons(r)[0].update(ident="p1: Bulbasaur"),
++            "ident missing": lambda r: mons(r)[0].pop("ident"),
++            "three pokemon": lambda r: mons(r).append(pokemon("A", "fennekin")),
++            "one pokemon": lambda r: mons(r).pop(),
++            "no active": lambda r: mons(r)[0].update(active=False),
++            "two active": lambda r: mons(r)[1].update(active=True),
++            "active not bool": lambda r: mons(r)[0].update(active=1),
++            "side missing": lambda r: r.pop("side"),
++            "pokemon not list": lambda r: r["side"].update(pokemon={}),
++        }
++        for msg, mutate in cases.items():
++            self._assert_rejected(mutate, msg)
++
++    def test_details_and_species(self):
++        mons = lambda r: r["side"]["pokemon"]  # noqa: E731
++        cases = {
++            "duplicate species": lambda r: mons(r)[1].update(
++                details=PROFILE.details_for("bulbasaur"), moves=list(PROFILE.species["bulbasaur"].moves)
++            ),
++            "unknown species": lambda r: mons(r)[1].update(details="Pikachu, L50, M"),
++            "wrong level": lambda r: mons(r)[1].update(details="Squirtle, L100, M"),
++            "wrong gender": lambda r: mons(r)[1].update(details="Squirtle, L50, F"),
++            "shiny tag": lambda r: mons(r)[1].update(details="Squirtle, L50, M, shiny"),
++            "details missing": lambda r: mons(r)[1].pop("details"),
++            "bad condition": lambda r: mons(r)[1].update(condition="fnt"),
++            "hp above max": lambda r: mons(r)[1].update(condition="200/105"),
++            "zero hp not fainted": lambda r: mons(r)[1].update(condition="0/105"),
++        }
++        for msg, mutate in cases.items():
++            self._assert_rejected(mutate, msg)
++
++    def test_out_of_scope_pokemon_flags_and_request_keys(self):
++        mons = lambda r: r["side"]["pokemon"]  # noqa: E731
++        cases = {
++            "reviving": lambda r: mons(r)[1].update(reviving=True),
++            "commanding": lambda r: mons(r)[1].update(commanding=True),
++            "terastallized": lambda r: mons(r)[0].update(terastallized="Grass"),
++            "held item": lambda r: mons(r)[0].update(item="leftovers"),
++            "teamPreview": lambda r: r.update(teamPreview=True),
++            "maxChosenTeamSize": lambda r: r.update(maxChosenTeamSize=2),
++        }
++        for msg, mutate in cases.items():
++            self._assert_rejected(mutate, msg)
++
++    def test_non_object_requests(self):
++        for bad in (None, [], "wait", 3, {}):
++            with self.subTest(bad=bad), self.assertRaises(ContractError):
++                CODEC.mask(bad)
++
++
++class CommandIndexTest(unittest.TestCase):
++    def test_invalid_indices_are_rejected_not_treated_as_illegal(self):
++        req = move_request()
++        for index in (True, False, -1, 4, "0", 1.0, None, [0]):
++            with self.subTest(index=index), self.assertRaises(ContractError) as ctx:
++                CODEC.command(req, index)
++            self.assertNotIsInstance(ctx.exception, IllegalActionError)
++
++    def test_bool_index_is_not_coerced_to_move(self):
++        req = move_request()
++        # True would alias index 1 ("move 2") if bools were accepted.
++        with self.assertRaises(ContractError):
++            CODEC.command(req, True)
++        self.assertEqual(CODEC.command(req, 1), "move 2")
++
++    def test_malformed_request_rejected_before_command_generation(self):
++        req = move_request()
++        req["active"][0]["canTerastallize"] = "Grass"
++        # Index 0 would be legal on the clean request; validation must win.
++        with self.assertRaises(ContractError) as ctx:
++            CODEC.command(req, 0)
++        self.assertNotIsInstance(ctx.exception, IllegalActionError)
++
++        stale = move_request()
++        stale["side"]["pokemon"][0]["ident"] = "p2: A"
++        with self.assertRaises(ContractError) as ctx:
++            CODEC.command(stale, 3)
++        self.assertNotIsInstance(ctx.exception, IllegalActionError)
++
++    def test_command_does_not_mutate_request(self):
++        req = move_request(order=("B", "A"), active="B")
++        snapshot = copy.deepcopy(req)
++        CODEC.command(req, 2)
++        CODEC.mask(req)
++        self.assertEqual(req, snapshot)
++
++
++class ProfileTest(unittest.TestCase):
++    def test_profile_loaded_from_repository(self):
++        self.assertEqual(PROFILE.version, "switch-reference-1")
++        self.assertEqual(set(PROFILE.species), {"bulbasaur", "squirtle", "fennekin"})
++        self.assertEqual(PROFILE.species["fennekin"].moves, ("incinerate", "scratch"))
++        self.assertEqual(PROFILE.actions, ("move-slot-1", "move-slot-2", "switch-original-A", "switch-original-B"))
++        self.assertEqual(PROFILE.details_for("squirtle"), "Squirtle, L50, M")
++
++    def test_profile_parser_rejects_drift(self):
++        import json
++
++        with open(contract.PROFILE_PATH, encoding="utf-8") as handle:
++            raw = json.load(handle)
++        for mutate in (
++            lambda p: p.update(version="other"),
++            lambda p: p.update(team_size=3),
++            lambda p: p.update(names=["A", "C"]),
++            lambda p: p["species"][0]["moves"].append("Growl"),
++            lambda p: p["species"][0].update(id="bulba"),
++        ):
++            bad = copy.deepcopy(raw)
++            mutate(bad)
++            with self.assertRaises(ContractError):
++                contract.parse_profile(bad)
++
++
++if __name__ == "__main__":
++    unittest.main()

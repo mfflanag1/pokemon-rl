@@ -1,0 +1,8 @@
+{
+  "node_tests": 65,
+  "python_tests": 170,
+  "smoke_audit_output": "{\"status\": \"smoke-evidence-verified\", \"two_hour_qualification\": false, \"replays\": 4}",
+  "status": "ready-for-production-soak",
+  "total_tests": 235,
+  "verification_sha256": "6d54e4010785a8660dbf62fd261cda27a7190d20912ad39992b830ced348a885"
+}

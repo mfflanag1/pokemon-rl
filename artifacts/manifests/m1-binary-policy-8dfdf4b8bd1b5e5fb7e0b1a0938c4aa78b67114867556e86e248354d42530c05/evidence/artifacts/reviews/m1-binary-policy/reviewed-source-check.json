@@ -1,0 +1,22 @@
+{
+  "policy-review": {
+    "contracts/binary-policy-v1/contract.json": true,
+    "contracts/binary-policy-v1/plan.json": false,
+    "python/pokemon_binary/policy.py": true,
+    "python/pokemon_binary/loss.py": true,
+    "python/pokemon_binary/loop.py": true,
+    "python/pokemon_binary/checkpoint.py": true,
+    "python/pokemon_binary/reference.py": true,
+    "tests/binary-policy/test_policy.py": true,
+    "tests/binary-policy/test_reference.py": true,
+    "tests/binary-policy/test_loop.py": true
+  },
+  "qualification-review": {
+    "python/pokemon_binary/qualification.py": true,
+    "scripts/seal-binary-policy.py": false,
+    "python/pokemon_binary/checkpoint.py": true,
+    "contracts/binary-policy-v1/contract.json": true,
+    "contracts/binary-policy-v1/plan.json": false,
+    "scripts/verify-fixed-loop.py": true
+  }
+}

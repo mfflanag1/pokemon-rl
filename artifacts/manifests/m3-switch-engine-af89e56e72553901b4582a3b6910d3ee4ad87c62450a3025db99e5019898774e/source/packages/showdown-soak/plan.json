@@ -1,0 +1,21 @@
+{
+  "schema": "showdown-network-soak-plan-1",
+  "namespace": "showdown-network-soak-v1",
+  "sessions": 20,
+  "games_per_session": 50,
+  "fault_offsets": [10, 20, 30],
+  "faults": ["before-choice", "lost-write", "accepted-choice"],
+  "policies": {"tactical": "tactical-v1", "baseline": "public-matchup-heuristic-v1"},
+  "decision_delay_ms": 2,
+  "accepted_opponent_control": "Hold at most one baseline action until tactical restoration; record its attempt and actual release separately. No fixed-delay race decides whether the accepted pending action is observed.",
+  "retry_delay_ms": 80,
+  "game_timeout_ms": 120000,
+  "intergame_delay_ms": 30,
+  "max_client_rss_mib": 768,
+  "smoke": {"namespace": "showdown-network-soak-smoke-v1", "sessions": 2, "games_per_session": 4, "fault_offsets": [0, 1, 2]},
+  "design": "500 team pairs; keep teams in fixed simulator seats and swap policies. Twenty new login sessions, each with 50 sequential games. Add session parity to each fault offset so all three fault types occur in both tactical seats. Three recoveries per tactical session; baseline transport remains connected.",
+  "chance": "Real local-server battle seeds are not controlled or coupled. This is a functional soak, not a paired strength comparison or a fresh deterministic simulator replay campaign.",
+  "admission": "Regenerate official development teams in this namespace. Require no exact-team overlap with prior panel, confirmation, network and own smoke pools. Reject a collision; no pair replacement. The local format admits only this exact pool, bypassing constructed-team legality as the normal random format does; no official set values are changed.",
+  "stopping": "Complete every planned game and wire audit. Stop and preserve evidence on unexpected client/server errors, timeout, missing recovery, telemetry limit or audit mismatch. No replacement games, strength tuning, adaptive extension, public server, final data or training.",
+  "scope": "Pinned loopback server and frozen stateless clients. Sessions rotate before the inherited 64-room limit. All three tactical reconnects are intentionally consumed; any unplanned loss fails. No process-restart, unlimited-session, public protocol, custom-engine G2/G3/G4 or strength certification. Client RSS only; server/device memory is not qualified."
+}

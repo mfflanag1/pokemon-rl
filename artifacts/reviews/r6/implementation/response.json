@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 120952,
+  "stop_reason": "end_turn",
+  "session_id": "88494ff1-9733-45c3-aee6-b879e6036fdc",
+  "total_cost_usd": 0.9659099999999999,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 26952,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 8537,
+    "output_tokens_details": {
+      "thinking_tokens": 6975
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26952,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 8537,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 26952,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 26952
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 8537,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 26952,
+      "webSearchRequests": 0,
+      "costUSD": 0.9659099999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 6975,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (no blocking integrity flaw within declared scope; one plausible ID-collision bug introduced by the latest expansion, plus a stale-artifact hazard).**\n\n## Findings\n\n**1. Medium \u2014 pathway ID collision after retaining all calls** (`source-index.mjs:63-91`, `manifest.mjs:84`)\nID = `hashJSON([owner, file, start_byte, kind])`. Nested call expressions sharing a start position and both classified `source-owned-call` (curried/IIFE forms such as `fn(a)(b)`, `getHandler(x)(args)`, `(cond ? f : g)(y)()`) produce identical IDs. Node emits duplicates silently; `mechanics.py:98` then rejects the whole bundle (\"Duplicate pathway\"). Previously only sink-named calls were emitted, so this was unlikely; now every CallExpression in `sim/*.ts` is included. Verification: after regeneration, assert `new Set(manifest.pathways.map(p=>p.id)).size === manifest.pathways.length` in the Node test, or include `end_byte` (or an ordinal) in the ID preimage and in the Python recomputation at `mechanics.py:103`.\n\n**2. Medium-low \u2014 initial-form enumeration only intercepts `generator.sample`** (`manifest.mjs:32-53`)\nBranches of `getForme` that draw via `this.prng.*`, `this.random`, or `this.randomChance` are invisible; `calls <= 1` passes with `calls === 0` and only one form is recorded. The line-77 check (every R3-observed form must be declared) partially mitigates, and the pikachu test gives one positive witness, but an unobserved alternate form reached via another RNG method would be labeled `not-established-initial` without any failure. Suggest asserting `calls === 1` for species whose `getForme` body contains any `random`/`sample`/`prng` identifier (via `stringLiterals`/AST), or documenting this limit in `item_candidate_scope`-style prose.\n\n**3. Low \u2014 Python validator does not cross-check `initial_class`** (`mechanics.py:85-87`)\n`reachability` is tied to `observed_count`, but `initial_class` is free text relative to counts; a resealed manifest could label a 0-count entry `observed-initial`. Not a support-gate risk (support is always rejected) but it weakens the \"independent verification\" claim. Add `(observed_count>0) == (initial_class=='observed-initial')` and membership in the four README values.\n\n**4. Low \u2014 derived cosmetic entries copy `pathways` from parent** (`manifest.mjs:118`)\nWorks only because pokedex entries never contain calls; if they ever did, `mechanics.py:108` fails with \"Pathway linkage mismatch\". Set `pathways: []` explicitly on derived entries.\n\n**5. Operational \u2014 stale artifact vs. producer drift** (`scripts/mechanics-inventory.mjs:13`, `mechanics.py:149-150`)\nThe pending Python tests read `artifacts/runs/r6-mechanics-v1`, which predates the expansion. `report.producer` hashes will now mismatch (`Producer source drift`), and `save()` refuses to overwrite changed `manifest.json`. The run directory must be removed/renamed before regeneration; otherwise \"full tests pending\" cannot pass.\n\n**6. Nit** \u2014 `callbacks()` computes per-callback `pathways` (line 102) that are never emitted; `manifest.mjs:96` re-walks each entry. Harmless.\n\nFixture assertions checked: Ditto maxhp 237 (base 48, 31 IV, 0 EV, L100) is correct; sleep-talk/zero-to-hero tapes and null-choice reversal are consistent; `|t:|` normalization and `prng.getSeed()` checkpoints make replay deterministic.\n\n## Scope limitations\n- Cannot confirm `hashJSON`/`hash_json` canonical equivalence, `sha256` UTF-8 encoding of string fragments, or `UPSTREAM == root/vendor/pokemon-showdown`.\n- Did not inspect pinned Showdown source; finding 1 is a structural risk, not a confirmed instance.\n- Line counting: TS treats `\\r`/U+2028/2029 as line breaks, Python counts only `\\n`; harmless unless such characters occur in pinned source.\n\n## Verdict\nFindings. Claims in README/scope are appropriately hedged; the support gate is fail-closed as described. Address finding 1 (and the regeneration workflow in 5) before trusting the post-expansion artifact.",
+  "ttft_ms": 100378,
+  "type": "result",
+  "duration_ms": 120986,
+  "uuid": "0c59989b-761b-43ae-81e9-c8cc81e7b37d",
+  "ttft_stream_ms": 1162,
+  "time_to_request_ms": 34,
+  "first_content_frame_ms": 1162,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

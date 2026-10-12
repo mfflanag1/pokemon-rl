@@ -1,0 +1,13 @@
+{
+  "changed": [
+    "python/pokemon_pilot/statistics.py"
+  ],
+  "outside_owned": [],
+  "symlinks": [],
+  "output_hashes": {
+    "contracts/pilot-v1/plan.json": "bd4f10bd6fdb6fb96689860122c6a7875fd95642fdebf297de08fb10181c437c",
+    "python/pokemon_pilot/__init__.py": "fc20fc50fd6e4a3b7e1f53ec211af9c4b40b5edae3d845ae5db6b1033b8a0bd0",
+    "python/pokemon_pilot/statistics.py": "a421ca8c098c03923568fad78bd213031e9357c558738161c094218d51c31588",
+    "tests/pilot/test_statistics.py": "f512f4bbe4c2a116e708d841768f0bd63e24ade299eb1a8e28666f695efca0f5"
+  }
+}

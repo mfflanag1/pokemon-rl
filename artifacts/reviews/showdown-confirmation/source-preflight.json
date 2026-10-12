@@ -1,0 +1,35 @@
+{
+  "status": "pass",
+  "node_syntax_files": [
+    "packages/showdown-confirmation/audit.mjs",
+    "packages/showdown-confirmation/campaign.mjs",
+    "packages/showdown-confirmation/cli.mjs",
+    "packages/showdown-confirmation/client.mjs",
+    "packages/showdown-confirmation/network-audit.mjs",
+    "packages/showdown-confirmation/network.mjs",
+    "packages/showdown-confirmation/report.mjs",
+    "packages/showdown-confirmation/statistics.mjs",
+    "packages/showdown-confirmation/teams.mjs"
+  ],
+  "python_sealer": "pass",
+  "covered": {
+    "packages/showdown-confirmation/audit.mjs": "e95477d176c921e1af5d2baf0ecfb14cb0c27c58ff6ff1e3f07c9ab097693993",
+    "packages/showdown-confirmation/campaign.mjs": "c7f4808c60a8a4fda500287ab59227a9922a7420a20d87a6fc58b8ccd4efbbda",
+    "packages/showdown-confirmation/cli.mjs": "4c2435f7acc75c8b241e201e3779d912fd5b1950285b6e098264992f26743811",
+    "packages/showdown-confirmation/client.mjs": "f16dfb87253d39daa7c81cacde9aeb2b1c4cfff4ddf852b850c1fc62d6e90a45",
+    "packages/showdown-confirmation/network-audit.mjs": "2543452a1fa8815c3f6e597dc73b1df1a1deca9fce6e0b19886eadfd3496c71c",
+    "packages/showdown-confirmation/network.mjs": "06829d48e7c7087a5218b0460d3bb74fc2d12f0fc97fe7ca56c9bd800c77ce42",
+    "packages/showdown-confirmation/plan.json": "00eeb5162137eb252b3d6d17da7872722aded46f432983b6bead604987d4a9c6",
+    "packages/showdown-confirmation/report.mjs": "bb0ccb010394cdf2ffe0741039a7ba95d97f92dd3cb27625685ab678cc689500",
+    "packages/showdown-confirmation/statistics.mjs": "997fe6efc70a353749c761255195df877a138cbe18d3de54e5caae7267b25fe6",
+    "packages/showdown-confirmation/teams.mjs": "c91ce708c3a606c3e69a97a8808f793cffa92931cd6550e0a6cd55bf6016aa8d",
+    "scripts/seal-showdown-confirmation.py": "bb042e50c9434feebfd7de07e93623ae98b3ce764dfd386847360adaa4e0e5be",
+    "tests/showdown-confirmation/audit.test.mjs": "3483f598f64fa0f9e4bfb09e17c4cc443aa0c2c013556d0cd31e8cee36a06c1a",
+    "tests/showdown-confirmation/client.test.mjs": "81bee437119a8947d068c324700599230b0eaef9f5466545a26c7e40186f95ae",
+    "tests/showdown-confirmation/decision-fixture.test.mjs": "a43453a592fbcad205e3473f7c00aef3f4998b382ae09be307e8702d541fcfc2",
+    "tests/showdown-confirmation/fixtures/network.json.gz": "41d19ac1d534efd83d80c54bab1f1750bf159390026b6b6a9f5615d0c19abe5e",
+    "tests/showdown-confirmation/network-audit.test.mjs": "687915dc7d20f6ea22c04fb64373051e29432133083da1277d69c095f90df85c",
+    "tests/showdown-confirmation/statistics.test.mjs": "366e65980b3f7fd70cbb983721bf8597aea70661f3eac324a2d65e53d9b40d95"
+  },
+  "source_count": 283
+}

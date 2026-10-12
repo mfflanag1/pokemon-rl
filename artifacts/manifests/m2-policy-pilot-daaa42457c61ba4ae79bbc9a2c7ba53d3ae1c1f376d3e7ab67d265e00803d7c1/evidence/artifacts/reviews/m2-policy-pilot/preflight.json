@@ -1,0 +1,11 @@
+{
+  "status": "ready-for-production",
+  "node_tests": 68,
+  "python_tests": 183,
+  "total_tests": 251,
+  "tested_source_files": 218,
+  "verification_sha256": "33fce7cf12cae9067110d410933b19b76402ea57b51f1965bf1d109753ccd295",
+  "smoke": "artifacts/runs/m2-policy-pilot-smoke-v4",
+  "smoke_report_hash": "b97ff367ee2cc6a1863a2e8bad7ef581f15171c7d6187775b6a04aa460c44a25",
+  "smoke_separate_audit": "passed all 48 games and both next-update fingerprints"
+}

@@ -1,0 +1,84 @@
+Pinned Showdown 942cda71d14bf0618bd57991708a2e2734b6daba
+Source vendor/pokemon-showdown/sim/battle.ts
+SHA256 3eb941313832729ee043407c39ced894b4338301fed5d29a45ae8b36e49a09f2
+
+21: import { PRNG, type PRNGSeed } from './prng';
+22: import { type MoveRequest, type ChoiceRequest, Side } from './side';
+23: import { State } from './state';
+24: import { BattleQueue, type Action } from './battle-queue';
+25: import { BattleActions } from './battle-actions';
+26: import { Utils } from '../lib/utils';
+27: declare const __version: any;
+28: 
+29: export type ChannelID = 0 | 1 | 2 | 3 | 4;
+30: 
+31: export type ChannelMessages<T extends ChannelID | -1> = Record<T, string[]>;
+32: 
+33: const splitRegex = /^\|split\|p([1234])\n(.*)\n(.*)|.+/gm;
+34: 
+35: export function extractChannelMessages<T extends ChannelID | -1>(message: string, channelIds: T[]): ChannelMessages<T> {
+36: 	const channelIdSet = new Set(channelIds);
+37: 	const channelMessages: ChannelMessages<ChannelID | -1> = {
+38: 		[-1]: [],
+39: 		0: [],
+40: 		1: [],
+41: 		2: [],
+42: 		3: [],
+43: 		4: [],
+44: 	};
+45: 
+46: 	for (const [lineMatch, playerMatch, secretMessage, sharedMessage] of message.matchAll(splitRegex)) {
+47: 		const player = playerMatch ? parseInt(playerMatch) : 0;
+48: 		for (const channelId of channelIdSet) {
+49: 			let line = lineMatch;
+50: 			if (player) {
+51: 				line = channelId === -1 || player === channelId ? secretMessage : sharedMessage;
+52: 				if (!line) continue;
+53: 			}
+54: 			channelMessages[channelId].push(line);
+55: 		}
+56: 	}
+57: 
+58: 	return channelMessages;
+59: }
+60: 
+61: interface BattleOptions {
+62: 	format?: Format;
+63: 	formatid: ID;
+64: 	/** Output callback */
+65: 	send?: (type: string, data: string | string[]) => void;
+66: 	prng?: PRNG; // PRNG override (you usually don't need this, just pass a seed)
+67: 	seed?: PRNGSeed; // PRNG seed
+68: 	rated?: boolean | string; // Rated string
+69: 	p1?: PlayerOptions; // Player 1 data
+70: 	p2?: PlayerOptions; // Player 2 data
+71: 	p3?: PlayerOptions; // Player 3 data
+72: 	p4?: PlayerOptions; // Player 4 data
+73: 	debug?: boolean; // show debug mode option
+74: 	forceRandomChance?: boolean; // force Battle#randomChance to always return true or false (used in some tests)
+75: 	deserialized?: boolean;
+76: 	strictChoices?: boolean; // whether invalid choices should throw
+77: }
+78: 
+79: interface EventListenerWithoutPriority {
+80: 	effect: Effect;
+81: 	target?: Pokemon;
+82: 	index?: number;
+83: 	callback?: Function;
+84: 	state: EffectState | null;
+85: 	end: Function | null;
+86: 	endCallArgs?: any[];
+87: 	effectHolder: Pokemon | Side | Field | Battle;
+88: }
+89: interface EventListener extends EventListenerWithoutPriority {
+90: 	order: number | false;
+91: 	priority: number;
+92: 	subOrder: number;
+93: 	effectOrder?: number;
+94: 	speed?: number;
+95: }
+96: 
+97: type Part = string | number | boolean | Pokemon | Side | Effect | Move | null | undefined;
+98: 
+99: // The current request state of the Battle:
+100: //

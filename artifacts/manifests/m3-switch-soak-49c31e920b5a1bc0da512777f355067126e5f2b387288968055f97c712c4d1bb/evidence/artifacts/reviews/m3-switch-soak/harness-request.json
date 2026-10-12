@@ -1,0 +1,20 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the additive M3 two-hour CPU qualification harness before production. Focus on false passes, clock/compilation/memory/counter linkage, exact original-next-update replay and sealer integrity. Predecessor learner is sealed and cannot change; new harness calls its same collect/update. Fresh seed101 warmup8 then timed7200; no strength claim. Gates validator implementation is independently delegated and will be separately tested/QA; assume specified gate-task behavior. Identify concrete material bugs, not style. Snapshot review cannot execute tests.",
+  "files_sha256": {
+    "python/pokemon_switch_soak/provenance.py": "b9379b90be46e87d7f45d26d6162222a6cc19000010ec0bab30059c01e41a775",
+    "python/pokemon_switch_soak/checkpoint.py": "c719f063cec03549442be36fc7a63ab1183578683d25327ad0b18fa76fa1522b",
+    "python/pokemon_switch_soak/campaign.py": "5d716dd6f32975015027417463d5ee3bb6a5a852cf4e0a23f6bce650a951412e",
+    "scripts/seal-switch-soak.py": "48d923b9a4bd14f1355e4f5020d3303b1741e97872e1c784f4c5424b72f60dce",
+    "contracts/switch-soak-v1/plan.json": "e5f8f15f72b2f40a260fd22b214b599fa1247d4d1f7c9b8c97d4fc3bdf7dd6b1",
+    "contracts/switch-soak-v1/gate-task.md": "e3ead4f1ebd03c30c5ea189c772facbece872b94594b285ca8aa3134c00b4d05",
+    "python/pokemon_switch_engine/learner.py": "c21000b6cf1c652c4ee9555cfb35ce5ce1c125348f9dd203304b32fc5211e344",
+    "python/pokemon_switch_engine/checkpoint.py": "c71ff3cbbe0c0e05a47dee700fe088aa70f04587081bf1289d16cf0e7372b3a5",
+    "tests/switch-soak/test_checkpoint.py": "b4a5d90047ff3801e1f9ef1c52f869e577a5d7b0ab1a2805be89ff0e4a829636"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

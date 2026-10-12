@@ -1,0 +1,11 @@
+{
+  "event_counts": {
+    "system": 86,
+    "stream_event": 414,
+    "assistant": 2,
+    "rate_limit_event": 1,
+    "result": 1
+  },
+  "visible_characters": 3817,
+  "final_result_received": true
+}

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/bin/caffeinate",
+    "-i",
+    "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+    "-m",
+    "pokemon_switch_screen.campaign",
+    "/Users/maxf/Documents/ChatGPT/Pokemon/artifacts/runs/m3-switch-screen-v1"
+  ],
+  "started_at": "2026-10-12T01:16:20.705852+00:00",
+  "launcher_pid": 47191
+}

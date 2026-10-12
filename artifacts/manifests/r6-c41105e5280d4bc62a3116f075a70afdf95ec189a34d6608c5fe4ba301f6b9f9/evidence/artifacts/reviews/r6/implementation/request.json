@@ -1,0 +1,21 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the additive R6 implementation for consequential bugs and claims exceeding evidence. R6 is a conservative inventory/catalog, not an accelerated simulator or minimal reachability proof. All pinned base Dex entries remain unsupported; no reference case grants support. Audit whether AST call/callback enumeration, initial-form alternatives, source/hash cross-links, Python independent verification and fail-closed support gate are sound within this declared scope. Check concrete fixture assertions and replay handling. Do not demand a full engine or exact reachability proof. Identify actionable omissions/integrity gaps; distinguish them from disclosed coarse bounds. Three Node and eight Python focused tests passed before the latest expansion to retain all ordinary calls/constructors; final full tests are still pending. Prior bounded research timed out without output; this is a narrower implementation review, no research findings integrated.",
+  "files_sha256": {
+    "contracts/mechanics-v1/README.md": "f1eb6e00b7a823bc534f6aa96e850d66f765d7612ddb8589256ae06edead05d1",
+    "packages/mechanics/source-index.mjs": "0c5af74aed1174be5c87f090e0332643fdcc5d3fbbb9f03e9cd489f98cda0734",
+    "packages/mechanics/policy.mjs": "fa7232f651bd48433da359fecf4236f7ae04e69d0ecd040723a2650249b408e7",
+    "packages/mechanics/manifest.mjs": "46f294e82c8638beb27c17f7a5c1714cac822c48764321d0fec42fc8d640bf5d",
+    "packages/mechanics/fixtures.mjs": "8e9959883c90b4a4408c60d5abe6cefa56716c0f3e8371c6e48363b8fb0ed5ff",
+    "packages/mechanics/catalog.mjs": "a7413695670fc94d40f193043617c16fba012ded938a9eacdacffc83139f0924",
+    "scripts/mechanics-inventory.mjs": "0f01b7beab0f020f745055f83d1bbda24aae2381b499a3d8a5f46dd64be20226",
+    "python/pokemon_reference/mechanics.py": "cbb0303fa5efe092bbd5ffbf002fd17c3c3be700e49cb645bf8daf6704871157",
+    "tests/mechanics/mechanics.test.mjs": "1cedd201cb108f8944e5c7af147fe33d94d8357dcd88b606e3d3e8ef36484b7b",
+    "tests/mechanics/test_mechanics.py": "0eef2382e33e31a2032d6fa8011afe5254e22354d869d4d63bd4f5112eac3d23"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

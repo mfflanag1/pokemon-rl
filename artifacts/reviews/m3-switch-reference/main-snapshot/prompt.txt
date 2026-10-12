@@ -1,0 +1,555 @@
+Task and review objective:
+Review the new M3 reference-only restricted profile, session adapter, fixtures, and conditional damage oracle for blocking correctness/information leaks and overclaims. Existing frozen M1/M2 is untouched; no JAX/training or full G2/G3 closure. Profile is 24 fixed two-member teams, private reserves/speed variants; standard non-debug Anything Goes instead of exact-HP Custom Game. Node seven focused tests passed. Draft 72 natural fixtures replay with opposite submission order; 1152 counterfactual starts give 1008 initial and 864 one-turn equal-view comparisons, plus 48 positive reserve reveal examples. 3456 damage calls inject private HP, willCrit, and bounded random(16) only, not natural roll-frequency or JAX parity. Review request binding, four-action original A/B mapping, phase/wait/truncation handling, prospective failure modes, conditional oracle validity and whether those claims are supported. Python codec and full regression are still in progress. Do not assume tests beyond those stated have run. Return only actionable issues and essential caveats.
+
+
+FILE contracts/switch-v1/profile.json
+1: {
+2:   "version": "switch-reference-1",
+3:   "id": "gen9-starter-pairs-v1",
+4:   "predecessor": "daaa42457c61ba4ae79bbc9a2c7ba53d3ae1c1f376d3e7ab67d265e00803d7c1",
+5:   "showdown_commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+6:   "reference_format": "gen9anythinggoes@@@!Team Preview,Terastal Clause",
+7:   "team_size": 2,
+8:   "level": 50,
+9:   "gender": "M",
+10:   "nature": "Serious",
+11:   "item": "",
+12:   "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 31, "spd": 31, "spe": 31},
+13:   "variants": {
+14:     "plain": {"hp": 0, "atk": 0, "def": 0, "spa": 0, "spd": 0, "spe": 0},
+15:     "swift": {"hp": 0, "atk": 0, "def": 0, "spa": 0, "spd": 0, "spe": 252}
+16:   },
+17:   "species": [
+18:     {"id": "bulbasaur", "species": "Bulbasaur", "ability": "Overgrow", "moves": ["Vine Whip", "Tackle"], "teraType": "Grass"},
+19:     {"id": "squirtle", "species": "Squirtle", "ability": "Torrent", "moves": ["Water Gun", "Tackle"], "teraType": "Water"},
+20:     {"id": "fennekin", "species": "Fennekin", "ability": "Blaze", "moves": ["Incinerate", "Scratch"], "teraType": "Fire"}
+21:   ],
+22:   "names": ["A", "B"],
+23:   "actions": ["move-slot-1", "move-slot-2", "switch-original-A", "switch-original-B"],
+24:   "max_resolved_turns": 12,
+25:   "max_decisions": 64,
+26:   "cutoff": "truncate only at a fresh uncommitted joint-move boundary; never relabel as draw",
+27:   "chance_contract": "Pinned Showdown only; future port must cover crits, damage, speed ties and switch ordering. No common raw-stream claim.",
+28:   "hidden": ["unrevealed reserve species", "opponent speed EV variant", "opponent exact HP and remaining PP"],
+29:   "known": ["profile roster and all possible sets", "own complete team and exact stats", "both team sizes", "public species, moves, switches and rounded opponent HP once revealed"],
+30:   "excluded": ["items", "Terastallization", "status moves", "status conditions", "stat stages", "weather", "terrain", "hazards", "recoil", "healing", "pivot moves", "revival", "team preview", "duplicate species", "PP exhaustion", "Struggle"],
+31:   "production_ready": false,
+32:   "custom_engine_implemented": false
+33: }
+34: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/switch-v1/README.md
+1: # switch-reference-1
+2: 
+3: This is a new two-member fixed-team reference scope, not a change to the sealed
+4: Rattata duel. Use the pinned stock Gen 9 Anything Goes format with Team Preview
+5: removed and Terastallization forbidden. Custom Game's debug mode exposes exact
+6: opponent HP, so it is not used. Require reportExactHP=false and debugMode=false.
+7: Only sets in profile.json are admitted, with distinct species and original names
+8: A/B. Six species orders times four speed-variant assignments give 24 teams.
+9: These constructed teams do not consume official train/dev/final partitions.
+10: 
+11: Moves have no accuracy misses at ordinary unmodified accuracy. Vine Whip/Tackle/
+12: Scratch are physical; Water Gun/Incinerate are special. Type effectiveness, STAB,
+13: critical hits, damage rolls, speed/ties, and Overgrow/Torrent/Blaze at <=1/3 HP
+14: are obligations. Incinerate's berry/gem removal is unreachable because all items
+15: are empty and no move/ability can create or transfer them. No status, stage,
+16: weather or terrain creator exists in this closed roster. Twelve resolved turns
+17: are below the minimum initial PP (24 for Incinerate), so exhaustion is excluded.
+18: A switch can still stall: cutoff is truncation at a fresh joint boundary, never
+19: a terminal draw. These exclusions hold only for the exact admitted profile.
+20: 
+21: Actor boundary: an R1 player view has exactly side, request_id, turn, request,
+22: protocol. It contains that side's current private request and its own channel
+23: history. Cross-player phase/seed/teams/audits never enter it. Full snapshots can
+24: be independently adapted to the existing R5 PlayerHistory feature encoder using
+25: episode-v1 observation(view,0). R5 feature tensors are diagnostic here, not a
+26: new trained model. Values and policies must receive the same actor tensors.
+27: 
+28: The new action codec has four booleans and uses zero-based indices:
+29: 0/1 = the active request's first/second move; 2/3 = switch to original A/B.
+30: Request pokemon order changes on switching; find A/B by exact own ident suffix,
+31: not current list position. Encode a switch as that mon's current 1-based request
+32: position. Moves require non-disabled, positive PP. Wait has no legal action.
+33: Force-switch has only non-active, non-fainted switch choices. No pass/Struggle/
+34: Tera/revive/trap/team-preview action is admitted. Reject unknown indices, bools,
+35: stale request IDs and extra submission fields before writing to Showdown.
+36: 
+37: The JSON golden file produced by fixtures records current player views and
+38: codec masks/commands. Python must independently reproduce those and reconstruct
+39: R5 actor tensors from full player-only snapshots. Treat fixture audit fields as
+40: privileged diagnostics, never as input to the actor adapter. Reject extra fields
+41: on the view. Direct protocol/private-request mutation is not a valid information
+42: counterfactual: compare independently initialized real games with the same public
+43: history and different hidden sets instead. Legitimate reveals must change input.
+44: 
+45: No new JAX transition, sampler, learner or strategic-strength claim is part of
+46: this reference milestone. All older source and evidence remain immutable.
+47: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/switch-reference/profile.mjs
+1: import assert from 'node:assert/strict';
+2: import {readFileSync} from 'node:fs';
+3: import {Dex,describe} from '../reference-node/engine.mjs';
+4: import {hashJSON} from '../battle-contract/canonical.mjs';
+5: export const PROFILE=JSON.parse(readFileSync(new URL('../../contracts/switch-v1/profile.json',import.meta.url)));
+6: export const SIDES=['p1','p2'];
+7: const ids=PROFILE.species.map(s=>s.id),variants=Object.keys(PROFILE.variants);
+8: export const ROSTER=[];
+9: for(const lead of ids)for(const reserve of ids)if(lead!==reserve)for(const a of variants)for(const b of variants)
+10:   ROSTER.push({id:`${lead}-${a}_${reserve}-${b}`,species:[lead,reserve],variants:[a,b]});
+11: export function team(id) {
+12:   const row=ROSTER.find(r=>r.id===id);assert.ok(row,'Unknown profile team');
+13:   return row.species.map((s,i)=>{const p=PROFILE.species.find(p=>p.id===s);return {
+14:     name:PROFILE.names[i],species:p.species,ability:p.ability,moves:[...p.moves],teraType:p.teraType,
+15:     gender:PROFILE.gender,item:PROFILE.item,level:PROFILE.level,nature:PROFILE.nature,
+16:     evs:{...PROFILE.variants[row.variants[i]]},ivs:{...PROFILE.ivs}};});
+17: }
+18: export function reference() {
+19:   const manifest=describe();assert.equal(manifest.commit,PROFILE.showdown_commit);
+20:   const format=Dex.formats.get(PROFILE.reference_format),rules=Dex.formats.getRuleTable(format);
+21:   assert.ok(!format.debug);assert.ok(!rules.has('teampreview'));assert.ok(rules.has('terastalclause'));
+22:   return {reference:manifest,profile_hash:hashJSON(PROFILE),format:{id:format.id,mod:format.mod,
+23:     rules:[...rules.entries()].sort(),values:[...rules.valueRules.entries()].sort()},roster:ROSTER};
+24: }
+25: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/switch-reference/actions.mjs
+1: import assert from 'node:assert/strict';
+2: import {PROFILE} from './profile.mjs';
+3: const id=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
+4: export function mask(request) {
+5:   assert.ok(request&&typeof request==='object'&&!Array.isArray(request),'Request');
+6:   assert.ok(!request.teamPreview,'No preview');
+7:   if(request.wait) {assert.equal(request.wait,true);assert.ok(!request.active&&!request.forceSwitch);return [false,false,false,false];}
+8:   const side=request.side;assert.ok(side&&['p1','p2'].includes(side.id));
+9:   assert.ok(Array.isArray(side.pokemon)&&side.pokemon.length===2);
+10:   const names=side.pokemon.map(m=>m.ident);assert.deepEqual([...names].sort(),PROFILE.names.map(n=>`${side.id}: ${n}`));
+11:   assert.equal(side.pokemon.filter(m=>m.active===true).length,1);
+12:   for(const m of side.pokemon) {assert.equal(typeof m.active,'boolean');assert.equal(typeof m.condition,'string');assert.ok(!m.reviving);}
+13:   const result=[false,false,false,false];
+14:   for(let i=0;i<2;i++) {const mon=side.pokemon.find(m=>m.ident===`${side.id}: ${PROFILE.names[i]}`);
+15:     result[2+i]=!mon.active&&!mon.condition.endsWith(' fnt');}
+16:   if(request.forceSwitch) {assert.deepEqual(request.forceSwitch,[true]);assert.ok(!request.active);return result;}
+17:   assert.ok(Array.isArray(request.active)&&request.active.length===1);
+18:   const active=request.active[0];assert.ok(!active.canTerastallize&&!active.trapped&&!active.maybeTrapped&&!active.canMegaEvo&&!active.canZMove&&!active.canDynamax);
+19:   assert.ok(Array.isArray(active.moves)&&active.moves.length===2);
+20:   const mon=side.pokemon.find(m=>m.active),p=PROFILE.species.find(p=>mon.details.split(',')[0]===p.species);
+21:   assert.ok(p,'Unsupported active species');
+22:   assert.deepEqual(active.moves.map(m=>m.id),p.moves.map(id));
+23:   for(let i=0;i<2;i++){const m=active.moves[i];assert.ok(Number.isSafeInteger(m.pp)&&m.pp>=0);assert.ok(m.disabled===undefined||typeof m.disabled==='boolean');result[i]=!m.disabled&&m.pp>0;}
+24:   assert.ok(result.slice(0,2).some(Boolean),'PP exhaustion is out of scope');return result;
+25: }
+26: export function command(request,index) {
+27:   assert.ok(Number.isInteger(index)&&index>=0&&index<4,'Action index');assert.ok(mask(request)[index],'Illegal action');
+28:   return index<2?`move ${index+1}`:`switch ${request.side.pokemon.findIndex(m=>m.ident===`${request.side.id}: ${PROFILE.names[index-2]}`)+1}`;
+29: }
+30: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/switch-reference/session.mjs
+1: import assert from 'node:assert/strict';
+2: import {BattleStream,checkSeed} from '../reference-node/engine.mjs';
+3: import {PlayerProjection} from '../reference-node/observations.mjs';
+4: import {hashJSON} from '../battle-contract/canonical.mjs';
+5: import {PROFILE,SIDES,team} from './profile.mjs';
+6: import {mask,command} from './actions.mjs';
+7: 
+8: // Profile-only oracle. Full simulator state is available solely to fixture audits.
+9: export class Session extends BattleStream {
+10:   constructor(){super({noCatch:true,keepAlive:true});this.projection=new PlayerProjection();this.group=0;this.tape=[];this.closed=false;}
+11:   push(message){const n=message.indexOf('\n');this.projection.ingest(message.slice(0,n),message.slice(n+1));}
+12:   views(){assert.equal(this.projection.errors.length,0);return SIDES.map(s=>this.projection.view(s));}
+13:   async start(spec){
+14:     assert.ok(!this.battle&&!this.closed);assert.deepEqual(Object.keys(spec).sort(),['seed','teams']);checkSeed(spec.seed);
+15:     assert.ok(Array.isArray(spec.teams)&&spec.teams.length===2);const teams=spec.teams.map(team);this.spec=structuredClone(spec);
+16:     await this.write(`>start ${JSON.stringify({formatid:PROFILE.reference_format,seed:spec.seed})}`);
+17:     for(let i=0;i<2;i++)await this.write(`>player p${i+1} ${JSON.stringify({name:`P${i+1}`,team:teams[i]})}`);
+18:     assert.equal(this.battle.reportExactHP,false);assert.equal(this.battle.debugMode,false);assert.equal(this.battle.turn,1);
+19:     this.initial=this.frame();return this.initial;
+20:   }
+21:   frame(){
+22:     assert.ok(this.battle&&!this.closed);const views=this.views();
+23:     const ended=this.battle.ended,winner=ended?({'P1':'p1','P2':'p2','':null})[this.battle.winner]:null;
+24:     assert.ok(!ended||winner!==undefined);
+25:     const requested=ended?[]:views.flatMap((v,i)=>!v.request.wait?[i]:[]);
+26:     const phase=ended?'terminal':requested.every(i=>views[i].request.forceSwitch)?'replacement':'joint_move';
+27:     if(!ended){assert.ok(requested.length);assert.ok(phase==='replacement'||requested.length===2);for(const v of views)mask(v.request);}
+28:     return {group:this.group,phase,turn:views[0].turn,requested,winner,views};
+29:   }
+30:   truncated(){const f=this.frame();return f.phase==='joint_move'&&f.turn>PROFILE.max_resolved_turns;}
+31:   async step(decisions,first=0){
+32:     assert.ok(!this.busy&&!this.failed,'Concurrent or failed session');this.busy=true;
+33:     const writes=this.tape.length;
+34:     try{return await this.stepOnce(decisions,first);}
+35:     catch(error){if(this.tape.length!==writes)this.failed=true;throw error;}
+36:     finally{this.busy=false;}
+37:   }
+38:   async stepOnce(decisions,first=0){
+39:     const before=this.frame();assert.ok(!this.truncated()&&before.phase!=='terminal');assert.ok(first===0||first===1);
+40:     assert.ok(Array.isArray(decisions));assert.equal(decisions.length,before.requested.length);
+41:     assert.ok(this.tape.length+decisions.length<=PROFILE.max_decisions);
+42:     const bySide=new Map();
+43:     for(const d of decisions){
+44:       assert.deepEqual(Object.keys(d).sort(),['action','group','request_id','side','view_hash']);assert.ok(SIDES.includes(d.side)&&!bySide.has(d.side));
+45:       const i=SIDES.indexOf(d.side),v=before.views[i];assert.ok(before.requested.includes(i));
+46:       assert.equal(d.group,before.group);assert.equal(d.request_id,v.request_id);assert.equal(d.view_hash,hashJSON(v));
+47:       bySide.set(d.side,{...d,command:command(v.request,d.action)});
+48:     }
+49:     const order=[first,1-first].filter(i=>before.requested.includes(i));
+50:     for(let j=0;j<order.length;j++){
+51:       const i=order[j],d=bySide.get(SIDES[i]);assert.ok(d);await this.write(`>${d.side} ${d.command}`);this.tape.push(d);
+52:       if(j===0&&order.length===2)assert.deepEqual(this.views(),before.views,'Pending choice leaked');
+53:     }
+54:     this.group++;return this.frame();
+55:   }
+56:   close(){this.closed=true;this.destroy();}
+57: }
+58: export function choices(frame,actions){return frame.requested.map(i=>({side:SIDES[i],group:frame.group,
+59:   request_id:frame.views[i].request_id,view_hash:hashJSON(frame.views[i]),action:actions[i]}));}
+60: export function audit(session){return {turn:session.battle.turn,seed:session.battle.prng.getSeed(),sides:session.battle.sides.map(s=>({
+61:   id:s.id,pokemon:s.pokemon.map(m=>({name:m.name,species:m.species.id,hp:m.hp,maxhp:m.maxhp,active:m.isActive,
+62:     fainted:m.fainted,ability:m.ability,item:m.item,status:m.status,stats:m.storedStats,
+63:     pp:m.moveSlots.map(m=>({id:m.id,pp:m.pp})),boosts:{...m.boosts},volatiles:Object.keys(m.volatiles)}))}))};}
+64: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/switch-reference/fixtures.mjs
+1: import assert from 'node:assert/strict';
+2: import {mkdirSync,writeFileSync} from 'node:fs';
+3: import {gzipSync} from 'node:zlib';
+4: import {seedFor} from '../reference-node/engine.mjs';
+5: import {hashJSON,canonical} from '../battle-contract/canonical.mjs';
+6: import {PROFILE,ROSTER,SIDES,reference} from './profile.mjs';
+7: import {Session,choices,audit} from './session.mjs';
+8: import {mask,command} from './actions.mjs';
+9: import {damageGrid} from './damage.mjs';
+10: 
+11: const packView=v=>({view:v,mask:mask(v.request),commands:mask(v.request).map((legal,i)=>legal?command(v.request,i):null)});
+12: const capture=s=>({frame:s.frame(),audit:audit(s)});
+13: function select(frame,style){return frame.views.map(v=>{
+14:   const m=mask(v.request),legal=m.flatMap((ok,i)=>ok?[i]:[]);
+15:   if(!legal.length)return null;
+16:   if(v.request.forceSwitch||style==='switch'||(style==='mixed'&&frame.turn%3===1))return legal.find(i=>i>=2)??legal[0];
+17:   return m[style==='normal'?1:0]?(style==='normal'?1:0):legal[0];
+18: });}
+19: export async function fixture(spec,style,first){
+20:   const s=new Session();try{
+21:     await s.start(spec);const snapshots=[capture(s)];
+22:     while(!s.battle.ended&&!s.truncated()){
+23:       const f=s.frame();await s.step(choices(f,select(f,style)),first);snapshots.push(capture(s));
+24:     }
+25:     const final=s.frame();return {spec,style,first,snapshots,tape:s.tape,
+26:       outcome:{status:s.battle.ended?'terminal':'truncated',winner:final.winner,turn:final.turn}};
+27:   }finally{s.close();}
+28: }
+29: export async function information(){
+30:   const initial=new Map(),after=new Map(),probes=[],comparisons=[];let initial_equal=0,post_equal=0,own_changed=0,starts=0;
+31:   for(const observer of [0,1])for(const own of ROSTER)for(const opponent of ROSTER){
+32:     const initialKey=[observer,own.id,opponent.species[0]].join('/');
+33:     const afterKey=[initialKey,opponent.variants[0]].join('/');
+34:     const teams=observer===0?[own.id,opponent.id]:[opponent.id,own.id];
+35:     // Reserve variant does not change the random namespace; no hidden state enters action selection.
+36:     const spec={teams,seed:seedFor(`switch-information-v1/${afterKey}`)};
+37:     const s=new Session();try{
+38:       const f=await s.start(spec);starts++;
+39:       const v=f.views[observer],h=hashJSON(v);
+40:       if(initial.has(initialKey)){assert.equal(h,initial.get(initialKey));initial_equal++;}else initial.set(initialKey,h);
+41:       const g=await s.step(choices(f,[1,1]),observer),v2=g.views[observer],h2=hashJSON(v2);
+42:       if(after.has(afterKey)){assert.equal(h2,after.get(afterKey));post_equal++;}else after.set(afterKey,h2);
+43:       comparisons.push({observer,own:own.id,opponent:opponent.id,initial_key:initialKey,after_key:afterKey,initial_hash:h,after_hash:h2,opponent_own_hash:hashJSON(f.views[1-observer])});
+44:       // Own private speed variant is a real input, unlike an opponent's unobserved variant.
+45:       if(own.id===ROSTER[0].id&&opponent.variants[0]==='swift'){
+46:         assert.equal(f.views[1-observer].request.side.pokemon[0].stats.spe,
+47:           s.battle.sides[1-observer].active[0].storedStats.spe);own_changed++;
+48:       }
+49:       // Keep complete positive-reveal examples in both seats for each lead/reserve/variant.
+50:       if(own.id===ROSTER[0].id){
+51:         assert.equal(g.phase,'joint_move');const actions=[1,1];actions[1-observer]=3;
+52:         const reveal=await s.step(choices(g,actions),observer);
+53:         assert.notEqual(hashJSON(reveal.views[observer]),h2);
+54:         assert.ok(reveal.views[observer].protocol.some(l=>l.startsWith(`|switch|${SIDES[1-observer]}a: B|`)));
+55:         probes.push({observer,spec,initial:packView(v),after:packView(v2),reveal:packView(reveal.views[observer])});
+56:       }
+57:     }finally{s.close();}
+58:   }
+59:   assert.equal(starts,1152);assert.equal(initial_equal,1008);assert.equal(post_equal,864);assert.equal(probes.length,48);
+60:   return {starts,initial_equal,post_equal,own_variant_observations:own_changed,comparisons,probes};
+61: }
+62: export async function generate(){
+63:   const manifest=reference(),cases=[];
+64:   for(const [i,row] of ROSTER.entries())for(const style of ['attack','mixed','switch']){
+65:     const spec={teams:[row.id,ROSTER[(i*7+9)%24].id],seed:seedFor(`switch-fixture-v1/${i}/${style}`)};
+66:     const a=await fixture(spec,style,i%2),b=await fixture(spec,style,1-i%2);
+67:     // Submission order must not select a different mechanic outcome or observation history.
+68:     assert.deepEqual(a.snapshots,b.snapshots);assert.deepEqual(a.outcome,b.outcome);
+69:     cases.push(a);
+70:   }
+71:   const info=await information(),coverage={terminal:0,truncated:0,replacement:0,wait:0,voluntary_switch:0,
+72:     critical_hits:0,super_effective:0,resisted:0,low_hp_ability_attacks:0,speed_tie_turns:0,masked_hp:0};
+73:   const golden=[];
+74:   for(const c of cases){coverage[c.outcome.status]++;
+75:     for(const [i,s] of c.snapshots.entries()){
+76:       if(s.frame.phase==='replacement')coverage.replacement++;
+77:       if(s.frame.phase!=='terminal')for(const v of s.frame.views){golden.push(packView(v));if(v.request.wait)coverage.wait++;}
+78:       for(const p of s.audit.sides)for(const m of p.pokemon){assert.equal(m.item,'');assert.ok(m.status===''||(m.status==='fnt'&&m.fainted&&m.hp===0));assert.deepEqual(m.volatiles,[]);assert.ok(Object.values(m.boosts).every(n=>n===0));}
+79:       if(i+1<c.snapshots.length){
+80:         const active=s.audit.sides.map(side=>side.pokemon.find(m=>m.active));
+81:         if(s.frame.phase==='joint_move'&&active[0].stats.spe===active[1].stats.spe)coverage.speed_tie_turns++;
+82:         for(let seat=0;seat<2;seat++){
+83:           const mon=active[seat];if(!mon)continue;const next=c.snapshots[i+1].frame.views[seat].protocol.slice(s.frame.views[seat].protocol.length);
+84:           const signature=PROFILE.species.find(p=>p.id===mon.species).moves[0];
+85:           if(mon.hp>0&&3*mon.hp<=mon.maxhp&&next.some(l=>l.startsWith(`|move|${SIDES[seat]}a: ${mon.name}|${signature}|`)))coverage.low_hp_ability_attacks++;
+86:         }
+87:       }
+88:     }
+89:     const protocol=c.snapshots.at(-1).frame.views[0].protocol;
+90:     for(const line of protocol){
+91:       if(line.startsWith('|-crit|'))coverage.critical_hits++;
+92:       if(line.startsWith('|-supereffective|'))coverage.super_effective++;
+93:       if(line.startsWith('|-resisted|'))coverage.resisted++;
+94:       if(/^\|(?:switch|\-damage)\|p2a:/.test(line)&&line.includes('/100'))coverage.masked_hp++;
+95:     }
+96:     for(const d of c.tape)if(d.action>=2&&c.snapshots[d.group].frame.phase==='joint_move')coverage.voluntary_switch++;
+97:   }
+98:   for(const [key,value] of Object.entries(coverage))assert.ok(value>0,`Missing coverage ${key}`);
+99:   assert.deepEqual(reference(),manifest);
+100:   const damage=await damageGrid();
+101:   return {damage,format:'switch-reference-fixtures-1',profile:PROFILE,manifest,cases,information:info,golden,coverage};
+102: }
+103: if(process.argv[1]===new URL(import.meta.url).pathname){
+104:   const out=process.argv[2];assert.ok(out,'Output directory required');mkdirSync(out,{recursive:false});
+105:   const data=await generate(),bytes=Buffer.from(canonical(data)+'\n');
+106:   writeFileSync(`${out}/fixtures.json.gz`,gzipSync(bytes,{level:9}),{flag:'wx'});
+107:   const summary={format:data.format,profile:PROFILE.id,fixture_hash:hashJSON(data),games:data.cases.length,
+108:     codec_views:data.golden.length,conditional_damage_values:data.damage.reduce((n,r)=>n+r.calls,0),information:{starts:data.information.starts,initial_equal:data.information.initial_equal,
+109:       post_equal:data.information.post_equal,reveal_probes:data.information.probes.length},coverage:data.coverage};
+110:   writeFileSync(`${out}/summary.json`,canonical(summary)+'\n',{flag:'wx'});console.log(JSON.stringify(summary));
+111: }
+112: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/switch-reference/damage.mjs
+1: // Conditional reference oracle: private HP and crit/roll are injected only here.
+2: // This is not a natural episode or a sampler-frequency test.
+3: import assert from 'node:assert/strict';
+4: import {Dex,seedFor} from '../reference-node/engine.mjs';
+5: import {PROFILE,ROSTER} from './profile.mjs';
+6: import {Session} from './session.mjs';
+7: export async function damageGrid(){
+8:   const rows=[];
+9:   for(const a of PROFILE.species)for(const b of PROFILE.species)for(const seat of [0,1]){
+10:     const teamFor=(p,v)=>ROSTER.find(r=>r.species[0]===p.id&&r.variants[0]===v).id;
+11:     const teams=[teamFor(a,'plain'),teamFor(b,'swift')];if(seat===1)teams.reverse();
+12:     const s=new Session();try{
+13:       await s.start({teams,seed:seedFor(`switch-damage-grid-v1/${a.id}/${b.id}/${seat}`)});
+14:       const battle=s.battle,source=battle.sides[seat].active[0],target=battle.sides[1-seat].active[0];
+15:       const hp=[Math.floor(source.maxhp/3)-1,Math.floor(source.maxhp/3),Math.floor(source.maxhp/3)+1];
+16:       const values=[];let calls=0;
+17:       for(const health of hp){source.hp=health;const moves=[];
+18:         for(const name of a.moves){const crits=[];
+19:           for(const critical of [false,true]){const rolls=[];
+20:             for(let roll=0;roll<16;roll++){
+21:               const move=Dex.getActiveMove(name);move.willCrit=critical;
+22:               // Preserve Showdown's randomizer and integer ordering; intercept only
+23:               // its bounded 0..15 draw. Any additional random call fails closed.
+24:               const before=calls;battle.random=(m,n)=>{assert.equal(m,16);assert.equal(n,undefined);calls++;return roll;};
+25:               const result=battle.actions.getDamage(source,target,move,true);
+26:               assert.equal(calls,before+1);assert.ok(Number.isInteger(result)&&result>0);rolls.push(result);
+27:             }crits.push(rolls);
+28:           }moves.push(crits);
+29:         }values.push(moves);
+30:       }
+31:       for(let crit=0;crit<2;crit++)for(let roll=0;roll<16;roll++){
+32:         assert.equal(values[0][0][crit][roll],values[1][0][crit][roll]);
+33:         assert.ok(values[1][0][crit][roll]>values[2][0][crit][roll],'Ability threshold');
+34:         assert.equal(values[0][1][crit][roll],values[2][1][crit][roll],'Normal move is not boosted');
+35:       }
+36:       rows.push({attacker:a.id,defender:b.id,seat,teams,maxhp:source.maxhp,hp,values,calls});
+37:     }finally{s.close();}
+38:   }
+39:   assert.equal(rows.length,18);return rows;
+40: }
+41: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/switch-reference/session.test.mjs
+1: import test from 'node:test';
+2: import assert from 'node:assert/strict';
+3: import {Session,choices,audit} from '../../packages/switch-reference/session.mjs';
+4: import {ROSTER,reference} from '../../packages/switch-reference/profile.mjs';
+5: import {mask,command} from '../../packages/switch-reference/actions.mjs';
+6: import {seedFor} from '../../packages/reference-node/engine.mjs';
+7: import {fixture} from '../../packages/switch-reference/fixtures.mjs';
+8: import {damageGrid} from '../../packages/switch-reference/damage.mjs';
+9: const spec=(key='a')=>({teams:[ROSTER[0].id,ROSTER[8].id],seed:seedFor(`switch-test/${key}`)});
+10: 
+11: test('profile has 24 closed teams and a non-debug private-HP format',()=>{
+12:   assert.equal(ROSTER.length,24);const r=reference();assert.ok(r.format.rules.some(([r])=>r==='hppercentagemod'));
+13: });
+14: test('stable switch identity survives current-request reordering',async()=>{
+15:   const s=new Session();try{
+16:     let f=await s.start(spec());assert.deepEqual(mask(f.views[0].request),[true,true,false,true]);
+17:     f=await s.step(choices(f,[3,1]));assert.equal(f.views[0].request.side.pokemon[0].ident,'p1: B');
+18:     assert.deepEqual(mask(f.views[0].request),[true,true,true,false]);assert.equal(command(f.views[0].request,2),'switch 2');
+19:     assert.ok(f.views[1].protocol.some(l=>l==='|switch|p1a: B|Squirtle, L50, M|100/100'));
+20:   }finally{s.close();}
+21: });
+22: test('stale, duplicate, extra, invalid and concurrent submissions cannot double commit',async()=>{
+23:   const s=new Session();try{
+24:     const f=await s.start(spec('reject')),before=audit(s),d=choices(f,[0,0]);
+25:     for(const bad of [[{...d[0],request_id:99},d[1]],[d[0],d[0]],[{...d[0],action:true},d[1]],
+26:       [{...d[0],seed:'hidden'},d[1]],[{...d[0],view_hash:'bad'},d[1]],[{...d[0],action:2},d[1]]]){
+27:       await assert.rejects(s.step(bad));assert.deepEqual(audit(s),before);assert.deepEqual(s.frame(),f);
+28:     }
+29:     const pending=s.step(d);await assert.rejects(s.step(d));await pending;
+30:     assert.equal(s.tape.length,2);await assert.rejects(s.step(d));assert.equal(s.tape.length,2);
+31:   }finally{s.close();}
+32: });
+33: test('out-of-profile startup and action phases fail closed',async()=>{
+34:   const s=new Session();try{await assert.rejects(s.start({...spec(),teams:[ROSTER[0].id,'unknown']}));assert.ok(!s.battle);
+35:     const f=await s.start(spec('scope'));const req=f.views[0].request;
+36:     for(const mutate of [r=>r.teamPreview=true,r=>r.active[0].canTerastallize='Grass',r=>r.active[0].trapped=true,
+37:       r=>r.active[0].moves[0].id='struggle',r=>r.active.push(r.active[0]),r=>r.side.pokemon[1].reviving=true]){
+38:       const changed=structuredClone(req);mutate(changed);assert.throws(()=>mask(changed));
+39:     }
+40:     assert.deepEqual(mask({wait:true}),[false,false,false,false]);assert.throws(()=>command({wait:true},0));
+41:   }finally{s.close();}
+42: });
+43: test('natural faint replacement is separate from a turn and waiting side has no action',async()=>{
+44:   const s=new Session();try{
+45:     let f=await s.start(spec('forced'));
+46:     for(let i=0;i<12&&f.phase==='joint_move';i++)f=await s.step(choices(f,[0,0]));
+47:     assert.equal(f.phase,'replacement');assert.equal(f.requested.length,1);
+48:     const seat=f.requested[0],turn=f.turn;assert.deepEqual(mask(f.views[1-seat].request),[false,false,false,false]);
+49:     const action=mask(f.views[seat].request).findIndex(Boolean);assert.ok(action>=2);
+50:     const next=await s.step(choices(f,seat===0?[action,null]:[null,action]));assert.equal(next.phase,'joint_move');
+51:     assert.ok(next.turn===turn||next.turn===turn+1);assert.equal(next.group,f.group+1);
+52:   }finally{s.close();}
+53: });
+54: test('switch loops truncate without creating a terminal outcome, order replay agrees',async()=>{
+55:   const a=await fixture(spec('cutoff'),'switch',0),b=await fixture(spec('cutoff'),'switch',1);
+56:   assert.deepEqual(a.snapshots,b.snapshots);assert.deepEqual(a.outcome,{status:'truncated',winner:null,turn:13});
+57: });
+58: test('conditional damage oracle covers both sides and the exact ability threshold',async()=>{
+59:   const rows=await damageGrid();assert.equal(rows.length,18);assert.equal(rows.reduce((n,r)=>n+r.calls,0),3456);
+60: });
+61: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch/views.py
+1: """Player-only adapter to the frozen R5 information boundary (diagnostic features)."""
+2: from pokemon_reference.contract import hash_json, request_phase, admissible_actions, action_mask
+3: from pokemon_reference.player_history import PlayerHistory
+4: 
+5: 
+6: def actor(view):
+7:     if not isinstance(view,dict) or set(view)!={'side','request_id','turn','request','protocol'}:
+8:         raise ValueError('Expected a player-only R1 view, without audit/seed/opponent state')
+9:     if view['side'] not in ('p1','p2') or type(view['turn']) is not int or type(view['request_id']) is not int:
+10:         raise ValueError('Player identity/counters')
+11:     if not isinstance(view['protocol'],list) or not all(isinstance(line,str) for line in view['protocol']):
+12:         raise ValueError('Player protocol')
+13:     # Reconstruct through the independently checked history parser. The request and
+14:     # its counter must match the final own-channel request in the protocol.
+15:     body={'viewer':view['side'],'request_id':view['request_id'],'turn':view['turn'],
+16:           'phase':request_phase(view['request']),'request':view['request'],
+17:           'protocol_start':0,'protocol_end':len(view['protocol']),
+18:           'protocol_delta':view['protocol'],'protocol_prefix_hash':hash_json(view['protocol']),
+19:           'admissible_actions':admissible_actions(view['request']),'action_mask':action_mask(view['request'])}
+20:     body['view_id']=hash_json(body)
+21:     return PlayerHistory(view['side']).append(body)
+22: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/reference-node/observations.mjs
+1: import {extractChannelMessages} from './engine.mjs';
+2: 
+3: // Only protocol timestamp lines are normalized. Requests and mechanics are unchanged.
+4: export const normalizeProtocol = text => text.split('\n').map(line => /^\|t:\|[0-9]+$/.test(line) ? '|t:|<timestamp>' : line).join('\n');
+5: 
+6: // R1 protocol choices, not the future semantic/tensor action codec. No hidden state.
+7: export function admissibleChoices(request) {
+8:   if (!request || request.wait) return [];
+9:   const pokemon = request.side.pokemon;
+10:   const fainted = mon => mon.condition.endsWith(' fnt');
+11:   if (request.forceSwitch) {
+12:     if (request.forceSwitch.length !== 1) throw new Error('Only singles requests are supported');
+13:     if (!request.forceSwitch[0]) return ['pass'];
+14:     const reviving = Boolean(pokemon[0].reviving);
+15:     const choices = pokemon.flatMap((mon, index) => (
+16:       (index > 0 || reviving) && (reviving ? fainted(mon) : !fainted(mon)) ? [`switch ${index + 1}`] : []
+17:     ));
+18:     return choices.length ? choices : ['pass'];
+19:   }
+20:   if (request.teamPreview || request.active?.length !== 1) throw new Error('Unexpected request phase for the pinned singles format');
+21:   const active = request.active[0];
+22:   const choices = active.moves.flatMap((move, index) => move.disabled ? [] : [
+23:     `move ${index + 1}`, ...(active.canTerastallize ? [`move ${index + 1} terastallize`] : []),
+24:   ]);
+25:   if (!active.trapped) pokemon.forEach((mon, index) => {
+26:     if (!mon.active && !fainted(mon)) choices.push(`switch ${index + 1}`);
+27:   });
+28:   return choices;
+29: }
+30: 
+31: export class PlayerProjection {
+32:   constructor() {
+33:     this.players = Object.fromEntries(['p1', 'p2'].map(side => [side, {
+34:       side, request_id: 0, turn: 0, request: null, protocol: [], pending: false,
+35:     }]));
+36:     this.spectator = [];
+37:     this.errors = [];
+38:   }
+39: 
+40:   ingest(type, data) {
+41:     if (type === 'update') {
+42:       // The same splitter used by upstream getPlayerStreams; never give actors channel -1.
+43:       const channels = extractChannelMessages(data, [0, 1, 2]);
+44:       this.spectator.push(...normalizeProtocol(channels[0].join('\n')).split('\n'));
+45:       for (const [side, channel] of [['p1', 1], ['p2', 2]]) this.receive(side, channels[channel].join('\n'));
+46:     } else if (type === 'sideupdate') {
+47:       const newline = data.indexOf('\n');
+48:       const side = data.slice(0, newline);
+49:       if (!this.players[side]) throw new Error(`Unexpected private channel ${side}`);
+50:       this.receive(side, data.slice(newline + 1));
+51:     } else if (type !== 'end') {
+52:       throw new Error(`Unknown simulator message ${type}`);
+53:     }
+54:     // The end payload contains both private teams and never enters a PlayerView.
+55:   }
+56: 
+57:   receive(side, text) {
+58:     const player = this.players[side];
+59:     for (const line of normalizeProtocol(text).split('\n')) {
+60:       player.protocol.push(line);
+61:       if (line.startsWith('|turn|')) player.turn = Number(line.slice(6));
+62:       if (line.startsWith('|request|')) {
+63:         player.request = JSON.parse(line.slice(9));
+64:         player.request_id++;
+65:         player.pending = Boolean(player.request && !player.request.wait);
+66:       }
+67:       if (line.startsWith('|error|')) this.errors.push({side, message: line.slice(7)});
+68:     }
+69:   }
+70: 
+71:   view(side) {
+72:     const {pending, ...view} = this.players[side];
+73:     return structuredClone(view);
+74:   }
+75: }
+76: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

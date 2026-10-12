@@ -1,0 +1,10 @@
+[
+  {
+    "argv": [
+      "node",
+      "--test",
+      "tests/showdown-panel/statistics.test.mjs"
+    ],
+    "returncode": 0
+  }
+]

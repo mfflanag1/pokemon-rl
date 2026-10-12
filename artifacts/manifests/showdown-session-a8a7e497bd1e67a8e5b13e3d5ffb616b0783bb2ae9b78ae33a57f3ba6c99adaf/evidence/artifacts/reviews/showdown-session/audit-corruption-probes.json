@@ -1,0 +1,18 @@
+[
+  {
+    "name": "actor-view",
+    "rejected": true
+  },
+  {
+    "name": "accepted-choice-replay",
+    "rejected": true
+  },
+  {
+    "name": "terminal-result",
+    "rejected": true
+  },
+  {
+    "name": "fault-inventory",
+    "rejected": true
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "followup": {
+    "changed_since_review": [],
+    "reviewed_files": 4
+  },
+  "host_monotonic_clock": {
+    "adjustable": false,
+    "implementation": "mach_absolute_time()",
+    "monotonic": true,
+    "resolution": 4.166666666666666e-08
+  },
+  "main": {
+    "changed_since_review": [
+      "python/pokemon_soak/campaign.py",
+      "python/pokemon_soak/gates.py",
+      "contracts/soak-v1/plan.json",
+      "scripts/seal-policy-soak.py",
+      "tests/soak/test_campaign.py",
+      "tests/soak/test_gates.py"
+    ],
+    "reviewed_files": 11
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review this new additive scalar/JAX port and passive Showdown capture for concrete mechanics, hidden-information or false-parity bugs. Closed immutable switch-v1 roster only. 72 exact sealed reference replays and 24 fresh games currently pass full state/events/mask/player-view comparison; 1872 reference hidden-state comparisons plus positive controls pass. No production 10000-game run or training has started. Focus on switch priority/outgoing speed, faint replacement/turn advancement, low-HP damage rounding, public HP/memory and observer-only compact encoder, passive chance instrumentation and independent checker coverage. Source-root predecessor files are read-only. Identify actionable correctness gaps, distinguish missing evidence from bugs. Snapshot only; do not claim tests executed.",
+  "files_sha256": {
+    "contracts/switch-v1/profile.json": "1b9b65d92b13c45f3425081a650e8750013f7d1d93dbbcbfd0012bb60a171df5",
+    "contracts/switch-engine-v1/README.md": "b82644096b3cf36825b6b186ce738c4f8d613065148f95b6155be7ae76a99002",
+    "contracts/switch-engine-v1/plan.json": "336775382719b2b922cdd297789f08e48ea897be7721b3ad201b9fe50d2a1311",
+    "packages/switch-reference/session.mjs": "21e754ffeae4ee931667bcb40b6a97254eede7af23bbc107df8d7b73c085eeda",
+    "packages/switch-engine/reference.mjs": "60e38afb261ddbb6ca1397abfcaab3adea26fda864ad86d608fa122ff3a7b640",
+    "python/pokemon_switch_engine/damage.py": "6f9a69f0d9992150145377f56b37de5b270767a438dd69d667621f8fda987c8d",
+    "python/pokemon_switch_engine/scalar.py": "0cc17c2c13b352fd9d0da421de5ae20200162af07cfa2193ceea09b3b9b7d05b",
+    "python/pokemon_switch_engine/engine.py": "15328239923fe8442a89c73a6c98397220d39ba5d7907f5df61d674b109177ae",
+    "python/pokemon_switch_engine/views.py": "46641241add460b13dbd6f10da15e4c9e5fd0de94bef20db81d5fe7ef94f14e7",
+    "python/pokemon_switch_engine/parity.py": "6a26868697a3db935bb903ef0d7387db69b674322f5579e95aa260e8fd36b9cd",
+    "python/pokemon_switch_engine/chance.py": "673501677150f0cab1ba01393ff5c62d28853830103689b52a7c1f67a97ca746"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

@@ -1,0 +1,22 @@
+✔ frame parser isolates rooms, including global messages and malicious room IDs (2.339208ms)
+✔ legal singles choices handle Tera, disabled moves, trapping, wait and Struggle (0.385083ms)
+✔ forced switch/revival use current request positions and opposite eligibility (25.018625ms)
+✔ foreign requests and unsupported battle types reject (0.402792ms)
+✔ heuristic responds to revealed type but not unobserved opponent state (233.04425ms)
+✔ duplicate/stale requests submit once; wait and terminal submit nothing (24.415084ms)
+✔ unavailable choice waits for a fresh request, then uses its new rqid (18.272167ms)
+✔ sentchoice history and revoked requests suppress replay (12.05475ms)
+✔ two rooms never share request IDs or public state (5.351583ms)
+✔ modern challenge PMs and legacy notifications require an allowlisted sender and exact format (0.538417ms)
+✔ remote transport requires encrypted authenticated connection; usernames cannot inject commands (0.155ms)
+✔ authentication uses exact challenge, strips JSON prefix and does not echo credentials on failure (0.480208ms)
+✔ explicit invalid choices and foreign battle formats fail visibly (0.381916ms)
+✔ disconnect fails without replaying a pending choice or reconnecting (32.653833ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 688.699916

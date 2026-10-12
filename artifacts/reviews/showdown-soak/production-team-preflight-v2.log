@@ -1,0 +1,12 @@
+/Users/maxf/Documents/ChatGPT/Pokemon/vendor/pokemon-showdown/dist/sim/team-validator.js:230
+      throw new Error(`format '${format}' should be a 'Format', but was a '${this.format.effectType}'`);
+            ^
+
+Error: format '[Gen 9] Bot Baseline Development' should be a 'Format', but was a 'Condition'
+    at new TeamValidator (/Users/maxf/Documents/ChatGPT/Pokemon/vendor/pokemon-showdown/dist/sim/team-validator.js:230:13)
+    at file:///Users/maxf/Documents/ChatGPT/Pokemon/artifacts/reviews/showdown-soak/team-preflight.mjs:13:19
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:655:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v25.6.1

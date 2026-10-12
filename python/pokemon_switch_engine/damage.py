@@ -1,0 +1,112 @@
+"""Scalar Gen9 damage helper for the closed three-species, level-50 profile.
+
+Pure, dependency-free functions. Every argument is strictly validated so the
+profile cannot be silently widened (bools are rejected where ints are required).
+"""
+
+_LEVEL = 50
+
+# species -> (base stats HP/Atk/Def/SpA/SpD/Spe, types, signature type)
+_SPECIES = {
+    'bulbasaur': ((45, 49, 49, 65, 65, 45), ('grass', 'poison'), 'grass'),
+    'squirtle': ((44, 48, 65, 50, 64, 43), ('water',), 'water'),
+    'fennekin': ((40, 45, 40, 62, 60, 60), ('fire',), 'fire'),
+}
+
+# species -> move0 (power, type, physical?); move1 is always physical 40 Normal
+_MOVE0 = {
+    'bulbasaur': (45, 'grass', True),   # Vine Whip
+    'squirtle': (40, 'water', False),   # Water Gun
+    'fennekin': (60, 'fire', False),    # Incinerate
+}
+_MOVE1 = (40, 'normal', True)           # Tackle / Scratch
+
+# move0 PP after 8/5 boost; move1 PP is 35 * 8/5 = 56
+_PP0 = {'bulbasaur': 40, 'squirtle': 40, 'fennekin': 24}
+_PP1 = 56
+
+# attacking type -> (resisted-by set, super-effective-against set)
+_CHART = {
+    'grass': ({'grass', 'poison', 'fire'}, {'water'}),
+    'water': ({'water', 'grass'}, {'fire'}),
+    'fire': ({'fire', 'water'}, {'grass'}),
+    'normal': (set(), set()),
+}
+
+
+def _check_species(species):
+    if not isinstance(species, str) or species not in _SPECIES:
+        raise ValueError('unsupported species: %r' % (species,))
+
+
+def _check_bool(value, name):
+    if not isinstance(value, bool):
+        raise TypeError('%s must be a bool' % name)
+
+
+def _check_int(value, name, low, high):
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise TypeError('%s must be an int' % name)
+    if not low <= value <= high:
+        raise ValueError('%s must be in %d..%d' % (name, low, high))
+
+
+def _round(value, mult):
+    """Pokémon fixed-point rounding: value * mult/4096, round half down."""
+    return (value * mult + 2047) // 4096
+
+
+def stats(species, swift=False):
+    """Return a new [hp, atk, def, spa, spd, spe] list (L50, Serious, IV31)."""
+    _check_species(species)
+    _check_bool(swift, 'swift')
+    base = _SPECIES[species][0]
+    out = [(2 * base[0] + 31) * _LEVEL // 100 + _LEVEL + 10]
+    for i in range(1, 6):
+        ev = 252 if (swift and i == 5) else 0
+        out.append((2 * base[i] + 31 + ev // 4) * _LEVEL // 100 + 5)
+    return out
+
+
+def max_pp(species):
+    """Return a new [move0, move1] max-PP list."""
+    _check_species(species)
+    return [_PP0[species], _PP1]
+
+
+def damage(attacker, defender, hp, move, crit, roll):
+    """Damage dealt by attacker's move against defender, as an int.
+
+    hp is the attacker's current HP (1..maxhp), move is 0/1, crit is a bool and
+    roll is Showdown's bounded draw 0..15 (damage factor 100-roll).
+    """
+    _check_species(attacker)
+    _check_species(defender)
+    _check_bool(crit, 'crit')
+    _check_int(move, 'move', 0, 1)
+    _check_int(roll, 'roll', 0, 15)
+    atk_stats = stats(attacker)
+    _check_int(hp, 'hp', 1, atk_stats[0])
+
+    power, mtype, physical = _MOVE0[attacker] if move == 0 else _MOVE1
+    attack = atk_stats[1] if physical else atk_stats[3]
+    def_stats = stats(defender)
+    defense = def_stats[2] if physical else def_stats[4]
+
+    signature = _SPECIES[attacker][2]
+    if mtype == signature and 3 * hp <= atk_stats[0]:
+        attack = _round(attack, 6144)  # Overgrow / Torrent / Blaze: 1.5x stat
+
+    value = (2 * _LEVEL // 5 + 2) * power * attack // defense // 50 + 2
+    if crit:
+        value = value * 3 // 2
+    value = value * (100 - roll) // 100
+    if mtype == signature:
+        value = _round(value, 6144)  # STAB 1.5x
+    resisted, strong = _CHART[mtype]
+    for dtype in _SPECIES[defender][1]:
+        if dtype in resisted:
+            value //= 2  # each resistance halving floors separately
+        elif dtype in strong:
+            value *= 2
+    return max(value, 1)

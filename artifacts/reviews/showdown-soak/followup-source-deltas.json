@@ -1,0 +1,25 @@
+{
+  "reviewed_files": 8,
+  "deltas": {
+    "packages/showdown-soak/campaign.mjs": {
+      "reviewed": "f461567a97c01752cf03c8361c606bc3ba84bc52c97dadf0e974f45117129b04",
+      "current": "fb3a358d8a678755fef8220c30af4774e7c7cb7d81a0e889826e0a082be7e4cb"
+    },
+    "packages/showdown-soak/audit.mjs": {
+      "reviewed": "c984c0a8aede832dd7e52490456cd8b948db74f4a46e93ee15830504adc68f9a",
+      "current": "da55d5576edf9cb177484a2977bf1be44f83bd7ff4aa922288dc0d915cb6d285"
+    },
+    "packages/showdown-soak/teams.mjs": {
+      "reviewed": "76b3f92c6f090389bdcfc04d3e9c615172bd452b18f2361a61ae5b70a128d46a",
+      "current": "d32f7327aedd2784e982aa56f5463ee56a3087e8ccf270ae089a2634ed3b1cf3"
+    },
+    "packages/showdown-soak/local-server.mjs": {
+      "reviewed": "b2b71e887d18230caa9e668c6d04b99fe8caadcd87a49fc08fb1aa57ec418db9",
+      "current": "09aaa3c230716f7e223a8a108a84a5ac39a3bd99fa509b44f841a64271aedeff"
+    },
+    "tests/showdown-soak/audit.test.mjs": {
+      "reviewed": "61c5e497c1bf2c805ffb89d8014d5a7b3e6cf880bc63e80375c62a697e7faf17",
+      "current": "33fa1a95b1f3d8f066711c75e95d9c2fca7ec11266a196e414fb5278b57735b3"
+    }
+  }
+}

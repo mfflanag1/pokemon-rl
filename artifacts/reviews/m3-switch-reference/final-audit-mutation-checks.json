@@ -1,0 +1,45 @@
+{
+  "results": [
+    {
+      "case": "wrong_submission_command",
+      "rejected": true,
+      "reason": "Submission codec"
+    },
+    {
+      "case": "golden_mask_drift",
+      "rejected": true,
+      "reason": "Complete golden-view roster"
+    },
+    {
+      "case": "counterfactual_visible_drift",
+      "rejected": true,
+      "reason": "Counterfactual view/hash binding"
+    },
+    {
+      "case": "retained_counterfactual_drift",
+      "rejected": true,
+      "reason": "Counterfactual view/hash binding"
+    },
+    {
+      "case": "coverage_drift",
+      "rejected": true,
+      "reason": "Independently counted coverage"
+    },
+    {
+      "case": "roster_drift",
+      "rejected": true,
+      "reason": "Exact profile roster"
+    },
+    {
+      "case": "damage_threshold_erased",
+      "rejected": true,
+      "reason": "Ability effect"
+    },
+    {
+      "case": "privileged_actor_envelope",
+      "rejected": true,
+      "reason": "Expected a player-only R1 view, without audit/seed/opponent state"
+    }
+  ],
+  "audit_source_sha256": "f98a3490d621e1a0b74bd5da68710c398ec245239d71c8919f3b5ff7b9f49778"
+}

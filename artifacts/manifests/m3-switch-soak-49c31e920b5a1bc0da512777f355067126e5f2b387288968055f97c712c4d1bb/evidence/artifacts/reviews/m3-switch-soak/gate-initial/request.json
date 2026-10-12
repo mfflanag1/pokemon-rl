@@ -1,0 +1,36 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Implement the pure switch soak gate exactly as contracts/switch-soak-v1/gate-task.md. Own only python/pokemon_switch_soak/gates.py. Do not delegate. Other work is happening; do not modify other files.",
+  "criteria": "Standard-library validator rejects malformed, incomplete, wrong-scope, unstable, mislinked and under-duration qualification/telemetry; preserves smoke distinction; provided tests pass. Read task specification for exact schema and bounds.",
+  "owned": [
+    "python/pokemon_switch_soak/gates.py"
+  ],
+  "checks": [
+    [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/switch-soak",
+      "-p",
+      "test_gates.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/switch-soak-v1/gate-task.md": "e3ead4f1ebd03c30c5ea189c772facbece872b94594b285ca8aa3134c00b4d05",
+    "contracts/switch-soak-v1/plan.json": "e5f8f15f72b2f40a260fd22b214b599fa1247d4d1f7c9b8c97d4fc3bdf7dd6b1",
+    "tests/switch-soak/test_gates.py": "d3dc298896967735a3f033da727b11a740e60d3212b109d4bb64676a0c78be5a"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "7c4d128f0ee350da51903e84596f5583008312ba",
+  "created_at": "2026-10-11T22:29:07.645980+00:00",
+  "test_run": false
+}

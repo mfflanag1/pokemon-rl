@@ -1,0 +1,26 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new Showdown chance milestone for consequential correctness flaws. Frozen predecessor binary policy and simulator are intentionally reused. Local CPU, x64 disabled only. We compare raw uint32 mappings with the pinned actual Showdown PRNG: crit floor(w*24/2^32)==0, descending damage 100-floor(w*16/2^32), context-aware two-element shuffle. Claim is conditional finite-word law, not sodium seed or word-consumption equivalence. Capture instruments 10,000 fresh fixed public Rattata duels in 100 shards; tied moves can be shuffled twice, and the final shuffle must govern the first event. Verify passivity of wrappers, decoded chance linkage to JAX transitions/player views, seed freshness, source/admission gates, and that the new sampler actually feeds the unchanged binary actor/update loop. Inspect checkpoint version/provenance and qualification overclaim risks. Full G2/G3, hidden-set mechanics and the binary policy two-hour soak remain open; no Prime or strength claim. Mapping and campaign unit tests (7 Python and 2 Node) passed locally; full campaign is running. Provide actionable findings with precise cases. Do not treat internal kernels as a supported mixed-device public API.",
+  "files_sha256": {
+    "contracts/showdown-chance-v1/contract.json": "8160e0b6c7a272aea5b95bbe609fe7bf08909354b926d0788a8d605827a1955e",
+    "contracts/showdown-chance-v1/loop.json": "41abb638916911b9f4e69af6d29afe475234901ae11f2577d89b8a2a316350db",
+    "packages/showdown-chance/reference.mjs": "3fa1244ec6be7436b3b522de318923076e34e002333699b1b80d80992ae23dc4",
+    "packages/showdown-chance/word-oracle.mjs": "a87750acd4a4db08f1c3c2d3b6bc32c2de4ef15256479bec8b1a28042461055b",
+    "python/pokemon_showdown/mapping.py": "3cd15dcb3b23e36463142ab0abc0b7f7461363457b6d3ece998e21c6c8fb3af1",
+    "python/pokemon_showdown/chance.py": "ed423424c41aa0e2356496eb99da1b15d9bb0724711b52921ed6580dbb1d3b80",
+    "python/pokemon_showdown/campaign.py": "792e04b1acca4ba1d6e389369e993156e94794119fd70e3febde29b01597c8ab",
+    "python/pokemon_showdown/loop.py": "eadea5522106d47397d2aa6804f692bbe03c8ee1b7d4facd4cbe4016ab0d825b",
+    "python/pokemon_showdown/checkpoint.py": "99c633de2000ee3531a3753b7d2d3b4b9650e40f5ac6394f316f0aab99045633",
+    "tests/showdown-chance/test_mapping.py": "6ef7c4a151c985ee18802984ec85ed3b15492b68dee5e8d5cf4085361a69ecad",
+    "tests/showdown-chance/test_campaign.py": "7c9c02e01f3e2e9d6248080ec13ee8a9cd1819d8b15b6fda0c56b59a20326981",
+    "tests/showdown-chance/reference.test.mjs": "718e2faf8b79ff76c1958193b763bf997245c95063c48c2e6f1a1f5d9827ca6d",
+    "python/pokemon_jax/campaign.py": "aeec49558c695e7af2b3bf72ea460a39a16cdc7e7869586654ca7df57a80685f",
+    "python/pokemon_jax/engine.py": "da278cf797f6d691e1d2674544d9a6fab5ef6bb6eb282b07deac09d070e5c262",
+    "vendor/pokemon-showdown/sim/prng.ts": "faff50532b3fde14de1a544f759acf466649279f6640e1a3fd0f7dff6fa538bc"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

@@ -1,0 +1,92 @@
+diff --git a/packages/showdown-panel/statistics.mjs b/packages/showdown-panel/statistics.mjs
+index 0e2bcee..99c894d 100644
+--- a/packages/showdown-panel/statistics.mjs
++++ b/packages/showdown-panel/statistics.mjs
+@@ -202,7 +202,7 @@ function validateOptions(options) {
+       throw new MatrixValidationError(`policyIds entries must be non-empty strings; got ${describe(id)}`);
+     }
+     if (seen.has(id)) {
+-      throw new MatrixValidationError(`policyIds contains duplicate id ${describe(id)}`);
++      throw new MatrixValidationError(`policyIds contains duplicate policy id ${describe(id)}`);
+     }
+     seen.add(id);
+   }
+diff --git a/tests/showdown-panel/statistics.test.mjs b/tests/showdown-panel/statistics.test.mjs
+index 87207e7..7d9d42f 100644
+--- a/tests/showdown-panel/statistics.test.mjs
++++ b/tests/showdown-panel/statistics.test.mjs
+@@ -273,6 +273,74 @@ test('nontrivial bootstrap matches an independent re-derivation of the documente
+   }
+ });
+ 
++// ───────────────────── literal known-answer fixture ─────────────────────
++
++/**
++ * Frozen literals computed OUTSIDE this codebase (coordinator-supplied,
++ * unsigned 32-bit integer arithmetic for mulberry32, seed 0). They are not
++ * derived from `mulberry32`, `uniformIndex`, `oracleSummary`, or any other
++ * bootstrap implementation, so this test catches a regression that would
++ * change the runtime oracle and the implementation in lockstep.
++ *
++ * Draw order per the module header: replicate s = 0..B−1, pair p = 0..pairs−1,
++ * one uniform index per (s, p) from a single PRNG stream. With pairs = 3 the
++ * rejection limit is 2^32 − (2^32 mod 3) = 2^32 − 1, so every word below is
++ * accepted and index = word mod 3.
++ */
++const MULBERRY32_SEED0_WORDS = [
++  1144304738, 1416247, 958946056, 627933444, 2007157716,
++  2340967985, 2642484575, 2787370982, 1958536065, 2496316458,
++  1057668038, 420269829, 3880206403, 1753221639, 3093645806,
++];
++const SEED0_INDICES_MOD3 = [2, 1, 1, 0, 0, 2, 2, 2, 0, 0, 2, 0, 1, 0, 2];
++
++test('mulberry32 seed 0 reproduces the frozen first 15 uint32 words', () => {
++  const next = mulberry32(0);
++  const words = Array.from({ length: 15 }, () => next());
++  assert.deepEqual(words, MULBERRY32_SEED0_WORDS);
++});
++
++test('uniformIndex over the seed 0 stream reproduces the frozen indices for n = 3', () => {
++  const next = mulberry32(0);
++  const indices = Array.from({ length: 15 }, () => uniformIndex(next, 3));
++  assert.deepEqual(indices, SEED0_INDICES_MOD3);
++  // Every one of the 15 words is below the limit 2^32 − 1, so exactly 15
++  // words were consumed (no rejections).
++  assert.deepEqual(MULBERRY32_SEED0_WORDS.map((w) => w < 2 ** 32 - 1), new Array(15).fill(true));
++  assert.deepEqual(MULBERRY32_SEED0_WORDS.map((w) => w % 3), SEED0_INDICES_MOD3);
++});
++
++test('bootstrap known answer: pair scores [0, 0.5, 1], B = 5, seed 0 ⇒ interval [1/3, 2/3]', () => {
++  // Records carry both mirrors per pair. Pair 1 is split 1/0 across its
++  // mirrors, so its pair score is 0.5 without any draw.
++  const policyIds = ['p', 'q'];
++  const records = [
++    { a: 'p', b: 'q', pair: 0, mirror: 0, score: 0 },
++    { a: 'p', b: 'q', pair: 0, mirror: 1, score: 0 },
++    { a: 'p', b: 'q', pair: 1, mirror: 0, score: 1 },
++    { a: 'p', b: 'q', pair: 1, mirror: 1, score: 0 },
++    { a: 'p', b: 'q', pair: 2, mirror: 0, score: 1 },
++    { a: 'p', b: 'q', pair: 2, mirror: 1, score: 1 },
++  ];
++  const [pq] = summarizeMatrix(records, { policyIds, pairs: 3, bootstrapSamples: 5, seed: 0 });
++
++  assert.equal(pq.wins, 3);
++  assert.equal(pq.draws, 0);
++  assert.equal(pq.losses, 3);
++  assert.equal(pq.mean_score, 0.5);
++  assert.deepEqual(pq.pair_scores, [0, 0.5, 1]);
++
++  // Frozen indices grouped by replicate (3 per replicate, 5 replicates):
++  //   [2,1,1] → (1 + .5 + .5)/3 = 2/3
++  //   [0,0,2] → (0 + 0 + 1)/3   = 1/3
++  //   [2,2,0] → (1 + 1 + 0)/3   = 2/3
++  //   [0,2,0] → (0 + 1 + 0)/3   = 1/3
++  //   [1,0,2] → (.5 + 0 + 1)/3  = 1/2
++  // B = 5 ⇒ k = ⌈5/40⌉ = 1 ⇒ [smallest, largest] = [1/3, 2/3].
++  assert.deepEqual(pq.interval95, [1 / 3, 2 / 3]);
++  assert.ok(pq.interval95[0] < pq.interval95[1], 'fixture is non-degenerate');
++});
++
+ // ───────────────────────────── determinism ─────────────────────────────
+ 
+ test('summaries are deterministic for a given seed and return fresh objects', () => {

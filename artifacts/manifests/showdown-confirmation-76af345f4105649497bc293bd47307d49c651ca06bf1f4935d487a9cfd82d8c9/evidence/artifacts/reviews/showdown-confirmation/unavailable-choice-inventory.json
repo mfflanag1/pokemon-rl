@@ -1,0 +1,166 @@
+{
+  "status": "recorded",
+  "attempts_with_unavailable_errors": 13,
+  "by_policy": {
+    "random-v1": 8,
+    "baseline-v1": 5
+  },
+  "rows": [
+    {
+      "file": "game-0-0437-0.json.gz",
+      "decision_index": 31,
+      "policy": "random-v1",
+      "choice": "switch 2",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-0-0437-0.json.gz",
+      "decision_index": 41,
+      "policy": "random-v1",
+      "choice": "switch 2",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-2-0437-1.json.gz",
+      "decision_index": 41,
+      "policy": "baseline-v1",
+      "choice": "switch 2",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-2-0437-1.json.gz",
+      "decision_index": 47,
+      "policy": "baseline-v1",
+      "choice": "switch 2",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-2-0437-1.json.gz",
+      "decision_index": 50,
+      "policy": "baseline-v1",
+      "choice": "switch 2",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-2-0437-1.json.gz",
+      "decision_index": 53,
+      "policy": "baseline-v1",
+      "choice": "switch 2",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-2-0437-1.json.gz",
+      "decision_index": 56,
+      "policy": "baseline-v1",
+      "choice": "switch 2",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-3-0437-1.json.gz",
+      "decision_index": 31,
+      "policy": "random-v1",
+      "choice": "switch 2",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-3-0681-0.json.gz",
+      "decision_index": 31,
+      "policy": "random-v1",
+      "choice": "switch 3",
+      "errors": [
+        {
+          "side": "p1",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-4-0336-1.json.gz",
+      "decision_index": 33,
+      "policy": "random-v1",
+      "choice": "switch 6",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-4-0681-0.json.gz",
+      "decision_index": 31,
+      "policy": "random-v1",
+      "choice": "switch 3",
+      "errors": [
+        {
+          "side": "p1",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-4-0752-1.json.gz",
+      "decision_index": 40,
+      "policy": "random-v1",
+      "choice": "switch 4",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    },
+    {
+      "file": "game-4-0767-1.json.gz",
+      "decision_index": 29,
+      "policy": "random-v1",
+      "choice": "switch 4",
+      "errors": [
+        {
+          "side": "p2",
+          "message": "[Unavailable choice] Can't switch: The active Pok\u00e9mon is trapped"
+        }
+      ]
+    }
+  ]
+}

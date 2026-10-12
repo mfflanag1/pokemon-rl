@@ -1,0 +1,10 @@
+[
+  {
+    "argv": [
+      "node",
+      "--test",
+      "tests/showdown-soak/schedule.test.mjs"
+    ],
+    "returncode": 1
+  }
+]

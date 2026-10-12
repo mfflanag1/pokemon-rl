@@ -1,0 +1,48 @@
+{
+  "status": "pass",
+  "coverage": {
+    "games": 8,
+    "sessions": 2,
+    "rematches": 6,
+    "faults": 6,
+    "tactical_connections": 8,
+    "baseline_connections": 2,
+    "tactical_p1": 4,
+    "tactical_p2": 4,
+    "scenarios": {
+      "normal": 2,
+      "before-choice": 2,
+      "lost-write": 2,
+      "accepted-choice": 2
+    }
+  },
+  "decisions": {
+    "tactical": 159,
+    "baseline": 165
+  },
+  "unavailable_retries": {
+    "tactical": 0,
+    "baseline": 0
+  },
+  "peak_client_rss": 356270080,
+  "peak_client_heap": 88981880,
+  "request_to_attempt_ms": {
+    "tactical": {
+      "median": 2.932250000001659,
+      "p95": 3.452207999998791,
+      "p99": 3.976875000000291,
+      "max": 4.252124999999069
+    },
+    "baseline": {
+      "median": 2.824540999999954,
+      "p95": 3.383125000000291,
+      "p99": 3.499041999999463,
+      "max": 3.9096669999998994
+    }
+  },
+  "teams": 8,
+  "final_teams_used": 0,
+  "report_sha256": "bb2c02f203428f9375c855ffcd48129279c66a4d85232839231c313d9331e0d1",
+  "preregistration_sha256": "3e2294c60ae66fe2c0b919047b949c56d8337f901b3fe7fc86566d5f4e945417",
+  "teams_sha256": "4bc59a37d9330bc62c7efadefa13266d6737d9ed044eac85329462b2d52be3b3"
+}

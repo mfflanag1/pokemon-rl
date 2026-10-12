@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 82213,
+  "stop_reason": "end_turn",
+  "session_id": "7daed0e4-e0f8-4d87-aae2-fde8c856d52a",
+  "total_cost_usd": 0.96511,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 34587,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 5467,
+    "output_tokens_details": {
+      "thinking_tokens": 4007
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34587,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 5467,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 34587,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 34587
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 5467,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 34587,
+      "webSearchRequests": 0,
+      "costUSD": 0.96511,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 4007,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (no blocker to the design; several acceptance gaps that let the seal under-enforce its own stated guarantees).** Most important: the sealer does not require the sealed run to be one of the archived `m1-fixed-loop-v*` directories, nor that the interrupted v1 exists and is recorded as non-passing \u2014 so \"archive both v1 and v2\" is not actually enforced.\n\n## Findings\n\n**1. Medium \u2014 v1/v2 archival not enforced (`seal-fixed-loop.py:31,88-89,91`).** `run` is only required to be under `artifacts/runs`; evidence is `glob('m1-fixed-loop-v*')`. A run named anything else is sealed but never archived, and nothing requires a `v1` directory to exist or records its `report.json` status. Fix: `require(run in runs)`, `require(len(runs)>=2)`, and add `{'predecessor_runs': {name: status/absent}}` to the report with `require(status!='passed')` for non-sealed siblings.\n\n**2. Medium \u2014 test log unbound to sealed sources (`:77-81`).** `npm-test.log` is accepted from `artifacts/reviews/...` with no link to the hashed `tests/`, `python/`, `packages/` files or to the campaign. A log produced before a later source edit passes. The hard-coded `11` suites / 63 node tests cannot be verified from the packet. Fix: have `scripts/test.mjs` print a manifest hash of the test/source tree and require equality with the sealer's `source_files` digest; or at minimum record the log's mtime and require it exceed every source mtime.\n\n**3. Low/Medium \u2014 checkpoint linkage underspecified (`:60-69`).** `load()` validates internal invariants only. The sealer never checks: `initial.seed==final.seed==p['soak_seed']`; each boundary has the soak seed and `initial.version < boundary.version <= final.version`, strictly increasing; `final.executed_moves-initial.executed_moves==soak['executed_moves']`; `final.decisions==soak['final_counters']['decisions']`; `initial counters==soak['initial_counters']`; parity checkpoint `.seed==seed`. A boundary file copied from a parity run would currently pass. All are one-line additions.\n\n**4. Low \u2014 parity completeness not asserted (`:44-45`).** Only `comparisons>0`. Should require the exact key set (34 keys as in `parity.json`) and counts (24 per tensor/leaf; 192 for `update/*`; 360 for `fused_vs_separate`). I recomputed 24\u00d715 leaves = 360 and 24\u00d7543 = 13032 elements against `parity.json` \u2014 consistent.\n\n**5. Low \u2014 hardcoded scope field (`:92`).** `'final_reservation_unchanged':True` should be taken from `admitted['prior_gates']['final_reservation_unchanged']` (currently `true` in `admission.json`) and `require`d, not asserted.\n\n**6. Low \u2014 telemetry/soak cross-checks.** Add `telemetry[-1]['decisions']<=soak['decisions']` and `telemetry[-1]['updates']==final.learner.version` (or \u2264).\n\nWhat the sealer does get right: content-hash linkage of `report.json`\u2192`parity/profile/soak.json`; `status=='passed'` plus `elapsed>=target==7200`; positive/negative compilation control; re-running `admission()` at seal time (catches drift in `pokemon_fixed`, contracts, sealed predecessors); `write_once` protects old receipts; profile budget/accounting checks pass against the supplied `profile.json` (400804 decisions, 351613 moves within bounds).\n\n## Scope limitations\nCannot verify: `digest/wire/file_hash/require` semantics, `Comparisons.check` tolerance enforcement, existence/contents of v1 directory and the three review `.md` files, actual number of Python test modules (11), plan file hash, or float-equality robustness of `decisions_per_cycle_second` after JSON round-trip. `report.json`, `soak.json`, telemetry and checkpoints do not yet exist; checks on them are reviewed against `campaign.py`'s writer only.\n\n## Verdict\nFindings. No false-accept of an incomplete soak is evident, but items 1\u20133 should be fixed before the seal is run on the completed v2.",
+  "ttft_ms": 62383,
+  "type": "result",
+  "duration_ms": 82245,
+  "uuid": "dfc7a674-e660-460e-acd5-6c149b7231d9",
+  "ttft_stream_ms": 2544,
+  "time_to_request_ms": 33,
+  "first_content_frame_ms": 2544,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

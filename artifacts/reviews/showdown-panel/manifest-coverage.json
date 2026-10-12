@@ -1,0 +1,18 @@
+{
+  "status": "pass",
+  "covered": {
+    "packages/showdown-panel/statistics.mjs": "e059affa6ed0100d2c4958bcc19d8cdac5263ef9f54ebf21f918ca6122afee88",
+    "packages/showdown-panel/plan.json": "c18f0bcc2105d5704efdf67db10c371085602a8bb9c6cefd7bb6b3c0e57dd2b6",
+    "packages/showdown-panel/view.mjs": "a75e750ff3b880a9c1b69eecf57fcfd4a659551179b0470ba6ea5ba260505f2f",
+    "packages/showdown-panel/report.mjs": "47820adc3906dcd527bffa01ac779969a02348f8cdce21cb22da283b948ff132",
+    "packages/showdown-panel/policy.mjs": "fdb816cd87c3ee08520e8b2706a3915d6596123d7437e10d08100e45ec730362",
+    "packages/showdown-panel/game.mjs": "74a743fdbc0a8bc959333c9b867ae929de2d86c837e76e67ff9110b125e1b02c",
+    "packages/showdown-panel/campaign.mjs": "9bd4f28b7ed711d580cccfc7213e70edb224c995640de460b5627827535f198a",
+    "packages/showdown-panel/audit.mjs": "c125ae8eec1fdcb9e4368729ff4ecec63a8d0a65144cd79856bd3274e93d628f",
+    "tests/showdown-panel/audit.test.mjs": "dd6fe4632962f0798faa6c931d2710e4418ed1aee47f69ed8d2ec5affe45e905",
+    "tests/showdown-panel/statistics.test.mjs": "bd2af14ecd5e757e1138b2c5a2e71f700c031c4b7b20d63aa4bc6c557fff659d",
+    "tests/showdown-panel/policy.test.mjs": "05111e7618df3ca6f58a5301d4fc10272e901a0ab32798f536c2a6351966a520",
+    "scripts/seal-showdown-panel.py": "abdc632bab8a2668cd9a89cbdeb33924f5a8e0a093aaef84bb4162fdaab6b0b0"
+  },
+  "total_source_files": 266
+}

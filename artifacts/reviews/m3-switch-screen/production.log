@@ -1,0 +1,47 @@
+{"phase": "training", "seed": 1009, "updates": 0, "decisions": 0}
+{"phase": "training", "seed": 1009, "updates": 2048, "decisions": 1463656}
+{"phase": "training", "seed": 1009, "updates": 8192, "decisions": 6223099}
+{"phase": "training", "seed": 2027, "updates": 0, "decisions": 0}
+{"phase": "training", "seed": 2027, "updates": 2048, "decisions": 1472524}
+{"phase": "training", "seed": 2027, "updates": 8192, "decisions": 6195091}
+{"phase": "training", "seed": 3037, "updates": 0, "decisions": 0}
+{"phase": "training", "seed": 3037, "updates": 2048, "decisions": 1493509}
+{"phase": "training", "seed": 3037, "updates": 8192, "decisions": 6197130}
+{"phase": "evaluation", "seed": 1009, "update": 0, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 1009, "update": 0, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 1009, "update": 0, "opponent": "frozen-initial", "games": 1152}
+{"phase": "evaluation", "seed": 1009, "update": 2048, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 1009, "update": 2048, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 1009, "update": 2048, "opponent": "frozen-initial", "games": 1152}
+{"phase": "evaluation", "seed": 1009, "update": 8192, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 1009, "update": 8192, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 1009, "update": 8192, "opponent": "frozen-initial", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 0, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 0, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 0, "opponent": "frozen-initial", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 2048, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 2048, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 2048, "opponent": "frozen-initial", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 8192, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 8192, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 2027, "update": 8192, "opponent": "frozen-initial", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 0, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 0, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 0, "opponent": "frozen-initial", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 2048, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 2048, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 2048, "opponent": "frozen-initial", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 8192, "opponent": "random", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 8192, "opponent": "damage-greedy", "games": 1152}
+{"phase": "evaluation", "seed": 3037, "update": 8192, "opponent": "frozen-initial", "games": 1152}
+{"phase": "audit", "seed": 1009, "update": 0, "opponent": "random"}
+{"phase": "audit", "seed": 1009, "update": 0, "opponent": "damage-greedy"}
+{"phase": "audit", "seed": 1009, "update": 0, "opponent": "frozen-initial"}
+{"phase": "audit", "seed": 1009, "update": 2048, "opponent": "random"}
+{"phase": "audit", "seed": 1009, "update": 2048, "opponent": "damage-greedy"}
+{"phase": "audit", "seed": 1009, "update": 2048, "opponent": "frozen-initial"}
+{"phase": "audit", "seed": 1009, "update": 8192, "opponent": "random"}
+{"phase": "audit", "seed": 1009, "update": 8192, "opponent": "damage-greedy"}
+{"phase": "audit", "seed": 1009, "update": 8192, "opponent": "frozen-initial"}
+{"phase": "audit", "seed": 2027, "update": 0, "opponent": "random"}
+{"phase": "audit", "seed": 2027, "update": 0, "opponent": "damage-greedy"}

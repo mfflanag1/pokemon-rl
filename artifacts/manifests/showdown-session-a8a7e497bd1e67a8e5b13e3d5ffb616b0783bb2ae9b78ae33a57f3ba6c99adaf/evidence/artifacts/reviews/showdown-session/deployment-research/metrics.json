@@ -1,0 +1,68 @@
+{
+  "usage": {
+    "input_tokens": 226,
+    "cache_creation_input_tokens": 46534,
+    "cache_read_input_tokens": 197003,
+    "output_tokens": 20284,
+    "output_tokens_details": {
+      "thinking_tokens": 8213
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 46534,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 32,
+        "output_tokens": 5549,
+        "cache_read_input_tokens": 47801,
+        "cache_creation_input_tokens": 2384,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2384
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "model_usage": {
+    "claude-fable-5-1": {
+      "inputTokens": 226,
+      "outputTokens": 20284,
+      "cacheReadInputTokens": 197003,
+      "cacheCreationInputTokens": 46534,
+      "webSearchRequests": 0,
+      "costUSD": 1.9963907499999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 8213,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    },
+    "claude-haiku-5-5": {
+      "inputTokens": 466486,
+      "outputTokens": 78638,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 0,
+      "webSearchRequests": 4,
+      "costUSD": 0.12596760000000004,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 55335,
+      "canonicalModel": "claude-haiku-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "cost_usd": 2.1223583499999994,
+  "effective_model": "claude-fable-5-1"
+}

@@ -1,0 +1,22 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review the new two-hour qualification harness and completion sealer before long execution. The selected binary-policy/Showdown-chance learner, runner, checkpoints and all predecessor packages/contracts remain byte unchanged. The new package only wraps the selected executable with a frozen 7200-second continuous CPU soak, 60-second telemetry, eleven ten-minute periodic checkpoints plus initial/final checkpoints, original-vs-restored exact next-update fingerprints, source admission and a completion sealer. Smoke is ten seconds and cannot qualify. Assess fail-closed behavior, timing/host-suspension handling, compile positive/repeat controls, evidence counters and fingerprints, report/sealer bindings, finite probability/ratio diagnostics, and operational risks for the two-hour launch. A host-loop gap over 30s fails; launch will use caffeinate -i. Process RSS is not device/system headroom. Full G2/G3 remain open; no strength/final-data/Prime claim. Qualification source is frozen before launch; any required edits happen before smoke/regression and long run. Give concrete blockers or missing checks. The prior recursive admission verifies reserved final team hashes and zero final episodes. Gates.py is independently delegated with opposite-model QA; focus here on campaign and sealer integration rather than style.",
+  "files_sha256": {
+    "python/pokemon_soak/campaign.py": "1c864d4efd5766019948683e999f8d0032ea288094b6a3c048120086958bb648",
+    "python/pokemon_soak/gates.py": "735fd1353b041bc06a83199b031ba01bb9ec44ce6d19ffdccf2ff377c06df17d",
+    "contracts/soak-v1/plan.json": "7ade630a7a84ae68107138942b938c5675fa138f4b3552d2355dd15810ffe727",
+    "scripts/seal-policy-soak.py": "a44c5b60756e681a08fb76ab3c5c282da3b338697bc6e8cdfedf0560b92ea5fa",
+    "tests/soak/test_campaign.py": "0d99fbb275ea4db8cdbb81cc01eb5596202ef895866a807476fc5ef82cc2f59a",
+    "tests/soak/test_gates.py": "8c8de6a88344c80a4e4c858b2018e7d3639c556da5c0d29145472a06f885eec7",
+    "python/pokemon_showdown/loop.py": "eadea5522106d47397d2aa6804f692bbe03c8ee1b7d4facd4cbe4016ab0d825b",
+    "python/pokemon_showdown/checkpoint.py": "99c633de2000ee3531a3753b7d2d3b4b9650e40f5ac6394f316f0aab99045633",
+    "python/pokemon_showdown/campaign.py": "792e04b1acca4ba1d6e389369e993156e94794119fd70e3febde29b01597c8ab",
+    "python/pokemon_fixed/campaign.py": "3d418da8776d9a218552831bd17f27dfd88bfe6cefff4ebbdcf2eccbfe7213be",
+    "scripts/verify-fixed-loop.py": "963e2bbab5a06a5763902ca280ad45bca9e22f5c6a3133b891994f8ae8dd2513"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

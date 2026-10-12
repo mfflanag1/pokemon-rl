@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "automation_update received invalid arguments: targetThreadId: Missing targetThreadId or destination=thread."
+    }
+  ],
+  "isError": true
+}

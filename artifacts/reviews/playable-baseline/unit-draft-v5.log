@@ -1,0 +1,25 @@
+✔ frame parser isolates rooms, including global messages and malicious room IDs (1.476917ms)
+✔ legal singles choices handle Tera, disabled moves, trapping, wait and Struggle (0.257ms)
+✔ forced switch/revival use current request positions and opposite eligibility (0.090042ms)
+✔ foreign requests and unsupported battle types reject (0.17025ms)
+✔ heuristic responds to revealed type but not unobserved opponent state (139.672791ms)
+✔ duplicate/stale requests submit once; wait and terminal submit nothing (24.281916ms)
+✔ unavailable choice waits for a fresh request, then uses its new rqid (16.085583ms)
+✔ sentchoice history and revoked requests suppress replay (10.77875ms)
+✔ two rooms never share request IDs or public state (5.125541ms)
+✔ modern challenge PMs and legacy notifications require an allowlisted sender and exact format (0.460792ms)
+✔ remote transport requires encrypted authenticated connection; usernames cannot inject commands (0.155584ms)
+✔ authentication uses exact challenge, strips JSON prefix and does not echo credentials on failure (0.3875ms)
+✔ explicit invalid choices and foreign battle formats fail visibly (0.298083ms)
+✔ disconnect fails without replaying a pending choice or reconnecting (25.138667ms)
+✔ real hidden trapping rejects a visible switch and refreshes the action set (151.738166ms)
+✔ constructed Revival Blessing request accepts the fainted-slot codec choice (3.014916ms)
+✔ unrevealed reserve change produces identical actual player inputs and policy choice (3.22775ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 694.333334

@@ -1,0 +1,41 @@
+{
+  "main-snapshot": [
+    {
+      "path": "contracts/switch-v1/README.md",
+      "reviewed": "79f900a1059c73d3d5fad50590d9db6ffe7743c7d0442cddb5ee0d5bf9e1dc36",
+      "current": "f9483e2d0a9a85637f1cbe01995e42e79a3b4cd4a8176c72ca16b3cd078e7744"
+    },
+    {
+      "path": "packages/switch-reference/actions.mjs",
+      "reviewed": "5899bbaaef63f0cc054106c708e80e89fb24a23146b1c5a506ea39a22842a85f",
+      "current": "bade2c75cae2ffa09ef75cf0b29e94c80df99206c811abe7e78107b5d095ee9e"
+    },
+    {
+      "path": "packages/switch-reference/fixtures.mjs",
+      "reviewed": "6820c6cfcb51b05d421d29e1189bdc8e1156b3e400863936c609b1687edcab04",
+      "current": "c5f66d0f1b0247d5f0f74c1e86f525e38d17c1fec9e3c51daaa917d7f5d7a992"
+    },
+    {
+      "path": "packages/switch-reference/damage.mjs",
+      "reviewed": "4b28368d6b53dd29bad3c7805ab5326194a5e3390a509a95ae48ac2d0077b2b5",
+      "current": "c81304ae92585207476d5bd03fd3f3745a5457acb3d8110953bdb1d0d280a8aa"
+    },
+    {
+      "path": "python/pokemon_switch/views.py",
+      "reviewed": "52213d585aa92e1089d4e78eafe7a5863d04660e45a67e8bfa5b730e3e280bb0",
+      "current": "67009d7a837e38337f8d7c803cc66b92379b75fc75ac85ef2f499d0e3af184d5"
+    }
+  ],
+  "boundary-snapshot": [
+    {
+      "path": "python/pokemon_switch/audit.py",
+      "reviewed": "9d6553a444b56f00f4c8b09b6d3d571dbd6846076f120d1e2cbce67dab83c1da",
+      "current": "f98a3490d621e1a0b74bd5da68710c398ec245239d71c8919f3b5ff7b9f49778"
+    },
+    {
+      "path": "tests/switch-reference/test_contract.py",
+      "reviewed": "f37da2a44d2ae07c04544f2a770eea6cb55df128c8db17a80d694d4c18d8e0e4",
+      "current": "251b97e905512b19055fcf0236cc1ea07e12b74dbd9fad42aa717db4bf85a28e"
+    }
+  ]
+}

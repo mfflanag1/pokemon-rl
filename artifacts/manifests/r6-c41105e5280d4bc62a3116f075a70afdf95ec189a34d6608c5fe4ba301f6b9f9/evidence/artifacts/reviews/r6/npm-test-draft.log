@@ -1,0 +1,161 @@
+
+> pokemon-reference@0.1.0 test
+> node scripts/test.mjs
+
+✔ canonical bytes are portable, including Unicode scalar ordering and integer boundaries (125.467875ms)
+✔ strict wire decoders reject ambiguous numbers, duplicate keys, malformed Unicode and trailing data (121.136458ms)
+✔ shared artifact goldens validate independently and preserve all bytes through Python hashing (366.244166ms)
+✔ all 14 policy indices are bijective; pass and wait have no trainable index (124.149334ms)
+✔ captured and constructed requests agree across semantic, protocol and tensor codecs (208.643459ms)
+✔ known zero, absent item and unknown knowledge are distinct (125.498333ms)
+✔ malformed choices, unknown versions and unsupported phases fail in both languages (758.482625ms)
+✔ actor loader rejects privileged artifacts, wrong manifest, wrong viewer and inconsistent masks (32.732958ms)
+✔ natural hidden-trapping attempts and re-requests preserve semantic choices and history boundaries (1084.528167ms)
+✔ live semantic submission executes Tera, rejects stale requests and invalid visible actions before engine input (21.804583ms)
+✔ switch slot is the current request order after a live switch (5.240042ms)
+✔ constructed hidden-disabled live state resolves to Struggle before any re-request (4.647584ms)
+✔ pinned upstream AI includes slot zero in constructed revival target requests (4.110291ms)
+✔ vocabulary includes lazily resolved cosmetic forms and templates retain distinct identities (203.402917ms)
+✔ whole teams are complete, ordered, deterministic across shards, and replay exactly (584.437916ms)
+✔ failed shard is never committed or skipped; resume records the failure and reproduces content (740.46125ms)
+✔ wrong resume configuration and corrupt shards fail without rewriting a completed corpus (372.329ms)
+✔ active writer lock prevents a second writer (55.35725ms)
+✔ checkpoint failure reports the durable prefix and resumes through an orphan shard (364.755667ms)
+✔ dead local writer is recovered only with exclusive recovery ownership (306.756625ms)
+✔ leftover recovery guard does not prevent a fresh exclusive writer acquisition (205.858625ms)
+✔ campaign checkpoints replayed episodes, resumes exact indices and retains failure/orphan evidence (4775.630041ms)
+✔ complete R4 episode preserves R1 visible mechanics and replays after canonical serialization (1777.356666ms)
+✔ natural hidden re-requests preserve the already chosen opponent action and zero-reward linkage (1500.699083ms)
+✔ budget reached on a hidden rejection waits for a fresh group; IDs distinguish order and action content (2396.399416ms)
+✔ concurrent submissions serialize, exact retries are idempotent, stale or invalid choices fail before writes (46.278209ms)
+✔ actor view does not change when only the opponent has submitted its hidden choice (43.555042ms)
+✔ constructed single and double faint replacements enter, retain commitments, and exit correctly (541.834083ms)
+✔ a constructed reference tie cancels the unsubmitted request and yields terminal half reward (134.516167ms)
+✔ constructed live continuations, mixed requests and revival targets cover both player roles (732.422125ms)
+✔ explicit truncation finishes the current group and bootstraps each same-player trajectory (196.720708ms)
+✔ semantic corruption remains rejected after artifact hashes are recomputed (154.56225ms)
+✔ R5 live hidden-state, HP, Transform, Illusion and Node/Python codec probes (8661.967125ms)
+✔ all R3 roots have sources; conservative inventory contains unobserved generated effects (1006.537709ms)
+✔ AST indexes array callbacks and computed calls; ordinary inherited names are not sinks (0.503125ms)
+✔ sixteen scripted reference cases satisfy semantic assertions and replay in both seats (45.202958ms)
+✔ fixed reference fingerprints remain stable across future harness changes (137.535ms)
+✔ manifest identifies the exact source, lockfile and resolved rules (17.225958ms)
+✔ provenance refuses changed source and a tampered compiled tree (114.299584ms)
+✔ official whole teams regenerate exactly with their own random stream (2.424458ms)
+✔ a completed seeded battle and its input tape reproduce exactly (88.838166ms)
+✔ replay is independent of wall-clock time while raw evidence is retained (88.753125ms)
+✔ natural hidden-trapping rejections retain the action and updated request on replay (123.740708ms)
+✔ explicit teams retain identity when seats and mechanics seed change (2.963042ms)
+✔ projection agrees with upstream getPlayerStreams for an entire recorded battle (16.214708ms)
+✔ private requests, split HP and terminal private teams do not cross player channels (0.227542ms)
+✔ real initial opponent-private mutation leaves the other player view unchanged (1.29925ms)
+✔ stale requests and injected control commands are rejected before simulation (2.690209ms)
+✔ observable choices exclude known-disabled moves without inspecting hidden legality (0.067333ms)
+✔ timestamps alone normalize; choice errors, HP and mechanics remain intact (0.030208ms)
+✔ tampered episode, raw trace and incompatible schemas fail replay (3.091208ms)
+✔ live replay detects divergent requests and results even with a valid envelope hash (89.254666ms)
+✔ a safety cap cannot be reported as a completed draw (19.5415ms)
+✔ JSONL worker processes multiple requests and reports malformed commands (381.741916ms)
+✔ artifact hash is independent of object key insertion order (0.165458ms)
+ℹ tests 55
+ℹ suites 0
+ℹ pass 55
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31638.194625
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.558s
+
+OK
+..{"validated_teams": 4, "requested": 12}
+{"validated_teams": 8, "requested": 12}
+{"validated_teams": 12, "requested": 12}
+{"validated_teams": 4, "requested": 12}
+{"validated_teams": 8, "requested": 12}
+{"validated_teams": 12, "requested": 12}
+....
+----------------------------------------------------------------------
+Ran 6 tests in 1.913s
+
+OK
+...............
+----------------------------------------------------------------------
+Ran 15 tests in 7.105s
+
+OK
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 2.468s
+
+OK
+E.FF...E.
+======================================================================
+ERROR: test_independent_source_and_bundle_validation (test_mechanics.MechanicsTest.test_independent_source_and_bundle_validation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/tests/mechanics/test_mechanics.py", line 29, in test_independent_source_and_bundle_validation
+    result = validate_bundle(RUN, ROOT)
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_reference/mechanics.py", line 145, in validate_bundle
+    entries = validate_manifest(manifest, root)
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_reference/mechanics.py", line 109, in validate_manifest
+    require(pathway['id'] not in paths, 'Duplicate pathway')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_reference/mechanics.py", line 35, in require
+    raise ValueError(message)
+ValueError: Duplicate pathway
+
+======================================================================
+ERROR: test_unsupported_unknown_and_empty_fail_loudly (test_mechanics.MechanicsTest.test_unsupported_unknown_and_empty_fail_loudly)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/tests/mechanics/test_mechanics.py", line 34, in test_unsupported_unknown_and_empty_fail_loudly
+    gate = SupportGate(self.manifest)
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_reference/mechanics.py", line 193, in __init__
+    self.entries = validate_manifest(manifest)
+                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_reference/mechanics.py", line 109, in validate_manifest
+    require(pathway['id'] not in paths, 'Duplicate pathway')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_reference/mechanics.py", line 35, in require
+    raise ValueError(message)
+ValueError: Duplicate pathway
+
+======================================================================
+FAIL: test_omitted_initial_entry_is_rejected_after_resealing (test_mechanics.MechanicsTest.test_omitted_initial_entry_is_rejected_after_resealing)
+----------------------------------------------------------------------
+ValueError: Duplicate pathway
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/tests/mechanics/test_mechanics.py", line 48, in test_omitted_initial_entry_is_rejected_after_resealing
+    self.mutate(lambda m: m['entries'].remove(next(e for e in m['entries'] if e['key'] == 'items:')), 'Initial corpus coverage')
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/tests/mechanics/test_mechanics.py", line 25, in mutate
+    with self.assertRaisesRegex(ValueError, pattern):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "Initial corpus coverage" does not match "Duplicate pathway"
+
+======================================================================
+FAIL: test_orphan_path_is_rejected_after_resealing (test_mechanics.MechanicsTest.test_orphan_path_is_rejected_after_resealing)
+----------------------------------------------------------------------
+ValueError: Duplicate pathway
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/tests/mechanics/test_mechanics.py", line 59, in test_orphan_path_is_rejected_after_resealing
+    self.mutate(remove_link, 'Orphan pathway')
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/tests/mechanics/test_mechanics.py", line 25, in mutate
+    with self.assertRaisesRegex(ValueError, pattern):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "Orphan pathway" does not match "Duplicate pathway"
+
+----------------------------------------------------------------------
+Ran 9 tests in 12.923s
+
+FAILED (failures=2, errors=2)

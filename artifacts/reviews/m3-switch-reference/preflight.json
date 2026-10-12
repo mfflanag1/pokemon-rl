@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "source_files": 235,
+  "node_tests": 75,
+  "python_tests": 189,
+  "report_hash": "a12d08c0296b8b3f2eac878e6193c85afcdee9637f9143c9cfbd5ca38741dc19",
+  "final_source_bound_regression": true,
+  "predecessor_live_archive_admission": true,
+  "prime_used": false,
+  "final_evaluation_used": false
+}

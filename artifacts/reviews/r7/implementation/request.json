@@ -1,0 +1,24 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Audit R7 split/provenance/actor admission logic for concrete correctness failures or leakage. Scope is CPU data foundation: legacy R3/R4 are exposed; frozen 90/5/5 ordered-team hash; fresh train/dev/final reservations; only train/dev mirrored games; no final play; separate actor/target export using R5. Check whether candidate/record mutation, reused seeds, mirrored perspectives, source drift, dropped records, or privileged fields could pass advertised gates. Caller supplies a separately trusted dataset hash, not an adversarially replaceable anchor; no OS-level secrecy claim. Check benchmark denominators and independence claims. Do not require a trained model or custom engine. Identity module had opposite-model QA; original acceptance fixture mistakenly reversed a one-move list, fixed locally to a multi-move list and five tests passed. Node/Python parity and exact threshold tests pass; full new collection/export not yet run. Focus actionable implementation flaws and validate claims against the supplied contract, not hypothetical requirements beyond scope.",
+  "files_sha256": {
+    "contracts/dataset-v1/README.md": "354c66855b7336ec8da2ec8edf5d0b879cc0b88623946ed95acdce909f6417f2",
+    "contracts/dataset-v1/policy.json": "fd433bd3772609c41e924503c6ab3becb1cc1101f48aaa48a9443eb2f7a5ff3f",
+    "packages/dataset/identity.mjs": "d6237b1e5045c149dda159ac575790a691628d37bd6e26e6aaf8f6dd98d8c1fa",
+    "packages/dataset/collect.mjs": "8f139a9c2d8a27500a81d271e732e29cf1a60b6058180066747c53da07ad03ff",
+    "packages/dataset/worker.mjs": "5c0bc86a354a365a5a8b7576e6461bb308c69b56d675fff43536c0ea8a93430e",
+    "python/pokemon_reference/dataset_identity.py": "950d7365143042e3b4b4395154925957babb6a943bbcb76f0eb3936c96166759",
+    "python/pokemon_reference/dataset_legacy.py": "4f08979581f4c4d6d1f8569aa465dc6a45b173343f28602045e4a2d12f3a7cc4",
+    "python/pokemon_reference/dataset_gate.py": "774b05dd60411e06baca3a5b5ab72dafa39ff5aceaceeed49c2a8e610c15647b",
+    "python/pokemon_reference/dataset_build.py": "7c6cf5b02f8ba099177d5e7022b7e56c299e80cef2b9cd2ea526e2fbe042fb03",
+    "python/pokemon_reference/feature_trajectories.py": "ea0f33e2d44ea0ab272820726ebd2839c568768eb49d5ed1a7d977b9b849f2b0",
+    "tests/dataset/test_identity.py": "491c661ef2f5863c198461d2a23a2fab0dd7b98c3b2d96c165f064904eb8fe79",
+    "tests/dataset/test_gate.py": "2bfab447a0625f0c232a90fdc2527f0069ad2b5656cf34811568c23ad18f9ba1",
+    "tests/dataset/dataset.test.mjs": "4e09049968273527cb6f8f75ff94a9e76d0f1f55f0d064166c4d065f93dd9cc7"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

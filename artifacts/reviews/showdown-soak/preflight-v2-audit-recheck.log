@@ -1,0 +1,25 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Received simulator team
++ actual - expected
+
++ '|soakteam|Dedenne||SitrusBerry|CheekPouch|Nuzzle,DazzlingGleam,Thunderbolt,SuperFang|Serious|85,85,85,85,85,85|F|||88|,,,,,Flying]Dipplin||Eviolite|StickyHold|Recover,GigaDrain,SuckerPunch,DragonPulse|Serious|85,85,85,85,85,85|M|||88|,,,,,Steel]Tauros||LifeOrb|SheerForce|BodySlam,CloseCombat,ZenHeadbutt,ThroatChop|Serious|85,85,85,85,85,85|M|||82|,,,,,Psychic]Iron Hands||Leftovers|QuarkDrive|DrainPunch,SwordsDance,IcePunch,WildCharge|Serious|85,85,85,85,85,85|N|||79|,,,,,Fighting]Iron Jugulis||ChoiceSpecs|QuarkDrive|DarkPulse,Hurricane,EarthPower,HydroPump|Serious|85,,85,85,85,85|N|,0,,,,||77|,,,,,Ground]Ogerpon|OgerponCornerstone|CornerstoneMask|Sturdy|HornLeech,IvyCudgel,SwordsDance,Superpower|Serious|85,85,85,85,85,85|F|||76|,Poison,,,,Rock'
+- '|soakteam|Dedenne||SitrusBerry|CheekPouch|Nuzzle,DazzlingGleam,Thunderbolt,SuperFang|Serious|85,85,85,85,85,85|F|||88|,,,,,Flying]Dipplin||Eviolite|StickyHold|Recover,GigaDrain,SuckerPunch,DragonPulse|Serious|85,85,85,85,85,85|M|||88|,,,,,Steel]Tauros||LifeOrb|SheerForce|BodySlam,CloseCombat,ZenHeadbutt,ThroatChop|Serious|85,85,85,85,85,85|M|||82|,,,,,Psychic]Iron Hands||Leftovers|QuarkDrive|DrainPunch,SwordsDance,IcePunch,WildCharge|Serious|85,85,85,85,85,85|N|||79|,,,,,Fighting]Iron Jugulis||ChoiceSpecs|QuarkDrive|DarkPulse,Hurricane,EarthPower,HydroPump|Serious|85,,85,85,85,85|N|,0,,,,||77|,,,,,Ground]Ogerpon|OgerponCornerstone|CornerstoneMask|Sturdy|HornLeech,IvyCudgel,SwordsDance,Superpower|Serious|85,85,85,85,85,85|F|||76|,,,,,Rock'
+
+    at WireAudit.check (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/audit.mjs:64:20)
+    at audit (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/audit.mjs:203:13)
+    at file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/audit.mjs:213:30
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:655:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '|soakteam|Dedenne||SitrusBerry|CheekPouch|Nuzzle,DazzlingGleam,Thunderbolt,SuperFang|Serious|85,85,85,85,85,85|F|||88|,,,,,Flying]Dipplin||Eviolite|StickyHold|Recover,GigaDrain,SuckerPunch,DragonPulse|Serious|85,85,85,85,85,85|M|||88|,,,,,Steel]Tauros||LifeOrb|SheerForce|BodySlam,CloseCombat,ZenHeadbutt,ThroatChop|Serious|85,85,85,85,85,85|M|||82|,,,,,Psychic]Iron Hands||Leftovers|QuarkDrive|DrainPunch,SwordsDance,IcePunch,WildCharge|Serious|85,85,85,85,85,85|N|||79|,,,,,Fighting]Iron Jugulis||ChoiceSpecs|QuarkDrive|DarkPulse,Hurricane,EarthPower,HydroPump|Serious|85,,85,85,85,85|N|,0,,,,||77|,,,,,Ground]Ogerpon|OgerponCornerstone|CornerstoneMask|Sturdy|HornLeech,IvyCudgel,SwordsDance,Superpower|Serious|85,85,85,85,85,85|F|||76|,Poison,,,,Rock',
+  expected: '|soakteam|Dedenne||SitrusBerry|CheekPouch|Nuzzle,DazzlingGleam,Thunderbolt,SuperFang|Serious|85,85,85,85,85,85|F|||88|,,,,,Flying]Dipplin||Eviolite|StickyHold|Recover,GigaDrain,SuckerPunch,DragonPulse|Serious|85,85,85,85,85,85|M|||88|,,,,,Steel]Tauros||LifeOrb|SheerForce|BodySlam,CloseCombat,ZenHeadbutt,ThroatChop|Serious|85,85,85,85,85,85|M|||82|,,,,,Psychic]Iron Hands||Leftovers|QuarkDrive|DrainPunch,SwordsDance,IcePunch,WildCharge|Serious|85,85,85,85,85,85|N|||79|,,,,,Fighting]Iron Jugulis||ChoiceSpecs|QuarkDrive|DarkPulse,Hurricane,EarthPower,HydroPump|Serious|85,,85,85,85,85|N|,0,,,,||77|,,,,,Ground]Ogerpon|OgerponCornerstone|CornerstoneMask|Sturdy|HornLeech,IvyCudgel,SwordsDance,Superpower|Serious|85,85,85,85,85,85|F|||76|,,,,,Rock',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v25.6.1

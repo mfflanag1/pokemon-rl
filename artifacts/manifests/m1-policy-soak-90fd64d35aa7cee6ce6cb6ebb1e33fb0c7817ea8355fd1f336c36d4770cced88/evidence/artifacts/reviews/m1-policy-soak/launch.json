@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/usr/bin/caffeinate",
+    "-i",
+    "/usr/bin/env",
+    "PYTHONPATH=python",
+    "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+    "-m",
+    "pokemon_soak.campaign",
+    "artifacts/runs/m1-policy-soak-v1"
+  ],
+  "directory": "artifacts/runs/m1-policy-soak-v1",
+  "idle_sleep_inhibited": true,
+  "launched_at": "2026-10-11T12:05:16.736153+00:00",
+  "log": "artifacts/reviews/m1-policy-soak/run.log",
+  "qualification_claimed": false,
+  "tmux_session": "pokemon-policy-soak-v1"
+}

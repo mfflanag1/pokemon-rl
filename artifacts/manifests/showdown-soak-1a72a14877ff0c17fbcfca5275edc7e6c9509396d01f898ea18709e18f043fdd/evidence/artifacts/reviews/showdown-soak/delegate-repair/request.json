@@ -1,0 +1,32 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "network-soak-schedule",
+  "task": "Bounded repair of prior failed schedule delivery. The two files under artifacts/reviews/showdown-soak/delegate-initial are unaccepted candidate inputs. Copy schedule.mjs to packages/showdown-soak/schedule.mjs and schedule.test.mjs to tests/showdown-soak/schedule.test.mjs in this isolated workspace. Fix only negative-zero canonicalization in gameSpec: JavaScript safe integer -0 passes validation but strict assert.equal(-0,0) fails. Normalize a validated zero index to positive zero before computing any fields. Preserve every other behavior and every test. Own only the two output files. Do not edit input snapshots or plan.json. You are not alone; do not revert other edits. No recursive delegation. Controller will execute node tests.",
+  "criteria": "All provided tests pass, including -0 returns index positive zero. Entire output diff relative to unaccepted candidate is only the minimal zero normalization; tests copied byte-identically. Only two owned output files created.",
+  "owned": [
+    "packages/showdown-soak/schedule.mjs",
+    "tests/showdown-soak/schedule.test.mjs"
+  ],
+  "checks": [
+    [
+      "node",
+      "--test",
+      "tests/showdown-soak/schedule.test.mjs"
+    ]
+  ],
+  "files_sha256": {
+    "packages/showdown-soak/plan.json": "5d5cd9a1bdba853ec9334c0575417cd974cde236da978fd8f37b8a6491b6af05",
+    "artifacts/reviews/showdown-soak/delegate-initial/schedule.mjs": "9365f8dbc3414b305903b81e94d89b32fab1206891658e5b9b87ebb74eaca301",
+    "artifacts/reviews/showdown-soak/delegate-initial/schedule.test.mjs": "d7a72319a5ccf9afe3757894ebb5e33259a2d2d57717480b6d2c973386fa8ef4"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "a8c9e5f58368440d3a4ca95a59e77aed2a42218e",
+  "created_at": "2026-10-11T18:59:07.113781+00:00",
+  "test_run": false
+}

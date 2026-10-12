@@ -1,0 +1,551 @@
+Task and review objective:
+Focused review of the newly added short qualification campaign and completion sealer. The numerical policy/loop/checkpoint received a prior separate audit with no blockers. Check false-success paths, result/accounting/source/checkpoint/test evidence linkage, and claims exceeding this bounded 60-second CPU qualification. New binary policy is not two-hour requalified; full G2/G3 stay open and no strength claim. Find concrete issues only; you cannot execute tests. Verify the exact dyadic proof summary stays conditional on uniform words.
+
+
+FILE python/pokemon_binary/qualification.py
+1: """Short CPU qualification of binary-policy-1; never a full G2/G3 promotion."""
+2: import argparse
+3: import json
+4: import logging
+5: from pathlib import Path
+6: import resource
+7: import time
+8: import traceback
+9: import jax
+10: import jax.numpy as jnp
+11: import numpy as np
+12: from pokemon_fixed.campaign import admission as prior_admission, CompileLog, compile_positive_control
+13: from pokemon_jax_learner.collector import collect as reference_collect
+14: from pokemon_learner.checkpoint import digest, wire, file_hash
+15: from pokemon_learner.core import require
+16: from pokemon_reference.dataset_gate import checked_file
+17: from .loop import ROOT, Executables, start, plan, objective, check_report
+18: from .checkpoint import Runner, provenance, save, load, state
+19: from .policy import threshold_words, select_words, act
+20: from .reference import dyadic_threshold
+21: 
+22: 
+23: def write(path, data):Path(path).write_bytes(wire(data)+b'\n')
+24: 
+25: 
+26: def admission():
+27:     p=plan();contract=json.loads((ROOT/p['policy_contract']).read_bytes())
+28:     receipt=json.loads((ROOT/'artifacts/reports/m1-fixed-loop.json').read_bytes())
+29:     require(receipt['content_hash']==contract['predecessor']==p['predecessor']==digest(
+30:         {k:v for k,v in receipt.items() if k!='content_hash'}),'Predecessor receipt')
+31:     for path,sha in receipt['source_files'].items():
+32:         if path.startswith(('python/','contracts/','tests/fixed-loop/')) or path in (
+33:             'scripts/seal-fixed-loop.py','scripts/verify-fixed-loop.py','requirements-jax.txt',
+34:             'requirements-learner.txt','requirements-contract.txt'):
+35:             checked_file(ROOT,path,sha)
+36:     return {'contract':contract,'plan':p,'provenance':provenance(),
+37:             'predecessor':receipt['content_hash'],'prior':prior_admission()}
+38: 
+39: 
+40: def exact(a,b):
+41:     require(jax.tree.structure(a)==jax.tree.structure(b),'Replay structure')
+42:     for x,y in zip(jax.tree.leaves(a),jax.tree.leaves(b)):
+43:         require(np.array_equal(x,y),'Replay bytes differ')
+44: 
+45: 
+46: def compare(a,b):
+47:     x,y=np.asarray(a),np.asarray(b)
+48:     require(x.shape==y.shape,'Parity shape')
+49:     if x.dtype.kind in 'f':
+50:         error=np.abs(x.astype(float)-y.astype(float));limit=3e-6+3e-5*np.abs(y.astype(float))
+51:         fraction=float(np.max(error/limit,initial=0))
+52:         require(fraction<=1,'Parity tolerance');return fraction
+53:     require(np.array_equal(x,y),'Discrete parity');return 0.
+54: 
+55: 
+56: def sampling_audit(count):
+57:     rng=np.random.default_rng(8251)
+58:     bits=((rng.integers(103,126,count,dtype=np.uint32)<<23)|rng.integers(0,2**23,count,dtype=np.uint32))
+59:     rare=np.r_[bits.view(np.float32),np.float32(.5),np.float32(2**-24)].astype(np.float32)
+60:     expected=np.array([dyadic_threshold(r) for r in rare],np.uint32)
+61:     actual=np.asarray(jax.jit(threshold_words)(rare))
+62:     require(np.array_equal(actual,expected),'Exact threshold oracle')
+63:     # Strict lexicographic comparison across high-word carries, for both action orderings.
+64:     words=[];results=[]
+65:     for hi,lo in expected:
+66:         t=(int(hi)<<32)|int(lo)
+67:         for w in (t-1,t,t+1):words.append([w>>32,w&0xffffffff]);results.append(w<t)
+68:     masses=np.repeat(rare,3);mask=np.ones((len(masses),2),bool)
+69:     for ra in (0,1):
+70:         actions=select_words(masses,np.full(len(masses),ra,np.int32),mask,np.array(words,np.uint32))
+71:         want=np.where(results,ra,1-ra)
+72:         require(np.array_equal(actions,want),'Threshold edge selection')
+73:     return {'status':'passed','rare_mass_cases':len(rare),'integer_thresholds_exact':True,
+74:             'injected_action_checks':2*len(words),'uniform_word_assumption':True,
+75:             'sampling_frequency_estimated':False,'minimum_mass':2**-24,
+76:             'proof':'r=m*2^(e-150), e=103..126; r*2^64=m*2^(e-86), shift17..40. Every integer below this threshold selects rare; its complement selects common.'}
+77: 
+78: 
+79: def parity(exe,p):
+80:     fraction=0.;decisions=0;batches=0
+81:     for seed in p['parity_seeds']:
+82:         l=start(seed)
+83:         for _ in range(p['parity_batches_per_seed']):
+84:             b,_=exe.compiled['collect'](l.parameters,l.next_game,jnp.uint32(seed));valid=np.asarray(b.valid)
+85:             ids=np.arange(int(l.next_game),int(l.next_game)+64,dtype=np.uint32)
+86:             ref=reference_collect(l.parameters,int(l.version),ids,environment_seed=seed,action_seed=seed,actor_fn=act)
+87:             for name in b.actor._fields:
+88:                 fraction=max(fraction,compare(np.asarray(getattr(b.actor,name))[valid],getattr(ref.actor,name)))
+89:             for name in ('rewards','terminal','advantages','returns'):
+90:                 fraction=max(fraction,compare(np.asarray(getattr(b.targets,name))[valid],getattr(ref.targets,name)))
+91:             compact=np.full(512,-1,np.int32);compact[valid]=np.arange(valid.sum())
+92:             nxt=np.asarray(b.targets.next_index)[valid]
+93:             compare(np.where(nxt<0,-1,compact[np.maximum(nxt,0)]),ref.targets.next_index)
+94:             _,metrics=objective(l.parameters,b.actor,b.targets,b.valid,p)
+95:             require(float(metrics['max_ratio_error'])<=1e-5,'Same policy ratio')
+96:             separate,_=exe.compiled['update'](l,b,jnp.uint32(seed))
+97:             fused,report=exe(l,seed);check_report(report)
+98:             for a,c in zip(jax.tree.leaves(fused),jax.tree.leaves(separate)):fraction=max(fraction,compare(a,c))
+99:             l=fused;decisions+=int(valid.sum());batches+=1
+100:     return {'status':'passed','batches':batches,'games':64*batches,'decisions':decisions,
+101:             'max_fraction_of_tolerance':fraction,'atol':3e-6,'rtol':3e-5,
+102:             'reference':'sealed Python-control collector with explicit new actor_fn; fused vs split update',
+103:             'old_policy_trajectory_equivalence_claimed':False}
+104: 
+105: 
+106: def replay(path,runner,exe):
+107:     save(path,runner);restored=load(path,exe)
+108:     a=exe(runner.learner,runner.seed);b=exe(restored.learner,restored.seed)
+109:     exact(a,b);require(state(runner)==state(restored),'Checkpoint body differs')
+110:     return {'file':path.name,'sha256':file_hash(path),'version':int(runner.learner.version),
+111:             'next_cycle_exact':True}
+112: 
+113: 
+114: def main(directory):
+115:     out=Path(directory).resolve()
+116:     require(out.is_relative_to(ROOT/'artifacts/runs'),'Campaign output location')
+117:     out.mkdir(parents=True,exist_ok=False)
+118:     result={'status':'running','full_g2':'open','full_g3':'open','prime_used':False,
+119:             'new_two_hour_soak':False,'strength_evaluation':False}
+120:     log=logging.getLogger('jax._src.dispatch');counter=CompileLog();old=log.propagate
+121:     log.addHandler(counter);log.propagate=False
+122:     try:
+123:         admitted=admission();write(out/'admission.json',admitted)
+124:         result['admission_hash']=digest(admitted);q=admitted['contract']['qualification'];p=admitted['plan']
+125:         result['sampling']=sampling_audit(q['word_probe_rows'])
+126:         with jax.log_compiles(True):
+127:             control=compile_positive_control(counter)
+128:             t=time.perf_counter();exe=Executables();exe.diagnostics()
+129:             result['compile_seconds']=time.perf_counter()-t
+130:             result['parity']=parity(exe,p)
+131:             result['seed_runs']=[];result['replays']=[]
+132:             for seed in q['seeds']:
+133:                 runner=Runner(seed,exe)
+134:                 for _ in range(q['updates_per_seed']):runner.run()
+135:                 result['seed_runs'].append({'seed':seed,'updates':int(runner.learner.version),
+136:                     'games':int(runner.learner.next_game),'decisions':runner.decisions,'executed_moves':runner.executed_moves})
+137:                 result['replays'].append(replay(out/f'seed-{seed}.json',runner,exe))
+138:             runner=Runner(q['soak_seed'],exe)
+139:             for _ in range(p['warmup_cycles']):runner.run()
+140:             result['replays'].append(replay(out/'soak-start.json',runner,exe))
+141:             baseline=counter.count;initial=state(runner);beg=time.perf_counter();cycles=0;cycle_seconds=0.;next_log=10
+142:             minimum=1.;maximum_ratio=0.;rows=[]
+143:             with (out/'telemetry.jsonl').open('w') as stream:
+144:                 while time.perf_counter()-beg<q['soak_seconds']:
+145:                     t=time.perf_counter();r=runner.run();cycle_seconds+=time.perf_counter()-t;cycles+=1
+146:                     minimum=min(minimum,float(r['minimum_behavior_probability']))
+147:                     maximum_ratio=max(maximum_ratio,float(np.max(r['metrics']['max_ratio_error'])))
+148:                     require(counter.count==baseline,'Unexpected compilation')
+149:                     elapsed=time.perf_counter()-beg
+150:                     if elapsed>=next_log:
+151:                         row={'elapsed_seconds':elapsed,'cycles':cycles,'decisions':runner.decisions-initial['decisions']}
+152:                         stream.write(json.dumps(row)+'\n');stream.flush();rows.append(row);next_log+=10
+153:                 elapsed=time.perf_counter()-beg
+154:             result['soak']={'status':'passed','target_seconds':q['soak_seconds'],'elapsed_seconds':elapsed,
+155:                 'cycles':cycles,'games':cycles*64,'decisions':runner.decisions-initial['decisions'],
+156:                 'executed_moves':runner.executed_moves-initial['executed_moves'],
+157:                 'cycle_seconds':cycle_seconds,'decisions_per_second':(runner.decisions-initial['decisions'])/elapsed,
+158:                 'minimum_exp_behavior_logp':minimum,'maximum_update_ratio_error':maximum_ratio,
+159:                 'unexpected_compilations':counter.count-baseline,'warmup_compilation_count':baseline,
+160:                 'peak_process_rss_bytes':resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+161:                 'device_memory_headroom_certified':False,'telemetry_rows':len(rows)}
+162:             result['replays'].append(replay(out/'soak-final.json',runner,exe))
+163:             result['compile_control']=control;result['traces']=exe.traces
+164:         require(admission()==admitted,'Source/runtime/final reservation changed')
+165:         result['final_reservation_unchanged']=True;result['status']='passed'
+166:     except Exception as exc:
+167:         result.update(status='failed',error=str(exc),traceback=traceback.format_exc());raise
+168:     finally:
+169:         log.removeHandler(counter);log.propagate=old
+170:         result['content_hash']=digest(result);write(out/'report.json',result)
+171:     print(json.dumps({'status':result['status'],'content_hash':result['content_hash'],'soak':result['soak']}))
+172: 
+173: 
+174: if __name__=='__main__':
+175:     parser=argparse.ArgumentParser();parser.add_argument('directory');main(parser.parse_args().directory)
+176: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE scripts/seal-binary-policy.py
+1: """Seal the bounded binary-policy qualification without promoting G2/G3."""
+2: import argparse
+3: import json
+4: from pathlib import Path
+5: import re
+6: import runpy
+7: import sys
+8: ROOT=Path(__file__).resolve().parents[1]
+9: sys.path.insert(0,str(ROOT/'python'))
+10: from pokemon_binary.qualification import admission
+11: from pokemon_binary.loop import Executables
+12: from pokemon_binary.checkpoint import load
+13: from pokemon_learner.checkpoint import digest,wire,file_hash
+14: from pokemon_learner.core import require
+15: 
+16: REVIEW=ROOT/'artifacts/reviews/m1-binary-policy'
+17: 
+18: 
+19: def read(path):return json.loads(path.read_bytes())
+20: 
+21: 
+22: def write_once(path,data):
+23:     path.parent.mkdir(parents=True,exist_ok=True)
+24:     if path.exists():require(path.read_bytes()==data,'Changed sealed artifact: '+str(path))
+25:     else:
+26:         with path.open('xb') as stream:stream.write(data)
+27: 
+28: 
+29: def main(directory):
+30:     run=Path(directory).resolve();require(run.is_relative_to(ROOT/'artifacts/runs'),'Run directory')
+31:     result=read(run/'report.json');admitted=read(run/'admission.json');q=admitted['contract']['qualification'];p=admitted['plan']
+32:     require(result['content_hash']==digest({k:v for k,v in result.items() if k!='content_hash'}),'Result checksum')
+33:     require(result['status']=='passed' and result['full_g2']==result['full_g3']=='open','Scope/status')
+34:     require(result['prime_used'] is False and result['new_two_hour_soak'] is False and result['strength_evaluation'] is False,'Scope claim')
+35:     require(result['admission_hash']==digest(admitted) and admitted==admission(),'Source/runtime drift')
+36:     require(result['final_reservation_unchanged'] is True and admitted['prior']['prior_gates']['final_reservation_unchanged'] is True,'Final reservation')
+37:     sampling=result['sampling'];n=q['word_probe_rows']+2
+38:     require(sampling['status']=='passed' and sampling['rare_mass_cases']==n and sampling['injected_action_checks']==6*n
+39:             and sampling['integer_thresholds_exact'] is True and sampling['uniform_word_assumption'] is True
+40:             and sampling['sampling_frequency_estimated'] is False and sampling['minimum_mass']==2**-24,'Sampling audit')
+41:     parity=result['parity'];batches=len(p['parity_seeds'])*p['parity_batches_per_seed']
+42:     require(parity['status']=='passed' and parity['batches']==batches and parity['games']==64*batches
+43:             and batches*256<=parity['decisions']<=batches*512 and 0<=parity['max_fraction_of_tolerance']<=1
+44:             and parity['atol']==p['atol']==3e-6 and parity['rtol']==p['rtol']==3e-5,'Collector/fused parity')
+45:     control=result['compile_control']
+46:     require(control['first_call_compilation_events']>0 and control['same_shape_repeat_events']==0
+47:             and result['traces']=={'cycle':1,'collect':1,'update':1},'Compilation controls')
+48:     require([r['seed'] for r in result['seed_runs']]==q['seeds'],'Seed roster')
+49:     for r in result['seed_runs']:
+50:         require(r['updates']==q['updates_per_seed'] and r['games']==r['updates']*64
+51:                 and r['games']*4<=r['decisions']<=r['games']*8
+52:                 and r['decisions']-r['games']<=r['executed_moves']<=r['decisions'],'Seed accounting')
+53:     soak=result['soak']
+54:     require(soak['status']=='passed' and soak['elapsed_seconds']>=soak['target_seconds']==q['soak_seconds']==60,'Short soak')
+55:     require(soak['unexpected_compilations']==0 and soak['warmup_compilation_count']>0,'Soak compilations')
+56:     require(soak['games']==soak['cycles']*64 and soak['games']*4<=soak['decisions']<=soak['games']*8
+57:             and soak['decisions']-soak['games']<=soak['executed_moves']<=soak['decisions'],'Soak accounting')
+58:     require(soak['cycle_seconds']>0 and soak['decisions_per_second']==soak['decisions']/soak['elapsed_seconds']
+59:             and soak['device_memory_headroom_certified'] is False,'Timing/headroom')
+60:     telemetry=[json.loads(line) for line in (run/'telemetry.jsonl').read_text().splitlines()]
+61:     require(len(telemetry)==soak['telemetry_rows']>=5 and telemetry[-1]['elapsed_seconds']>=50,'Telemetry coverage')
+62:     require(all(a['cycles']<b['cycles'] and a['decisions']<b['decisions'] and a['elapsed_seconds']<b['elapsed_seconds']
+63:                 for a,b in zip(telemetry,telemetry[1:])),'Telemetry ordering')
+64:     require(telemetry[-1]['cycles']<=soak['cycles'] and telemetry[-1]['decisions']<=soak['decisions'],'Telemetry endpoint')
+65:     exe=Executables();expected_names=[f'seed-{seed}.json' for seed in q['seeds']]+['soak-start.json','soak-final.json']
+66:     require([r['file'] for r in result['replays']]==expected_names,'Replay roster')
+67:     checkpoints={}
+68:     for item in result['replays']:
+69:         require(item['next_cycle_exact'] is True and file_hash(run/item['file'])==item['sha256'],'Replay evidence')
+70:         runner=load(run/item['file'],exe);require(int(runner.learner.version)==item['version'],'Replay version')
+71:         checkpoints[item['file']]=runner
+72:     for row in result['seed_runs']:
+73:         r=checkpoints[f"seed-{row['seed']}.json"]
+74:         require(r.seed==row['seed'] and int(r.learner.version)==row['updates'] and r.decisions==row['decisions']
+75:                 and r.executed_moves==row['executed_moves'],'Seed checkpoint')
+76:     start,end=checkpoints['soak-start.json'],checkpoints['soak-final.json']
+77:     require(start.seed==end.seed==q['soak_seed'] and int(start.learner.version)==p['warmup_cycles']
+78:             and int(end.learner.version)-int(start.learner.version)==soak['cycles']
+79:             and end.decisions-start.decisions==soak['decisions']
+80:             and end.executed_moves-start.executed_moves==soak['executed_moves'],'Soak checkpoint accounting')
+81:     verification=read(REVIEW/'verification.json')
+82:     manifest=runpy.run_path(str(ROOT/'scripts/verify-fixed-loop.py'))['source_manifest']()
+83:     require(verification['status']=='passed' and verification['exit_code']==0 and verification['sources_unchanged'] is True
+84:             and verification['source_files']==manifest and verification['test_log_sha256']==file_hash(REVIEW/'npm-test.log'),'Regression source/log binding')
+85:     log=(REVIEW/'npm-test.log').read_text();node=re.search(r'# pass (\d+)',log)
+86:     suites=list(map(int,re.findall(r'Ran (\d+) tests? in',log)))
+87:     require(node is not None and int(node[1])==63 and suites==[7,6,15,13,10,15,13,6,25,17,16,11]
+88:             and log.count('\nOK\n')==len(suites),'Regression suite coverage')
+89:     for name in ('claude-review.md','review-dispositions.md','delegate-verification.md'):
+90:         require((REVIEW/name).is_file(),'Missing review '+name)
+91:     sources=dict(manifest)
+92:     for path in [ROOT/'README.md',*(ROOT/'docs').glob('*.md')]:sources[str(path.relative_to(ROOT))]=file_hash(path)
+93:     evidence={}
+94:     for directory in (run,REVIEW):
+95:         for path in sorted(directory.rglob('*')):
+96:             if path.is_file() and '__pycache__' not in path.parts:evidence[str(path.relative_to(ROOT))]=file_hash(path)
+97:     receipt={'format':'m1-binary-policy-receipt-1','status':'complete-for-declared-scope',
+98:         'full_g2':'open','full_g3':'open','campaign':result,'run':str(run.relative_to(ROOT)),
+99:         'predecessor':admitted['predecessor'],'tests':{'node':63,'python':sum(suites),'suite_counts':suites},
+100:         'source_files':sources,'evidence_files':evidence}
+101:     receipt['content_hash']=digest(receipt)
+102:     archive=ROOT/'artifacts/manifests'/('m1-binary-policy-'+receipt['content_hash'])
+103:     for kind,files in (('source',sources),('evidence',evidence)):
+104:         for path,sha in files.items():
+105:             data=(ROOT/path).read_bytes();require(file_hash(ROOT/path)==sha,'Archive source drift')
+106:             write_once(archive/kind/path,data)
+107:     write_once(archive/'receipt.json',wire(receipt)+b'\n')
+108:     write_once(ROOT/'artifacts/reports/m1-binary-policy.json',wire(receipt)+b'\n')
+109:     print(json.dumps({'status':receipt['status'],'content_hash':receipt['content_hash'],'source_files':len(sources),'evidence_files':len(evidence),'tests':receipt['tests']}))
+110: 
+111: 
+112: if __name__=='__main__':
+113:     parser=argparse.ArgumentParser();parser.add_argument('directory');main(parser.parse_args().directory)
+114: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_binary/checkpoint.py
+1: """Bounded checkpoint state: no per-update ledger growing during the CPU soak.
+2: 
+3: Only completed whole-episode updates can be published. A failed collection/update
+4: must load the last durable boundary; no live-game or partial optimizer continuation.
+5: """
+6: import json
+7: import os
+8: from pathlib import Path
+9: import jax
+10: import jax.numpy as jnp
+11: import numpy as np
+12: from pokemon_fixed.checkpoint import provenance as prior_provenance
+13: from pokemon_jax_learner.model import validate_parameters
+14: from pokemon_learner.checkpoint import wire, digest, file_hash, array_wire, read_array
+15: from pokemon_learner.core import require
+16: from .loop import ROOT, Learner, start, plan, check_report
+17: 
+18: 
+19: def provenance():
+20:     result = prior_provenance()
+21:     for path in sorted((ROOT / 'python/pokemon_binary').glob('*.py')) + sorted((ROOT / 'contracts/binary-policy-v1').glob('*')):
+22:         result['sources'][str(path.relative_to(ROOT))] = file_hash(path)
+23:     return result
+24: 
+25: 
+26: class Runner:
+27:     def __init__(self, seed, executable):
+28:         require(type(seed) is int and 0 <= seed < 2**32, 'Seed range')
+29:         self.seed, self.executable, self.plan = seed, executable, executable.plan
+30:         self.learner = start(seed)
+31:         self.decisions = self.executed_moves = 0
+32:         self.phase = 'idle'
+33: 
+34:     def run(self, *, fault=None):
+35:         require(self.phase == 'idle', 'Uncommitted work: restore a boundary checkpoint')
+36:         require(fault in (None, 'after_collect', 'after_update'), 'Unknown fault')
+37:         require(int(self.learner.version) < self.plan['maximum_updates'], 'Counter budget exhausted')
+38:         self.phase = 'collect-update'
+39:         if fault == 'after_collect':
+40:             buffer, state = self.executable.compiled['collect'](self.learner.parameters, self.learner.next_game, jnp.uint32(self.seed))
+41:             jax.block_until_ready((buffer, state))
+42:             raise RuntimeError('Injected failure after collection before update/commit')
+43:         candidate, report = self.executable(self.learner, self.seed)
+44:         r = check_report(report)  # includes device synchronization
+45:         if fault == 'after_update': raise RuntimeError('Injected failure after update before commit')
+46:         self.learner = candidate
+47:         self.decisions += int(r['decisions'])
+48:         self.executed_moves += int(r['executed_moves'])
+49:         self.phase = 'idle'
+50:         return r
+51: 
+52: 
+53: def state(runner):
+54:     require(runner.phase == 'idle', 'Only completed-update checkpoints supported')
+55:     l = runner.learner
+56:     return {'format': 'binary-policy-checkpoint-1', 'mode': 'completed-update-whole-episodes',
+57:             'provenance': provenance(), 'plan': runner.plan, 'seed': runner.seed,
+58:             'parameters': {k: array_wire(np.asarray(v)) for k, v in l.parameters.items()},
+59:             'm': {k: array_wire(np.asarray(v)) for k, v in l.m.items()},
+60:             'v': {k: array_wire(np.asarray(v)) for k, v in l.v.items()},
+61:             'step': int(l.step), 'version': int(l.version), 'next_game': int(l.next_game),
+62:             'decisions': runner.decisions, 'executed_moves': runner.executed_moves,
+63:             'environment': {'active_games': 0, 'partial_buffer': None},
+64:             'random_streams': 'Threefry(seed); ENV/game/turn/role; ACT/game/turn/seat/DYB1; SHF/version/epoch; no mutable cursor'}
+65: 
+66: 
+67: def save(path, runner, *, interrupt_before_replace=False):
+68:     path = Path(path)
+69:     path.parent.mkdir(parents=True, exist_ok=True)
+70:     body = state(runner)
+71:     doc = {'body': body, 'sha256': digest(body)}
+72:     temporary = path.with_name(path.name + '.partial')
+73:     with temporary.open('xb') as stream:
+74:         stream.write(wire(doc) + b'\n')
+75:         stream.flush()
+76:         os.fsync(stream.fileno())
+77:     if interrupt_before_replace: raise RuntimeError('Injected interrupted checkpoint publication')
+78:     os.replace(temporary, path)
+79:     fd = os.open(path.parent, os.O_RDONLY)
+80:     try: os.fsync(fd)
+81:     finally: os.close(fd)
+82:     return doc['sha256']
+83: 
+84: 
+85: def load(path, executable):
+86:     def unique(pairs):
+87:         result = {}
+88:         for k, v in pairs:
+89:             require(k not in result, 'Duplicate checkpoint key')
+90:             result[k] = v
+91:         return result
+92:     doc = json.loads(Path(path).read_bytes(), object_pairs_hook=unique)
+93:     require(set(doc) == {'body', 'sha256'} and doc['sha256'] == digest(doc['body']), 'Checkpoint checksum')
+94:     b = doc['body']
+95:     require(b['format'] == 'binary-policy-checkpoint-1' and b['mode'] == 'completed-update-whole-episodes', 'Checkpoint mode')
+96:     require(b['plan'] == executable.plan == plan() and b['provenance'] == provenance(), 'Source/runtime/plan drift')
+97:     runner = Runner(b['seed'], executable)
+98:     arrays = {}
+99:     for name in ('parameters', 'm', 'v'):
+100:         require(set(b[name]) == set(runner.learner.parameters), 'Array keys')
+101:         arrays[name] = {k: jnp.asarray(read_array(b[name][k], a.shape)) for k, a in runner.learner.parameters.items()}
+102:         validate_parameters(arrays[name])
+103:     require(all(np.all(np.asarray(a) >= 0) for a in arrays['v'].values()), 'Negative second moment')
+104:     for key in ('step', 'version', 'next_game', 'decisions', 'executed_moves'):
+105:         require(type(b[key]) is int and b[key] >= 0, 'Counter type')
+106:     updates = b['version']
+107:     require(updates <= executable.plan['maximum_updates'] and b['next_game'] == 64 * updates, 'Game/version counter')
+108:     # Each game lasts 2..4 turns: 256..512 decisions, 2..4 nonempty minibatches/epoch.
+109:     require(4 * updates <= b['step'] <= 8 * updates and b['step'] % 2 == 0, 'Optimizer counter')
+110:     require(256 * updates <= b['decisions'] <= 512 * updates and b['decisions'] % 2 == 0, 'Decision counter')
+111:     require(b['decisions'] - 64 * updates <= b['executed_moves'] <= b['decisions'], 'Executed move counter')
+112:     runner.learner = Learner(arrays['parameters'], arrays['m'], arrays['v'], jnp.int32(b['step']),
+113:                              jnp.int32(updates), jnp.uint32(b['next_game']))
+114:     runner.decisions, runner.executed_moves = b['decisions'], b['executed_moves']
+115:     require(state(runner) == b, 'Noncanonical checkpoint or unsupported live environment')
+116:     return runner
+117: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/binary-policy-v1/contract.json
+1: {
+2:   "format": "binary-policy-1",
+3:   "scope": "two-action public fixed-duel policy only; full G2/G3 open",
+4:   "predecessor": "4d75cb69595a1cd1b325b5acbde7a86c22e64488b4a1a13a67ad26fbb062a731",
+5:   "dtype": "FP32, CPU, x64 disabled",
+6:   "minimum_legal_mass": 5.960464477539063e-8,
+7:   "law": "For two legal actions: d = logit0-logit1; rare_action = 1 if d>=0 else 0; r = max(2^-24, sigmoid(-abs(d))) in FP32. Exact masses are r and the real complement 1-r. At equal logits action1 is designated rare but both masses are 1/2.",
+8:   "logs": "rare log(r), common log1p(-r), FP32; illegal/terminal finite sentinel zero. Returned probabilities are FP32 renderings, not the authority for complements.",
+9:   "sampling": "Fold each supplied Threefry key with 0x44594231; draw two uint32 words in high/low order; choose rare iff concatenated word < r*2^64. Compute the integer threshold from FP32 exponent/mantissa; no FP64 or uniform float is used. Exact mass claims are conditional on uniformly distributed word pairs.",
+10:   "gradient": "Standard FP32 autodiff through clipped sigmoid and log/log1p. Floor is constant with zero derivative at and below floor; at equal logits use the d>=0 branch. No straight-through integer quantizer. The integer sampler is outside the loss gradient.",
+11:   "mask": "One legal action has mass one, logp zero, entropy and policy gradient zero. No legal actions means terminal padding: action -1, probabilities/logs/value zero.",
+12:   "random_domain": "DYB1 (0x44594231), downstream of ACT/game/turn/seat",
+13:   "compatibility": "No old trajectory/old_logp/checkpoint reuse. New checkpoint format and source/contract binding. Existing simulator chance sampler remains nominal 1/24 and is not Showdown finite-word equivalent.",
+14:   "qualification": {"seeds": [11,29,47], "updates_per_seed": 100, "soak_seconds": 60, "soak_seed": 73, "word_probe_rows": 100000, "atol": 0.000003, "rtol": 0.00003},
+15:   "limits": "A short numerical qualification, not a new two-hour soak, strength evaluation, hidden-set coverage or expanded mechanics gate. Final reserved teams stay untouched. Prime unnecessary."
+16: }
+17: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/binary-policy-v1/plan.json
+1: {
+2:   "version": "binary-policy-loop-plan-1",
+3:   "predecessor": "4d75cb69595a1cd1b325b5acbde7a86c22e64488b4a1a13a67ad26fbb062a731",
+4:   "profile": "gen9-rattata-duel-v1",
+5:   "backend": "cpu",
+6:   "x64_enabled": false,
+7:   "games_per_batch": 64,
+8:   "turns": 4,
+9:   "seats": 2,
+10:   "capacity": 512,
+11:   "features": 59,
+12:   "actions": 2,
+13:   "epochs": 2,
+14:   "minibatch": 128,
+15:   "learning_rate": 0.003,
+16:   "max_gradient_norm": 1.0,
+17:   "gamma": 1.0,
+18:   "gae_lambda": 0.95,
+19:   "ppo_clip": 0.2,
+20:   "value_coefficient": 0.5,
+21:   "entropy_coefficient": 0.01,
+22:   "atol": 3e-06,
+23:   "rtol": 3e-05,
+24:   "parity_seeds": [
+25:     11,
+26:     29,
+27:     47
+28:   ],
+29:   "parity_batches_per_seed": 8,
+30:   "warmup_cycles": 8,
+31:   "soak_seconds": 60,
+32:   "soak_seed": 73,
+33:   "telemetry_seconds": 10,
+34:   "checkpoint_seconds": 30,
+35:   "maximum_updates": 50000000,
+36:   "padding": "time-major [4,64,2]; invalid rows sanitized before math; losses average valid rows; empty minibatches skip Adam",
+37:   "shuffle": "permute all 512 rows with Threefry domain SHF, version, epoch; stable-partition valid rows first; 4 fixed minibatches per epoch",
+38:   "optimizer_bias": "FP32(1-beta**step) table for steps 1..20000; exact FP32 one thereafter",
+39:   "checkpoint_mode": "completed whole-episode update boundary; atomic rollback only",
+40:   "soak_stop": "elapsed monotonic wall time >=60 after warmup; numerical qualification only; no two-hour stability claim for this new policy",
+41:   "full_g2": "open",
+42:   "full_g3": "open",
+43:   "final_evaluation": "sealed; no reads of final episode data or new final games",
+44:   "format": "binary-policy-loop-1",
+45:   "policy_contract": "contracts/binary-policy-v1/contract.json"
+46: }
+47: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE scripts/verify-fixed-loop.py
+1: """Run the complete regression and bind its log to the tested code/configuration.
+2: 
+3: Documentation and outputs are excluded; implementation, tests, contract fixtures,
+4: dependency locks and this verification script are included. The campaign separately
+5: checks dataset, predecessor and runtime provenance. A changed tree fails verification.
+6: """
+7: import argparse
+8: import hashlib
+9: import json
+10: from pathlib import Path
+11: import subprocess
+12: import sys
+13: 
+14: ROOT=Path(__file__).resolve().parents[1]
+15: 
+16: 
+17: def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+18: 
+19: 
+20: def source_manifest():
+21:     paths=[]
+22:     for directory in ('python','packages','contracts','scripts','tests','tools/mechanics-deps'):
+23:         paths.extend(p for p in (ROOT/directory).rglob('*') if p.is_file() and not {'node_modules','__pycache__'} & set(p.parts))
+24:     paths.extend(ROOT/p for p in ('package.json','package-lock.json','showdown.pin.json','requirements-contract.txt',
+25:                                   'requirements-learner.txt','requirements-jax.txt','.node-version','.gitignore'))
+26:     return {str(p.relative_to(ROOT)):sha(p) for p in sorted(set(paths))}
+27: 
+28: 
+29: def main(directory):
+30:     out=Path(directory).resolve()
+31:     if not out.is_relative_to(ROOT/'artifacts/reviews'):raise ValueError('Verification directory must be under artifacts/reviews')
+32:     out.mkdir(parents=True,exist_ok=True)
+33:     before=source_manifest();log=out/'npm-test.log'
+34:     # Preserve an earlier run; a new source-bound verification never silently erases it.
+35:     if log.exists():
+36:         previous=out/('npm-test-before-'+sha(log)[:16]+'.log')
+37:         if not previous.exists():previous.write_bytes(log.read_bytes())
+38:     with log.open('wb') as stream:
+39:         result=subprocess.run(['npm','test'],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT)
+40:     after=source_manifest();passed=result.returncode==0 and before==after
+41:     report={'format':'source-bound-regression-1','status':'passed' if passed else 'failed',
+42:             'command':['npm','test'],'exit_code':result.returncode,'python':sys.version,
+43:             'node':subprocess.check_output(['node','--version'],text=True).strip(),
+44:             'source_files':before,'sources_unchanged':before==after,'test_log_sha256':sha(log)}
+45:     if before!=after:report['changed_paths']=[p for p in sorted(set(before)|set(after)) if before.get(p)!=after.get(p)]
+46:     (out/'verification.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
+47:     print(json.dumps({'status':report['status'],'verification':str(out/'verification.json'),'sources':len(before)}))
+48:     if not passed:raise SystemExit(result.returncode or 1)
+49: 
+50: 
+51: if __name__=='__main__':
+52:     parser=argparse.ArgumentParser();parser.add_argument('directory');main(parser.parse_args().directory)
+53: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

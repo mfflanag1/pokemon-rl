@@ -1,0 +1,8 @@
+{
+  "stage": "first sealing attempt after cleaned-plan regression",
+  "status": "failed",
+  "reason": "Node default spec reporter uses \u2139 pass/\u2139 fail; initial new sealer expected # pass TAP output",
+  "tests_passed": 218,
+  "effect": "No receipt or archive was published by the failed attempt",
+  "fix": "Accept and validate both exact summary formats, require zero Node failures, and test valid/invalid/missing summaries; rerun source-bound regression."
+}

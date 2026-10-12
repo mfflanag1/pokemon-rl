@@ -1,0 +1,42 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Follow artifacts/reviews/m1-showdown-chance/delegate-task.md. Own only mapping.py. You are not alone; do not revert others or recursively delegate.",
+  "criteria": "Exact upstream boundary/probe parity and integer reference at 100000 words; jit CPU uint32 arithmetic x64 disabled; strict checked wrapper; no changes to provided unittest tests.",
+  "owned": [
+    "python/pokemon_showdown/mapping.py"
+  ],
+  "checks": [
+    [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "PYTHONDONTWRITEBYTECODE=1",
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/showdown-chance",
+      "-p",
+      "test_mapping.py"
+    ]
+  ],
+  "files_sha256": {
+    ".gitignore": "5e5a628809e3b82bbeab2b6cb385767cd551f83e8316137ea0cba96da42c1771",
+    "contracts/showdown-chance-v1/contract.json": "8160e0b6c7a272aea5b95bbe609fe7bf08909354b926d0788a8d605827a1955e",
+    "artifacts/reviews/m1-showdown-chance/delegate-task.md": "5bd66a06d96d8915dcd8e7dc0d31db9a958a1618f83e393534a57d42c68c99af",
+    "python/pokemon_showdown/__init__.py": "5b2fd4f265ad0ec644f2669729ec8c48f201189c6066434173898e3cc066bd04",
+    "tests/showdown-chance/test_mapping.py": "6ef7c4a151c985ee18802984ec85ed3b15492b68dee5e8d5cf4085361a69ecad",
+    "tests/showdown-chance/fixtures/word-oracle.json": "a0c7d739d33e3e41d632b8e9700a8b879c5bb9c20ce860ebe2094deb59042a11"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "e09fe8508307e1164b8abee8e945d35432a28311",
+  "created_at": "2026-10-11T03:51:17.841222+00:00",
+  "test_run": false
+}

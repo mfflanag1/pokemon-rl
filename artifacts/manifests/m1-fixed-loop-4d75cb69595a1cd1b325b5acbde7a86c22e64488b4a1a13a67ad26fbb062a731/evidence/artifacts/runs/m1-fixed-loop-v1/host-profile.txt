@@ -1,0 +1,43 @@
+         1055000 function calls in 0.871 seconds
+
+   Ordered by: cumulative time
+   List reduced from 116 to 35 due to restriction <35>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     1000    0.009    0.000    0.803    0.001 checkpoint.py:34(run)
+     1000    0.014    0.000    0.688    0.001 loop.py:230(check_report)
+     1000    0.006    0.000    0.646    0.001 api.py:2555(device_get)
+    43000    0.025    0.000    0.580    0.000 profiler.py:417(wrapper)
+     1000    0.005    0.000    0.526    0.001 tree_util.py:394(tree_map)
+    22000    0.005    0.000    0.519    0.000 tree_util.py:406(<genexpr>)
+    21000    0.015    0.000    0.514    0.000 api.py:2538(_device_get)
+    21000    0.009    0.000    0.478    0.000 array.py:404(__array__)
+    22000    0.441    0.000    0.461    0.000 array.py:629(_value)
+     1000    0.002    0.000    0.097    0.000 loop.py:226(__call__)
+    21000    0.063    0.000    0.094    0.000 array.py:619(copy_to_host_async)
+     1000    0.033    0.000    0.068    0.000 campaign.py:79(add)
+     1000    0.001    0.000    0.060    0.000 array_constructors.py:374(asarray)
+     1000    0.005    0.000    0.053    0.000 array_constructors.py:107(array)
+     1000    0.004    0.000    0.042    0.000 lax.py:1709(_convert_element_type)
+     1000    0.034    0.000    0.035    0.000 stages.py:943(__call__)
+     1000    0.003    0.000    0.027    0.000 core.py:686(bind)
+     1000    0.000    0.000    0.022    0.000 lax.py:5502(_convert_element_type_bind_with_trace)
+     1000    0.001    0.000    0.021    0.000 core.py:735(bind_with_trace)
+     1000    0.002    0.000    0.019    0.000 core.py:1311(process_primitive)
+    48000    0.019    0.000    0.019    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+    25000    0.012    0.000    0.017    0.000 dtypes.py:498(issubdtype)
+    43000    0.010    0.000    0.016    0.000 array.py:351(is_fully_replicated)
+    22000    0.004    0.000    0.016    0.000 {method 'sum' of 'numpy.ndarray' objects}
+     1000    0.013    0.000    0.015    0.000 dispatch.py:81(apply_primitive)
+    43000    0.010    0.000    0.014    0.000 sharding.py:191(has_addressable_devices)
+     8000    0.004    0.000    0.014    0.000 fromnumeric.py:2342(sum)
+   128000    0.013    0.000    0.013    0.000 {built-in method builtins.isinstance}
+    22000    0.003    0.000    0.012    0.000 _methods.py:47(_sum)
+    22000    0.011    0.000    0.011    0.000 sharding_impls.py:190(make_single_device_sharding)
+     8000    0.005    0.000    0.009    0.000 fromnumeric.py:66(_wrapreduction)
+     1000    0.001    0.000    0.009    0.000 array.py:297(__int__)
+     2000    0.002    0.000    0.008    0.000 dtypes.py:1103(check_and_canonicalize_user_dtype)
+    86000    0.007    0.000    0.007    0.000 array.py:264(sharding)
+    43000    0.006    0.000    0.006    0.000 array.py:599(_check_if_deleted)
+
+

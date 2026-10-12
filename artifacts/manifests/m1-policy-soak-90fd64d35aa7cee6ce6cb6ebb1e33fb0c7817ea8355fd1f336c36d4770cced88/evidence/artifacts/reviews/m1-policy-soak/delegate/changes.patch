@@ -1,0 +1,48 @@
+diff --git a/python/pokemon_soak/gates.py b/python/pokemon_soak/gates.py
+index 0086dcb..99ac73a 100644
+--- a/python/pokemon_soak/gates.py
++++ b/python/pokemon_soak/gates.py
+@@ -71,10 +71,30 @@ def _require_positive_int(value, name):
+     return value
+ 
+ 
++def _describe(value):
++    """Render a value for an error message without risking a second failure.
++
++    ``repr`` of an enormous integer can itself raise ``ValueError`` once the
++    interpreter's int-to-str digit limit is exceeded; fall back to a short
++    type-based description rather than rendering the digits.
++    """
++    try:
++        return repr(value)
++    except Exception:
++        return "<%s too large to render>" % type(value).__name__
++
++
+ def _require_finite(value, name):
+     if not _is_number(value):
+         _fail("%s must be a number, got %r" % (name, value))
+-    if not math.isfinite(value):
++    try:
++        finite = math.isfinite(value)
++    except OverflowError:
++        # Integers beyond float range cannot be finite in the sense this gate
++        # uses; reject them without rendering the (possibly huge) integer.
++        _fail("%s must be a finite number within floating-point range, got %s"
++              % (name, _describe(value)))
++    if not finite:
+         _fail("%s must be finite, got %r" % (name, value))
+     return value
+ 
+@@ -181,7 +201,10 @@ def _validate_compile_controls(report, soak):
+ 
+     traces = _require_mapping(_get(soak, "traces", "soak"), "soak.traces")
+     if set(traces) != set(REQUIRED_TRACES):
+-        _fail("soak.traces must contain exactly %r, got %r" % (REQUIRED_TRACES, sorted(traces)))
++        # Keys may be of mixed, mutually incomparable types (e.g. str and int);
++        # sort on a safe rendering so the error message itself cannot raise.
++        got = sorted(_describe(key) for key in traces)
++        _fail("soak.traces must contain exactly %r, got [%s]" % (REQUIRED_TRACES, ", ".join(got)))
+     for name in REQUIRED_TRACES:
+         count = _require_int(traces[name], "soak.traces.%s" % name)
+         if count != 1:

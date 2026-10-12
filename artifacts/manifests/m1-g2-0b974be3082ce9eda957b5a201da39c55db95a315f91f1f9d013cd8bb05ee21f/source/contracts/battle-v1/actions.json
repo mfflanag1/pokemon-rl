@@ -1,0 +1,69 @@
+{
+  "version": "gen9-singles-request-v1",
+  "actions": [
+    {
+      "kind": "move",
+      "slot": 0,
+      "terastallize": false
+    },
+    {
+      "kind": "move",
+      "slot": 1,
+      "terastallize": false
+    },
+    {
+      "kind": "move",
+      "slot": 2,
+      "terastallize": false
+    },
+    {
+      "kind": "move",
+      "slot": 3,
+      "terastallize": false
+    },
+    {
+      "kind": "move",
+      "slot": 0,
+      "terastallize": true
+    },
+    {
+      "kind": "move",
+      "slot": 1,
+      "terastallize": true
+    },
+    {
+      "kind": "move",
+      "slot": 2,
+      "terastallize": true
+    },
+    {
+      "kind": "move",
+      "slot": 3,
+      "terastallize": true
+    },
+    {
+      "kind": "switch",
+      "slot": 0
+    },
+    {
+      "kind": "switch",
+      "slot": 1
+    },
+    {
+      "kind": "switch",
+      "slot": 2
+    },
+    {
+      "kind": "switch",
+      "slot": 3
+    },
+    {
+      "kind": "switch",
+      "slot": 4
+    },
+    {
+      "kind": "switch",
+      "slot": 5
+    }
+  ]
+}

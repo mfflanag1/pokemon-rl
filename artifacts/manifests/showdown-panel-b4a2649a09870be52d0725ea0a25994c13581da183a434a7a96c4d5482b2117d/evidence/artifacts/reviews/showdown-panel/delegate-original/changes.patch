@@ -1,0 +1,865 @@
+diff --git a/packages/showdown-panel/statistics.mjs b/packages/showdown-panel/statistics.mjs
+new file mode 100644
+index 0000000..0e2bcee
+--- /dev/null
++++ b/packages/showdown-panel/statistics.mjs
+@@ -0,0 +1,358 @@
++/**
++ * Showdown opponent-panel statistics.
++ *
++ * Pure, dependency-free summary of a round-robin policy matrix that was played
++ * as mirrored pairs: for every unordered policy matchup ("edge") and every
++ * team/seed pair index, two games are played with the policy seats swapped
++ * (`mirror` 0 and 1). This module turns that grid of per-game outcomes into
++ * per-edge win/draw/loss accounting, per-pair scores, and a descriptive
++ * paired-bootstrap interval of the mean score.
++ *
++ * ──────────────────────────────────────────────────────────────────────────
++ * Input contract
++ * ──────────────────────────────────────────────────────────────────────────
++ * `summarizeMatrix(records, { policyIds, pairs, bootstrapSamples, seed })`
++ *
++ *   records           Array of `{ a, b, pair, mirror, score }` objects.
++ *                       a, b    policy ids, both present in `policyIds`, a ≠ b.
++ *                       pair    integer in [0, pairs).
++ *                       mirror  0 or 1 (which seat assignment of the pair).
++ *                       score   outcome for policy `a`: 0 (loss), 0.5 (draw),
++ *                               or 1 (win). It is ALWAYS from `a`'s point of
++ *                               view, also when mirror = 1.
++ *                     Extra properties are ignored. Records may appear in any
++ *                     order. A record may name the matchup in either
++ *                     orientation; if `a` comes after `b` in `policyIds` the
++ *                     record is normalised to the canonical orientation and its
++ *                     score is complemented (1 − score), which is lossless
++ *                     because the score is defined as `a`'s outcome.
++ *   policyIds         ≥ 2 unique non-empty strings. Their order defines the
++ *                     canonical orientation of every edge and the output order.
++ *   pairs             positive integer: number of team/seed pairs per edge.
++ *   bootstrapSamples  positive integer (default 10000).
++ *   seed              integer in [0, 2^32 − 1] (default 73291).
++ *
++ * The grid must be complete and exact: for every edge (i < j in `policyIds`
++ * index order), every pair 0..pairs−1 and both mirrors there must be exactly
++ * one record. Missing, duplicate (including the same game given in the other
++ * orientation), foreign-policy, self-play, out-of-range, non-finite, or
++ * otherwise invalid records cause a `MatrixValidationError`. So do invalid
++ * options. Inputs are never mutated.
++ *
++ * ──────────────────────────────────────────────────────────────────────────
++ * Output
++ * ──────────────────────────────────────────────────────────────────────────
++ * An array with one entry per edge in lexicographic (i, j) index order, i.e.
++ * (0,1), (0,2), …, (0,n−1), (1,2), …, (n−2,n−1):
++ *
++ *   {
++ *     a, b,            canonical policy ids (a precedes b in policyIds)
++ *     games,           2 × pairs
++ *     pairs,           number of pairs
++ *     wins, draws, losses,   game counts from a's point of view
++ *     mean_score,      (wins + 0.5·draws) / games  (= mean of pair_scores)
++ *     pair_scores,     Array(pairs); pair_scores[p] = (score(p,0)+score(p,1))/2
++ *     interval95: [low, high]   descriptive 95 % bootstrap interval, see below
++ *   }
++ *
++ * ──────────────────────────────────────────────────────────────────────────
++ * Bootstrap specification (deterministic)
++ * ──────────────────────────────────────────────────────────────────────────
++ * The resampling unit is the whole pair, never the individual game: the two
++ * mirrored games of a pair share teams and mechanics seed and are therefore
++ * not independent observations. Each bootstrap replicate resamples `pairs`
++ * pair indices with replacement and averages the pair scores at those indices.
++ *
++ * The SAME resampled pair indices are applied to every edge within a
++ * replicate, so cross-edge dependence that stems from reusing the same pairs
++ * across matchups is preserved (differences between edges are comparable
++ * replicate-by-replicate).
++ *
++ * PRNG: mulberry32 (Tommy Ettinger's 32-bit generator), stated explicitly in
++ * `mulberry32` below, with its state kept as a uint32. Index draws use
++ * unbiased rejection sampling (`uniformIndex`). Draw order: for replicate
++ * s = 0..B−1, for p = 0..pairs−1, draw index[p] from the single PRNG stream.
++ *
++ * Quantiles: with B replicates sorted ascending and k = ⌈B/40⌉ (= ⌈0.025·B⌉
++ * computed in integer arithmetic), `low` is the k-th smallest replicate and
++ * `high` is the k-th largest replicate. This is the symmetric nearest-rank
++ * rule for the 2.5 % and 97.5 % percentiles; it differs from the plain
++ * nearest-rank 97.5 % rank ⌈0.975·B⌉ by at most one position and has the
++ * property that complementing every score exactly mirrors the interval.
++ *
++ * ──────────────────────────────────────────────────────────────────────────
++ * Interpretation — read before quoting an interval
++ * ──────────────────────────────────────────────────────────────────────────
++ * • The intervals are DESCRIPTIVE. They summarise how much the observed mean
++ *   score would move under resampling of the admitted pairs. They are not a
++ *   test, carry no promotion / qualification decision, and make no claim about
++ *   other team pools, seeds, formats, or servers.
++ * • They are PER-EDGE intervals. No simultaneous-coverage or
++ *   multiple-comparison adjustment is applied; quoting several edges together
++ *   does not give joint 95 % coverage.
++ * • DEGENERATE intervals (low === high) arise whenever all pair scores of an
++ *   edge coincide — for example `pairs = 1`, every pair split 1/0 across its
++ *   mirrors, or a sweep — and when B is tiny. A zero-width interval means the
++ *   resampled statistic cannot vary, not that the true score is known
++ *   exactly.
++ * • The bootstrap does not model game-level randomness inside a fixed pair
++ *   (both mirrors were played exactly once), nor the finite number of
++ *   admitted teams.
++ */
++
++const UINT32_RANGE = 2 ** 32;
++const VALID_SCORES = [0, 0.5, 1];
++
++export class MatrixValidationError extends Error {
++  constructor(message) {
++    super(message);
++    this.name = 'MatrixValidationError';
++  }
++}
++
++/**
++ * mulberry32 — explicit, dependency-free uint32 PRNG.
++ *
++ * State: one uint32. Per call:
++ *   state = (state + 0x6D2B79F5) mod 2^32
++ *   t = state
++ *   t = imul(t ^ (t >>> 15), t | 1)
++ *   t = t ^ (t + imul(t ^ (t >>> 7), t | 61))
++ *   return (t ^ (t >>> 14)) as uint32
++ * where imul is 32-bit integer multiplication (Math.imul) and bitwise ops are
++ * the usual JavaScript int32 operations. Returns integers in [0, 2^32 − 1].
++ */
++export function mulberry32(seed) {
++  if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) {
++    throw new MatrixValidationError(`seed must be an integer in [0, 2^32 - 1]; got ${String(seed)}`);
++  }
++  let state = seed >>> 0;
++  return function next() {
++    state = (state + 0x6d2b79f5) >>> 0;
++    let t = state;
++    t = Math.imul(t ^ (t >>> 15), t | 1);
++    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
++    return (t ^ (t >>> 14)) >>> 0;
++  };
++}
++
++/**
++ * Unbiased integer in [0, n) from a uint32 source via rejection sampling:
++ * draw u; accept iff u < 2^32 − (2^32 mod n); return u mod n.
++ */
++export function uniformIndex(next, n) {
++  if (!Number.isInteger(n) || n < 1 || n > UINT32_RANGE) {
++    throw new MatrixValidationError(`uniformIndex: n must be an integer in [1, 2^32]; got ${String(n)}`);
++  }
++  const limit = UINT32_RANGE - (UINT32_RANGE % n);
++  let u;
++  do {
++    u = next();
++  } while (u >= limit);
++  return u % n;
++}
++
++/**
++ * Symmetric nearest-rank 95 % interval of a sample of finite numbers.
++ * With B values and k = ⌈B/40⌉: [k-th smallest, k-th largest].
++ * The input is not mutated.
++ */
++export function percentileInterval95(values) {
++  if (!Array.isArray(values) && !ArrayBuffer.isView(values)) {
++    throw new MatrixValidationError('percentileInterval95: values must be an array');
++  }
++  const size = values.length;
++  if (size < 1) {
++    throw new MatrixValidationError('percentileInterval95: need at least one value');
++  }
++  const sorted = Array.from(values);
++  for (const v of sorted) {
++    if (typeof v !== 'number' || !Number.isFinite(v)) {
++      throw new MatrixValidationError('percentileInterval95: values must be finite numbers');
++    }
++  }
++  sorted.sort((x, y) => x - y);
++  const k = Math.floor((size + 39) / 40); // ⌈size / 40⌉ without floating-point
++  return [sorted[k - 1], sorted[size - k]];
++}
++
++function isPositiveInteger(value) {
++  return Number.isSafeInteger(value) && value > 0;
++}
++
++function describe(value) {
++  if (typeof value === 'string') return JSON.stringify(value);
++  if (typeof value === 'number' || typeof value === 'boolean' || value == null) return String(value);
++  if (Array.isArray(value)) return 'array';
++  return typeof value;
++}
++
++function validateOptions(options) {
++  if (options === null || typeof options !== 'object') {
++    throw new MatrixValidationError('options must be an object with policyIds and pairs');
++  }
++  const { policyIds, pairs, bootstrapSamples = 10000, seed = 73291 } = options;
++
++  if (!Array.isArray(policyIds) || policyIds.length < 2) {
++    throw new MatrixValidationError('policyIds must be an array of at least two policy ids');
++  }
++  const seen = new Set();
++  for (const id of policyIds) {
++    if (typeof id !== 'string' || id.length === 0) {
++      throw new MatrixValidationError(`policyIds entries must be non-empty strings; got ${describe(id)}`);
++    }
++    if (seen.has(id)) {
++      throw new MatrixValidationError(`policyIds contains duplicate id ${describe(id)}`);
++    }
++    seen.add(id);
++  }
++  if (!isPositiveInteger(pairs)) {
++    throw new MatrixValidationError(`pairs must be a positive integer; got ${describe(pairs)}`);
++  }
++  if (!isPositiveInteger(bootstrapSamples)) {
++    throw new MatrixValidationError(`bootstrapSamples must be a positive integer; got ${describe(bootstrapSamples)}`);
++  }
++  if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) {
++    throw new MatrixValidationError(`seed must be an integer in [0, 2^32 - 1]; got ${describe(seed)}`);
++  }
++  return { policyIds: policyIds.slice(), pairs, bootstrapSamples, seed };
++}
++
++/**
++ * Summarise a complete mirrored-pair round-robin grid. See the module header
++ * for the full contract.
++ */
++export function summarizeMatrix(records, options) {
++  const { policyIds, pairs, bootstrapSamples, seed } = validateOptions(options);
++
++  if (!Array.isArray(records)) {
++    throw new MatrixValidationError('records must be an array');
++  }
++
++  const indexOf = new Map(policyIds.map((id, i) => [id, i]));
++  const count = policyIds.length;
++
++  // Edges in lexicographic (i, j) index order.
++  const edges = [];
++  const edgeByKey = new Map();
++  for (let i = 0; i < count; i += 1) {
++    for (let j = i + 1; j < count; j += 1) {
++      const cells = new Array(pairs);
++      for (let p = 0; p < pairs; p += 1) cells[p] = [null, null];
++      const edge = { a: policyIds[i], b: policyIds[j], ai: i, bi: j, cells };
++      edges.push(edge);
++      edgeByKey.set(`${i}:${j}`, edge);
++    }
++  }
++
++  const expected = edges.length * pairs * 2;
++  if (records.length !== expected) {
++    throw new MatrixValidationError(
++      `expected exactly ${expected} records (${edges.length} edges × ${pairs} pairs × 2 mirrors); got ${records.length}`,
++    );
++  }
++
++  records.forEach((record, position) => {
++    if (record === null || typeof record !== 'object' || Array.isArray(record)) {
++      throw new MatrixValidationError(`record[${position}] must be an object; got ${describe(record)}`);
++    }
++    const { a, b, pair, mirror, score } = record;
++
++    if (typeof a !== 'string' || !indexOf.has(a)) {
++      throw new MatrixValidationError(`record[${position}].a ${describe(a)} is not a known policy id`);
++    }
++    if (typeof b !== 'string' || !indexOf.has(b)) {
++      throw new MatrixValidationError(`record[${position}].b ${describe(b)} is not a known policy id`);
++    }
++    if (a === b) {
++      throw new MatrixValidationError(`record[${position}] pairs policy ${describe(a)} against itself`);
++    }
++    if (!Number.isInteger(pair) || pair < 0 || pair >= pairs) {
++      throw new MatrixValidationError(`record[${position}].pair must be an integer in [0, ${pairs}); got ${describe(pair)}`);
++    }
++    if (mirror !== 0 && mirror !== 1) {
++      throw new MatrixValidationError(`record[${position}].mirror must be 0 or 1; got ${describe(mirror)}`);
++    }
++    if (typeof score !== 'number' || !Number.isFinite(score) || !VALID_SCORES.includes(score)) {
++      throw new MatrixValidationError(`record[${position}].score must be 0, 0.5 or 1; got ${describe(score)}`);
++    }
++
++    const ai = indexOf.get(a);
++    const bi = indexOf.get(b);
++    const canonical = ai < bi;
++    const edge = edgeByKey.get(canonical ? `${ai}:${bi}` : `${bi}:${ai}`);
++    const canonicalScore = canonical ? score : 1 - score;
++
++    if (edge.cells[pair][mirror] !== null) {
++      throw new MatrixValidationError(
++        `record[${position}] duplicates game ${describe(edge.a)} vs ${describe(edge.b)} pair ${pair} mirror ${mirror}`,
++      );
++    }
++    edge.cells[pair][mirror] = canonicalScore;
++  });
++
++  // The count check plus duplicate rejection already implies completeness,
++  // but verify explicitly so the invariant does not depend on that reasoning.
++  for (const edge of edges) {
++    for (let p = 0; p < pairs; p += 1) {
++      for (let m = 0; m < 2; m += 1) {
++        if (edge.cells[p][m] === null) {
++          throw new MatrixValidationError(
++            `missing game ${describe(edge.a)} vs ${describe(edge.b)} pair ${p} mirror ${m}`,
++          );
++        }
++      }
++    }
++  }
++
++  // Per-edge accounting.
++  const summaries = edges.map((edge) => {
++    let wins = 0;
++    let draws = 0;
++    let losses = 0;
++    const pairScores = new Array(pairs);
++    for (let p = 0; p < pairs; p += 1) {
++      const [s0, s1] = edge.cells[p];
++      for (const s of [s0, s1]) {
++        if (s === 1) wins += 1;
++        else if (s === 0.5) draws += 1;
++        else losses += 1;
++      }
++      pairScores[p] = (s0 + s1) / 2;
++    }
++    const games = pairs * 2;
++    return {
++      a: edge.a,
++      b: edge.b,
++      games,
++      pairs,
++      wins,
++      draws,
++      losses,
++      mean_score: (wins + 0.5 * draws) / games,
++      pair_scores: pairScores,
++      interval95: null,
++    };
++  });
++
++  // Paired bootstrap with shared indices across edges.
++  const next = mulberry32(seed);
++  const replicates = summaries.map(() => new Float64Array(bootstrapSamples));
++  const indices = new Array(pairs);
++  for (let s = 0; s < bootstrapSamples; s += 1) {
++    for (let p = 0; p < pairs; p += 1) {
++      indices[p] = uniformIndex(next, pairs);
++    }
++    for (let e = 0; e < summaries.length; e += 1) {
++      const scores = summaries[e].pair_scores;
++      let sum = 0;
++      for (let p = 0; p < pairs; p += 1) sum += scores[indices[p]];
++      replicates[e][s] = sum / pairs;
++    }
++  }
++  for (let e = 0; e < summaries.length; e += 1) {
++    summaries[e].interval95 = percentileInterval95(replicates[e]);
++  }
++
++  return summaries;
++}
+diff --git a/tests/showdown-panel/statistics.test.mjs b/tests/showdown-panel/statistics.test.mjs
+new file mode 100644
+index 0000000..87207e7
+--- /dev/null
++++ b/tests/showdown-panel/statistics.test.mjs
+@@ -0,0 +1,495 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++
++import {
++  summarizeMatrix,
++  mulberry32,
++  uniformIndex,
++  percentileInterval95,
++  MatrixValidationError,
++} from '../../packages/showdown-panel/statistics.mjs';
++
++// ───────────────────────────── helpers ─────────────────────────────
++
++function edgeOrder(policyIds) {
++  const edges = [];
++  for (let i = 0; i < policyIds.length; i += 1) {
++    for (let j = i + 1; j < policyIds.length; j += 1) edges.push([policyIds[i], policyIds[j]]);
++  }
++  return edges;
++}
++
++/** Build a complete grid; scoreOf(a, b, pair, mirror) gives a's outcome. */
++function buildGrid(policyIds, pairs, scoreOf) {
++  const records = [];
++  for (const [a, b] of edgeOrder(policyIds)) {
++    for (let pair = 0; pair < pairs; pair += 1) {
++      for (const mirror of [0, 1]) {
++        records.push({ a, b, pair, mirror, score: scoreOf(a, b, pair, mirror) });
++      }
++    }
++  }
++  return records;
++}
++
++function fromTable(table) {
++  return (a, b, pair, mirror) => table[`${a}|${b}`][pair][mirror];
++}
++
++function deepFreeze(value) {
++  if (value && typeof value === 'object') {
++    Object.freeze(value);
++    for (const key of Object.keys(value)) deepFreeze(value[key]);
++  }
++  return value;
++}
++
++function expectRejected(records, options, pattern) {
++  assert.throws(
++    () => summarizeMatrix(records, options),
++    (error) => {
++      assert.ok(error instanceof MatrixValidationError, `expected MatrixValidationError, got ${error && error.name}: ${error && error.message}`);
++      assert.match(error.message, pattern);
++      return true;
++    },
++  );
++}
++
++// ───────────────────────── exact accounting ─────────────────────────
++
++test('exact 0 / 0.5 / 1 accounting, pair averaging, and edge order', () => {
++  const policyIds = ['p', 'q', 'r'];
++  const table = {
++    'p|q': [[1, 0.5], [0, 0]],
++    'p|r': [[1, 1], [1, 1]],
++    'q|r': [[0.5, 0.5], [1, 0]],
++  };
++  // Reverse the record order to show the summary does not depend on it.
++  const records = buildGrid(policyIds, 2, fromTable(table)).reverse();
++  const result = summarizeMatrix(records, { policyIds, pairs: 2, bootstrapSamples: 200, seed: 1 });
++
++  assert.equal(result.length, 3);
++  assert.deepEqual(result.map((e) => [e.a, e.b]), [['p', 'q'], ['p', 'r'], ['q', 'r']]);
++
++  const [pq, pr, qr] = result;
++
++  assert.equal(pq.games, 4);
++  assert.equal(pq.pairs, 2);
++  assert.equal(pq.wins, 1);
++  assert.equal(pq.draws, 1);
++  assert.equal(pq.losses, 2);
++  assert.equal(pq.mean_score, 0.375);
++  assert.deepEqual(pq.pair_scores, [0.75, 0]);
++  // Every replicate mean of two pair scores drawn from {0.75, 0} is one of these.
++  assert.ok([0, 0.375, 0.75].includes(pq.interval95[0]));
++  assert.ok([0, 0.375, 0.75].includes(pq.interval95[1]));
++  assert.ok(pq.interval95[0] <= pq.interval95[1]);
++
++  assert.equal(pr.wins, 4);
++  assert.equal(pr.draws, 0);
++  assert.equal(pr.losses, 0);
++  assert.equal(pr.mean_score, 1);
++  assert.deepEqual(pr.pair_scores, [1, 1]);
++  assert.deepEqual(pr.interval95, [1, 1]);
++
++  assert.equal(qr.wins, 1);
++  assert.equal(qr.draws, 2);
++  assert.equal(qr.losses, 1);
++  assert.equal(qr.mean_score, 0.5);
++  // pair 0: two draws, pair 1: a win and a loss — both pairs average to 0.5.
++  assert.deepEqual(qr.pair_scores, [0.5, 0.5]);
++  assert.deepEqual(qr.interval95, [0.5, 0.5]);
++
++  for (const entry of result) {
++    assert.deepEqual(Object.keys(entry).sort(), [
++      'a', 'b', 'draws', 'games', 'interval95', 'losses', 'mean_score', 'pair_scores', 'pairs', 'wins',
++    ]);
++    assert.equal(entry.wins + entry.draws + entry.losses, entry.games);
++    assert.equal(entry.pair_scores.length, entry.pairs);
++    assert.equal(entry.interval95.length, 2);
++  }
++});
++
++test('mirror=1 scores are still from a\'s point of view and the pair is the resampling unit', () => {
++  // Policy p wins every mirror-0 game and loses every mirror-1 game.
++  // Game-level: 6 wins, 6 losses. Pair-level: every pair is exactly 0.5, so a
++  // whole-pair bootstrap cannot vary at all. Resampling individual games would
++  // give a wide interval instead.
++  const policyIds = ['p', 'q'];
++  const records = buildGrid(policyIds, 6, (a, b, pair, mirror) => (mirror === 0 ? 1 : 0));
++  const [pq] = summarizeMatrix(records, { policyIds, pairs: 6, bootstrapSamples: 3000, seed: 99 });
++  assert.equal(pq.wins, 6);
++  assert.equal(pq.losses, 6);
++  assert.equal(pq.draws, 0);
++  assert.equal(pq.mean_score, 0.5);
++  assert.deepEqual(pq.pair_scores, [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]);
++  assert.deepEqual(pq.interval95, [0.5, 0.5]);
++});
++
++test('a single pair always yields a degenerate interval equal to its pair score', () => {
++  const policyIds = ['p', 'q', 'r'];
++  const table = { 'p|q': [[1, 0.5]], 'p|r': [[0, 0]], 'q|r': [[0.5, 1]] };
++  const result = summarizeMatrix(buildGrid(policyIds, 1, fromTable(table)), {
++    policyIds, pairs: 1, bootstrapSamples: 500, seed: 5,
++  });
++  assert.deepEqual(result.map((e) => e.interval95), [[0.75, 0.75], [0, 0], [0.75, 0.75]]);
++  assert.deepEqual(result.map((e) => e.mean_score), [0.75, 0, 0.75]);
++});
++
++test('two pairs at 0 and 1 give the full [0, 1] interval at the default sample count', () => {
++  // Replicate means are 0, 0.5 or 1 with probabilities 1/4, 1/2, 1/4. With
++  // 10000 replicates and k = 250, the 250th smallest is 0 and the 250th
++  // largest is 1 unless the PRNG is badly broken (expected 2500 of each).
++  const policyIds = ['p', 'q'];
++  const records = buildGrid(policyIds, 2, (a, b, pair) => (pair === 0 ? 0 : 1));
++  const [pq] = summarizeMatrix(records, { policyIds, pairs: 2 });
++  assert.deepEqual(pq.pair_scores, [0, 1]);
++  assert.deepEqual(pq.interval95, [0, 1]);
++});
++
++// ───────────────────── shared indices across edges ─────────────────────
++
++test('all edges use the same resampled pair indices in every replicate', () => {
++  const policyIds = ['a', 'b', 'c'];
++  const table = {
++    'a|b': [[1, 1], [0, 0.5], [0.5, 1], [0, 0]], // pair scores 1, .25, .75, 0
++    'a|c': [[0, 0], [1, 0.5], [0.5, 0], [1, 1]], // exact complement: 0, .75, .25, 1
++    'b|c': [[1, 1], [0, 0.5], [0.5, 1], [0, 0]], // identical to a|b
++  };
++  const records = buildGrid(policyIds, 4, fromTable(table));
++  const [ab, ac, bc] = summarizeMatrix(records, { policyIds, pairs: 4, bootstrapSamples: 2000, seed: 4242 });
++
++  assert.deepEqual(ab.pair_scores, [1, 0.25, 0.75, 0]);
++  assert.deepEqual(ac.pair_scores, [0, 0.75, 0.25, 1]);
++  assert.ok(ab.interval95[0] < ab.interval95[1], 'interval should be non-degenerate here');
++
++  // Identical pair scores + identical indices ⇒ identical replicates.
++  assert.deepEqual(bc.interval95, ab.interval95);
++
++  // Complemented pair scores + identical indices + symmetric quantile rule
++  // ⇒ exactly mirrored interval. Independent index streams would not give
++  // this exactly.
++  const tolerance = 1e-12;
++  assert.ok(Math.abs(ac.interval95[0] - (1 - ab.interval95[1])) < tolerance, `${ac.interval95} vs ${ab.interval95}`);
++  assert.ok(Math.abs(ac.interval95[1] - (1 - ab.interval95[0])) < tolerance, `${ac.interval95} vs ${ab.interval95}`);
++});
++
++// ─────────────────────── independently derived case ───────────────────────
++
++/**
++ * Independent re-derivation of the documented procedure, written without
++ * reference to the implementation: groups raw records itself, uses Ettinger's
++ * published float-state mulberry32 form, generic rejection sampling, and
++ * counting-based order statistics instead of sort-and-index.
++ */
++function oracleSummary(records, { policyIds, pairs, bootstrapSamples, seed }) {
++  const edges = edgeOrder(policyIds);
++  const pairScores = edges.map(([a, b]) => {
++    const scores = [];
++    for (let p = 0; p < pairs; p += 1) {
++      const games = records.filter((r) => r.a === a && r.b === b && r.pair === p);
++      assert.equal(games.length, 2);
++      scores.push(games.reduce((acc, r) => acc + r.score, 0) / 2);
++    }
++    return scores;
++  });
++
++  let state = seed;
++  const next = () => {
++    let t = (state += 0x6d2b79f5);
++    t = Math.imul(t ^ (t >>> 15), t | 1);
++    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
++    return (t ^ (t >>> 14)) >>> 0;
++  };
++  const limit = 2 ** 32 - ((2 ** 32) % pairs);
++  const draw = () => {
++    for (;;) {
++      const u = next();
++      if (u < limit) return u % pairs;
++    }
++  };
++
++  const replicates = edges.map(() => []);
++  for (let s = 0; s < bootstrapSamples; s += 1) {
++    const indices = Array.from({ length: pairs }, () => draw());
++    edges.forEach((_, e) => {
++      let sum = 0;
++      for (const i of indices) sum += pairScores[e][i];
++      replicates[e].push(sum / pairs);
++    });
++  }
++
++  const k = Math.ceil(bootstrapSamples / 40);
++  const kthSmallest = (values) => {
++    const distinct = [...new Set(values)].sort((x, y) => x - y);
++    return distinct.find((v) => values.filter((x) => x <= v).length >= k);
++  };
++  const kthLargest = (values) => {
++    const distinct = [...new Set(values)].sort((x, y) => y - x);
++    return distinct.find((v) => values.filter((x) => x >= v).length >= k);
++  };
++
++  return edges.map(([a, b], e) => ({
++    a,
++    b,
++    pair_scores: pairScores[e],
++    interval95: [kthSmallest(replicates[e]), kthLargest(replicates[e])],
++  }));
++}
++
++test('nontrivial bootstrap matches an independent re-derivation of the documented spec', () => {
++  const policyIds = ['x', 'y', 'z'];
++  const table = {
++    'x|y': [[1, 0], [0.5, 0.5], [1, 1], [0, 0.5], [0, 0]], // .5 .5 1 .25 0
++    'x|z': [[0, 0], [1, 0.5], [0.5, 0], [1, 1], [0.5, 1]], // 0 .75 .25 1 .75
++    'y|z': [[1, 1], [1, 0.5], [0, 0], [0.5, 0], [1, 0]], // 1 .75 0 .25 .5
++  };
++  const options = { policyIds, pairs: 5, bootstrapSamples: 300, seed: 12345 };
++  const records = buildGrid(policyIds, 5, fromTable(table));
++
++  const expected = oracleSummary(records, options);
++  const actual = summarizeMatrix(records, options);
++
++  assert.deepEqual(expected.map((e) => e.pair_scores), [
++    [0.5, 0.5, 1, 0.25, 0],
++    [0, 0.75, 0.25, 1, 0.75],
++    [1, 0.75, 0, 0.25, 0.5],
++  ]);
++  assert.deepEqual(actual.map((e) => e.pair_scores), expected.map((e) => e.pair_scores));
++
++  for (let e = 0; e < expected.length; e += 1) {
++    assert.equal(actual[e].a, expected[e].a);
++    assert.equal(actual[e].b, expected[e].b);
++    for (const side of [0, 1]) {
++      assert.ok(
++        Math.abs(actual[e].interval95[side] - expected[e].interval95[side]) < 1e-12,
++        `edge ${expected[e].a}|${expected[e].b}: ${actual[e].interval95} vs oracle ${expected[e].interval95}`,
++      );
++    }
++    assert.ok(actual[e].interval95[0] < actual[e].interval95[1], 'case must be non-degenerate to be meaningful');
++    const lo = Math.min(...actual[e].pair_scores);
++    const hi = Math.max(...actual[e].pair_scores);
++    assert.ok(actual[e].interval95[0] >= lo && actual[e].interval95[1] <= hi);
++  }
++});
++
++// ───────────────────────────── determinism ─────────────────────────────
++
++test('summaries are deterministic for a given seed and return fresh objects', () => {
++  const policyIds = ['p', 'q', 'r'];
++  const records = buildGrid(policyIds, 7, (a, b, pair, mirror) => [0, 0.5, 1][(pair * 2 + mirror + a.length) % 3]);
++  const options = { policyIds, pairs: 7, bootstrapSamples: 400, seed: 2024 };
++  const first = summarizeMatrix(records, options);
++  const second = summarizeMatrix(records, options);
++  assert.deepEqual(first, second);
++  assert.notEqual(first, second);
++  assert.notEqual(first[0].pair_scores, second[0].pair_scores);
++  assert.notEqual(first[0].interval95, second[0].interval95);
++
++  const defaults = summarizeMatrix(records, { policyIds, pairs: 7 });
++  const explicit = summarizeMatrix(records, { policyIds, pairs: 7, bootstrapSamples: 10000, seed: 73291 });
++  assert.deepEqual(defaults, explicit);
++});
++
++test('mulberry32 is reproducible, uint32-valued, and seed-sensitive', () => {
++  const take = (seed, n) => {
++    const next = mulberry32(seed);
++    return Array.from({ length: n }, () => next());
++  };
++  const a = take(7, 100);
++  const b = take(7, 100);
++  assert.deepEqual(a, b);
++  for (const v of a) {
++    assert.ok(Number.isInteger(v) && v >= 0 && v <= 0xffffffff, `not uint32: ${v}`);
++  }
++  assert.notDeepEqual(take(8, 100), a);
++  assert.ok(new Set(a).size > 90, 'stream should not be stuck');
++  assert.throws(() => mulberry32(-1), MatrixValidationError);
++  assert.throws(() => mulberry32(2 ** 32), MatrixValidationError);
++  assert.throws(() => mulberry32(1.5), MatrixValidationError);
++});
++
++test('uniformIndex rejects values at or above the unbiased limit', () => {
++  // 2^32 mod 3 = 1, so the only rejected value for n = 3 is 2^32 - 1.
++  const feed = [0xffffffff, 7];
++  let consumed = 0;
++  const next = () => feed[consumed++];
++  assert.equal(uniformIndex(next, 3), 1); // 7 mod 3
++  assert.equal(consumed, 2);
++
++  // n = 1 always yields 0 but still consumes a draw.
++  let calls = 0;
++  assert.equal(uniformIndex(() => { calls += 1; return 123456789; }, 1), 0);
++  assert.equal(calls, 1);
++
++  const prng = mulberry32(3);
++  for (let i = 0; i < 5000; i += 1) {
++    const v = uniformIndex(prng, 5);
++    assert.ok(Number.isInteger(v) && v >= 0 && v < 5);
++  }
++  assert.throws(() => uniformIndex(prng, 0), MatrixValidationError);
++});
++
++test('percentileInterval95 uses k = ceil(B/40): k-th smallest and k-th largest', () => {
++  assert.deepEqual(percentileInterval95([5, 1, 4, 2, 3]), [1, 5]); // B=5, k=1
++  const descending = (n) => Array.from({ length: n }, (_, i) => n - 1 - i);
++
++  const forty = descending(40); // k=1
++  assert.deepEqual(percentileInterval95(forty), [0, 39]);
++  assert.deepEqual(forty, descending(40), 'input must not be mutated');
++
++  assert.deepEqual(percentileInterval95(descending(41)), [1, 39]); // k=2
++  assert.deepEqual(percentileInterval95(descending(80)), [1, 78]); // k=2
++  assert.deepEqual(percentileInterval95(descending(81)), [2, 78]); // k=3
++  assert.deepEqual(percentileInterval95(descending(10000)), [249, 9750]); // k=250
++  assert.deepEqual(percentileInterval95(Float64Array.from([0.5, 0.25, 0.75])), [0.25, 0.75]);
++  assert.deepEqual(percentileInterval95([2, 2, 2]), [2, 2]);
++
++  assert.throws(() => percentileInterval95([]), MatrixValidationError);
++  assert.throws(() => percentileInterval95([1, NaN]), MatrixValidationError);
++  assert.throws(() => percentileInterval95('abc'), MatrixValidationError);
++});
++
++// ───────────────────────── orientation handling ─────────────────────────
++
++test('records given in the reverse orientation are normalised with complemented scores', () => {
++  const policyIds = ['p', 'q'];
++  const table = { 'p|q': [[1, 0.5], [0, 0], [0.5, 1]] };
++  const canonical = buildGrid(policyIds, 3, fromTable(table));
++  const reversed = canonical.map((r) => ({ a: r.b, b: r.a, pair: r.pair, mirror: r.mirror, score: 1 - r.score }));
++  const mixed = canonical.map((r, i) => (i % 2 === 0 ? r : reversed[i]));
++  const options = { policyIds, pairs: 3, bootstrapSamples: 100, seed: 11 };
++
++  const expected = summarizeMatrix(canonical, options);
++  assert.deepEqual(summarizeMatrix(reversed, options), expected);
++  assert.deepEqual(summarizeMatrix(mixed, options), expected);
++  assert.equal(expected[0].a, 'p');
++  assert.equal(expected[0].b, 'q');
++  assert.equal(expected[0].wins, 2);
++  assert.equal(expected[0].draws, 2);
++  assert.equal(expected[0].losses, 2);
++});
++
++// ───────────────────────────── malformed grids ─────────────────────────────
++
++test('malformed grids are rejected', () => {
++  const policyIds = ['p', 'q', 'r'];
++  const options = { policyIds, pairs: 2, bootstrapSamples: 50, seed: 3 };
++  const good = () => buildGrid(policyIds, 2, (a, b, pair, mirror) => [1, 0.5, 0][(pair + mirror) % 3]);
++  assert.doesNotThrow(() => summarizeMatrix(good(), options));
++
++  const withOne = (patch) => {
++    const records = good();
++    records[3] = { ...records[3], ...patch };
++    return records;
++  };
++
++  // Missing / extra / duplicate.
++  expectRejected(good().slice(1), options, /expected exactly 12 records/);
++  expectRejected([...good(), good()[0]], options, /expected exactly 12 records/);
++  const dup = good();
++  dup[5] = { ...dup[0] };
++  expectRejected(dup, options, /duplicates game/);
++  const dupReversed = good();
++  dupReversed[5] = { a: dup[0].b, b: dup[0].a, pair: dup[0].pair, mirror: dup[0].mirror, score: 1 - dup[0].score };
++  expectRejected(dupReversed, options, /duplicates game/);
++  expectRejected([], options, /expected exactly 12 records/);
++
++  // Policies.
++  expectRejected(withOne({ a: 'zzz' }), options, /not a known policy id/);
++  expectRejected(withOne({ b: 'zzz' }), options, /not a known policy id/);
++  expectRejected(withOne({ a: 42 }), options, /not a known policy id/);
++  expectRejected(withOne({ b: undefined }), options, /not a known policy id/);
++  expectRejected(withOne({ a: 'p', b: 'p' }), options, /against itself/);
++
++  // Pair index.
++  expectRejected(withOne({ pair: 2 }), options, /pair must be an integer in \[0, 2\)/);
++  expectRejected(withOne({ pair: -1 }), options, /pair must be an integer/);
++  expectRejected(withOne({ pair: 0.5 }), options, /pair must be an integer/);
++  expectRejected(withOne({ pair: '0' }), options, /pair must be an integer/);
++  expectRejected(withOne({ pair: NaN }), options, /pair must be an integer/);
++
++  // Mirror / seat.
++  expectRejected(withOne({ mirror: 2 }), options, /mirror must be 0 or 1/);
++  expectRejected(withOne({ mirror: '1' }), options, /mirror must be 0 or 1/);
++  expectRejected(withOne({ mirror: true }), options, /mirror must be 0 or 1/);
++  expectRejected(withOne({ mirror: undefined }), options, /mirror must be 0 or 1/);
++
++  // Score.
++  expectRejected(withOne({ score: NaN }), options, /score must be 0, 0.5 or 1/);
++  expectRejected(withOne({ score: Infinity }), options, /score must be 0, 0.5 or 1/);
++  expectRejected(withOne({ score: -Infinity }), options, /score must be 0, 0.5 or 1/);
++  expectRejected(withOne({ score: 0.3 }), options, /score must be 0, 0.5 or 1/);
++  expectRejected(withOne({ score: -0.5 }), options, /score must be 0, 0.5 or 1/);
++  expectRejected(withOne({ score: 2 }), options, /score must be 0, 0.5 or 1/);
++  expectRejected(withOne({ score: '1' }), options, /score must be 0, 0.5 or 1/);
++  expectRejected(withOne({ score: undefined }), options, /score must be 0, 0.5 or 1/);
++
++  // Record shape / container.
++  const nullRecord = good();
++  nullRecord[3] = null;
++  expectRejected(nullRecord, options, /record\[3\] must be an object/);
++  const arrayRecord = good();
++  arrayRecord[3] = ['p', 'q', 0, 0, 1];
++  expectRejected(arrayRecord, options, /record\[3\] must be an object/);
++  expectRejected('not an array', options, /records must be an array/);
++  expectRejected(undefined, options, /records must be an array/);
++});
++
++test('invalid options are rejected', () => {
++  const policyIds = ['p', 'q'];
++  const records = buildGrid(policyIds, 2, () => 0.5);
++  const base = { policyIds, pairs: 2, bootstrapSamples: 20, seed: 9 };
++  assert.doesNotThrow(() => summarizeMatrix(records, base));
++
++  expectRejected(records, undefined, /options must be an object/);
++  expectRejected(records, null, /options must be an object/);
++
++  expectRejected(records, { ...base, policyIds: undefined }, /policyIds must be an array/);
++  expectRejected(records, { ...base, policyIds: 'pq' }, /policyIds must be an array/);
++  expectRejected(records, { ...base, policyIds: ['p'] }, /at least two/);
++  expectRejected(records, { ...base, policyIds: ['p', 'p'] }, /duplicate policy id/);
++  expectRejected(records, { ...base, policyIds: ['p', 1] }, /non-empty strings/);
++  expectRejected(records, { ...base, policyIds: ['p', ''] }, /non-empty strings/);
++
++  expectRejected(records, { ...base, pairs: 0 }, /pairs must be a positive integer/);
++  expectRejected(records, { ...base, pairs: -2 }, /pairs must be a positive integer/);
++  expectRejected(records, { ...base, pairs: 2.5 }, /pairs must be a positive integer/);
++  expectRejected(records, { ...base, pairs: '2' }, /pairs must be a positive integer/);
++  expectRejected(records, { ...base, pairs: undefined }, /pairs must be a positive integer/);
++
++  expectRejected(records, { ...base, bootstrapSamples: 0 }, /bootstrapSamples must be a positive integer/);
++  expectRejected(records, { ...base, bootstrapSamples: -1 }, /bootstrapSamples must be a positive integer/);
++  expectRejected(records, { ...base, bootstrapSamples: 1.5 }, /bootstrapSamples must be a positive integer/);
++  expectRejected(records, { ...base, bootstrapSamples: null }, /bootstrapSamples must be a positive integer/);
++
++  expectRejected(records, { ...base, seed: -1 }, /seed must be an integer/);
++  expectRejected(records, { ...base, seed: 2 ** 32 }, /seed must be an integer/);
++  expectRejected(records, { ...base, seed: 1.5 }, /seed must be an integer/);
++  expectRejected(records, { ...base, seed: NaN }, /seed must be an integer/);
++  expectRejected(records, { ...base, seed: '1' }, /seed must be an integer/);
++
++  // Boundary seeds are accepted.
++  assert.doesNotThrow(() => summarizeMatrix(records, { ...base, seed: 0 }));
++  assert.doesNotThrow(() => summarizeMatrix(records, { ...base, seed: 0xffffffff }));
++});
++
++// ───────────────────────────── input preservation ─────────────────────────────
++
++test('inputs are not mutated', () => {
++  const policyIds = ['p', 'q', 'r'];
++  const records = buildGrid(policyIds, 3, (a, b, pair, mirror) => [0, 1, 0.5][(pair + 2 * mirror) % 3]).reverse();
++  const snapshot = JSON.stringify(records);
++  const options = { policyIds, pairs: 3, bootstrapSamples: 100, seed: 17 };
++  const optionsSnapshot = JSON.stringify(options);
++
++  deepFreeze(records);
++  deepFreeze(options);
++  const result = summarizeMatrix(records, options);
++  assert.equal(result.length, 3);
++
++  assert.equal(JSON.stringify(records), snapshot);
++  assert.equal(JSON.stringify(options), optionsSnapshot);
++  assert.deepEqual(policyIds, ['p', 'q', 'r']);
++  for (const entry of result) assert.notEqual(entry.pair_scores, records);
++});

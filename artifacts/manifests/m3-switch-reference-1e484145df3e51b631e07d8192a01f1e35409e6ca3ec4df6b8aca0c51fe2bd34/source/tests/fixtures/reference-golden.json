@@ -1,0 +1,41 @@
+{
+  "showdown_commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "fixtures": [
+    {
+      "label": "r1-smoke-0",
+      "initial_team_hashes": [
+        "4b7e6e963890f49db8997e2333dfbac4994160fbb42a7f689a3cf1bca395e7bd",
+        "a2cdae581408e7f53ce3134dfc5d73fd74710c4e79eb20773c2cff24b8f6274e"
+      ],
+      "normalized_output_hash": "b44c0fc5c37f17064053f503b24825bfbf8471a2f9014b55a29bd1bd4a470960",
+      "outcome": {
+        "winner": "Player 1",
+        "turns": 40,
+        "score": [
+          3,
+          0
+        ]
+      },
+      "decision_count": 90,
+      "unavailable_rejections": 0
+    },
+    {
+      "label": "r1-smoke-8",
+      "initial_team_hashes": [
+        "d9a31ade6f7c6411186d69c4cbcf48d280ebfa603b4faf0d01d3dba979b3e789",
+        "3c5f077bccaee3d0a08c8b980af0851bfe851f2052ed7514eea4ef0517c15687"
+      ],
+      "normalized_output_hash": "356e08e79962c8f90d12c7d890e8bbec7cfbea1bfaf98432108f82ccdff1d624",
+      "outcome": {
+        "winner": "Player 2",
+        "turns": 52,
+        "score": [
+          0,
+          1
+        ]
+      },
+      "decision_count": 118,
+      "unavailable_rejections": 2
+    }
+  ]
+}

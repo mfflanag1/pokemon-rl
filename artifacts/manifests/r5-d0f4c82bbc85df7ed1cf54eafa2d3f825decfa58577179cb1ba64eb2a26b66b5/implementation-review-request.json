@@ -1,0 +1,23 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review R5 for actionable correctness and hidden-information leakage bugs. Frozen R1-R4 must remain unchanged. Actor features are built only from a verified own-player view, never opponent truth. Check transactional history, action semantics, conservative Illusion/Transform encounter memory, input/target separation, and whether campaign evidence overclaims. The 1000 pairs intentionally mutate invalid privileged carriers; separate live Node probes directly mutate reference state and do NOT assert reachability. Bounded memory is explicitly lossy; no trained policy. Pinned transform emitter serializes target Pokemon via toString as public ident, verified by live probe. Report concrete counterexamples and severity, distinguish limitations from bugs. Do not request expansion to training or search.",
+  "files_sha256": {
+    "python/pokemon_reference/player_history.py": "9d99c29013c50726c3d926109958e8606d7dd33716443d91f627a25d011a8b4c",
+    "python/pokemon_reference/public_history.py": "541a4884530a8133624def7006a6dabee7443480e64a586a0a25808c6f3fd7d0",
+    "python/pokemon_reference/actor_actions.py": "b371d30d8fa401124140366fa4a783df10437c6663de22db6c08ff81bd55ecbc",
+    "python/pokemon_reference/feature_spec.py": "0abefe0840e4e670677874206ac0199f777202e324002d797769c5b46730be29",
+    "python/pokemon_reference/feature_validation.py": "6215eadb7e22c1883e3c14df3d0089571edf4c24962942ee1e10aae82669832f",
+    "python/pokemon_reference/feature_trajectories.py": "ea0f33e2d44ea0ab272820726ebd2839c568768eb49d5ed1a7d977b9b849f2b0",
+    "python/pokemon_reference/feature_campaign.py": "978cdf2415f8d13e1d3a5eebaaa145baffc3057d480a3c4f37eefe4f33d509ef",
+    "python/pokemon_reference/feature_checks.py": "ee1c017856ea6fb450cf3c0a559a6dc829cb9f83ab6a905ed87134e5e2237741",
+    "scripts/player-feature-fixtures.mjs": "f7988827c426348ff7995b3eef60ce29c688a7a71e5e3288a07421de68a4119d",
+    "contracts/player-features-v1/layout.json": "788004af9097f0989da5d243ed07c0e78921b9c5973ef3c6003948b9941161fd",
+    "tests/features/test_features.py": "eff494725a9a48d8dfd2369dbe7514e1f8ae43342d9d81bca26696c8bae526fa",
+    "docs/R5_DESIGN.md": "a626d49bc82c99f1ca47257659cb82a7444bbe5077439425499153ce5bda373b"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

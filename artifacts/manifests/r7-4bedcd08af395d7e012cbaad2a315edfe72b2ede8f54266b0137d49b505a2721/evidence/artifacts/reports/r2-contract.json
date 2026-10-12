@@ -1,0 +1,114 @@
+{
+  "report_version": "r2-contract-smoke-1",
+  "generated_at": "2026-10-10T16:40:43.278Z",
+  "manifest_id": "9eb8c302d7e68e3fda8167479de6f6338ee3ae45d48153b6e73f873c99ca799f",
+  "node": "v25.6.1",
+  "python": "Python 3.14.3",
+  "contract_source_hashes": {
+    "contracts/battle-v1/schema.json": "0fbff975c03b240a7107be485e475ab6a7d655ecc054c68bb62128a861641a1f",
+    "contracts/battle-v1/actions.json": "c7cb2d635b085374036da0e7507ce374104c86c824d5dd95772c64c68e30c657",
+    "packages/battle-contract/canonical.mjs": "58860f2f00ccc39233d76b146cf4a972f706f8beb001c882db10f5de41cc9c97",
+    "packages/battle-contract/schema.mjs": "1f8f7bc7d4f118ed1e4f8efd03627d0452eae7d8c598f72f6843446dad18ccd1",
+    "packages/battle-contract/actions.mjs": "de8e63aaf8ad24e4b5303f0973dac4661054ee6fe85b657c1a67eb16ac4392e1",
+    "packages/battle-contract/artifacts.mjs": "14443a832ad879192e526d23e11d9f908a32cac62e49ca508e255d066ecdfcbd",
+    "packages/reference-node/contract-v1.mjs": "2be3e252a97df27fae72c363127eb85885c49b07c52c0d21c2d80ef18ca0a7d9",
+    "package-lock.json": "2875345ad758189cdb31a4e9473b121f2707d4d3a43417dd5611bc8de446f741"
+  },
+  "consumer_source_hashes": {
+    "python/pokemon_reference/contract.py": "a7f3accdfac9ba6c34e03c719786484c6d3d4fd383866eb9b8b5259d90f4b5d6",
+    "python/pokemon_reference/__main__.py": "9b1946534392b097e74307ef2ffec79474c2aa45f9380c90fc700e0fc31f4592",
+    "requirements-contract.txt": "b41f5e1c575082b07952e8cc81de8ea702f1efefbc2abcb6c3290f375a5731c3"
+  },
+  "cases": [
+    {
+      "label": "r1-smoke-0",
+      "decisions": 90,
+      "turns": 40,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:9e727e842bbbfccbd85ddff4f67536610fa6842ccf7f07b20780b21ef856c92c",
+      "normalized_reference_hash": "b44c0fc5c37f17064053f503b24825bfbf8471a2f9014b55a29bd1bd4a470960"
+    },
+    {
+      "label": "r1-smoke-1",
+      "decisions": 61,
+      "turns": 25,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:d12c74878f1b0018f6f9a2216814c0eeb8df19b9bf2ff053f7dd0aeb0c146c47",
+      "normalized_reference_hash": "607629e77360868eb57fe0c9aee2063d4ea78330088d40c579d773d550c19959"
+    },
+    {
+      "label": "r1-smoke-2",
+      "decisions": 86,
+      "turns": 38,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:8dae522f5a279e6c68171bc2a2a12f7e72a8aed9a974c560283c0e089802d234",
+      "normalized_reference_hash": "c6f5d7d874c9b611ea1af045a156e55b0f2e9094f37589891d43aa4cbc2b142e"
+    },
+    {
+      "label": "r1-smoke-3",
+      "decisions": 89,
+      "turns": 40,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:8e6f935771fe42c23d205aa6c56087a04ae1a75111ba73df22d8e190fcac141e",
+      "normalized_reference_hash": "ac39f2b98709796db267b42484b997f762f8b27504335de9e158752945d9f036"
+    },
+    {
+      "label": "r1-smoke-4",
+      "decisions": 97,
+      "turns": 44,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:ceffc65f0e827fa49209a426a5cdb046d196eb7fc7d4ec361b673177a5dc488a",
+      "normalized_reference_hash": "4c50c360813f9f0756228583ed3e86ab54c708476c4f667bcffd38e9d8f4b8ea"
+    },
+    {
+      "label": "r1-smoke-5",
+      "decisions": 71,
+      "turns": 30,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:63cbabafff655ec6cf9346b1f3097cd9af2244c02efa94a41f72458b5d620229",
+      "normalized_reference_hash": "20a7bee7f334979e6e5b4b8c9d7c13112792c7d71559330748e17b46f49df1dd"
+    },
+    {
+      "label": "r1-smoke-6",
+      "decisions": 52,
+      "turns": 21,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:490ebbe591f24058141426650fdaf8ebfeb294d76a049497f42045b6b7e81888",
+      "normalized_reference_hash": "c0053f413d9fed853ded3089ceb5fcfb417905a4a8b918e6ac0501748989ad5a"
+    },
+    {
+      "label": "r1-smoke-7",
+      "decisions": 105,
+      "turns": 47,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:bfa8f2ebf17ff6bcaee10b10f847350d998b0c49ad28d00e2680f042d6291b0f",
+      "normalized_reference_hash": "9388f8731654e20249c263e9cf53ad1d28b0f5559f952feda73add60f6f59d4c"
+    },
+    {
+      "label": "r1-smoke-8",
+      "decisions": 118,
+      "turns": 52,
+      "unavailable_rejections": 2,
+      "episode_id": "episode:10ba1aa0d11cc7fbc4bdd5682ccae36123b1b2571752743d025cf283e038c448",
+      "normalized_reference_hash": "356e08e79962c8f90d12c7d890e8bbec7cfbea1bfaf98432108f82ccdff1d624"
+    },
+    {
+      "label": "r1-smoke-9",
+      "decisions": 54,
+      "turns": 22,
+      "unavailable_rejections": 0,
+      "episode_id": "episode:0d4b5ff4d1b08bc600a85a193a2a183f58b7fb1ad9fbd0322132ad0ca5884d66",
+      "normalized_reference_hash": "4b191e046aa5ea43e4ee13f344bdc15efba963a900093921aa0da6164e807496"
+    }
+  ],
+  "episodes": 10,
+  "artifacts": 1677,
+  "decisions": 823,
+  "turns": 359,
+  "unavailable_rejections": 2,
+  "canonical_jsonl_sha256": "947481a829cad59dc5cd0a176e3c46d33fea4da812394645b195c344526e85e3",
+  "canonical_jsonl_bytes": 71886183,
+  "python_canonical_roundtrip_identical": true,
+  "elapsed_ms": 23874,
+  "evidence_directory": "artifacts/runs/r2-1791650419455"
+}

@@ -1,0 +1,1163 @@
+Task and review objective:
+Audit R7 split/provenance/actor admission logic for concrete correctness failures or leakage. Scope is CPU data foundation: legacy R3/R4 are exposed; frozen 90/5/5 ordered-team hash; fresh train/dev/final reservations; only train/dev mirrored games; no final play; separate actor/target export using R5. Check whether candidate/record mutation, reused seeds, mirrored perspectives, source drift, dropped records, or privileged fields could pass advertised gates. Caller supplies a separately trusted dataset hash, not an adversarially replaceable anchor; no OS-level secrecy claim. Check benchmark denominators and independence claims. Do not require a trained model or custom engine. Identity module had opposite-model QA; original acceptance fixture mistakenly reversed a one-move list, fixed locally to a multi-move list and five tests passed. Node/Python parity and exact threshold tests pass; full new collection/export not yet run. Focus actionable implementation flaws and validate claims against the supplied contract, not hypothetical requirements beyond scope.
+
+
+FILE contracts/dataset-v1/README.md
+1: # Dataset contract R7 v1
+2: 
+3: This additive layer leaves R1–R6 artifacts and raw R4 `split: unassigned`
+4: envelopes unchanged. R7 admission records assign splits only after a frozen
+5: precollection plan and independent checks. The reference engine remains pinned
+6: Showdown; this contract does not grant custom-engine support.
+7: 
+8: ## Identity and assignment
+9: 
+10: `policy.json` freezes an ordered whole-team holdout. Identity retains resolved
+11: species/form, ability, item, ordered moves, Tera type, level, gender, EVs and IVs.
+12: The R2 official-generator schema has no explicit nature/happiness fields;
+13: unknown additional fields reject rather than disappear. Nicknames, shiny flags,
+14: role/source-species bookkeeping, generation seeds and raw team hashes are
+15: excluded. Meaningful forms and cosmetic resolved form IDs remain distinct; this
+16: is not a holdout of individual sets, base species, unordered teams or every
+17: mechanically equivalent configuration.
+18: 
+19: Team key = canonical SHA-256 of `[identity_version, canonical_team]`.
+20: Partition digest = canonical SHA-256 of `[hash_version, salt, canonical_team]`.
+21: Interpret all 256 bits as an unsigned integer x; compare x*10000 against
+22: 9000*2^256 and 9500*2^256, with half-open train/development/final ranges. No floating
+23: point, reduced-width truncation or modulo bucketing is used. Node and Python
+24: implement and check this independently.
+25: 
+26: ## Legacy exposures and holdout
+27: 
+28: R3's 100,000 teams and all R4 episode teams/seeds are exposed exploratory data.
+29: Their assignments are audited prospectively; they are not retroactively clean
+30: holdout data. A content-bound exposure registry excludes them from fresh R7
+31: collection. Final candidate generation is automated and filtering uses only the
+32: fixed policy and prior exposure/duplicate checks. Final teams are retained in a
+33: separate file, with hashes and counts in the public collection index; no final
+34: battles, actor export or outcome-driven selection is performed.
+35: 
+36: This seal is a workflow/API boundary and integrity commitment, not encryption or
+37: an OS security boundary against the file owner. Reading final team files or
+38: running their battles later requires an explicit evaluation-release procedure.
+39: Current ActorDataset has no final/evaluation access mode. Do not change the salt
+40: or reroll the reservation after looking at final results.
+41: 
+42: ## Collection and pairing
+43: 
+44: Write `plan.json` before candidate generation. Preserve attempted/accepted and
+45: rejection counts per split. Reserve 64 train, 32 development and 128 final teams
+46: for this initial campaign. Pair consecutive teams within train/development and
+47: play both seat orders: 48 pairs, 96 episodes. Final has no jobs. The two mirrors
+48: share a mechanics seed; policy seeds follow the logical teams when swapped.
+49: Team generation, mechanics and policy seed namespaces are separate. Mirrors are
+50: correlated observations and remain in the same split/group.
+51: 
+52: A ledger rejects shared team identities, seeds, episode keys or mirror groups
+53: that cross split/group boundaries; seeds cannot cross roles. Mirrored reuse is
+54: explicit and allowed within its group. Jobs are independently re-derived in
+55: Python from the reservations and namespace. A raw episode must match its exact
+56: job/spec and official profile; renamed/relabelled records cannot silently pass.
+57: 
+58: Generation uses long-lived local Node workers. Each complete episode is serialized
+59: and replayed before its record is committed. Errors retain a failure record and
+60: partial output; no complete index is published. This initial R7 wrapper is a
+61: fresh-directory run, not a resumable collector. The earlier R3/R4 resumable tools
+62: remain available. Never conceal partial results by reusing the same directory.
+63: 
+64: ## Admission and actor separation
+65: 
+66: Python verifies collection file hashes, policy, reference/source/build provenance,
+67: reservations, exposure exclusion, jobs, mirrors, raw episode contracts and all
+68: record summaries. Export creates physically separate actor and target gzip JSONL
+69: streams. Each actor wire passes R5's strict schema, tensor bounds and feature hash;
+70: full teams, RNG, future outcomes and privileged raw records never become actor
+71: columns. Both policy and value read the same ActorInput tensor interface.
+72: 
+73: `dataset.json` binds source hashes, collection files, actor/target checksums and
+74: validation counts. `ActorDataset(directory, expected_hash=..., purpose=...)`
+75: requires a separately trusted dataset hash; a self-supplied checksum is not an
+76: authenticity signature. Training can load train actors, development can load
+77: development actors, and final access rejects. The loader returns only ActorInput
+78: objects and rejects privileged/wrong-kind wires and changed bytes.
+79: 
+80: ## Artifact versions and benchmark meaning
+81: 
+82: - `r7-exposures-1`: prior team keys, seed set and episode keys, linked certificates.
+83: - `r7-collection-plan-1`: fixed policy, counts, namespace, producer and reference.
+84: - `r7-team-reservation-1`: per-split official R2 teams plus their reference entries.
+85: - `r7-job-plan-1`: train/development pairs, seat orders and exact reference specs.
+86: - `r7-collection-1`: complete records, hashes, sampling counts and measured times.
+87: - `r7-dataset-1`: independently validated dataset and separated actor/target files.
+88: - `r7-benchmark-1`: measured wall times, counts, storage and hardware.
+89: 
+90: Seals use the existing canonical UTF-8 sorted-key integer JSON convention and
+91: hash all fields except `content_hash`. File hashes include exact bytes/newlines.
+92: Source and data paths are confined to their declared roots.
+93: 
+94: Collection throughput includes worker startup, serialized reference replay,
+95: compression and storage. Per-episode replay latency includes serialization and
+96: validation. Actor validation/projection/export is measured separately. Millisecond
+97: counts and integer rates scaled by 1,000 avoid nonportable numeric encodings.
+98: Latency quantiles use nearest rank. Tera remains disabled in the frozen random
+99: baseline. These measurements are reference-data costs, not PPO throughput,
+100: accelerated-engine fidelity, general mechanic coverage or learned playing strength.
+101: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/dataset-v1/policy.json
+1: {"schema_version":"r7-split-policy-1","identity_version":"r7-ordered-team-1","hash_version":"r7-team-partition-1","salt":"pokemon-reference-r7-2026-10-10-v1","denominator":10000,"ranges":[{"split":"train","lower":0,"upper":9000},{"split":"development","lower":9000,"upper":9500},{"split":"final","lower":9500,"upper":10000}],"profile":"gen9randombattle","showdown_commit":"942cda71d14bf0618bd57991708a2e2734b6daba","holdout_unit":"ordered-whole-team-with-ordered-moves-and-resolved-forms","ignored_fields":["generator_seed","source_team_hash","name","shiny","role","speciesId"],"legacy_policy":"R3 and R4 content is exposed; never promote it to sealed final data","final_access":"reservation-only; no final episodes or actor exports during R7"}
+2: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/dataset/identity.mjs
+1: import {readFileSync} from 'node:fs';
+2: import {hashJSON, canonical} from '../battle-contract/canonical.mjs';
+3: import {validateSchema} from '../battle-contract/schema.mjs';
+4: 
+5: export const POLICY = JSON.parse(readFileSync(new URL('../../contracts/dataset-v1/policy.json', import.meta.url)));
+6: export const POLICY_HASH = hashJSON(POLICY);
+7: export function canonicalTeam(payload) {
+8:   validateSchema(payload, 'team');
+9:   return payload.pokemon.map((p, i) => ({species: payload.ids[i].species, ability: payload.ids[i].ability,
+10:     item: payload.ids[i].item, moves: [...payload.ids[i].moves], tera_type: payload.ids[i].tera_type,
+11:     level: p.level, gender: p.gender, evs: {...p.evs}, ivs: {...p.ivs}}));
+12: }
+13: export function teamKey(payload) { return hashJSON([POLICY.identity_version, canonicalTeam(payload)]); }
+14: export function partition(payload) {
+15:   return partitionDigest(hashJSON([POLICY.hash_version, POLICY.salt, canonicalTeam(payload)]));
+16: }
+17: export function partitionDigest(hex) {
+18:   if (!/^[0-9a-f]{64}$/.test(hex)) throw new Error('Expected full partition digest');
+19:   const value = BigInt(`0x${hex}`);
+20:   for (const r of POLICY.ranges) if (value * 10000n < BigInt(r.upper) * (1n << 256n)) return r.split;
+21:   throw new Error('Partition range incomplete');
+22: }
+23: export function pairPartition(a, b) {
+24:   const one = partition(a), two = partition(b);
+25:   if (one !== two) throw new Error('Cross-partition matchup');
+26:   return one;
+27: }
+28: export function requirePolicy(policy) {
+29:   if (canonical(policy) !== canonical(POLICY)) throw new Error('Frozen R7 split policy differs');
+30: }
+31: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/dataset/collect.mjs
+1: import {fork} from 'node:child_process';
+2: import {readFileSync, writeFileSync, mkdirSync, appendFileSync} from 'node:fs';
+3: import path from 'node:path';
+4: import os from 'node:os';
+5: import {performance} from 'node:perf_hooks';
+6: import {generateTeam, seedFor} from '../reference-node/engine.mjs';
+7: import {teamArtifact} from '../reference-node/contract-v1.mjs';
+8: import {episodeManifest} from '../episodes/manifest.mjs';
+9: import {ROOT, fileHash} from '../reference-node/provenance.mjs';
+10: import {hashJSON, canonical, parseJSON} from '../battle-contract/canonical.mjs';
+11: import {seal, verifySeal} from '../corpus/common.mjs';
+12: import {POLICY, POLICY_HASH, teamKey, partition, pairPartition} from './identity.mjs';
+13: 
+14: export const SOURCE_FILES = ['packages/dataset/identity.mjs', 'packages/dataset/collect.mjs', 'packages/dataset/worker.mjs',
+15:   'contracts/dataset-v1/policy.json'];
+16: const sourceHashes = () => Object.fromEntries(SOURCE_FILES.map(file => [file, fileHash(path.join(ROOT, file))]));
+17: const write = (dir, file, value, mode = 0o644) => writeFileSync(path.join(dir, file), canonical(value) + '\n', {flag: 'wx', mode});
+18: 
+19: export function buildJobs(teams, namespace) {
+20:   const jobs = [];
+21:   for (const split of ['train', 'development']) {
+22:     const rows = teams[split];
+23:     if (rows.length % 2) throw new Error('Pairing needs even team counts');
+24:     for (let i = 0; i < rows.length; i += 2) {
+25:       const pair = [rows[i], rows[i + 1]], pairNumber = i / 2;
+26:       if (pairPartition(...pair.map(t => t.artifact.payload)) !== split) throw new Error('Pair split mismatch');
+27:       const group = hashJSON(['r7-matchup-1', POLICY_HASH, pair.map(t => t.team_key).sort()]);
+28:       const label = `${namespace}/${split}/pair/${pairNumber}`;
+29:       const policySeeds = [seedFor(`${label}/policy/0`), seedFor(`${label}/policy/1`)];
+30:       for (const mirror of [false, true]) {
+31:         const ordered = mirror ? [...pair].reverse() : pair;
+32:         jobs.push({id: `${split}-${String(pairNumber).padStart(4, '0')}-${Number(mirror)}`, split, group, mirror,
+33:           team_keys: ordered.map(t => t.team_key),
+34:           spec: {format_id: POLICY.profile, teams: ordered.map(t => t.entry), mechanics_seed: seedFor(`${label}/mechanics`),
+35:             policy_seeds: mirror ? [...policySeeds].reverse() : policySeeds,
+36:             policy_id: 'upstream-random-move-0.9-no-tera-r1', max_submissions: 20000}});
+37:       }
+38:     }
+39:   }
+40:   return jobs;
+41: }
+42: 
+43: function send(child, job) {
+44:   return new Promise((resolve, reject) => {
+45:     const cleanup = () => { child.off('message', message); child.off('error', failed); child.off('exit', exited); };
+46:     const message = value => { cleanup(); value.ok ? resolve(value.record) : reject(new Error(value.message)); };
+47:     const failed = e => { cleanup(); reject(e); };
+48:     const exited = code => failed(new Error(`Dataset worker exited ${code}`));
+49:     child.once('message', message); child.once('error', failed); child.once('exit', exited);
+50:     child.send(job, e => { if (e) failed(e); });
+51:   });
+52: }
+53: 
+54: export async function collect({out, exposures, namespace = 'r7-reference-2026-10-10-v1', workers = 4,
+55:   counts = {train: 64, development: 32, final: 128}, onProgress = () => {}}) {
+56:   if (!Number.isSafeInteger(workers) || workers < 1 || workers > 8) throw new Error('Invalid worker count');
+57:   if (!namespace || namespace.length > 180) throw new Error('Invalid namespace');
+58:   if (Object.keys(counts).sort().join(',') !== 'development,final,train' || Object.values(counts).some(n => !Number.isSafeInteger(n) || n < 2 || n > 10000 || n % 2)) throw new Error('Invalid reservation counts');
+59:   const directory = path.resolve(out), registry = verifySeal(parseJSON(readFileSync(exposures)));
+60:   if (registry.version !== 'r7-exposures-1' || registry.policy_hash !== POLICY_HASH) throw new Error('Exposure policy mismatch');
+61:   mkdirSync(directory); mkdirSync(`${directory}/teams`); mkdirSync(`${directory}/raw`);
+62:   const manifest = episodeManifest(), sources = sourceHashes();
+63:   const plan = seal({version: 'r7-collection-plan-1', namespace, policy: POLICY, policy_hash: POLICY_HASH,
+64:     team_counts: counts, episode_manifest_id: manifest.manifest_id, source_hashes: sources,
+65:     exposure_registry_hash: registry.content_hash, exposure_registry_sha256: fileHash(exposures),
+66:     workers, pairing: 'adjacent-same-split-with-swapped-seat-replay-pairs',
+67:     final_access: 'reservation-only', expected_episodes: counts.train + counts.development,
+68:     frozen_at: new Date().toISOString()});
+69:   // The plan is durable before generating candidates or inspecting outcomes.
+70:   write(directory, 'plan.json', plan); write(directory, 'reference-manifest.json', manifest);
+71:   const teams = {}, sampling = {}, seen = new Set(registry.team_keys), legacySeeds = new Set(registry.seeds);
+72:   try {
+73:     for (const split of ['train', 'development', 'final']) {
+74:       const started = performance.now(), rows = [], rejected = {other_partition: 0, duplicate_or_exposed: 0, seed_overlap: 0};
+75:       let attempt = 0;
+76:       while (rows.length < counts[split]) {
+77:         if (attempt >= counts[split] * 1000) throw new Error('Reservation rejection budget exceeded');
+78:         const seed = seedFor(`${namespace}/team/${split}/${attempt++}`);
+79:         if (legacySeeds.has(seed)) { rejected.seed_overlap++; continue; }
+80:         const entry = generateTeam(seed), artifact = teamArtifact(entry, manifest.reference_contract.manifest_id);
+81:         if (partition(artifact.payload) !== split) { rejected.other_partition++; continue; }
+82:         const key = teamKey(artifact.payload);
+83:         if (seen.has(key)) { rejected.duplicate_or_exposed++; continue; }
+84:         rows.push({split, team_key: key, artifact, entry}); seen.add(key); legacySeeds.add(seed);
+85:       }
+86:       teams[split] = rows;
+87:       write(directory, `teams/${split}.json`, seal({version: 'r7-team-reservation-1', split, plan_hash: plan.content_hash, rows}), split === 'final' ? 0o600 : 0o644);
+88:       sampling[split] = {attempts: attempt, accepted: rows.length, rejected, elapsed_ms: Math.round(performance.now() - started)};
+89:       onProgress({stage: 'reserved', split, ...sampling[split]});
+90:     }
+91:     const jobs = buildJobs(teams, namespace);
+92:     write(directory, 'jobs.json', seal({version: 'r7-job-plan-1', plan_hash: plan.content_hash, jobs}));
+93:     // No final teams or jobs are sent to workers.
+94:     const records = [], children = [], started = performance.now(); let cursor = 0, failure;
+95:     try {
+96:       const settled = await Promise.allSettled(Array.from({length: Math.min(workers, jobs.length)}, async () => {
+97:         const child = fork(new URL('./worker.mjs', import.meta.url), [], {cwd: ROOT, stdio: ['ignore', 'ignore', 'pipe', 'ipc']});
+98:         children.push(child); let diagnostics = '';
+99:         child.stderr.on('data', data => { diagnostics = (diagnostics + data).slice(-4000); });
+100:         while (!failure && cursor < jobs.length) {
+101:           const job = jobs[cursor++];
+102:           try {
+103:             const record = await send(child, {directory, job, manifest});
+104:             if (record.job_id !== job.id) throw new Error('Wrong worker result');
+105:             records.push(record);
+106:             appendFileSync(`${directory}/progress.jsonl`, canonical(record) + '\n');
+107:             if (records.length % 16 === 0) onProgress({stage: 'episodes', completed: records.length, requested: jobs.length});
+108:           } catch (e) { failure ??= e; appendFileSync(`${directory}/failures.jsonl`, canonical({job_id: job.id, error: e.message, diagnostics}) + '\n'); }
+109:         }
+110:       }));
+111:       for (const r of settled) if (r.status === 'rejected') failure ??= r.reason;
+112:       if (failure) throw failure;
+113:       if (records.length !== jobs.length || canonical(sourceHashes()) !== canonical(sources)) throw new Error('Incomplete or changed producer');
+114:       const index = seal({version: 'r7-collection-1', plan_hash: plan.content_hash, status: 'complete', sampling,
+115:         records: records.sort((a, b) => a.job_id.localeCompare(b.job_id, 'en')), expected: jobs.length,
+116:         collection_wall_ms: Math.round(performance.now() - started), workers, failure_events: 0,
+117:         hardware: {cpu: os.cpus()[0].model, logical_cpus: os.cpus().length, memory_bytes: os.totalmem(), platform: os.platform(), release: os.release(), arch: os.arch(), node: process.version},
+118:         files: Object.fromEntries(['plan.json', 'reference-manifest.json', 'jobs.json', ...Object.keys(teams).map(s => `teams/${s}.json`)].map(f => [f, fileHash(path.join(directory, f))]))});
+119:       write(directory, 'index.json', index); return index;
+120:     } finally { for (const child of children) child.kill(); }
+121:   } catch (e) { write(directory, 'failed.json', {status: 'failed', message: e.message}); throw e; }
+122: }
+123: 
+124: if (process.argv[1] === new URL(import.meta.url).pathname) {
+125:   const [out, exposures] = process.argv.slice(2);
+126:   const index = await collect({out, exposures, onProgress: p => console.log(JSON.stringify(p))});
+127:   console.log(JSON.stringify({status: index.status, episodes: index.records.length, elapsed_ms: index.collection_wall_ms}));
+128: }
+129: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/dataset/worker.mjs
+1: import {writeFileSync} from 'node:fs';
+2: import {gzipSync} from 'node:zlib';
+3: import {performance} from 'node:perf_hooks';
+4: import {runPhaseEpisode, replayPhaseEpisode} from '../episodes/session.mjs';
+5: import {canonical, parseJSON} from '../battle-contract/canonical.mjs';
+6: import {digest} from '../corpus/common.mjs';
+7: 
+8: process.on('message', async ({directory, job, manifest}) => {
+9:   try {
+10:     if (!['train', 'development'].includes(job.split)) throw new Error('Final collection is sealed');
+11:     const start = performance.now();
+12:     const bundle = await runPhaseEpisode(job.spec, {manifest, order: job.mirror ? 'p2-first' : 'p1-first'});
+13:     if (bundle.episode.payload.outcome.status !== 'terminal') throw new Error('Incomplete dataset episode');
+14:     const generated = performance.now(), plain = Buffer.from(canonical(bundle) + '\n');
+15:     await replayPhaseEpisode(parseJSON(plain), manifest);
+16:     const replayed = performance.now(), compressed = gzipSync(plain, {level: 6});
+17:     const file = `raw/${job.id}.json.gz`;
+18:     writeFileSync(`${directory}/${file}`, compressed, {flag: 'wx'});
+19:     const p = bundle.episode.payload;
+20:     process.send({ok: true, record: {job_id: job.id, split: job.split, group: job.group, mirror: job.mirror,
+21:       file, bytes: compressed.length, sha256: digest(compressed), json_bytes: plain.length, json_sha256: digest(plain),
+22:       episode_key: p.episode_key, episode_hash: bundle.episode.content_hash, replay_verified: true,
+23:       decisions: p.decisions.length, turns: p.outcome.turn, unavailable_rejections: p.decisions.filter(d => !d.accepted).length,
+24:       generation_ms: Math.round(generated - start), replay_ms: Math.round(replayed - generated),
+25:       serialization_storage_ms: Math.round(performance.now() - replayed)}});
+26:   } catch (error) { process.send({ok: false, message: error.stack ?? error.message, job_id: job.id}); }
+27: });
+28: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_reference/dataset_identity.py
+1: """R7 pure whole-team identity and deterministic partition assignment.
+2: 
+3: Inputs are R2 ``team`` artifact payloads (``contracts/battle-v1/schema.json``,
+4: ``$defs/team``). Identity is the ordered whole team with ordered moves and
+5: resolved forms; bookkeeping (``name``, ``shiny``, ``role``, ``speciesId``), the
+6: generator seed and the raw ``source_team_hash`` never enter the identity.
+7: 
+8: The R2 schema fixes absent ``nature``/``happiness`` to the pinned generator
+9: defaults, so a payload carrying any field outside the exact schema field sets
+10: is a different mechanical contract and is rejected rather than dropped.
+11: 
+12: IDs are trusted only after outer corpus/artifact provenance validation; this
+13: module performs no Dex interpretation and does not verify ``source_team_hash``.
+14: All functions are pure: inputs are never mutated and outputs own their data.
+15: """
+16: 
+17: from copy import deepcopy
+18: 
+19: from jsonschema import ValidationError
+20: 
+21: from .contract import hash_json, validate_schema
+22: 
+23: # Exact R2 schema field sets, required independently of the JSON Schema check.
+24: TEAM_FIELDS = frozenset(('generator_seed', 'source_team_hash', 'pokemon', 'ids'))
+25: ID_FIELDS = frozenset(('species', 'base_species', 'ability', 'item', 'moves', 'tera_type'))
+26: POKEMON_FIELDS = frozenset(('name', 'species', 'speciesId', 'gender', 'shiny', 'level', 'moves',
+27:                             'ability', 'item', 'teraType', 'role', 'evs', 'ivs'))
+28: STAT_FIELDS = frozenset(('hp', 'atk', 'def', 'spa', 'spd', 'spe'))
+29: GENDERS = frozenset(('M', 'F', 'N', ''))
+30: TEAM_SIZE = 6
+31: 
+32: # Supported split policy (contracts/dataset-v1/policy.json). Any other value is
+33: # an unknown or inconsistent policy and is rejected explicitly.
+34: POLICY_FIELDS = frozenset(('schema_version', 'identity_version', 'hash_version', 'salt', 'denominator',
+35:                            'ranges', 'profile', 'showdown_commit', 'holdout_unit', 'ignored_fields',
+36:                            'legacy_policy', 'final_access'))
+37: RANGE_FIELDS = frozenset(('split', 'lower', 'upper'))
+38: PINNED_POLICY = {
+39:     'schema_version': 'r7-split-policy-1',
+40:     'identity_version': 'r7-ordered-team-1',
+41:     'hash_version': 'r7-team-partition-1',
+42:     'profile': 'gen9randombattle',
+43:     'showdown_commit': '942cda71d14bf0618bd57991708a2e2734b6daba',
+44:     'holdout_unit': 'ordered-whole-team-with-ordered-moves-and-resolved-forms',
+45:     'ignored_fields': ['generator_seed', 'source_team_hash', 'name', 'shiny', 'role', 'speciesId'],
+46: }
+47: DENOMINATOR = 10000
+48: RANGES = (('train', 0, 9000), ('development', 9000, 9500), ('final', 9500, 10000))
+49: DIGEST_BITS = 256
+50: DIGEST_SPACE = 1 << DIGEST_BITS
+51: 
+52: 
+53: def _is_int(value):
+54:     return type(value) is int
+55: 
+56: 
+57: def _require_fields(value, fields, what):
+58:     if type(value) is not dict:
+59:         raise ValueError(f'{what} must be an object')
+60:     present = set(value)
+61:     if present != fields:
+62:         unknown = sorted(present - fields)
+63:         missing = sorted(fields - present)
+64:         if unknown:
+65:             raise ValueError(f'{what} has unknown fields {unknown}; new mechanical fields are not accepted')
+66:         raise ValueError(f'{what} is missing fields {missing}')
+67: 
+68: 
+69: def _require_stats(value, what, maximum):
+70:     _require_fields(value, STAT_FIELDS, what)
+71:     for stat in sorted(STAT_FIELDS):
+72:         number = value[stat]
+73:         if not _is_int(number) or not 0 <= number <= maximum:
+74:             raise ValueError(f'{what}.{stat} must be an integer in [0, {maximum}]')
+75: 
+76: 
+77: def _require_moves(value, what):
+78:     if type(value) is not list or not 1 <= len(value) <= 4:
+79:         raise ValueError(f'{what} must be a list of 1 to 4 move IDs')
+80:     for move in value:
+81:         if type(move) is not str or not move:
+82:             raise ValueError(f'{what} entries must be non-empty strings')
+83: 
+84: 
+85: def _validate_payload(payload):
+86:     _require_fields(payload, TEAM_FIELDS, 'team payload')
+87:     try:
+88:         validate_schema(payload, 'team')
+89:     except (ValidationError, TypeError, ValueError) as exc:
+90:         raise ValueError(f'team payload does not match the R2 team schema: {exc}') from exc
+91:     ids, pokemon = payload['ids'], payload['pokemon']
+92:     if type(ids) is not list or len(ids) != TEAM_SIZE:
+93:         raise ValueError(f'team payload ids must list exactly {TEAM_SIZE} entries')
+94:     if type(pokemon) is not list or len(pokemon) != TEAM_SIZE:
+95:         raise ValueError(f'team payload pokemon must list exactly {TEAM_SIZE} entries')
+96:     for slot, entry in enumerate(ids):
+97:         what = f'ids[{slot}]'
+98:         _require_fields(entry, ID_FIELDS, what)
+99:         for field in ('species', 'base_species', 'ability', 'tera_type'):
+100:             if type(entry[field]) is not str or not entry[field]:
+101:                 raise ValueError(f'{what}.{field} must be a non-empty string')
+102:         if type(entry['item']) is not str:
+103:             raise ValueError(f'{what}.item must be a string')
+104:         _require_moves(entry['moves'], f'{what}.moves')
+105:     for slot, mon in enumerate(pokemon):
+106:         what = f'pokemon[{slot}]'
+107:         _require_fields(mon, POKEMON_FIELDS, what)
+108:         if not _is_int(mon['level']) or not 1 <= mon['level'] <= 100:
+109:             raise ValueError(f'{what}.level must be an integer in [1, 100]')
+110:         if type(mon['gender']) is not str or mon['gender'] not in GENDERS:
+111:             raise ValueError(f'{what}.gender must be one of M, F, N or empty')
+112:         _require_stats(mon['evs'], f'{what}.evs', 252)
+113:         _require_stats(mon['ivs'], f'{what}.ivs', 31)
+114:         _require_moves(mon['moves'], f'{what}.moves')
+115: 
+116: 
+117: def canonical_team(payload):
+118:     """Return the ordered mechanical identity of a validated R2 team payload.
+119: 
+120:     Each slot pairs ``ids[i]`` (resolved species, ability, item, ordered moves,
+121:     tera type) with ``pokemon[i]`` (level, gender, EVs, IVs) by position. The
+122:     result is a fresh structure that shares no containers with ``payload``.
+123:     """
+124:     _validate_payload(payload)
+125:     team = []
+126:     for entry, mon in zip(payload['ids'], payload['pokemon']):
+127:         team.append({
+128:             'species': entry['species'],
+129:             'ability': entry['ability'],
+130:             'item': entry['item'],
+131:             'moves': list(entry['moves']),
+132:             'tera_type': entry['tera_type'],
+133:             'level': mon['level'],
+134:             'gender': mon['gender'],
+135:             'evs': {stat: mon['evs'][stat] for stat in sorted(STAT_FIELDS)},
+136:             'ivs': {stat: mon['ivs'][stat] for stat in sorted(STAT_FIELDS)},
+137:         })
+138:     return deepcopy(team)
+139: 
+140: 
+141: def _validate_policy(policy):
+142:     _require_fields(policy, POLICY_FIELDS, 'split policy')
+143:     for field, pinned in PINNED_POLICY.items():
+144:         if type(policy[field]) is not type(pinned) or policy[field] != pinned:
+145:             raise ValueError(f'unsupported split policy {field}: {policy[field]!r}')
+146:     if type(policy['salt']) is not str or not policy['salt']:
+147:         raise ValueError('split policy salt must be a non-empty string')
+148:     for field in ('legacy_policy', 'final_access'):
+149:         if type(policy[field]) is not str:
+150:             raise ValueError(f'split policy {field} must be a string')
+151:     if not _is_int(policy['denominator']) or policy['denominator'] != DENOMINATOR:
+152:         raise ValueError(f'split policy denominator must be exactly {DENOMINATOR}')
+153:     ranges = policy['ranges']
+154:     if type(ranges) is not list or len(ranges) != len(RANGES):
+155:         raise ValueError(f'split policy must declare exactly {len(RANGES)} ranges')
+156:     for index, (declared, expected) in enumerate(zip(ranges, RANGES)):
+157:         _require_fields(declared, RANGE_FIELDS, f'ranges[{index}]')
+158:         split, lower, upper = expected
+159:         if (type(declared['split']) is not str or declared['split'] != split
+160:                 or not _is_int(declared['lower']) or declared['lower'] != lower
+161:                 or not _is_int(declared['upper']) or declared['upper'] != upper):
+162:             raise ValueError(f'split policy ranges[{index}] must be exactly {split} [{lower}, {upper})')
+163: 
+164: 
+165: def team_key(payload, policy):
+166:     """Deterministic identity key of the team under ``policy.identity_version``."""
+167:     _validate_policy(policy)
+168:     return hash_json([policy['identity_version'], canonical_team(payload)])
+169: 
+170: 
+171: def partition(payload, policy):
+172:     """Assign the team to a split using the full unsigned 256-bit salted digest.
+173: 
+174:     Thresholds are compared as exact integers: ``digest * denominator`` is
+175:     placed against ``bound * 2**256``. No floats and no modulo reduction.
+176:     """
+177:     _validate_policy(policy)
+178:     team = canonical_team(payload)
+179:     hexdigest = hash_json([policy['hash_version'], policy['salt'], team])
+180:     if len(hexdigest) * 4 != DIGEST_BITS:
+181:         raise ValueError('unexpected digest width')
+182:     digest = int(hexdigest, 16)
+183:     if not 0 <= digest < DIGEST_SPACE:
+184:         raise ValueError('digest outside the unsigned 256-bit range')
+185:     scaled = digest * policy['denominator']
+186:     for declared in policy['ranges']:
+187:         if declared['lower'] * DIGEST_SPACE <= scaled < declared['upper'] * DIGEST_SPACE:
+188:             return declared['split']
+189:     raise ValueError('split policy ranges do not cover the digest space')
+190: 
+191: 
+192: def pair_partition(left, right, policy):
+193:     """Partition of a pair of teams; rejects pairs that straddle partitions."""
+194:     left_split = partition(left, policy)
+195:     right_split = partition(right, policy)
+196:     if left_split != right_split:
+197:         raise ValueError(f'cross-partition pair: {left_split} vs {right_split}')
+198:     return left_split
+199: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_reference/dataset_legacy.py
+1: """R7 reuses exact-byte R3/R4 certificates to quarantine all prior exposures."""
+2: import argparse
+3: from collections import Counter
+4: import gzip
+5: import json
+6: from pathlib import Path
+7: import sqlite3
+8: import time
+9: 
+10: from .contract import canonical, hash_json
+11: from .corpus import load_context, read_json, verify_seal, sealed, file_digest, digest
+12: from .feature_campaign import certified_context
+13: from .dataset_identity import team_key, partition
+14: 
+15: ROOT = Path(__file__).resolve().parents[2]
+16: POLICY = read_json(ROOT / 'contracts/dataset-v1/policy.json')
+17: R3 = ROOT / 'artifacts/runs/r3-gen9-random-100k-v2'
+18: R4 = ROOT / 'artifacts/runs/r4-reference-1000-v1'
+19: 
+20: 
+21: def episode_payload(entry, catalog):
+22:     """Resolve already-certified raw team fields through the frozen R3 catalog."""
+23:     mons = entry['team']; resolvers = catalog['resolvers']
+24:     ids = []
+25:     for mon in mons:
+26:         species = resolvers['species'][mon['species']]
+27:         ids.append({**species, 'species': species['id'], 'ability': resolvers['ability'][mon['ability']],
+28:                     'item': resolvers['item'][mon['item']], 'moves': mon['moves'], 'tera_type': resolvers['tera_type'][mon['teraType']]})
+29:         del ids[-1]['id']
+30:     return {'generator_seed': {'kind': 'showdown-sodium', 'hex': entry['seed'].removeprefix('sodium,')},
+31:             'source_team_hash': entry['team_hash'], 'pokemon': mons, 'ids': ids}
+32: 
+33: 
+34: def scan(out):
+35:     out = Path(out); out.mkdir(parents=True, exist_ok=False)
+36:     started = time.monotonic_ns()
+37:     r3 = load_context(R3)
+38:     cert = verify_seal(read_json(R3 / 'inventory-final/report.json'))
+39:     summary = verify_seal(read_json(ROOT / 'artifacts/reports/r3-corpus.json'))
+40:     if (cert['content_hash'] != summary['inventory_report_hash'] or cert['index_hash'] != r3['index']['content_hash']
+41:         or cert['teams'] != r3['index']['completed'] or cert['status'] != 'complete'
+42:         or not cert['all_records_validated_in_python'] or not cert['all_canonical_bytes_match'] or not cert['seed_order_verified']):
+43:         raise ValueError('R3 certificate mismatch')
+44:     for file, expected in cert['consumer_hashes'].items():
+45:         if file_digest(ROOT / file) != expected: raise ValueError('R3 consumer drift')
+46:     r4 = certified_context(R4)
+47:     db = sqlite3.connect(out / 'exposures.sqlite')
+48:     db.executescript('CREATE TABLE teams (team_key TEXT PRIMARY KEY, split TEXT NOT NULL, occurrences INTEGER NOT NULL); CREATE TABLE seeds (seed TEXT PRIMARY KEY, split TEXT, role TEXT NOT NULL);')
+49:     counts, duplicates, legacy_pair_counts = Counter(), 0, Counter()
+50:     def team(payload, origin):
+51:         nonlocal duplicates
+52:         key, split = team_key(payload, POLICY), partition(payload, POLICY)
+53:         prev = db.execute('SELECT split FROM teams WHERE team_key=?', (key,)).fetchone()
+54:         if prev and prev[0] != split: raise ValueError('Exact team crossed partitions')
+55:         duplicates += int(prev is not None)
+56:         db.execute('INSERT INTO teams VALUES(?,?,1) ON CONFLICT(team_key) DO UPDATE SET occurrences=occurrences+1', (key, split))
+57:         seed('sodium,' + payload['generator_seed']['hex'], split, 'team')
+58:         counts[f'{origin}/{split}'] += 1
+59:         return split
+60:     def seed(value, split, role):
+61:         previous = db.execute('SELECT split,role FROM seeds WHERE seed=?', (value,)).fetchone()
+62:         if previous and previous != (split, role): raise ValueError('Legacy seed crosses roles/partitions')
+63:         db.execute('INSERT OR IGNORE INTO seeds VALUES(?,?,?)', (value, split, role))
+64:     for shard in r3['index']['chunks']:
+65:         compressed = (R3 / shard['file']).read_bytes()
+66:         if digest(compressed) != shard['sha256'] or len(compressed) != shard['bytes']: raise ValueError('R3 shard bytes differ')
+67:         plain = gzip.decompress(compressed)
+68:         if digest(plain) != shard['jsonl_sha256'] or len(plain) != shard['jsonl_bytes']: raise ValueError('R3 JSON bytes differ')
+69:         lines = plain.splitlines()
+70:         if len(lines) != shard['count']: raise ValueError('R3 row count')
+71:         for line in lines: team(json.loads(line)['payload'], 'r3')
+72:         db.commit()
+73:     episode_keys = set()
+74:     for record in r4['index']['episodes']:
+75:         compressed = (R4 / record['file']).read_bytes()
+76:         if digest(compressed) != record['sha256'] or len(compressed) != record['bytes']: raise ValueError('R4 episode bytes differ')
+77:         plain = gzip.decompress(compressed)
+78:         if digest(plain) != record['json_sha256'] or len(plain) != record['json_bytes']: raise ValueError('R4 episode JSON differs')
+79:         bundle = json.loads(plain); p = bundle['episode']['payload']
+80:         if bundle['episode']['content_hash'] != record['episode_hash']: raise ValueError('R4 certificate identity differs')
+81:         parts = [team(episode_payload(t, r3['catalog']), 'r4') for t in p['spec']['teams']]
+82:         legacy_pair_counts['same/' + parts[0] if parts[0] == parts[1] else 'cross-partition'] += 1
+83:         # Prior R4 episodes remain exploratory even if their prospective assignments match.
+84:         for value, role in [(p['spec']['mechanics_seed'], 'mechanics'), *[(s, 'policy') for s in p['spec']['policy_seeds']]]:
+85:             seed(value, 'exploratory', role)
+86:         episode_keys.add(p['episode_key'])
+87:     db.commit()
+88:     registry = sealed({'version': 'r7-exposures-1', 'policy_hash': hash_json(POLICY),
+89:         'team_keys': [r[0] for r in db.execute('SELECT team_key FROM teams ORDER BY team_key')],
+90:         'seeds': [r[0] for r in db.execute('SELECT seed FROM seeds ORDER BY seed')], 'episode_keys': sorted(episode_keys),
+91:         'r3_index_hash': r3['index']['content_hash'], 'r3_certificate_hash': cert['content_hash'],
+92:         'r4_index_hash': r4['index']['content_hash'], 'r4_certificate_hash': r4['certificate_hash']})
+93:     (out / 'registry.json').write_text(canonical(registry) + '\n')
+94:     db.close()
+95:     report = sealed({'version': 'r7-exposures-report-1', 'policy_hash': hash_json(POLICY), 'counts': dict(counts),
+96:         'legacy_episode_assignments': dict(legacy_pair_counts), 'duplicate_team_occurrences': duplicates,
+97:         'unique_teams': len(registry['team_keys']), 'unique_seeds': len(registry['seeds']), 'episodes': len(episode_keys),
+98:         'elapsed_ms': (time.monotonic_ns() - started) // 1_000_000,
+99:         'files': {f: file_digest(out / f) for f in ['registry.json', 'exposures.sqlite']},
+100:         'scope': 'All prior R3/R4 content is exposed and excluded from fresh R7 collection. Assignments are prospective; no legacy final holdout is certified.'})
+101:     (out / 'report.json').write_text(canonical(report) + '\n')
+102:     print(json.dumps({k: v for k, v in report.items() if k != 'files'}, sort_keys=True))
+103: 
+104: if __name__ == '__main__':
+105:     parser = argparse.ArgumentParser(); parser.add_argument('out'); args = parser.parse_args(); scan(args.out)
+106: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_reference/dataset_gate.py
+1: """R7 provenance, split, pairing and actor-admission boundary."""
+2: import gzip
+3: from pathlib import Path
+4: 
+5: from .contract import canonical, hash_json, parse_json, validate_artifact
+6: from .corpus import read_json, verify_seal, file_digest
+7: from .dataset_identity import team_key, partition
+8: from .dataset_legacy import episode_payload, R3
+9: from .corpus import load_context as corpus_context
+10: from .episodes import validate_manifest
+11: from .player_history import load_actor_input
+12: 
+13: ROOT = Path(__file__).resolve().parents[2]
+14: POLICY = read_json(ROOT / 'contracts/dataset-v1/policy.json')
+15: POLICY_HASH = hash_json(POLICY)
+16: 
+17: 
+18: def check(ok, message):
+19:     if not ok: raise ValueError(message)
+20: 
+21: 
+22: def confined(root, name):
+23:     check(type(name) is str and not Path(name).is_absolute(), 'Expected relative dataset path')
+24:     result = (root / name).resolve()
+25:     check(result.is_relative_to(root.resolve()), 'Dataset path escapes root')
+26:     return result
+27: 
+28: 
+29: def checked_file(root, name, expected):
+30:     file = confined(root, name)
+31:     check(file_digest(file) == expected, f'Dataset file changed: {name}')
+32:     return file
+33: 
+34: 
+35: class LeakageLedger:
+36:     """A repeated identity may only retain the same split, group and seed role."""
+37:     def __init__(self): self.entries = {}
+38: 
+39:     def add(self, kind, key, split, group, role=None):
+40:         check(split in {'train', 'development', 'final'}, 'Unknown partition')
+41:         value = (split, group, role); ident = (kind, key)
+42:         check(ident not in self.entries or self.entries[ident] == value, f'Leakage: shared {kind} crosses split/group/role')
+43:         self.entries[ident] = value
+44: 
+45: 
+46: def reference_seed(label): return 'sodium,' + hash_json(['pokemon-reference-r1', label])
+47: 
+48: 
+49: def expected_jobs(teams, namespace):
+50:     result = []
+51:     for split in ['train', 'development']:
+52:         rows = teams[split]
+53:         for i in range(0, len(rows), 2):
+54:             pair, number = rows[i:i+2], i // 2
+55:             group = hash_json(['r7-matchup-1', POLICY_HASH, sorted(t['team_key'] for t in pair)])
+56:             label = f'{namespace}/{split}/pair/{number}'
+57:             policies = [reference_seed(f'{label}/policy/{i}') for i in range(2)]
+58:             for mirror in [False, True]:
+59:                 ordered = list(reversed(pair)) if mirror else pair
+60:                 result.append({'id': f'{split}-{number:04d}-{int(mirror)}', 'split': split, 'group': group, 'mirror': mirror,
+61:                     'team_keys': [t['team_key'] for t in ordered],
+62:                     'spec': {'format_id': POLICY['profile'], 'teams': [t['entry'] for t in ordered],
+63:                         'mechanics_seed': reference_seed(label + '/mechanics'), 'policy_seeds': list(reversed(policies)) if mirror else policies,
+64:                         'policy_id': 'upstream-random-move-0.9-no-tera-r1', 'max_submissions': 20000}})
+65:     return result
+66: 
+67: 
+68: def validate_collection(directory, exposures):
+69:     directory = Path(directory)
+70:     index = verify_seal(read_json(directory / 'index.json'))
+71:     check(index['version'] == 'r7-collection-1' and index['status'] == 'complete' and index['failure_events'] == 0, 'Incomplete collection')
+72:     expected_files = {'plan.json', 'reference-manifest.json', 'jobs.json', 'teams/train.json', 'teams/development.json', 'teams/final.json'}
+73:     check(set(index['files']) == expected_files, 'Collection metadata file set')
+74:     for name, expected in index['files'].items(): checked_file(directory, name, expected)
+75:     plan = verify_seal(read_json(directory / 'plan.json'))
+76:     check(plan['version'] == 'r7-collection-plan-1' and index['plan_hash'] == plan['content_hash'], 'Plan linkage')
+77:     check(plan['policy_hash'] == POLICY_HASH and canonical(plan['policy']) == canonical(POLICY), 'Split policy drift')
+78:     check(plan['final_access'] == 'reservation-only', 'Final holdout is sealed')
+79:     for name, expected in plan['source_hashes'].items(): checked_file(ROOT, name, expected)
+80:     registry = verify_seal(read_json(exposures))
+81:     check(registry['policy_hash'] == POLICY_HASH and registry['content_hash'] == plan['exposure_registry_hash']
+82:           and file_digest(Path(exposures)) == plan['exposure_registry_sha256'], 'Exposure registry linkage')
+83:     manifest = validate_manifest(read_json(directory / 'reference-manifest.json'))
+84:     check(manifest['profile'] == 'official' and manifest['manifest_id'] == plan['episode_manifest_id'], 'Wrong reference profile')
+85:     for name, expected in manifest['source_hashes'].items(): checked_file(ROOT, name, expected)
+86:     contract = manifest['reference_contract']['payload']; reference = contract['reference_manifest']
+87:     check(reference['commit'] == POLICY['showdown_commit'] and reference['format']['id'] == POLICY['profile']
+88:           and reference['source_dirty'] is False, 'Wrong pinned reference')
+89:     for name, expected in contract['contract_hashes'].items(): checked_file(ROOT, name, expected)
+90:     for name, expected in reference['harness_source_hashes'].items(): checked_file(ROOT / 'packages/reference-node', name, expected)
+91:     for name, expected in reference['source_hashes'].items(): checked_file(ROOT / 'vendor/pokemon-showdown', name, expected)
+92:     check(hash_json(read_json(ROOT / 'contracts/battle-v1/vocabulary.json')) == contract['vocabulary_hash'], 'Vocabulary drift')
+93:     check(canonical(read_json(ROOT / 'vendor/pokemon-showdown/.reference-build.json')) == canonical(reference['build']), 'Reference build drift')
+94:     catalog_context = corpus_context(R3)
+95:     check(catalog_context['index']['content_hash'] == registry['r3_index_hash'], 'Exposure catalog mismatch')
+96:     catalog = catalog_context['catalog']
+97:     legacy_keys, legacy_seeds = set(registry['team_keys']), set(registry['seeds'])
+98:     teams, keys, ledger = {}, set(), LeakageLedger()
+99:     for split in ['train', 'development', 'final']:
+100:         reservation = verify_seal(read_json(directory / f'teams/{split}.json'))
+101:         check(reservation['version'] == 'r7-team-reservation-1' and reservation['split'] == split and reservation['plan_hash'] == plan['content_hash'], 'Reservation linkage')
+102:         rows = reservation['rows']; teams[split] = rows
+103:         check(len(rows) == plan['team_counts'][split] and len(rows) >= 2 and len(rows) % 2 == 0, 'Reservation count')
+104:         stats = index['sampling'][split]
+105:         check(stats['accepted'] == len(rows) and stats['attempts'] == len(rows) + sum(stats['rejected'].values()), 'Rejection accounting')
+106:         for row in rows:
+107:             artifact = validate_artifact(row['artifact'], kind='team', manifest_id=manifest['reference_contract']['manifest_id'])
+108:             check(canonical(episode_payload(row['entry'], catalog)) == canonical(artifact['payload']), 'Raw/resolved team mismatch')
+109:             key = team_key(artifact['payload'], POLICY)
+110:             check(row['team_key'] == key and row['split'] == split and partition(artifact['payload'], POLICY) == split, 'Wrong team assignment')
+111:             check(key not in keys and key not in legacy_keys, 'Duplicate/exposed team admitted')
+112:             check(row['entry']['seed'] not in legacy_seeds, 'Exposed seed admitted')
+113:             keys.add(key); ledger.add('team', key, split, key)
+114:             ledger.add('seed', row['entry']['seed'], split, key, 'team')
+115:     jobs_doc = verify_seal(read_json(directory / 'jobs.json'))
+116:     check(jobs_doc['version'] == 'r7-job-plan-1' and jobs_doc['plan_hash'] == plan['content_hash'], 'Job plan linkage')
+117:     check(canonical(jobs_doc['jobs']) == canonical(expected_jobs(teams, plan['namespace'])), 'Pairing/seed/mirror plan mismatch')
+118:     jobs = {j['id']: j for j in jobs_doc['jobs']}
+119:     check(len(jobs) == len(jobs_doc['jobs']) == plan['expected_episodes'] == index['expected'], 'Job count')
+120:     check(len(index['records']) == len(jobs) and {r['job_id'] for r in index['records']} == jobs.keys(), 'Missing/duplicate episodes')
+121:     for job in jobs.values():
+122:         check(job['split'] in {'train', 'development'}, 'Final episode forbidden')
+123:         ledger.add('mirror-group', job['group'], job['split'], job['group'])
+124:         for value, role in [(job['spec']['mechanics_seed'], 'mechanics'), *[(s, 'policy') for s in job['spec']['policy_seeds']]]:
+125:             check(value not in legacy_seeds, 'Exposed battle/policy seed admitted')
+126:             ledger.add('seed', value, job['split'], job['group'], role)
+127:     for record in index['records']:
+128:         job = jobs[record['job_id']]
+129:         check(all(record[k] == job[k] for k in ['split', 'group', 'mirror']), 'Record split/group mismatch')
+130:         check(record['file'] == f"raw/{job['id']}.json.gz" and record['replay_verified'] is True, 'Episode path/replay mismatch')
+131:         check(record['episode_key'] not in registry['episode_keys'], 'Legacy episode admitted')
+132:         ledger.add('episode', record['episode_key'], record['split'], job['id'])
+133:         checked_file(directory, record['file'], record['sha256'])
+134:     return {'index': index, 'plan': plan, 'manifest': manifest, 'jobs': jobs, 'teams': teams,
+135:             'registry_hash': registry['content_hash'], 'ledger_entries': len(ledger.entries)}
+136: 
+137: 
+138: class ActorDataset:
+139:     """Admission requires a separately trusted dataset hash. Final access is absent.
+140: 
+141:     Only validated ActorInput objects leave this interface; full episode data and
+142:     training targets are stored separately and never accepted as model inputs.
+143:     """
+144:     def __init__(self, directory, *, expected_hash, purpose):
+145:         check(purpose in {'training', 'development'}, 'Final evaluation requires a separate release; holdout is sealed')
+146:         self.directory, self.purpose = Path(directory), purpose
+147:         self.document = verify_seal(read_json(self.directory / 'dataset.json'))
+148:         check(self.document['version'] == 'r7-dataset-1' and self.document['content_hash'] == expected_hash, 'Untrusted dataset identity')
+149:         check(self.document['policy_hash'] == POLICY_HASH and self.document['status'] == 'validated', 'Dataset admission status')
+150:         check(self.document['final_access'] == 'reservation-only', 'Final holdout is sealed')
+151:         for name, expected in self.document['source_hashes'].items(): checked_file(ROOT, name, expected)
+152:         # Bind the collection and reservation files without returning their content.
+153:         for name, expected in self.document['collection_files'].items(): checked_file(self.directory, name, expected)
+154:         check(all(r['split'] in {'train', 'development'} for r in self.document['actors']), 'Final actor export forbidden')
+155: 
+156:     def actors(self, split):
+157:         expected = 'train' if self.purpose == 'training' else 'development'
+158:         check(split == expected, 'Purpose/split mismatch; final holdout is sealed')
+159:         for row in self.document['actors']:
+160:             if row['split'] != split: continue
+161:             check(row['file'].startswith(f'actors/{split}/'), 'Not an actor-only file')
+162:             file = checked_file(self.directory, row['file'], row['sha256'])
+163:             lines = gzip.decompress(file.read_bytes()).splitlines()
+164:             check(len(lines) == row['count'], 'Actor row count changed')
+165:             for line in lines: yield load_actor_input(line)
+166: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_reference/dataset_build.py
+1: """Validate fresh R7 episodes, export separate actor/target streams, measure costs."""
+2: import argparse
+3: from concurrent.futures import ProcessPoolExecutor
+4: from dataclasses import asdict
+5: import gzip
+6: import json
+7: from pathlib import Path
+8: import platform
+9: import shutil
+10: import time
+11: 
+12: from .contract import canonical, parse_json
+13: from .corpus import read_json, sealed, file_digest, digest
+14: from .dataset_gate import validate_collection, checked_file, check, POLICY_HASH, ROOT
+15: from .feature_trajectories import assemble_episode
+16: from .player_history import load_actor_input
+17: 
+18: 
+19: def write_json(path, value):
+20:     with path.open('x') as f: f.write(canonical(value) + '\n')
+21: 
+22: 
+23: def write_rows(directory, file, rows):
+24:     plain = ('\n'.join(rows) + '\n').encode() if rows else b''
+25:     compressed = gzip.compress(plain, compresslevel=6, mtime=0)
+26:     with (directory / file).open('xb') as stream: stream.write(compressed)
+27:     return {'file': file, 'sha256': digest(compressed), 'bytes': len(compressed), 'json_bytes': len(plain), 'count': len(rows)}
+28: 
+29: 
+30: def export_episode(args):
+31:     directory, record, job, manifest = args
+32:     directory = Path(directory); started = time.monotonic_ns()
+33:     compressed = checked_file(directory, record['file'], record['sha256']).read_bytes()
+34:     check(len(compressed) == record['bytes'], 'Episode byte count')
+35:     plain = gzip.decompress(compressed)
+36:     check(len(plain) == record['json_bytes'] and digest(plain) == record['json_sha256'], 'Episode JSON bytes')
+37:     bundle = parse_json(plain)
+38:     check((canonical(bundle) + '\n').encode() == plain, 'Noncanonical episode')
+39:     check(bundle['episode']['content_hash'] == record['episode_hash'], 'Episode identity differs')
+40:     p = bundle['episode']['payload']
+41:     check(canonical(p['spec']) == canonical(job['spec']), 'Episode does not implement its predeclared job')
+42:     check(p['episode_key'] == record['episode_key'] and p['split'] == 'unassigned' and p['fixture'] is None, 'Unexpected R4 envelope')
+43:     check(p['outcome']['status'] == 'terminal', 'Nonterminal benchmark record')
+44:     check(p['submission_order'] == ('p2-first' if job['mirror'] else 'p1-first'), 'Wrong submission order')
+45:     check(record['decisions'] == len(p['decisions']) and record['turns'] == p['outcome']['turn'] and
+46:           record['unavailable_rejections'] == sum(not d['accepted'] for d in p['decisions']), 'Record summary mismatch')
+47:     trajectories = assemble_episode(bundle, manifest)
+48:     validated = time.monotonic_ns()
+49:     actors, targets = [], []
+50:     for trajectory in trajectories:
+51:         check(trajectory.bootstrap is None, 'Terminal episode has bootstrap')
+52:         actor_rows = []
+53:         for actor in trajectory.actor_inputs:
+54:             # Independently enforce the public actor wire before export.
+55:             verified = load_actor_input(actor._wire)
+56:             actor_rows.append(verified._wire)
+57:         suffix = f"{job['id']}-{trajectory.viewer}.jsonl.gz"
+58:         meta = {'job_id': job['id'], 'split': job['split'], 'group': job['group'], 'viewer': trajectory.viewer}
+59:         actors.append({**meta, **write_rows(directory, f"actors/{job['split']}/{suffix}", actor_rows)})
+60:         targets.append({**meta, **write_rows(directory, f"targets/{job['split']}/{suffix}", [canonical(asdict(t)) for t in trajectory.targets])})
+61:     return {'job_id': job['id'], 'actors': actors, 'targets': targets,
+62:             'validation_projection_ms': (validated - started) // 1_000_000,
+63:             'actor_wire_storage_ms': (time.monotonic_ns() - validated) // 1_000_000}
+64: 
+65: 
+66: def quantiles(values):
+67:     values = sorted(values)
+68:     return {str(p): values[max(0, (len(values) * p + 99) // 100 - 1)] for p in [50, 95, 99, 100]}
+69: 
+70: 
+71: def source_hashes():
+72:     files = sorted((ROOT / 'python/pokemon_reference').glob('*.py'))
+73:     files += sorted((ROOT / 'contracts/player-features-v1').glob('*.json'))
+74:     files += [ROOT / 'contracts/dataset-v1/policy.json', ROOT / 'requirements-contract.txt']
+75:     return {str(p.relative_to(ROOT)): file_digest(p) for p in files}
+76: 
+77: 
+78: def build(collection, exposures, out, workers=4):
+79:     check(type(workers) is int and 1 <= workers <= 8, 'Invalid workers')
+80:     started = time.monotonic_ns(); collection, out = Path(collection), Path(out)
+81:     context = validate_collection(collection, exposures)
+82:     sources = source_hashes()
+83:     out.mkdir(parents=True, exist_ok=False)
+84:     inputs = {'index.json': file_digest(collection / 'index.json'), **context['index']['files'],
+85:               **{r['file']: r['sha256'] for r in context['index']['records']}}
+86:     for name, expected in inputs.items():
+87:         destination = out / name; destination.parent.mkdir(parents=True, exist_ok=True)
+88:         shutil.copyfile(checked_file(collection, name, expected), destination)
+89:         if name == 'teams/final.json': destination.chmod(0o600)
+90:         checked_file(out, name, expected)
+91:     for kind in ['actors', 'targets']:
+92:         for split in ['train', 'development']: (out / kind / split).mkdir(parents=True)
+93:     copied = time.monotonic_ns()
+94:     work = [(str(out), r, context['jobs'][r['job_id']], context['manifest']) for r in context['index']['records']]
+95:     results = []
+96:     try:
+97:         with ProcessPoolExecutor(max_workers=workers) as pool:
+98:             for result in pool.map(export_episode, work):
+99:                 results.append(result)
+100:                 if len(results) % 16 == 0: print(json.dumps({'validated_exported': len(results), 'requested': len(work)}), flush=True)
+101:         check(sources == source_hashes(), 'Exporter source changed')
+102:         records = context['index']['records']; elapsed = (time.monotonic_ns() - copied) // 1_000_000
+103:         document = sealed({'version': 'r7-dataset-1', 'status': 'validated', 'policy_hash': POLICY_HASH,
+104:             'plan_hash': context['plan']['content_hash'], 'collection_hash': context['index']['content_hash'],
+105:             'exposure_registry_hash': context['registry_hash'], 'final_access': 'reservation-only',
+106:             'collection_files': inputs, 'source_hashes': sources,
+107:             'actors': [a for r in results for a in r['actors']], 'targets': [a for r in results for a in r['targets']],
+108:             'validation': {'episodes': len(results), 'all_node_replayed': True, 'all_python_validated': True,
+109:                 'actor_wire_rows': sum(a['count'] for r in results for a in r['actors']),
+110:                 'ledger_entries': context['ledger_entries'], 'cross_split_overlaps': 0, 'final_episodes': 0, 'final_actor_rows': 0}})
+111:         write_json(out / 'dataset.json', document)
+112:         ms = context['index']['collection_wall_ms']
+113:         report = sealed({'version': 'r7-benchmark-1', 'dataset_hash': document['content_hash'],
+114:             'episodes': len(records), 'paired_matchups': len(records) // 2,
+115:             'decisions': sum(r['decisions'] for r in records), 'turns': sum(r['turns'] for r in records),
+116:             'failure_events': context['index']['failure_events'], 'unavailable_rejections': sum(r['unavailable_rejections'] for r in records),
+117:             'collection_wall_ms_including_replay': ms, 'collection_workers': context['index']['workers'],
+118:             'episode_rate_per_second_milli': len(records) * 1_000_000 // ms,
+119:             'decision_rate_per_second_milli': sum(r['decisions'] for r in records) * 1_000_000 // ms,
+120:             'generation_latency_ms_nearest_rank': quantiles([r['generation_ms'] for r in records]),
+121:             'replay_latency_ms_nearest_rank': quantiles([r['replay_ms'] for r in records]),
+122:             'storage': {'raw_compressed_bytes': sum(r['bytes'] for r in records), 'raw_json_bytes': sum(r['json_bytes'] for r in records),
+123:                         'actor_compressed_bytes': sum(r['bytes'] for r in document['actors']), 'actor_json_bytes': sum(r['json_bytes'] for r in document['actors']),
+124:                         'target_compressed_bytes': sum(r['bytes'] for r in document['targets'])},
+125:             'validation_export_wall_ms': elapsed, 'validation_workers': workers,
+126:             'input_audit_copy_ms': (copied - started) // 1_000_000, 'python': platform.python_version(),
+127:             'hardware': context['index']['hardware'], 'sampling': context['index']['sampling'],
+128:             'scope': 'Pinned random baseline with Tera disabled; both seats per pair. Includes exact reference replay, serialization and storage. No learner, accelerator, strength inference or final outcomes.'})
+129:         write_json(out / 'benchmark.json', report)
+130:         print(json.dumps({'dataset_hash': document['content_hash'], 'episodes': len(records), 'actor_rows': document['validation']['actor_wire_rows'], 'elapsed_ms': elapsed}), flush=True)
+131:         return document
+132:     except BaseException as error:
+133:         write_json(out / 'failed-export.json', {'status': 'failed', 'message': str(error), 'completed': len(results)})
+134:         raise
+135: 
+136: if __name__ == '__main__':
+137:     p = argparse.ArgumentParser(); p.add_argument('collection'); p.add_argument('exposures'); p.add_argument('out'); p.add_argument('--workers', type=int, default=4)
+138:     a = p.parse_args(); build(a.collection, a.exposures, a.out, a.workers)
+139: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_reference/feature_trajectories.py
+1: """Episode boundary: actor inputs and training targets use different immutable types."""
+2: from dataclasses import dataclass
+3: from .contract import canonical, parse_json
+4: from .episodes import validate_episode
+5: from .player_history import ActorInput, PlayerHistory
+6: from .actor_actions import ActionCodec
+7: 
+8: 
+9: @dataclass(frozen=True)
+10: class TrainingTarget:
+11:     action_index: int | None
+12:     control_action: str | None
+13:     accepted: bool
+14:     next_actor_index: int | None
+15:     next_bootstrap: bool
+16:     terminal: bool
+17:     truncated: bool
+18:     reward_numerator: int
+19:     reward_denominator: int
+20: 
+21: 
+22: @dataclass(frozen=True)
+23: class PlayerTrajectory:
+24:     viewer: str
+25:     actor_inputs: tuple[ActorInput, ...]
+26:     targets: tuple[TrainingTarget, ...]
+27:     bootstrap: ActorInput | None
+28: 
+29: 
+30: def project_player_views(payload, viewer):
+31:     """Project selected views only. This does not certify a privileged episode.
+32: 
+33:     Used by the validated offline boundary below and by noninterference tests.
+34:     Never read spec, frames, opponent views, actions, targets or outcome to encode.
+35:     """
+36:     history = PlayerHistory(viewer)
+37:     inputs = []
+38:     for decision in payload['decisions']:
+39:         if decision['side'] == viewer:
+40:             inputs.append(history.append(decision['view']))
+41:     bootstrap = None
+42:     if payload['bootstrap_views'] is not None:
+43:         bootstrap = history.append(payload['bootstrap_views'][viewer])
+44:     return tuple(inputs), bootstrap
+45: 
+46: 
+47: def assemble_episode(bundle, manifest):
+48:     """Validate the complete privileged artifact, then separate inputs and targets."""
+49:     validate_episode(bundle, manifest)
+50:     # Own the input bytes so caller mutations cannot race either projection or labels.
+51:     payload = parse_json(canonical(bundle['episode']['payload']))
+52:     result = []
+53:     for side in ('p1', 'p2'):
+54:         actors, bootstrap = project_player_views(payload, side)
+55:         decisions = [d for d in payload['decisions'] if d['side'] == side]
+56:         local = {d['sequence']: i for i, d in enumerate(decisions)}
+57:         targets = []
+58:         for d in decisions:
+59:             transition = payload['transitions'][d['sequence']]
+60:             codec = ActionCodec(d['view']['request'])
+61:             action = d['action']
+62:             index = codec.encode(action) if action['kind'] != 'pass' else None
+63:             target = transition['target']
+64:             targets.append(TrainingTarget(index, 'pass' if index is None else None, d['accepted'],
+65:                 local[target['sequence']] if target['kind'] == 'decision' else None,
+66:                 target['kind'] == 'bootstrap', transition['terminal'], transition['truncated'],
+67:                 transition['reward_numerator'], transition['reward_denominator']))
+68:         if len(targets) != len(actors):
+69:             raise ValueError('Actor/target count mismatch')
+70:         result.append(PlayerTrajectory(side, actors, tuple(targets), bootstrap))
+71:     return tuple(result)
+72: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/dataset/test_identity.py
+1: import copy
+2: import json
+3: from pathlib import Path
+4: import unittest
+5: 
+6: from pokemon_reference.contract import hash_json
+7: from pokemon_reference.dataset_identity import canonical_team, team_key, partition, pair_partition
+8: 
+9: ROOT = Path(__file__).resolve().parents[2]
+10: POLICY = json.loads((ROOT / 'contracts/dataset-v1/policy.json').read_text())
+11: PAYLOAD = json.loads((ROOT / 'tests/dataset/fixtures/team.json').read_text())['payload']
+12: 
+13: 
+14: class IdentityTest(unittest.TestCase):
+15:     def test_metadata_and_seed_do_not_change_group(self):
+16:         p = copy.deepcopy(PAYLOAD)
+17:         p['generator_seed']['hex'] = '0' * 64
+18:         for mon in p['pokemon']:
+19:             mon['name'] = 'A new nickname'; mon['role'] = 'different bookkeeping'; mon['shiny'] = not mon['shiny']
+20:             mon['speciesId'] = 'bookkeeping'
+21:         p['source_team_hash'] = hash_json(p['pokemon'])
+22:         self.assertEqual(team_key(p, POLICY), team_key(PAYLOAD, POLICY))
+23:         self.assertEqual(partition(p, POLICY), partition(PAYLOAD, POLICY))
+24: 
+25:     def test_each_mechanical_field_and_order_changes_identity(self):
+26:         original = team_key(PAYLOAD, POLICY)
+27:         edits = [lambda p: p['pokemon'][0].update(level=1), lambda p: p['pokemon'][0].update(gender=''),
+28:                  lambda p: p['pokemon'][0]['evs'].update(hp=1), lambda p: p['pokemon'][0]['ivs'].update(hp=1),
+29:                  lambda p: p['ids'][0].update(species='pikachu'), lambda p: p['ids'][0].update(ability='pressure'),
+30:                  lambda p: p['ids'][0].update(item=''), lambda p: p['ids'][0].update(tera_type='normal'),
+31:                  lambda p: p['ids'][1]['moves'].reverse(), lambda p: (p['pokemon'].reverse(), p['ids'].reverse())]
+32:         for edit in edits:
+33:             p = copy.deepcopy(PAYLOAD); edit(p)
+34:             self.assertNotEqual(team_key(p, POLICY), original)
+35: 
+36:     def test_full_digest_exact_threshold_assignment(self):
+37:         c = canonical_team(PAYLOAD)
+38:         digest = int(hash_json([POLICY['hash_version'], POLICY['salt'], c]), 16)
+39:         expected = 'train' if digest * 10000 < 9000 * 2**256 else 'development' if digest * 10000 < 9500 * 2**256 else 'final'
+40:         self.assertEqual(partition(PAYLOAD, POLICY), expected)
+41:         self.assertEqual(pair_partition(PAYLOAD, PAYLOAD, POLICY), expected)
+42: 
+43:     def test_mixed_partition_is_rejected(self):
+44:         variants = {}
+45:         for level in range(1, 101):
+46:             p = copy.deepcopy(PAYLOAD); p['pokemon'][0]['level'] = level
+47:             variants.setdefault(partition(p, POLICY), p)
+48:         self.assertGreater(len(variants), 1)
+49:         a, b = list(variants.values())[:2]
+50:         with self.assertRaises(ValueError): pair_partition(a, b, POLICY)
+51: 
+52:     def test_unknown_mechanical_fields_versions_and_policy_changes_reject(self):
+53:         p = copy.deepcopy(PAYLOAD); p['pokemon'][0]['nature'] = 'Adamant'
+54:         with self.assertRaises(ValueError): canonical_team(p)
+55:         for field,value in [('identity_version','future'),('hash_version','future'),('salt',''),('denominator',0)]:
+56:             policy = copy.deepcopy(POLICY); policy[field] = value
+57:             with self.assertRaises(ValueError): partition(PAYLOAD, policy)
+58:         policy = copy.deepcopy(POLICY); policy['ranges'][0]['upper']=9001
+59:         with self.assertRaises(ValueError): partition(PAYLOAD,policy)
+60: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/dataset/test_gate.py
+1: import copy
+2: import gzip
+3: import tempfile
+4: from pathlib import Path
+5: import unittest
+6: from unittest.mock import patch
+7: 
+8: from pokemon_reference.contract import hash_json, canonical
+9: from pokemon_reference.corpus import read_json, sealed
+10: from pokemon_reference.dataset_identity import partition
+11: from pokemon_reference.dataset_gate import LeakageLedger, checked_file, confined, ActorDataset, POLICY
+12: 
+13: ROOT = Path(__file__).resolve().parents[2]
+14: PAYLOAD = read_json(ROOT / 'tests/dataset/fixtures/team.json')['payload']
+15: 
+16: class GateTest(unittest.TestCase):
+17:     def test_full_digest_boundary_in_python(self):
+18:         space = 1 << 256; dev = (space * 9000 + 9999) // 10000; final = (space * 9500 + 9999) // 10000
+19:         for n, expected in [(0,'train'),(dev-1,'train'),(dev,'development'),(final-1,'development'),(final,'final'),(space-1,'final')]:
+20:             with patch('pokemon_reference.dataset_identity.hash_json', return_value=f'{n:064x}'):
+21:                 self.assertEqual(partition(PAYLOAD, POLICY), expected)
+22: 
+23:     def test_shared_teams_seeds_episodes_and_mirrors_fail_across_splits(self):
+24:         for kind in ['team', 'seed', 'episode', 'mirror-group']:
+25:             ledger = LeakageLedger(); ledger.add(kind, 'same', 'train', 'pair')
+26:             ledger.add(kind, 'same', 'train', 'pair')
+27:             for split in ['development', 'final']:
+28:                 with self.assertRaisesRegex(ValueError, 'Leakage'): ledger.add(kind, 'same', split, 'pair')
+29:         ledger = LeakageLedger(); ledger.add('seed', 'seed', 'train', 'pair', 'mechanics')
+30:         with self.assertRaisesRegex(ValueError, 'Leakage'): ledger.add('seed', 'seed', 'train', 'pair', 'policy')
+31: 
+32:     def test_boundary_rejects_final_and_unknown_purpose_before_opening_files(self):
+33:         for purpose in ['final', 'evaluation', 'anything']:
+34:             with self.assertRaisesRegex(ValueError, 'sealed'):
+35:                 ActorDataset('/nonexistent', expected_hash='0'*64, purpose=purpose)
+36: 
+37:     def test_changed_bytes_and_path_escape_reject(self):
+38:         with tempfile.TemporaryDirectory() as name:
+39:             root = Path(name); (root/'file').write_text('different')
+40:             with self.assertRaisesRegex(ValueError, 'changed'): checked_file(root,'file','0'*64)
+41:             with self.assertRaisesRegex(ValueError, 'escapes'): confined(root,'../outside')
+42: 
+43:     def test_untrusted_resealed_dataset_hash_rejects(self):
+44:         with tempfile.TemporaryDirectory() as name:
+45:             root = Path(name); doc=sealed({'version':'r7-dataset-1','status':'validated','policy_hash':hash_json(POLICY)})
+46:             (root/'dataset.json').write_text(canonical(doc))
+47:             with self.assertRaisesRegex(ValueError, 'Untrusted dataset'):
+48:                 ActorDataset(root, expected_hash='0'*64, purpose='training')
+49: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/dataset/dataset.test.mjs
+1: import test from 'node:test';
+2: import assert from 'node:assert/strict';
+3: import {readFileSync} from 'node:fs';
+4: import {spawnSync} from 'node:child_process';
+5: import {POLICY, teamKey, partition, partitionDigest, pairPartition} from '../../packages/dataset/identity.mjs';
+6: 
+7: const payload = JSON.parse(readFileSync('tests/dataset/fixtures/team.json')).payload;
+8: test('Node and independent Python agree on ordered team identities and full-digest partitions', () => {
+9:   const values = Array.from({length: 100}, (_, i) => { const p = structuredClone(payload); p.pokemon[0].level = i + 1; return p; });
+10:   const result = spawnSync('.venv/bin/python', ['-c',
+11:     'import json,sys;from pokemon_reference.dataset_identity import team_key,partition;p=json.load(sys.stdin);print(json.dumps([[team_key(x,p["policy"]),partition(x,p["policy"])] for x in p["teams"]]))'],
+12:     {input: JSON.stringify({policy: POLICY, teams: values}), encoding: 'utf8', env: {...process.env, PYTHONPATH: 'python'}});
+13:   assert.equal(result.status, 0, result.stderr);
+14:   assert.deepEqual(values.map(p => [teamKey(p), partition(p)]), JSON.parse(result.stdout));
+15:   const one = values[0], two = values.find(p => partition(p) !== partition(one));
+16:   assert.ok(two); assert.throws(() => pairPartition(one, two), /Cross-partition/);
+17: });
+18: 
+19: test('partition edges use the entire 256-bit digest with exact rational thresholds', () => {
+20:   const space = 1n << 256n, hex = n => n.toString(16).padStart(64, '0');
+21:   const firstDev = (space * 9000n + 9999n) / 10000n, firstFinal = (space * 9500n + 9999n) / 10000n;
+22:   for (const [n, expected] of [[0n, 'train'], [firstDev - 1n, 'train'], [firstDev, 'development'],
+23:     [firstFinal - 1n, 'development'], [firstFinal, 'final'], [space - 1n, 'final']]) assert.equal(partitionDigest(hex(n)), expected);
+24:   assert.throws(() => partitionDigest('0'), /full partition digest/);
+25: });
+26: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

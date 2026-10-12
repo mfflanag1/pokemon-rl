@@ -1,0 +1,15 @@
+[
+  {
+    "argv": [
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/jax-slice",
+      "-p",
+      "test_views.py"
+    ],
+    "returncode": 1
+  }
+]

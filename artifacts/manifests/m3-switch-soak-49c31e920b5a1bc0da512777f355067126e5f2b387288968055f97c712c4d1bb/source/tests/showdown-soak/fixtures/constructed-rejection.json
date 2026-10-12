@@ -1,0 +1,218 @@
+{
+  "entry": {
+    "seed": "sodium,c5ff8377f1e75ff53fea92745ba704de97a39f8cb2c8789aa6a7d36f4dd400a0",
+    "team": [
+      {
+        "name": "Raging Bolt",
+        "species": "Raging Bolt",
+        "speciesId": "ragingbolt",
+        "gender": "N",
+        "shiny": false,
+        "level": 78,
+        "moves": [
+          "thunderbolt",
+          "dracometeor",
+          "calmmind",
+          "thunderclap"
+        ],
+        "ability": "Protosynthesis",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Leftovers",
+        "teraType": "Fairy",
+        "role": "Bulky Setup"
+      },
+      {
+        "name": "Iron Treads",
+        "species": "Iron Treads",
+        "speciesId": "irontreads",
+        "gender": "N",
+        "shiny": false,
+        "level": 77,
+        "moves": [
+          "rapidspin",
+          "voltswitch",
+          "earthquake",
+          "ironhead"
+        ],
+        "ability": "Quark Drive",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Assault Vest",
+        "teraType": "Dragon",
+        "role": "Bulky Support"
+      },
+      {
+        "name": "Magcargo",
+        "species": "Magcargo",
+        "speciesId": "magcargo",
+        "gender": "F",
+        "shiny": false,
+        "level": 95,
+        "moves": [
+          "fireblast",
+          "shellsmash",
+          "earthpower",
+          "powergem"
+        ],
+        "ability": "Weak Armor",
+        "evs": {
+          "hp": 85,
+          "atk": 0,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Dragon",
+        "role": "Setup Sweeper"
+      },
+      {
+        "name": "Banette",
+        "species": "Banette",
+        "speciesId": "banette",
+        "gender": "M",
+        "shiny": false,
+        "level": 93,
+        "moves": [
+          "shadowsneak",
+          "poltergeist",
+          "gunkshot",
+          "swordsdance"
+        ],
+        "ability": "Insomnia",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Life Orb",
+        "teraType": "Ghost",
+        "role": "Wallbreaker"
+      },
+      {
+        "name": "Chien-Pao",
+        "species": "Chien-Pao",
+        "speciesId": "chienpao",
+        "gender": "N",
+        "shiny": false,
+        "level": 72,
+        "moves": [
+          "throatchop",
+          "swordsdance",
+          "iciclecrash",
+          "sacredsword"
+        ],
+        "ability": "Sword of Ruin",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Heavy-Duty Boots",
+        "teraType": "Fighting",
+        "role": "Setup Sweeper"
+      },
+      {
+        "name": "Tornadus",
+        "species": "Tornadus-Therian",
+        "speciesId": "tornadustherian",
+        "gender": "M",
+        "shiny": false,
+        "level": 79,
+        "moves": [
+          "bleakwindstorm",
+          "heatwave",
+          "knockoff",
+          "uturn"
+        ],
+        "ability": "Regenerator",
+        "evs": {
+          "hp": 85,
+          "atk": 85,
+          "def": 85,
+          "spa": 85,
+          "spd": 85,
+          "spe": 85
+        },
+        "ivs": {
+          "hp": 31,
+          "atk": 31,
+          "def": 31,
+          "spa": 31,
+          "spd": 31,
+          "spe": 31
+        },
+        "item": "Assault Vest",
+        "teraType": "Steel",
+        "role": "AV Pivot"
+      }
+    ],
+    "team_hash": "4f0a5a0fff4bde3ce941e8841fa8505c4e123dc3ea20b185ab9f9eebb1673aa9",
+    "partition": "development",
+    "team_key": "eed5ddf96d8935809c226bac47397c69b9c5aa79baf4692bd1a00a1e9cb70111"
+  },
+  "constructed_errors": [
+    "Raging Bolt is only obtainable from an event - it needs to match its event:",
+    "Raging Bolt must have 20 Attack IVs to be from its event."
+  ]
+}

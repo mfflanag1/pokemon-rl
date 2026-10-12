@@ -1,0 +1,142 @@
+diff --git a/python/pokemon_fixed/math.py b/python/pokemon_fixed/math.py
+new file mode 100644
+index 0000000..7849691
+--- /dev/null
++++ b/python/pokemon_fixed/math.py
+@@ -0,0 +1,136 @@
++"""Pure JAX math for the fixed-shape whole-episode loop (`contracts/fixed-loop-v1/plan.json`).
++
++Three jit-compatible, host-check-free functions built on the sealed reference kernels in
++`pokemon_jax_learner.core` (which is imported, never modified):
++
++* `masked_loss`     - padded-row PPO loss and the seven reference metrics, with the sealed
++                      `_loss` arithmetic (inclusive clip subgradient, half-MSE value loss,
++                      entropy bonus) averaged over *valid* rows only.
++* `bias_correction` - exact FP32 Adam bias-correction pair from a NumPy host-rounded table
++                      for steps 1..20000 and exact ones thereafter.
++* `adam_step`       - functional global-norm-clipped Adam update reusing the sealed
++                      `_adam_kernel`; the step counter is carried as int32 state.
++
++Everything is computed by JAX in FP32 (x64 disabled). No function evaluates traced data on
++the host, so each can be wrapped in `jax.jit`, differentiated with `jax.grad`/`value_and_grad`
++and carried through `jax.lax.scan`. Validation (finiteness, shapes, legal masks for valid
++rows, skipping Adam on empty minibatches) is the caller's responsibility, exactly as the
++plan's padding rule states: "invalid rows sanitized before math; losses average valid rows;
++empty minibatches skip Adam".
++"""
++import jax
++import jax.numpy as jnp
++import numpy as np
++
++from pokemon_jax_learner.core import _adam_kernel, distribution_kernel
++
++__all__ = ['masked_loss', 'bias_correction', 'adam_step', 'BIAS_TABLE_STEPS']
++
++
++# ----------------------------------------------------------------------------- masked PPO loss
++
++def masked_loss(logits, values, mask, actions, old_logp, advantages, returns, valid,
++                clip=.2, value_coef=.5, entropy_coef=.01):
++    """Padded PPO loss -> (scalar_loss, metrics) over the rows flagged by `valid`.
++
++    Shapes (n rows, A actions): `logits` (n, A) FP32, `values` (n,) FP32, `mask` (n, A) bool,
++    `actions` (n,) integer, `old_logp`/`advantages`/`returns` (n,) FP32, `valid` (n,) bool.
++    `clip`, `value_coef`, `entropy_coef` are Python floats (host-rounded to FP32 like the
++    reference's `F32(1 - clip)` / `F32(1 + clip)`); treat them as static under `jax.jit`.
++
++    Semantics on the valid rows are exactly those of the sealed
++    `pokemon_jax_learner.core._loss` applied to the compacted valid subset:
++    mean clipped actor loss with the explicit inclusive `active` branch (equality on the
++    unclipped side keeps the gradient), `value_coef` * half-MSE value loss, minus
++    `entropy_coef` * mean entropy; `old_logp`, `advantages`, `returns` are stop-gradient.
++    Metrics are the reference's seven keys: `loss`, `actor_loss`, `value_loss`, `entropy`,
++    `max_ratio_error` (max over valid rows), `clip_fraction`, `approx_kl` (valid-row means).
++
++    Invalid rows may hold any transport payload (NaN logits/values/targets, action -1,
++    all-false mask). Every input is sanitized with `jnp.where(valid, ...)` to neutral finite
++    values (zeros; all-true mask; action 0) *before* any arithmetic, and every per-row term is
++    re-masked before its reduction, so invalid rows contribute neither value nor gradient:
++    both selections have exact-zero cotangents, giving exactly 0 gradient entries on padded
++    rows. With no valid rows the divisor is 1, so all seven metrics and both gradients are
++    exactly zero. Differentiable in `logits` and `values`; no host checks.
++    """
++    valid = jnp.asarray(valid, bool)
++    valid_rows = valid[:, None]
++    zero = jnp.float32(0)
++    # Sanitize *all* inputs on invalid rows before any arithmetic touches them.
++    logits = jnp.where(valid_rows, logits, zero)
++    mask = jnp.where(valid_rows, mask, True)
++    actions = jnp.where(valid, actions, 0).astype(jnp.int32)
++    values, old_logp, advantages, returns = [jnp.where(valid, a, zero) for a in (values, old_logp, advantages, returns)]
++    old_logp, advantages, returns = [jax.lax.stop_gradient(a) for a in (old_logp, advantages, returns)]
++    low, high, clip, value_coef, entropy_coef = [
++        jnp.asarray(c, jnp.float32) for c in (1 - clip, 1 + clip, clip, value_coef, entropy_coef)]
++
++    count = jnp.maximum(jnp.sum(valid.astype(jnp.float32)), jnp.float32(1))
++
++    def valid_mean(rows):
++        return jnp.sum(jnp.where(valid, rows, zero)) / count
++
++    p, logp = distribution_kernel(logits, mask)
++    n = logits.shape[0]
++    log_ratio = logp[jnp.arange(n), actions] - old_logp
++    ratio = jnp.exp(log_ratio)
++    clipped = jnp.clip(ratio, low, high)
++    # Reference inclusive branch: equality on the unclipped side keeps the gradient.
++    active = jnp.where(advantages >= 0, ratio <= high, ratio >= low)
++    surrogate = jnp.where(active, ratio, jax.lax.stop_gradient(clipped)) * advantages
++    actor_loss = -valid_mean(surrogate)
++    entropy = valid_mean(-jnp.sum(p * logp, axis=1))
++    value_loss = jnp.float32(.5) * valid_mean(jnp.square(values - returns))
++    loss = actor_loss + value_coef * value_loss - entropy_coef * entropy
++    error = jnp.abs(ratio - jnp.float32(1))
++    metrics = {'loss': loss, 'actor_loss': actor_loss, 'value_loss': value_loss, 'entropy': entropy,
++               'max_ratio_error': jnp.max(jnp.where(valid, error, zero)),
++               'clip_fraction': valid_mean((error > clip).astype(jnp.float32)),
++               'approx_kl': valid_mean((ratio - jnp.float32(1)) - log_ratio)}
++    return loss, metrics
++
++
++# ----------------------------------------------------------------------------- bias correction
++
++BIAS_TABLE_STEPS = 20000
++# Host-rounded exactly like the sealed `Adam.apply`: F32(1 - beta ** step) from Python-double
++# `beta ** step`. Row s-1 holds step s. Every step beyond the table has 0.999 ** step < 2**-25,
++# so its FP32 rounding is exactly 1.0 (and 0.9 ** step underflowed long before).
++_BIAS_TABLE = np.array([[1 - .9 ** s, 1 - .999 ** s] for s in range(1, BIAS_TABLE_STEPS + 1)], np.float32)
++
++
++def bias_correction(step):
++    """FP32 pair `[1 - 0.9**step, 1 - 0.999**step]` for a positive int32 `step`, shape (2,).
++
++    Steps 1..`BIAS_TABLE_STEPS` are read from the precomputed NumPy host-rounded table (the
++    sealed reference constants bit for bit); later steps return exact FP32 ones, which is the
++    host rounding for every such step. Non-positive steps clamp to the step-1 entry (the
++    contract only covers positive steps). Pure gather/select: safe under `jit` and `scan`.
++    """
++    step = jnp.asarray(step, jnp.int32)
++    index = jnp.clip(step - 1, 0, BIAS_TABLE_STEPS - 1)
++    tabled = jnp.asarray(_BIAS_TABLE)[index]
++    return jnp.where(step > BIAS_TABLE_STEPS, jnp.ones(2, jnp.float32), tabled)
++
++
++# ----------------------------------------------------------------------------- functional Adam
++
++def adam_step(parameters, gradients, m, v, step, lr=.003, max_norm=1.):
++    """Functional sealed Adam step -> (new_parameters, new_m, new_v, new_step, preclip_norm).
++
++    `parameters`, `gradients`, `m`, `v` are same-keyed dicts of FP32 arrays (`m`/`v` zeros
++    before the first update); `step` is the int32 number of updates already applied (0 at
++    start) and is returned incremented by one. The recipe is the sealed
++    `pokemon_jax_learner.core.Adam.apply`: global-norm clip to `max_norm` (FP32 norm
++    returned pre-clip), beta 0.9/0.999, eps 1e-8, bias correction at `step + 1` from
++    `bias_correction`, via the sealed `_adam_kernel`. Python-float `lr`/`max_norm` are
++    host-rounded to FP32 like the reference. Pure and mutation-free (fresh dicts), so the
++    tuple can be scanned; no host checks. Callers skip this call for empty minibatches.
++    """
++    new_step = jnp.asarray(step, jnp.int32) + 1
++    bias = bias_correction(new_step)
++    new_parameters, new_m, new_v, norm = _adam_kernel(
++        dict(parameters), dict(gradients), dict(m), dict(v),
++        jnp.asarray(lr, jnp.float32), jnp.asarray(max_norm, jnp.float32), bias[0], bias[1])
++    return new_parameters, new_m, new_v, new_step, norm

@@ -1,0 +1,3 @@
+{"battles": 10000, "turns": 31303, "events": 54965, "player_view_comparisons_including_padding": 0, "pending_player_comparisons": 0, "disagreements": 0}
+{"battles": 1000, "turns": 3144, "events": 5512, "player_view_comparisons_including_padding": 18000, "pending_player_comparisons": 6288, "disagreements": 0}
+{"status": "passed", "family_alpha": 0.01, "bonferroni_cutoff": 8.445945945945946e-06, "test_count": 1184, "failures": [], "scope": "Finite predeclared PRNG/discrete-law checks, not proof of independence of all PRNG outputs. Fixed first-turn Showdown draws avoid outcome-dependent stopping."}

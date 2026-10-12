@@ -1,0 +1,65 @@
+{
+  "schema": "showdown-tactical-confirmation-plan-1",
+  "format": "gen9randombattle",
+  "policy_ids": [
+    "baseline-v1",
+    "random-v1",
+    "damage-v1",
+    "tactical-v1"
+  ],
+  "candidate": "tactical-v1",
+  "pairs": 1000,
+  "namespace": "showdown-tactical-confirmation-v1",
+  "matchups": [
+    [
+      "baseline-v1",
+      "random-v1"
+    ],
+    [
+      "baseline-v1",
+      "damage-v1"
+    ],
+    [
+      "baseline-v1",
+      "tactical-v1"
+    ],
+    [
+      "random-v1",
+      "damage-v1"
+    ],
+    [
+      "random-v1",
+      "tactical-v1"
+    ],
+    [
+      "damage-v1",
+      "tactical-v1"
+    ]
+  ],
+  "max_decisions_per_game": 20000,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 840931,
+  "confirmation": {
+    "bootstrap_samples": 30000,
+    "seed": 912877,
+    "family_alpha": 0.05,
+    "comparisons": 3,
+    "minimum_direct_score": 0.52,
+    "direct_lower_threshold": 0.5,
+    "opponent_delta_lower_threshold": -0.03,
+    "quantile": "For each comparison use the ceil(B * family_alpha / comparisons)-th smallest shared-pair bootstrap mean as a one-sided lower bound; require strict greater-than threshold. These are nominal approximate Bonferroni bounds, not finite-sample guarantees."
+  },
+  "metrics": [
+    "tactical score against baseline",
+    "tactical minus baseline score against random",
+    "tactical minus baseline score against damage"
+  ],
+  "pairing": "Same two admitted teams in fixed seats and same mechanics seed for each pair across edges; swap policy seats. Policy streams keyed by policy and pair. Resample whole pairs using common indices across all metrics.",
+  "freshness": "Require zero exact-team overlap with the sealed opponent panel, its smoke pool, and this milestone smoke/network pools; fresh namespace and unchanged policy definitions. Do not replace a colliding pair: fail admission.",
+  "stopping": "Complete all 12000 games and all fresh replays. No optional stopping, tuning, difficult-pair replacement or scoring failures as losses.",
+  "decision": "Pass only if every lower-bound comparison passes and direct point score is at least 0.52. Failure is an honest non-promotion result; never relax thresholds or extend this run. Network qualification is a separate local functional test and does not override this screen.",
+  "split": "development",
+  "final_evaluation_used": false,
+  "public_server_used": false,
+  "training_performed": false
+}

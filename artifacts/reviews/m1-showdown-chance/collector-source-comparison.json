@@ -1,0 +1,9 @@
+{
+  "collect_ast_equal": true,
+  "cycle_ast_equal": true,
+  "scope": "Function bodies identical; successor imports the new chance sampler and retains sealed actor/update helpers. Numerical dependency-injection parity is in test_campaign.py.",
+  "source_files": {
+    "python/pokemon_binary/loop.py": "ceb04a22b818cc47a48671e1b70a02407909142912ae7850b957a269d3d3b78a",
+    "python/pokemon_showdown/loop.py": "eadea5522106d47397d2aa6804f692bbe03c8ee1b7d4facd4cbe4016ab0d825b"
+  }
+}

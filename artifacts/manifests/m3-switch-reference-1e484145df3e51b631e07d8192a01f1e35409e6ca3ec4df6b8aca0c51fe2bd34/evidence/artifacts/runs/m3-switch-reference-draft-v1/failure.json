@@ -1,0 +1,1 @@
+{"status":"failed","stage":"fixture coverage audit","reason":"Showdown uses status fnt on a fainted Pokemon; the draft audit incorrectly required an empty status string.","qualification":false}

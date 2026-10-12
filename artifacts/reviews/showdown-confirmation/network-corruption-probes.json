@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "cases": [
+    {
+      "name": "actor input",
+      "rejected": true
+    },
+    {
+      "name": "accepted action replay",
+      "rejected": true
+    },
+    {
+      "name": "reported count",
+      "rejected": true
+    },
+    {
+      "name": "policy identity",
+      "rejected": true
+    }
+  ]
+}

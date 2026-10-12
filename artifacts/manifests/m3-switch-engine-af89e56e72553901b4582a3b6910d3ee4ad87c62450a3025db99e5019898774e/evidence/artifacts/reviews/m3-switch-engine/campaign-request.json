@@ -1,0 +1,19 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review admission/evidence integrity for the new M3 engineering smoke campaign and sealer. Find concrete bugs allowing a false completion, source/runtime drift, wrong budget or non-original checkpoint replay. Production plan is 10000 fresh Showdown games BEFORE three seeds x64 updates x32 capped games. Sealed predecessor source immutable except six current docs/registry files, source-bound regression required. New evidence replay verifies saved conditional trajectories, effective final tie shuffle, actual unpatched passivity controls, hidden-info tests, and six original-next-update checkpoint fingerprints. Check substantive fixes from prior mechanics review: pinned Showdown source actually uses Math.ceil(100 * hp / maxhp), so rejected speculative opposite-order HP finding; mapping returns damage factor85..100. Snapshot review only; do not assume unprovided dependency flaws. Learner math is being separately reviewed. Flag code-supported admission/evidence gaps.",
+  "files_sha256": {
+    "scripts/seal-switch-engine.py": "723a1eed450279c19b2742296926ea142dc98f67b57eba406c4e6943ab536454",
+    "python/pokemon_switch_engine/campaign.py": "374586c924a7a52bdb3edd20d870117b6da97b1c7100338eb2e49e34fede97fc",
+    "python/pokemon_switch_engine/checkpoint.py": "0499997b06168f81daa39f6c39c275f2938f5ed0a723b1e12eba755cd5f9c006",
+    "python/pokemon_switch_engine/parity.py": "6c92c03be551b1427baf16ed36f44d549e99b8b0370faf737126be1ea566ad4c",
+    "packages/switch-engine/reference.mjs": "f109c5b478070f7c2e5cee668c4f50d50903a1c7f1448b64aa116bcdee9819c1",
+    "contracts/switch-engine-v1/plan.json": "336775382719b2b922cdd297789f08e48ea897be7721b3ad201b9fe50d2a1311",
+    "scripts/seal-showdown-soak.py": "2a9ab09d99cbeb6cf17a67485d3593a320131d9bf00a2f257259465ee5655f98",
+    "scripts/verify-fixed-loop.py": "963e2bbab5a06a5763902ca280ad45bca9e22f5c6a3133b891994f8ae8dd2513"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

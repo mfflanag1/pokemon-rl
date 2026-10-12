@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 88616,
+  "stop_reason": "end_turn",
+  "session_id": "eb729d1b-fb7e-4dc4-b2df-2e3bb1dab352",
+  "total_cost_usd": 0.9440899999999999,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 31086,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6447,
+    "output_tokens_details": {
+      "thinking_tokens": 4959
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 31086,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 6447,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 31086,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 31086
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 6447,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 31086,
+      "webSearchRequests": 0,
+      "costUSD": 0.9440899999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 4959,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: no blocking findings in reviewed scope; two medium/low gaps worth closing before the first full run.**\n\n## Findings\n\n**1. Medium \u2014 Producer-drift check during collection covers only 4 files (`packages/dataset/collect.mjs:14-16, 113`).**\n`SOURCE_FILES` omits the code that actually produces episodes (`episodes/session.mjs`, `reference-node/engine.mjs`, worker-loaded modules). The reference manifest is captured once at `collect.mjs:62` and passed to workers; Python later re-hashes manifest sources against the *current* tree (`dataset_gate.py:85-91`), not the tree at generation time. A mid-run edit to `session.mjs` that is reverted before export would pass every gate. Not a leakage vector, but it weakens the \"jobs are independently re-derived / exact official profile\" provenance claim. Verification: include manifest `source_hashes` (or re-call `episodeManifest()` and compare `manifest_id`) in the end-of-run check at line 113.\n\n**2. Low \u2014 Node identity's \"unknown fields reject rather than disappear\" is unverified (`identity.mjs:7-12`).**\nPython enforces exact field sets (`dataset_identity.py:24-27, 57-66`); Node relies solely on `validateSchema(payload,'team')`. If the R2 schema lacks `additionalProperties:false` at every level (`pokemon[i]`, `evs`, `ids[i]`), Node silently drops e.g. `nature` and computes a key Python would refuse. Parity test (`dataset.test.mjs:9`) only varies `level`. Since Python is the admission authority, a drift would surface as a Python rejection at gate time rather than leakage \u2014 but the collection would be wasted. Verification: add a `nature` fixture to the Node/Python parity test asserting both reject.\n\n**3. Low \u2014 Node collector never checks mechanics/policy seeds against the exposure registry (`collect.mjs:29-36`).**\nOnly team seeds are filtered (`:79`). Python gate does reject (`dataset_gate.py:125`), so this cannot admit a leak, but a collision (possible only if R4 used the same `pokemon-reference-r1` label namespace) would fail after a full run. Cheap to pre-check in `buildJobs`.\n\n**4. Low \u2014 Node `partitionDigest` checks only upper bounds (`identity.mjs:20`).**\nCorrect given the pinned policy, but it implicitly assumes ordered, contiguous ranges from 0; `requirePolicy` only protects callers that invoke it. Python validates lower bounds explicitly. Threshold edge tests on both sides pass per claim, so this is hygiene.\n\n**Verified as correct in snapshot:** half-open exact-integer thresholds (Node/Python agree; `dev = ceil(0.9\u00b72\u00b2\u2075\u2076)` test values are right); mirror seed handling (shared mechanics seed, policy seeds reversed in both `buildJobs` and `expected_jobs`); ledger rejects cross-split/group/role reuse while permitting in-group mirror reuse; rejection accounting (`attempts == accepted + \u03a3rejected`) matches the loop at `collect.mjs:76-85`; record\u2194job binding via exact `spec` canonical equality, `submission_order`, episode hash and byte digests (`dataset_build.py:33-46`); no final jobs/exports (`worker.mjs:10`, `dataset_gate.py:122,145,154`); nearest-rank quantiles are correctly `ceil(np/100)`; `collection_wall_ms` does start before `fork`, so throughput includes worker startup as advertised; `paired_matchups = episodes/2` is consistent with 96/48.\n\n## Scope limitations\nNot in packet: R2 `schema.json`, `seedFor`/`reference_seed` equivalence, `load_actor_input`/R5 wire schema, `validate_episode`, `episode_key` derivation, catalog resolver shapes, `verify_seal`. Independence of mirrors/pairs is acknowledged in the README, not tested here. No tests executed; full collection/export not yet run per task statement.\n\n## Verdict\nFindings (no high-severity). Admission logic as written does not admit candidate/record mutation, reused seeds, cross-split mirrors, dropped records, or final data; the main gap is producer-code drift during collection (Finding 1).",
+  "ttft_ms": 67478,
+  "type": "result",
+  "duration_ms": 88651,
+  "uuid": "d3ed5bd5-47f3-42a8-acfb-7be8060a5f50",
+  "ttft_stream_ms": 927,
+  "time_to_request_ms": 34,
+  "first_content_frame_ms": 927,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

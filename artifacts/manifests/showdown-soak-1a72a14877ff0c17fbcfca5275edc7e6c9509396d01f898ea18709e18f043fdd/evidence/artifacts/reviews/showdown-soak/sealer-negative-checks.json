@@ -1,0 +1,54 @@
+{
+  "status": "pass",
+  "cases": [
+    {
+      "case": "failure",
+      "rejected": true,
+      "expected": "Failed run cannot be sealed",
+      "error": "Failed run cannot be sealed"
+    },
+    {
+      "case": "progress",
+      "rejected": true,
+      "expected": "Complete progress",
+      "error": "Complete progress"
+    },
+    {
+      "case": "source",
+      "rejected": true,
+      "expected": "Frozen source/plan",
+      "error": "Frozen source/plan"
+    },
+    {
+      "case": "game",
+      "rejected": true,
+      "expected": "Game evidence binding",
+      "error": "Game evidence binding"
+    },
+    {
+      "case": "report",
+      "rejected": true,
+      "expected": "Audit binding: report.json",
+      "error": "Audit binding: report.json"
+    },
+    {
+      "case": "plugin",
+      "rejected": true,
+      "expected": "Local receipt endpoint source",
+      "error": "Local receipt endpoint source"
+    },
+    {
+      "case": "format",
+      "rejected": true,
+      "expected": "Exact admitted server format",
+      "error": "Command '['node', '/Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/audit.mjs', '/Users/maxf/Documents/ChatGPT/Pokemon/artifacts/runs/showdown-soak-negative-format', '--check']' returned non-zero exit status 1."
+    },
+    {
+      "case": "forged-audit",
+      "rejected": true,
+      "expected": "Fresh wire audit differs from saved audit",
+      "error": "Fresh wire audit differs from saved audit"
+    }
+  ],
+  "receipt_writes": []
+}

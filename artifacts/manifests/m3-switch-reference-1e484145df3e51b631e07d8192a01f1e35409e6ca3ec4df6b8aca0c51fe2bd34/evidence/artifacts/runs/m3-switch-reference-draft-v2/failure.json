@@ -1,0 +1,1 @@
+{"status":"failed","stage":"fixture coverage audit","reason":"Coverage reader assumed an active live Pokemon during faint-replacement phases; fixed by phase guard and absent-active handling.","qualification":false}

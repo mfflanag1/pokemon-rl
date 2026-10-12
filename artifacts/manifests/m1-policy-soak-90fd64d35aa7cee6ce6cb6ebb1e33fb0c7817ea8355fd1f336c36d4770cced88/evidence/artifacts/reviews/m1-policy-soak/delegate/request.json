@@ -1,0 +1,39 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Repair only python/pokemon_soak/gates.py after two verified QA findings. _require_finite must translate overflow for huge integer inputs into ValueError without rendering that enormous integer (Python digit limits can also fail). Formatting invalid trace keys must not sort incomparable mixed types. Keep the existing JSON-dict-only interface; no Mapping expansion needed. You are not alone; do not edit other files, tests or contract. Keep all valid-input behavior unchanged. No recursive delegation.",
+  "criteria": "Pass frozen tests including huge-integer and mixed-key probes; invalid inputs raise ValueError; change only owned file; preserve all summary gates and stdlib-only implementation.",
+  "owned": [
+    "python/pokemon_soak/gates.py"
+  ],
+  "checks": [
+    [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/soak",
+      "-p",
+      "test_gates.py"
+    ]
+  ],
+  "files_sha256": {
+    "python/pokemon_soak/__init__.py": "788bc62ab5c0f9169d4d678ffc1d87e45c64c244f1e52c906187fcc95dde1b33",
+    "python/pokemon_soak/gates.py": "735fd1353b041bc06a83199b031ba01bb9ec44ce6d19ffdccf2ff377c06df17d",
+    "contracts/soak-v1/plan.json": "7ade630a7a84ae68107138942b938c5675fa138f4b3552d2355dd15810ffe727",
+    "tests/soak/test_gates.py": "6977129c3d8b0b046f92e7e922b75b9ff9fb866d36a57545f0458b2fdd8561c4"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "41ac3fa7fda4accb99965e2e40edc81fd76bc57d",
+  "created_at": "2026-10-11T11:56:37.261383+00:00",
+  "test_run": false
+}

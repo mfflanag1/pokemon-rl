@@ -1,0 +1,1034 @@
+Task and review objective:
+Review this additive binary-policy-1 fix for the historical FP32 inverse-CDF tail mismatch. Exact law is FP32 rare mass r>=2^-24 and real complement 1-r; sampler compares two uint32 words to exact r*2^64, logs use log(r)/log1p(-r), ordinary autodiff through floor-clipped sigmoid. Check integer mapping proof and boundary cases, log-gradient consistency (distinguish normal floating-point approximation from a mismatched sampling law), masking/leakage, fixed-loop integration and checkpoint isolation. Full G2/G3 stay open; this has only short qualification planned, no strength or two-hour requalification claim. Independent oracle source reference.py was salvaged from a failed Codex delegate; its pytest test candidate and bytecode were not integrated; current unittest tests are coordinator-written. Please independently QA that scalar reference as opposite-model review too. Report concrete correctness problems or unsupported claims. You cannot run tests; do not imply you did.
+
+
+FILE contracts/binary-policy-v1/contract.json
+1: {
+2:   "format": "binary-policy-1",
+3:   "scope": "two-action public fixed-duel policy only; full G2/G3 open",
+4:   "predecessor": "4d75cb69595a1cd1b325b5acbde7a86c22e64488b4a1a13a67ad26fbb062a731",
+5:   "dtype": "FP32, CPU, x64 disabled",
+6:   "minimum_legal_mass": 5.960464477539063e-8,
+7:   "law": "For two legal actions: d = logit0-logit1; rare_action = 1 if d>=0 else 0; r = max(2^-24, sigmoid(-abs(d))) in FP32. Exact masses are r and the real complement 1-r. At equal logits action1 is designated rare but both masses are 1/2.",
+8:   "logs": "rare log(r), common log1p(-r), FP32; illegal/terminal finite sentinel zero. Returned probabilities are FP32 renderings, not the authority for complements.",
+9:   "sampling": "Fold each supplied Threefry key with 0x44594231; draw two uint32 words in high/low order; choose rare iff concatenated word < r*2^64. Compute the integer threshold from FP32 exponent/mantissa; no FP64 or uniform float is used. Exact mass claims are conditional on uniformly distributed word pairs.",
+10:   "gradient": "Standard FP32 autodiff through clipped sigmoid and log/log1p. Floor is constant with zero derivative at and below floor; at equal logits use the d>=0 branch. No straight-through integer quantizer. The integer sampler is outside the loss gradient.",
+11:   "mask": "One legal action has mass one, logp zero, entropy and policy gradient zero. No legal actions means terminal padding: action -1, probabilities/logs/value zero.",
+12:   "random_domain": "DYB1 (0x44594231), downstream of ACT/game/turn/seat",
+13:   "compatibility": "No old trajectory/old_logp/checkpoint reuse. New checkpoint format and source/contract binding. Existing simulator chance sampler remains nominal 1/24 and is not Showdown finite-word equivalent.",
+14:   "qualification": {"seeds": [11,29,47], "updates_per_seed": 100, "soak_seconds": 60, "soak_seed": 73, "word_probe_rows": 100000, "atol": 0.000003, "rtol": 0.00003},
+15:   "limits": "A short numerical qualification, not a new two-hour soak, strength evaluation, hidden-set coverage or expanded mechanics gate. Final reserved teams stay untouched. Prime unnecessary."
+16: }
+17: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/binary-policy-v1/plan.json
+1: {
+2:   "version": "binary-policy-loop-plan-1",
+3:   "predecessor": "4d75cb69595a1cd1b325b5acbde7a86c22e64488b4a1a13a67ad26fbb062a731",
+4:   "profile": "gen9-rattata-duel-v1",
+5:   "backend": "cpu",
+6:   "x64_enabled": false,
+7:   "games_per_batch": 64,
+8:   "turns": 4,
+9:   "seats": 2,
+10:   "capacity": 512,
+11:   "features": 59,
+12:   "actions": 2,
+13:   "epochs": 2,
+14:   "minibatch": 128,
+15:   "learning_rate": 0.003,
+16:   "max_gradient_norm": 1.0,
+17:   "gamma": 1.0,
+18:   "gae_lambda": 0.95,
+19:   "ppo_clip": 0.2,
+20:   "value_coefficient": 0.5,
+21:   "entropy_coefficient": 0.01,
+22:   "atol": 3e-06,
+23:   "rtol": 3e-05,
+24:   "parity_seeds": [
+25:     11,
+26:     29,
+27:     47
+28:   ],
+29:   "parity_batches_per_seed": 8,
+30:   "warmup_cycles": 8,
+31:   "soak_seconds": 60,
+32:   "soak_seed": 73,
+33:   "telemetry_seconds": 10,
+34:   "checkpoint_seconds": 30,
+35:   "maximum_updates": 50000000,
+36:   "padding": "time-major [4,64,2]; invalid rows sanitized before math; losses average valid rows; empty minibatches skip Adam",
+37:   "shuffle": "permute all 512 rows with Threefry domain SHF, version, epoch; stable-partition valid rows first; 4 fixed minibatches per epoch",
+38:   "optimizer_bias": "FP32(1-beta**step) table for steps 1..20000; exact FP32 one thereafter",
+39:   "checkpoint_mode": "completed whole-episode update boundary; atomic rollback only",
+40:   "soak_stop": "elapsed monotonic wall time >=60 after warmup; numerical qualification only; no two-hour stability claim for this new policy",
+41:   "full_g2": "open",
+42:   "full_g3": "open",
+43:   "final_evaluation": "sealed; no reads of final episode data or new final games",
+44:   "format": "binary-policy-loop-1",
+45:   "policy_contract": "contracts/binary-policy-v1/contract.json"
+46: }
+47: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_binary/policy.py
+1: """Two-action policy with exact dyadic word selection, conditional on uniform words.
+2: 
+3: The rare FP32 mass and its real complement define the law. Logs use log/log1p
+4: of that same mass; rounded displayed probabilities never define the sampler.
+5: Only this binary profile is admitted. The integer sampler is not differentiated.
+6: """
+7: import jax
+8: import jax.numpy as jnp
+9: import numpy as np
+10: from pokemon_jax_learner.model import (ActorInput, forward, validate_input,
+11:                                        validate_parameters)
+12: from pokemon_learner.core import require
+13: 
+14: FLOOR = np.float32(2**-24)
+15: DOMAIN = 0x44594231
+16: 
+17: 
+18: def parts(logits, mask):
+19:     both = jnp.all(mask, axis=1)
+20:     # Forced/padded rows must have no logit gradient, including their difference.
+21:     safe = jnp.where(both[:, None], logits, jnp.float32(0))
+22:     delta = safe[:, 0] - safe[:, 1]
+23:     rare_action = jnp.where(delta >= 0, 1, 0).astype(jnp.int32)
+24:     tail = jnp.exp(-jnp.abs(delta))
+25:     raw = tail / (jnp.float32(1) + tail)
+26:     rare = jnp.where(raw > FLOOR, raw, FLOOR)  # zero derivative at the floor
+27:     is_rare = jnp.arange(2)[None, :] == rare_action[:, None]
+28:     p = jnp.where(is_rare, rare[:, None], jnp.float32(1) - rare[:, None])
+29:     logs = jnp.where(is_rare, jnp.log(rare)[:, None], jnp.log1p(-rare)[:, None])
+30:     # Forced legal action: exact one/zero; terminal: exact all-zero transport.
+31:     return (jnp.where(both[:, None], p, mask.astype(jnp.float32)),
+32:             jnp.where(both[:, None], logs, jnp.float32(0)), rare_action, rare)
+33: 
+34: 
+35: def distribution_kernel(logits, mask):
+36:     return parts(logits, mask)[:2]
+37: 
+38: 
+39: def threshold_words(rare):
+40:     """Exact high/low words of rare*2^64 for normal FP32 rare in [2^-24,1/2].
+41: 
+42:     rare = m * 2^(e-150), m a 24-bit significand and biased exponent e.
+43:     The shift e-86 lies in [17,40], so two uint32 words suffice without x64.
+44:     """
+45:     bits = jax.lax.bitcast_convert_type(rare, jnp.uint32)
+46:     mantissa = (bits & jnp.uint32(0x7fffff)) | jnp.uint32(0x800000)
+47:     shift = ((bits >> jnp.uint32(23)) & jnp.uint32(255)).astype(jnp.int32) - 86
+48:     high = jnp.where(shift < 32,
+49:         mantissa >> jnp.maximum(32 - shift, 0).astype(jnp.uint32),
+50:         mantissa << jnp.maximum(shift - 32, 0).astype(jnp.uint32))
+51:     low = jnp.where(shift < 32, mantissa << jnp.minimum(shift, 31).astype(jnp.uint32), jnp.uint32(0))
+52:     return jnp.stack((high, low), axis=-1)
+53: 
+54: 
+55: def select_words(rare, rare_action, mask, words):
+56:     """Pure injected-word selector used identically by tests and keyed sampling."""
+57:     threshold = threshold_words(rare)
+58:     choose_rare = ((words[:, 0] < threshold[:, 0]) |
+59:                    ((words[:, 0] == threshold[:, 0]) & (words[:, 1] < threshold[:, 1])))
+60:     selected = jnp.where(choose_rare, rare_action, 1 - rare_action)
+61:     live = jnp.any(mask, axis=1)
+62:     return jnp.where(live, jnp.where(jnp.all(mask, axis=1), selected,
+63:                                    jnp.argmax(mask, axis=1)), -1).astype(jnp.int32)
+64: 
+65: 
+66: @jax.jit
+67: def predict_kernel(parameters, obs):
+68:     logits, values = forward(parameters, obs)
+69:     probabilities, logs = distribution_kernel(logits, obs.mask)
+70:     return probabilities, logs, jnp.where(jnp.any(obs.mask, axis=1), values, 0)
+71: 
+72: 
+73: @jax.jit
+74: def action_kernel(parameters, obs, keys):
+75:     logits, values = forward(parameters, obs)
+76:     _, logs, rare_action, rare = parts(logits, obs.mask)
+77:     words = jax.vmap(lambda key: jax.random.bits(jax.random.fold_in(key, DOMAIN),
+78:                                                (2,), dtype=jnp.uint32))(keys)
+79:     actions = select_words(rare, rare_action, obs.mask, words)
+80:     live = jnp.any(obs.mask, axis=1)
+81:     selected = logs[jnp.arange(len(actions)), jnp.maximum(actions, 0)]
+82:     return actions, jnp.where(live, selected, 0), jnp.where(live, values, 0)
+83: 
+84: 
+85: def act(parameters, obs, keys):
+86:     require(jax.default_backend() == 'cpu' and not jax.config.x64_enabled, 'CPU FP32 only')
+87:     n = validate_input(obs)
+88:     validate_parameters(parameters)
+89:     require(keys.shape == (n,) and str(keys.dtype) == 'key<fry>', 'One Threefry key per row')
+90:     result = action_kernel(parameters, obs, keys)
+91:     actions, mask = np.asarray(result[0]), np.asarray(obs.mask)
+92:     live = mask.any(axis=1)
+93:     require(np.all(actions[~live] == -1) and np.all(mask[np.arange(n)[live], actions[live]]), 'Illegal action')
+94:     require(all(np.all(np.isfinite(x)) for x in result), 'Nonfinite actor output')
+95:     return result
+96: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_binary/loss.py
+1: """Valid-row PPO with the binary-policy-1 law; sealed loss arithmetic retained."""
+2: import jax
+3: import jax.numpy as jnp
+4: from .policy import distribution_kernel
+5: 
+6: def masked_loss(logits, values, mask, actions, old_logp, advantages, returns, valid,
+7:                 clip=.2, value_coef=.5, entropy_coef=.01):
+8:     """Padded PPO loss -> (scalar_loss, metrics) over the rows flagged by `valid`.
+9: 
+10:     Shapes (n rows, A actions): `logits` (n, A) FP32, `values` (n,) FP32, `mask` (n, A) bool,
+11:     `actions` (n,) integer, `old_logp`/`advantages`/`returns` (n,) FP32, `valid` (n,) bool.
+12:     `clip`, `value_coef`, `entropy_coef` are Python floats (host-rounded to FP32 like the
+13:     reference's `F32(1 - clip)` / `F32(1 + clip)`); treat them as static under `jax.jit`.
+14: 
+15:     Reduction and clipping semantics on valid rows follow the sealed
+16:     `pokemon_jax_learner.core._loss`; distribution is binary-policy-1:
+17:     mean clipped actor loss with the explicit inclusive `active` branch (equality on the
+18:     unclipped side keeps the gradient), `value_coef` * half-MSE value loss, minus
+19:     `entropy_coef` * mean entropy; `old_logp`, `advantages`, `returns` are stop-gradient.
+20:     Metrics are the reference's seven keys: `loss`, `actor_loss`, `value_loss`, `entropy`,
+21:     `max_ratio_error` (max over valid rows), `clip_fraction`, `approx_kl` (valid-row means).
+22: 
+23:     Invalid rows may hold any transport payload (NaN logits/values/targets, action -1,
+24:     all-false mask). Every input is sanitized with `jnp.where(valid, ...)` to neutral finite
+25:     values (zeros; all-true mask; action 0) *before* any arithmetic, and every per-row term is
+26:     re-masked before its reduction, so invalid rows contribute neither value nor gradient:
+27:     both selections have exact-zero cotangents, giving exactly 0 gradient entries on padded
+28:     rows. With no valid rows the divisor is 1, so all seven metrics and both gradients are
+29:     exactly zero. Differentiable in `logits` and `values`; no host checks.
+30:     """
+31:     valid = jnp.asarray(valid, bool)
+32:     valid_rows = valid[:, None]
+33:     zero = jnp.float32(0)
+34:     # Sanitize *all* inputs on invalid rows before any arithmetic touches them.
+35:     logits = jnp.where(valid_rows, logits, zero)
+36:     mask = jnp.where(valid_rows, mask, True)
+37:     actions = jnp.where(valid, actions, 0).astype(jnp.int32)
+38:     values, old_logp, advantages, returns = [jnp.where(valid, a, zero) for a in (values, old_logp, advantages, returns)]
+39:     old_logp, advantages, returns = [jax.lax.stop_gradient(a) for a in (old_logp, advantages, returns)]
+40:     low, high, clip, value_coef, entropy_coef = [
+41:         jnp.asarray(c, jnp.float32) for c in (1 - clip, 1 + clip, clip, value_coef, entropy_coef)]
+42: 
+43:     count = jnp.maximum(jnp.sum(valid.astype(jnp.float32)), jnp.float32(1))
+44: 
+45:     def valid_mean(rows):
+46:         return jnp.sum(jnp.where(valid, rows, zero)) / count
+47: 
+48:     p, logp = distribution_kernel(logits, mask)
+49:     n = logits.shape[0]
+50:     log_ratio = logp[jnp.arange(n), actions] - old_logp
+51:     ratio = jnp.exp(log_ratio)
+52:     clipped = jnp.clip(ratio, low, high)
+53:     # Reference inclusive branch: equality on the unclipped side keeps the gradient.
+54:     active = jnp.where(advantages >= 0, ratio <= high, ratio >= low)
+55:     surrogate = jnp.where(active, ratio, jax.lax.stop_gradient(clipped)) * advantages
+56:     actor_loss = -valid_mean(surrogate)
+57:     entropy = valid_mean(-jnp.sum(p * logp, axis=1))
+58:     value_loss = jnp.float32(.5) * valid_mean(jnp.square(values - returns))
+59:     loss = actor_loss + value_coef * value_loss - entropy_coef * entropy
+60:     error = jnp.abs(ratio - jnp.float32(1))
+61:     metrics = {'loss': loss, 'actor_loss': actor_loss, 'value_loss': value_loss, 'entropy': entropy,
+62:                'max_ratio_error': jnp.max(jnp.where(valid, error, zero)),
+63:                'clip_fraction': valid_mean((error > clip).astype(jnp.float32)),
+64:                'approx_kl': valid_mean((ratio - jnp.float32(1)) - log_ratio)}
+65:     return loss, metrics
+66: 
+67: 
+68: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_binary/loop.py
+1: """Versioned binary-policy cycle, derived from the sealed fixed-loop implementation.
+2: 
+3: Only PlayerView-derived ActorInput enters the frozen actor. The engine and targets
+4: remain outside that API. Time/game/seat padding is explicit; no host compaction,
+5: host linkage, Python minibatch loop or variable-shape numerical call is required.
+6: """
+7: from typing import NamedTuple
+8: import json
+9: from pathlib import Path
+10: import jax
+11: import jax.numpy as jnp
+12: import numpy as np
+13: from pokemon_jax.engine import initial, step_kernel, view_kernel, PlayerView
+14: from pokemon_jax.chance import event_key, sample_kernel
+15: from pokemon_jax_learner.model import ActorInput, forward, initialize
+16: from pokemon_learner.core import require
+17: from pokemon_fixed.math import adam_step
+18: from .loss import masked_loss
+19: from .policy import action_kernel
+20: 
+21: ROOT = Path(__file__).resolve().parents[2]
+22: PLAN_PATH = ROOT / 'contracts/binary-policy-v1/plan.json'
+23: 
+24: 
+25: class Learner(NamedTuple):
+26:     parameters: dict
+27:     m: dict
+28:     v: dict
+29:     step: jax.Array
+30:     version: jax.Array
+31:     next_game: jax.Array
+32: 
+33: 
+34: class ActorTape(NamedTuple):
+35:     features: jax.Array
+36:     mask: jax.Array
+37:     actions: jax.Array
+38:     old_logp: jax.Array
+39:     old_values: jax.Array
+40:     game_id: jax.Array
+41:     side: jax.Array
+42:     turn: jax.Array
+43: 
+44: 
+45: class Targets(NamedTuple):
+46:     rewards: jax.Array
+47:     terminal: jax.Array
+48:     next_index: jax.Array
+49:     advantages: jax.Array
+50:     returns: jax.Array
+51: 
+52: 
+53: class Buffer(NamedTuple):
+54:     actor: ActorTape
+55:     targets: Targets
+56:     valid: jax.Array
+57: 
+58: 
+59: def plan():
+60:     p = json.loads(PLAN_PATH.read_text())
+61:     require(jax.default_backend() == 'cpu' and not jax.config.x64_enabled, 'CPU FP32 only')
+62:     require((p['games_per_batch'], p['turns'], p['seats'], p['capacity'], p['features'], p['actions'],
+63:              p['epochs'], p['minibatch']) == (64, 4, 2, 512, 59, 2, 2, 128), 'Fixed plan shape')
+64:     require(p['maximum_updates'] * p['capacity'] > 0 and p['maximum_updates'] * 8 < 2**31
+65:             and p['maximum_updates'] * 64 < 2**32, 'Counter bounds')
+66:     return p
+67: 
+68: 
+69: def start(seed):
+70:     parameters = initialize(seed)
+71:     return Learner(parameters, jax.tree.map(jnp.zeros_like, parameters),
+72:                    jax.tree.map(jnp.zeros_like, parameters), jnp.int32(0), jnp.int32(0), jnp.uint32(0))
+73: 
+74: 
+75: def finite_tree(tree):
+76:     return jnp.all(jnp.stack([jnp.all(jnp.isfinite(x)) for x in jax.tree.leaves(tree)]))
+77: 
+78: 
+79: def encode(view):
+80:     """Pure fixed-shape equivalent of the sealed checked PlayerView encoder."""
+81:     n = view.header.shape[0]
+82:     return ActorInput(jnp.concatenate((view.header, view.history.reshape(n, 48)), axis=1)
+83:                       .astype(jnp.float32) / jnp.float32(105), view.header[:, 9:].astype(jnp.bool_))
+84: 
+85: 
+86: def gae(rewards, values, terminal, valid, gamma, lam):
+87:     """Reverse scan along time, never across games or players; whole episodes only."""
+88:     shape = (4, 128)
+89:     def one(carry, row):
+90:         next_value, next_adv = carry
+91:         r, v, ended, live = row
+92:         vnext = jnp.where(ended, 0, next_value)
+93:         anext = jnp.where(ended, 0, next_adv)
+94:         advantage = jnp.where(live, r + jnp.float32(gamma) * vnext - v
+95:                               + jnp.float32(gamma * lam) * anext, 0)
+96:         return (jnp.where(live, v, 0), advantage), advantage
+97:     _, advantages = jax.lax.scan(one, (jnp.zeros(128), jnp.zeros(128)),
+98:         tuple(x.reshape(shape) for x in (rewards, values, terminal, valid)), reverse=True)
+99:     advantages = advantages.reshape(-1)
+100:     return advantages, jnp.where(valid, advantages + values, 0)
+101: 
+102: 
+103: def collect(parameters, next_game, seed, p):
+104:     ids = next_game + jnp.arange(64, dtype=jnp.uint32)
+105:     master = jax.random.key(seed, impl='threefry2x32')
+106:     env_key = jax.random.fold_in(master, 0x454e56)
+107:     actor_key = jax.random.fold_in(master, 0x414354)
+108:     # initial() performs profile admission once at trace time, not per environment step.
+109:     state = initial(64)
+110:     def turn(state, _):
+111:         valid = jnp.repeat(state.winner == -1, 2)
+112:         views = [view_kernel(state, side) for side in (0, 1)]
+113:         view = PlayerView(*[jnp.stack((views[0][k], views[1][k]), axis=1)
+114:                             .reshape((-1, *views[0][k].shape[1:])) for k in (0, 1)])
+115:         obs = encode(view)
+116:         keys = jax.vmap(lambda game, t: jnp.stack([event_key(actor_key, game, t, side)
+117:                     for side in (0, 1)]))(ids, state.turn.astype(jnp.uint32)).reshape(-1)
+118:         actions, old_logp, values = action_kernel(parameters, obs, keys)
+119:         chance = sample_kernel(env_key, ids, state.turn.astype(jnp.uint32))
+120:         after, _ = step_kernel(state, jnp.where(valid, actions, 0).reshape(64, 2), chance)
+121:         ended = (state.winner == -1) & (after.winner != -1)
+122:         rewards = (ended[:, None] & (after.winner[:, None] == jnp.arange(2))).astype(jnp.float32).reshape(-1)
+123:         actor = ActorTape(jnp.where(valid[:, None], obs.features, 0), obs.mask, actions, old_logp, values,
+124:                           jnp.repeat(ids, 2), jnp.tile(jnp.arange(2, dtype=jnp.int32), 64),
+125:                           jnp.where(valid, jnp.repeat(state.turn, 2), 0))
+126:         return after, (actor, rewards, jnp.repeat(ended, 2), valid)
+127:     state, (actor, rewards, terminal, valid) = jax.lax.scan(turn, state, xs=None, length=4)
+128:     actor = ActorTape(*[x.reshape((-1, *x.shape[2:])) for x in actor])
+129:     rewards, terminal, valid = [x.reshape(-1) for x in (rewards, terminal, valid)]
+130:     advantages, returns = gae(rewards, actor.old_values, terminal, valid, p['gamma'], p['gae_lambda'])
+131:     nxt = jnp.where(valid & ~terminal, jnp.arange(512, dtype=jnp.int32) + 128, -1)
+132:     return Buffer(actor, Targets(rewards, terminal, nxt, advantages, returns), valid), state
+133: 
+134: 
+135: def permutation(seed, version, epoch, valid):
+136:     """Full-capacity permutation then stable valid-first partition, all shapes fixed."""
+137:     key = jax.random.fold_in(jax.random.key(seed, impl='threefry2x32'), 0x534846)
+138:     key = jax.random.fold_in(jax.random.fold_in(key, version), epoch)
+139:     order = jax.random.permutation(key, 512)
+140:     return order[jnp.argsort(~valid[order], stable=True)]
+141: 
+142: 
+143: def objective(parameters, actor, targets, valid, p):
+144:     # Sanitization also precedes the model: NaN padding cannot poison weight gradients.
+145:     obs = ActorInput(jnp.where(valid[:, None], actor.features, 0), actor.mask)
+146:     logits, values = forward(parameters, obs)
+147:     return masked_loss(logits, values, actor.mask, actor.actions, actor.old_logp,
+148:                        targets.advantages, targets.returns, valid,
+149:                        p['ppo_clip'], p['value_coefficient'], p['entropy_coefficient'])
+150: 
+151: 
+152: def update(learner, buffer, seed, p):
+153:     def epoch(carry, epoch_id):
+154:         order = permutation(seed, learner.version, epoch_id, buffer.valid).reshape(4, 128)
+155:         def minibatch(carry, indices):
+156:             parameters, m, v, step = carry
+157:             sub = jax.tree.map(lambda x: x[indices], buffer)
+158:             (_, metrics), gradients = jax.value_and_grad(lambda pars: objective(
+159:                 pars, sub.actor, sub.targets, sub.valid, p), has_aux=True)(parameters)
+160:             count = jnp.sum(sub.valid)
+161:             def apply(_): return adam_step(parameters, gradients, m, v, step,
+162:                                            p['learning_rate'], p['max_gradient_norm'])
+163:             newp, newm, newv, newstep, norm = jax.lax.cond(count > 0, apply,
+164:                 lambda _: (parameters, m, v, step, jnp.float32(0)), operand=None)
+165:             metrics = dict(metrics, valid_count=count, gradient_norm=norm,
+166:                            finite=finite_tree((metrics, gradients, newp, newm, newv)),
+167:                            optimizer_applied=count > 0)
+168:             return (newp, newm, newv, newstep), metrics
+169:         return jax.lax.scan(minibatch, carry, order)
+170:     (parameters, m, v, step), metrics = jax.lax.scan(epoch,
+171:         (learner.parameters, learner.m, learner.v, learner.step), jnp.arange(2, dtype=jnp.int32))
+172:     return Learner(parameters, m, v, step, learner.version + 1, learner.next_game + jnp.uint32(64)), metrics
+173: 
+174: 
+175: def cycle(learner, seed, p):
+176:     buffer, terminal_state = collect(learner.parameters, learner.next_game, seed, p)
+177:     learner, metrics = update(learner, buffer, seed, p)
+178:     a, t, valid = buffer
+179:     legal = jnp.all(jnp.where(valid, (a.actions >= 0) & (a.actions < 2)
+180:                     & jnp.take_along_axis(a.mask, jnp.clip(a.actions, 0, 1)[:, None], axis=1)[:, 0], a.actions == -1))
+181:     # Both player decisions are retained on a KO turn even when the second move cancels.
+182:     report = {'metrics': metrics, 'decisions': jnp.sum(valid),
+183:               'games': jnp.int32(64), 'executed_moves': jnp.sum(terminal_state.count),
+184:               'terminal_games': jnp.sum(terminal_state.winner >= 0),
+185:               'terminal_scores': jnp.sum(t.rewards), 'legal': legal,
+186:               'actor_has_no_outcome': jnp.all(jnp.where(valid[:, None], a.features[:, 1:3] == 0, True)),
+187:               'finite': finite_tree((learner, buffer, metrics)),
+188:               'minimum_behavior_probability': jnp.min(jnp.where(valid, jnp.exp(a.old_logp), 1)),
+189:               'max_link': jnp.max(t.next_index)}
+190:     return learner, report
+191: 
+192: 
+193: class Executables:
+194:     """Ahead-of-time compiled functions: wrong shapes/dtypes fail, never retrace.
+195: 
+196:     Trace counters are independent of JAX's private cache API. They count Python
+197:     tracing of these entry points. The compiled callables cannot compile a new shape.
+198:     """
+199:     def __init__(self, p=None):
+200:         self.plan = plan() if p is None else p
+201:         self.traces = {'collect': 0, 'update': 0, 'cycle': 0}
+202:         self.compiled = {}
+203:         sample = start(0)
+204:         specs = jax.tree.map(lambda a: jax.ShapeDtypeStruct(a.shape, a.dtype), sample)
+205:         seed = jax.ShapeDtypeStruct((), jnp.uint32)
+206:         def trace(name, fn):
+207:             def wrapped(*args):
+208:                 self.traces[name] += 1
+209:                 return fn(*args, self.plan)
+210:             return jax.jit(wrapped)
+211:         self.functions = {name: trace(name, fn) for name, fn in
+212:                           [('collect', collect), ('update', update), ('cycle', cycle)]}
+213:         self.lowered = {}
+214:         self.lowered['cycle'] = self.functions['cycle'].lower(specs, seed)
+215:         self.compiled['cycle'] = self.lowered['cycle'].compile()
+216: 
+217:     def diagnostics(self):
+218:         """Compile separate phase executables for profiling and differential tests."""
+219:         sample = start(0)
+220:         seed = jnp.uint32(0)
+221:         for name, args in [('collect', (sample.parameters, sample.next_game, seed))]:
+222:             self.lowered[name] = self.functions[name].lower(*args)
+223:             self.compiled[name] = self.lowered[name].compile()
+224:         buffer, _ = self.compiled['collect'](sample.parameters, sample.next_game, seed)
+225:         self.lowered['update'] = self.functions['update'].lower(sample, buffer, seed)
+226:         self.compiled['update'] = self.lowered['update'].compile()
+227: 
+228:     def __call__(self, learner, seed):
+229:         return self.compiled['cycle'](learner, jnp.asarray(seed, dtype=jnp.uint32))
+230: 
+231: 
+232: def check_report(report):
+233:     """Host boundary: do not publish a new learner/checkpoint after a failed cycle."""
+234:     r = jax.device_get(report)
+235:     require(bool(r['finite']) and bool(np.all(r['metrics']['finite'])), 'Nonfinite cycle')
+236:     require(bool(r['legal']) and bool(r['actor_has_no_outcome']), 'Actor information/legality')
+237:     require(int(r['terminal_games']) == 64 and float(r['terminal_scores']) == 64, 'Incomplete whole episodes')
+238:     # A maximum hit is 58 HP, below 105: every admitted game needs at least two turns.
+239:     require(256 <= int(r['decisions']) <= 512 and int(r['max_link']) < 512, 'Capacity/linkage')
+240:     require(np.all(np.isfinite([np.asarray(x).astype(float).sum() for x in jax.tree.leaves(r)])), 'Nonfinite diagnostics')
+241:     return r
+242: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_binary/checkpoint.py
+1: """Bounded checkpoint state: no per-update ledger growing during the CPU soak.
+2: 
+3: Only completed whole-episode updates can be published. A failed collection/update
+4: must load the last durable boundary; no live-game or partial optimizer continuation.
+5: """
+6: import json
+7: import os
+8: from pathlib import Path
+9: import jax
+10: import jax.numpy as jnp
+11: import numpy as np
+12: from pokemon_fixed.checkpoint import provenance as prior_provenance
+13: from pokemon_jax_learner.model import validate_parameters
+14: from pokemon_learner.checkpoint import wire, digest, file_hash, array_wire, read_array
+15: from pokemon_learner.core import require
+16: from .loop import ROOT, Learner, start, plan, check_report
+17: 
+18: 
+19: def provenance():
+20:     result = prior_provenance()
+21:     for path in sorted((ROOT / 'python/pokemon_binary').glob('*.py')) + sorted((ROOT / 'contracts/binary-policy-v1').glob('*')):
+22:         result['sources'][str(path.relative_to(ROOT))] = file_hash(path)
+23:     return result
+24: 
+25: 
+26: class Runner:
+27:     def __init__(self, seed, executable):
+28:         require(type(seed) is int and 0 <= seed < 2**32, 'Seed range')
+29:         self.seed, self.executable, self.plan = seed, executable, executable.plan
+30:         self.learner = start(seed)
+31:         self.decisions = self.executed_moves = 0
+32:         self.phase = 'idle'
+33: 
+34:     def run(self, *, fault=None):
+35:         require(self.phase == 'idle', 'Uncommitted work: restore a boundary checkpoint')
+36:         require(fault in (None, 'after_collect', 'after_update'), 'Unknown fault')
+37:         require(int(self.learner.version) < self.plan['maximum_updates'], 'Counter budget exhausted')
+38:         self.phase = 'collect-update'
+39:         if fault == 'after_collect':
+40:             buffer, state = self.executable.compiled['collect'](self.learner.parameters, self.learner.next_game, jnp.uint32(self.seed))
+41:             jax.block_until_ready((buffer, state))
+42:             raise RuntimeError('Injected failure after collection before update/commit')
+43:         candidate, report = self.executable(self.learner, self.seed)
+44:         r = check_report(report)  # includes device synchronization
+45:         if fault == 'after_update': raise RuntimeError('Injected failure after update before commit')
+46:         self.learner = candidate
+47:         self.decisions += int(r['decisions'])
+48:         self.executed_moves += int(r['executed_moves'])
+49:         self.phase = 'idle'
+50:         return r
+51: 
+52: 
+53: def state(runner):
+54:     require(runner.phase == 'idle', 'Only completed-update checkpoints supported')
+55:     l = runner.learner
+56:     return {'format': 'binary-policy-checkpoint-1', 'mode': 'completed-update-whole-episodes',
+57:             'provenance': provenance(), 'plan': runner.plan, 'seed': runner.seed,
+58:             'parameters': {k: array_wire(np.asarray(v)) for k, v in l.parameters.items()},
+59:             'm': {k: array_wire(np.asarray(v)) for k, v in l.m.items()},
+60:             'v': {k: array_wire(np.asarray(v)) for k, v in l.v.items()},
+61:             'step': int(l.step), 'version': int(l.version), 'next_game': int(l.next_game),
+62:             'decisions': runner.decisions, 'executed_moves': runner.executed_moves,
+63:             'environment': {'active_games': 0, 'partial_buffer': None},
+64:             'random_streams': 'Threefry(seed); ENV/game/turn/role; ACT/game/turn/seat/DYB1; SHF/version/epoch; no mutable cursor'}
+65: 
+66: 
+67: def save(path, runner, *, interrupt_before_replace=False):
+68:     path = Path(path)
+69:     path.parent.mkdir(parents=True, exist_ok=True)
+70:     body = state(runner)
+71:     doc = {'body': body, 'sha256': digest(body)}
+72:     temporary = path.with_name(path.name + '.partial')
+73:     with temporary.open('xb') as stream:
+74:         stream.write(wire(doc) + b'\n')
+75:         stream.flush()
+76:         os.fsync(stream.fileno())
+77:     if interrupt_before_replace: raise RuntimeError('Injected interrupted checkpoint publication')
+78:     os.replace(temporary, path)
+79:     fd = os.open(path.parent, os.O_RDONLY)
+80:     try: os.fsync(fd)
+81:     finally: os.close(fd)
+82:     return doc['sha256']
+83: 
+84: 
+85: def load(path, executable):
+86:     def unique(pairs):
+87:         result = {}
+88:         for k, v in pairs:
+89:             require(k not in result, 'Duplicate checkpoint key')
+90:             result[k] = v
+91:         return result
+92:     doc = json.loads(Path(path).read_bytes(), object_pairs_hook=unique)
+93:     require(set(doc) == {'body', 'sha256'} and doc['sha256'] == digest(doc['body']), 'Checkpoint checksum')
+94:     b = doc['body']
+95:     require(b['format'] == 'binary-policy-checkpoint-1' and b['mode'] == 'completed-update-whole-episodes', 'Checkpoint mode')
+96:     require(b['plan'] == executable.plan == plan() and b['provenance'] == provenance(), 'Source/runtime/plan drift')
+97:     runner = Runner(b['seed'], executable)
+98:     arrays = {}
+99:     for name in ('parameters', 'm', 'v'):
+100:         require(set(b[name]) == set(runner.learner.parameters), 'Array keys')
+101:         arrays[name] = {k: jnp.asarray(read_array(b[name][k], a.shape)) for k, a in runner.learner.parameters.items()}
+102:         validate_parameters(arrays[name])
+103:     require(all(np.all(np.asarray(a) >= 0) for a in arrays['v'].values()), 'Negative second moment')
+104:     for key in ('step', 'version', 'next_game', 'decisions', 'executed_moves'):
+105:         require(type(b[key]) is int and b[key] >= 0, 'Counter type')
+106:     updates = b['version']
+107:     require(updates <= executable.plan['maximum_updates'] and b['next_game'] == 64 * updates, 'Game/version counter')
+108:     # Each game lasts 2..4 turns: 256..512 decisions, 2..4 nonempty minibatches/epoch.
+109:     require(4 * updates <= b['step'] <= 8 * updates and b['step'] % 2 == 0, 'Optimizer counter')
+110:     require(256 * updates <= b['decisions'] <= 512 * updates and b['decisions'] % 2 == 0, 'Decision counter')
+111:     require(b['decisions'] - 64 * updates <= b['executed_moves'] <= b['decisions'], 'Executed move counter')
+112:     runner.learner = Learner(arrays['parameters'], arrays['m'], arrays['v'], jnp.int32(b['step']),
+113:                              jnp.int32(updates), jnp.uint32(b['next_game']))
+114:     runner.decisions, runner.executed_moves = b['decisions'], b['executed_moves']
+115:     require(state(runner) == b, 'Noncanonical checkpoint or unsupported live environment')
+116:     return runner
+117: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_binary/reference.py
+1: """Independent scalar oracle for the binary-policy-v1 contract.
+2: 
+3: This module deliberately uses Python integer arithmetic for sampling thresholds.
+4: It is a readable reference, not a vectorized implementation.
+5: """
+6: 
+7: from __future__ import annotations
+8: 
+9: from fractions import Fraction
+10: from typing import NamedTuple
+11: 
+12: import numpy as np
+13: 
+14: 
+15: MINIMUM_LEGAL_MASS = np.float32(2.0**-24)
+16: _UINT32_MAX = (1 << 32) - 1
+17: 
+18: 
+19: class ScalarPolicy(NamedTuple):
+20:     probabilities: np.ndarray
+21:     logp: np.ndarray
+22:     rare_index: int
+23:     rare_mass: np.float32
+24: 
+25: 
+26: def _checked_probability(probability: object) -> np.float32:
+27:     if not isinstance(probability, np.float32):
+28:         raise TypeError("probability must be an actual numpy.float32 scalar")
+29:     if not np.isfinite(probability):
+30:         raise ValueError("probability must be finite")
+31:     if probability < MINIMUM_LEGAL_MASS or probability > np.float32(0.5):
+32:         raise ValueError("probability must be in [2^-24, 0.5]")
+33:     return probability
+34: 
+35: 
+36: def dyadic_threshold(probability: object) -> tuple[int, int]:
+37:     """Return high/low uint32 words of the exact integer ``p * 2**64``."""
+38: 
+39:     probability = _checked_probability(probability)
+40:     numerator, denominator = probability.item().as_integer_ratio()
+41:     scaled = Fraction(numerator, denominator) * (1 << 64)
+42:     if scaled.denominator != 1:  # Defensive: impossible for an in-range float32.
+43:         raise ValueError("probability does not have an integral 64-bit threshold")
+44:     threshold = scaled.numerator
+45:     return threshold >> 32, threshold & _UINT32_MAX
+46: 
+47: 
+48: def _checked_word(word: object, name: str) -> int:
+49:     # bool is intentionally excluded even though it subclasses int.
+50:     if type(word) is not int:
+51:         raise TypeError(f"{name} must be a Python int")
+52:     if not 0 <= word <= _UINT32_MAX:
+53:         raise ValueError(f"{name} must be in uint32 range")
+54:     return word
+55: 
+56: 
+57: def word_selects_rare(high: object, low: object, probability: object) -> bool:
+58:     """Whether the concatenated high/low word lies below the exact threshold."""
+59: 
+60:     high = _checked_word(high, "high")
+61:     low = _checked_word(low, "low")
+62:     threshold_high, threshold_low = dyadic_threshold(probability)
+63:     word = (high << 32) | low
+64:     threshold = (threshold_high << 32) | threshold_low
+65:     return word < threshold
+66: 
+67: 
+68: def _checked_policy_inputs(
+69:     logits: object, mask: object
+70: ) -> tuple[np.ndarray, np.ndarray]:
+71:     if not isinstance(logits, np.ndarray) or logits.dtype != np.float32:
+72:         raise TypeError("logits must be a numpy.ndarray with dtype float32")
+73:     if logits.shape != (2,):
+74:         raise ValueError("logits must have shape (2,)")
+75:     if not np.all(np.isfinite(logits)):
+76:         raise ValueError("logits must be finite")
+77:     if not isinstance(mask, np.ndarray) or mask.dtype != np.bool_:
+78:         raise TypeError("mask must be a numpy.ndarray with dtype bool")
+79:     if mask.shape != (2,):
+80:         raise ValueError("mask must have shape (2,)")
+81:     return logits, mask
+82: 
+83: 
+84: def _rare_mass(logits: np.ndarray) -> tuple[int, np.float32, np.float32]:
+85:     d = np.float32(logits[0] - logits[1])
+86:     rare_index = 1 if d >= np.float32(0.0) else 0
+87:     exponent = np.float32(-np.abs(d))
+88:     exp_value = np.exp(exponent, dtype=np.float32)
+89:     raw = np.float32(exp_value / np.float32(1.0 + exp_value))
+90:     return rare_index, np.maximum(raw, MINIMUM_LEGAL_MASS), raw
+91: 
+92: 
+93: def scalar_policy(logits: object, mask: object) -> ScalarPolicy:
+94:     """Evaluate the contract's clipped two-action policy for one state."""
+95: 
+96:     logits, mask = _checked_policy_inputs(logits, mask)
+97:     legal = int(mask[0]) + int(mask[1])
+98:     probabilities = np.zeros(2, dtype=np.float32)
+99:     logp = np.zeros(2, dtype=np.float32)
+100:     if legal == 0:
+101:         return ScalarPolicy(probabilities, logp, -1, np.float32(0.0))
+102:     if legal == 1:
+103:         only = 0 if mask[0] else 1
+104:         probabilities[only] = np.float32(1.0)
+105:         return ScalarPolicy(probabilities, logp, only, np.float32(0.0))
+106: 
+107:     rare_index, rare_mass, _ = _rare_mass(logits)
+108:     common_index = 1 - rare_index
+109:     probabilities[rare_index] = rare_mass
+110:     probabilities[common_index] = np.float32(np.float32(1.0) - rare_mass)
+111:     logp[rare_index] = np.log(rare_mass, dtype=np.float32)
+112:     logp[common_index] = np.log1p(np.float32(-rare_mass), dtype=np.float32)
+113:     return ScalarPolicy(probabilities, logp, rare_index, rare_mass)
+114: 
+115: 
+116: def selected_logp_derivative(
+117:     logits: object, mask: object, selected_action: object
+118: ) -> np.ndarray:
+119:     """Analytic derivative of the selected action's log probability."""
+120: 
+121:     logits, mask = _checked_policy_inputs(logits, mask)
+122:     if type(selected_action) is not int:
+123:         raise TypeError("selected_action must be a Python int")
+124:     if selected_action not in (0, 1):
+125:         raise ValueError("selected_action must be 0 or 1")
+126:     if not mask[selected_action]:
+127:         raise ValueError("selected_action must be legal")
+128:     if int(mask[0]) + int(mask[1]) < 2:
+129:         return np.zeros(2, dtype=np.float32)
+130: 
+131:     d = np.float32(logits[0] - logits[1])
+132:     rare_index, rare_mass, raw = _rare_mass(logits)
+133:     # The clipping primitive is constant at equality with the floor as specified.
+134:     if raw <= MINIMUM_LEGAL_MASS:
+135:         return np.zeros(2, dtype=np.float32)
+136:     sign = np.float32(-1.0 if d >= np.float32(0.0) else 1.0)
+137:     dr_dd = np.float32(sign * rare_mass * np.float32(1.0 - rare_mass))
+138:     if selected_action == rare_index:
+139:         derivative_d = np.float32(dr_dd / rare_mass)
+140:     else:
+141:         derivative_d = np.float32(-dr_dd / np.float32(1.0 - rare_mass))
+142:     return np.array([derivative_d, -derivative_d], dtype=np.float32)
+143: 
+144: 
+145: # A descriptive alias useful to callers that phrase the operation in sampler terms.
+146: probability_to_threshold_words = dyadic_threshold
+147: 
+148: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/binary-policy/test_policy.py
+1: import unittest
+2: import jax
+3: import jax.numpy as jnp
+4: import numpy as np
+5: from pokemon_binary.policy import (parts, distribution_kernel, threshold_words,
+6:     select_words, action_kernel, act, FLOOR, DOMAIN)
+7: from pokemon_binary.loss import masked_loss
+8: from pokemon_jax_learner.model import ActorInput, initialize
+9: 
+10: 
+11: class PolicyTests(unittest.TestCase):
+12:     def test_integer_threshold_boundaries(self):
+13:         rng = np.random.default_rng(410)
+14:         # Every admitted exponent, significand edges and deterministic random significands.
+15:         bits = np.concatenate([((e << 23) | np.r_[0,1,2,0x3fffff,0x7ffffe,0x7fffff,
+16:             rng.integers(0,2**23,400,dtype=np.uint32)]).astype(np.uint32) for e in range(103,126)])
+17:         rare = np.r_[bits.view(np.float32), np.float32(.5)].astype(np.float32)
+18:         thresholds = np.asarray(jax.jit(threshold_words)(rare))
+19:         words, expected, masses = [], [], []
+20:         for r, (hi, lo) in zip(rare, thresholds):
+21:             numerator, denominator = float(r).as_integer_ratio()
+22:             integer, remainder = divmod(numerator * 2**64, denominator)
+23:             self.assertEqual(remainder, 0)
+24:             self.assertEqual((int(hi)<<32) | int(lo), integer)
+25:             for w in (0, integer-1, integer, integer+1, 2**64-1):
+26:                 words.append([w>>32,w&0xffffffff]); expected.append(w < integer); masses.append(r)
+27:         n = len(words)
+28:         actual = select_words(jnp.array(masses), jnp.ones(n,jnp.int32),
+29:                               jnp.ones((n,2),bool), jnp.array(words,jnp.uint32))
+30:         np.testing.assert_array_equal(actual, np.asarray(expected,np.int32))
+31: 
+32:     def test_mirrored_tails_and_masks(self):
+33:         logits = np.array([[-27.038734,0],[0,-27.038734],[0,0],[1e30,-1e30],
+34:                            [100,-100],[-100,100],[0,0]], np.float32)
+35:         mask = np.array([[1,1],[1,1],[1,1],[1,1],[0,1],[1,0],[0,0]],bool)
+36:         probs, logs, rare_action, rare = map(np.asarray, parts(logits, mask))
+37:         self.assertEqual(rare[0],FLOOR);self.assertEqual(rare[1],FLOOR)
+38:         np.testing.assert_array_equal(probs[0],probs[1][::-1])
+39:         np.testing.assert_array_equal(logs[0],logs[1][::-1])
+40:         self.assertLess(logs[0,1], 0)
+41:         self.assertAlmostEqual(float(logs[0,1]),float(np.log1p(-FLOOR)),places=13)
+42:         np.testing.assert_array_equal(probs[4:],[[0,1],[1,0],[0,0]])
+43:         np.testing.assert_array_equal(logs[4:],0)
+44:         words = jnp.array([[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]],jnp.uint32)
+45:         np.testing.assert_array_equal(select_words(rare,rare_action,mask,words),[0,1,1,1,1,0,-1])
+46:         words = jnp.full((7,2),jnp.uint32(0xffffffff))
+47:         np.testing.assert_array_equal(select_words(rare,rare_action,mask,words),[1,0,0,0,1,0,-1])
+48: 
+49:     def test_selected_log_gradient_and_floor(self):
+50:         for d in (-8.,-1.,0.,1.,8.,-27.,27.):
+51:             x = jnp.array([[d,0]],jnp.float32)
+52:             for a in (0,1):
+53:                 g = np.asarray(jax.grad(lambda l:distribution_kernel(l,jnp.ones((1,2),bool))[1][0,a])(x))[0]
+54:                 r = float(parts(x,jnp.ones((1,2),bool))[3][0])
+55:                 p0 = r if d < 0 else 1-r
+56:                 expected = np.array([1-p0,-(1-p0)]) if a == 0 else np.array([-p0,p0])
+57:                 if abs(d)>20: expected[:]=0
+58:                 np.testing.assert_allclose(g,expected,atol=1e-7,rtol=3e-6)
+59:         for mask in ([[1,0]],[[0,1]],[[0,0]]):
+60:             g = jax.grad(lambda l:jnp.sum(distribution_kernel(l,jnp.array(mask,bool))[1]))(jnp.zeros((1,2)))
+61:             np.testing.assert_array_equal(g,0)
+62: 
+63:     def test_keyed_actor_is_word_selector_and_reorders(self):
+64:         n=64;p=initialize(9)
+65:         obs=ActorInput(jnp.arange(n*59,dtype=jnp.float32).reshape(n,59)/500,
+66:                        jnp.ones((n,2),bool))
+67:         keys=jax.random.split(jax.random.key(42),n)
+68:         result=act(p,obs,keys)
+69:         logits=obs.features@p['policy_w']+p['policy_b']
+70:         _,logs,ra,r=parts(logits,obs.mask)
+71:         words=jax.vmap(lambda key:jax.random.bits(jax.random.fold_in(key,DOMAIN),(2,),dtype=jnp.uint32))(keys)
+72:         expected=select_words(r,ra,obs.mask,words)
+73:         np.testing.assert_array_equal(result[0],expected)
+74:         np.testing.assert_array_equal(result[1],logs[jnp.arange(n),expected])
+75:         order=np.random.default_rng(9).permutation(n)
+76:         perm=action_kernel(p,ActorInput(obs.features[order],obs.mask[order]),keys[order])
+77:         for a,b in zip(result,perm):np.testing.assert_array_equal(np.asarray(a)[order],b)
+78:         chunks=[action_kernel(p,ActorInput(obs.features[s],obs.mask[s]),keys[s]) for s in (slice(0,17),slice(17,None))]
+79:         for i in range(3):np.testing.assert_array_equal(result[i],np.concatenate([c[i] for c in chunks]))
+80:         with self.assertRaises(ValueError):act(p,{'features':obs.features},keys)
+81:         with self.assertRaises(ValueError):act(p,obs,keys[:3])
+82: 
+83:     def test_loss_ratio_padding_and_forced_rows(self):
+84:         logits=jnp.array([[0.,0.],[27.,0.],[3.,-2.],[jnp.nan,jnp.nan]])
+85:         mask=jnp.array([[1,1],[1,1],[0,1],[0,0]],bool)
+86:         valid=jnp.array([1,1,1,0],bool);a=jnp.array([1,1,1,-1])
+87:         old=distribution_kernel(logits[:3],mask[:3])[1][jnp.arange(3),a[:3]]
+88:         old=jnp.r_[old,jnp.nan]
+89:         args=(jnp.array([0.,1.,2.,jnp.nan]),mask,a,old,jnp.array([1.,-1.,1.,jnp.nan]),
+90:               jnp.array([1.,0.,3.,jnp.nan]),valid)
+91:         (loss,metrics),g=jax.value_and_grad(masked_loss,has_aux=True)(logits,*args)
+92:         self.assertTrue(np.isfinite(loss));self.assertEqual(float(metrics['max_ratio_error']),0.)
+93:         np.testing.assert_array_equal(g[2:],0)
+94:         empty_args=(*args[:-1],jnp.zeros(4,bool))
+95:         (loss,m),g=jax.value_and_grad(masked_loss,has_aux=True)(logits,*empty_args)
+96:         self.assertEqual(float(loss),0.);np.testing.assert_array_equal(g,0)
+97:         self.assertTrue(all(float(v)==0 for v in m.values()))
+98:         # Finite differences exercise clipped PPO and entropy together away from kinks.
+99:         x=np.array([[.7,-.1],[-.4,.9]],np.float32)
+100:         ma=jnp.ones((2,2),bool);ac=jnp.array([0,1]);v=jnp.zeros(2)
+101:         old=distribution_kernel(jnp.zeros((2,2)),ma)[1][jnp.arange(2),ac]
+102:         args=(v,ma,ac,old,jnp.array([1.,-1.]),v,jnp.ones(2,bool))
+103:         gradient=np.asarray(jax.grad(masked_loss,has_aux=True)(jnp.array(x),*args)[0])
+104:         fd=np.zeros_like(x)
+105:         for i,j in np.ndindex(x.shape):
+106:             plus=x.copy();minus=x.copy();plus[i,j]+=.001;minus[i,j]-=.001
+107:             fd[i,j]=(float(masked_loss(plus,*args)[0])-float(masked_loss(minus,*args)[0]))/.002
+108:         np.testing.assert_allclose(gradient,fd,atol=4e-5,rtol=3e-3)
+109: 
+110: if __name__=='__main__':unittest.main()
+111: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/binary-policy/test_reference.py
+1: """Independent arithmetic/analytic oracle checks; no third-party test framework."""
+2: import unittest
+3: import jax
+4: import jax.numpy as jnp
+5: import numpy as np
+6: from pokemon_binary.reference import (dyadic_threshold, word_selects_rare,
+7:     scalar_policy, selected_logp_derivative, MINIMUM_LEGAL_MASS)
+8: from pokemon_binary.policy import parts, distribution_kernel, threshold_words
+9: 
+10: 
+11: class ReferenceTests(unittest.TestCase):
+12:     def test_hand_computable_words_and_validation(self):
+13:         cases=[(np.float32(.5),1<<63),(np.float32(.25),1<<62),
+14:                (MINIMUM_LEGAL_MASS,1<<40),
+15:                (np.nextafter(np.float32(.5),np.float32(0)),(1<<63)-(1<<39)),
+16:                (np.nextafter(MINIMUM_LEGAL_MASS,np.float32(1)),(1<<40)+(1<<17))]
+17:         for p,t in cases:
+18:             h,l=dyadic_threshold(p);self.assertEqual((h<<32)|l,t)
+19:             for w in (t-1,t,t+1):self.assertEqual(word_selects_rare(w>>32,w&0xffffffff,p),w<t)
+20:         for p in (.25,np.float64(.25),np.float32(np.nan),np.float32(0),np.float32(.6)):
+21:             with self.assertRaises((TypeError,ValueError)):dyadic_threshold(p)
+22:         for word in (True,np.uint32(1),-1,2**32):
+23:             with self.assertRaises((TypeError,ValueError)):word_selects_rare(word,0,np.float32(.25))
+24: 
+25:     def test_numpy_policy_and_analytic_derivative_against_jax(self):
+26:         # Include both signs, the nondifferentiable floor's declared branch, and tie.
+27:         x=np.array([[d,0.] for d in [-100,-27,-17,-16.6,-16,-10,-1,0,1,10,16,16.6,17,27,100]],np.float32)
+28:         mask=np.ones_like(x,bool)
+29:         p,lp,ra,r=map(np.asarray,parts(x,mask))
+30:         for i,row in enumerate(x):
+31:             ref=scalar_policy(row,mask[i])
+32:             np.testing.assert_allclose(p[i],ref.probabilities,atol=2e-7,rtol=2e-6)
+33:             np.testing.assert_allclose(lp[i],ref.logp,atol=2e-6,rtol=2e-6)
+34:             self.assertEqual(ra[i],ref.rare_index)
+35:             self.assertEqual(tuple(map(int,threshold_words(jnp.array([r[i]]))[0])),dyadic_threshold(np.float32(r[i])))
+36:             for action in (0,1):
+37:                 grad=np.asarray(jax.grad(lambda l: distribution_kernel(l,mask[i:i+1])[1][0,action])(row[None,:]))[0]
+38:                 np.testing.assert_allclose(grad,selected_logp_derivative(row,mask[i],action),atol=2e-7,rtol=3e-6)
+39:         for mask in (np.array([True,False]),np.array([False,True]),np.array([False,False])):
+40:             row=np.array([2,-1],np.float32);ref=scalar_policy(row,mask)
+41:             a,b=distribution_kernel(row[None,:],mask[None,:])
+42:             np.testing.assert_array_equal(a[0],ref.probabilities)
+43:             np.testing.assert_array_equal(b[0],ref.logp)
+44:         for row,mask in (([0,1],np.ones(2,bool)),(np.zeros(3,np.float32),np.ones(2,bool)),
+45:                          (np.zeros(2,np.float32),np.ones(2,np.int32)),(np.array([np.nan,0],np.float32),np.ones(2,bool))):
+46:             with self.assertRaises((TypeError,ValueError)):scalar_policy(row,mask)
+47: 
+48:     def test_analytic_finite_difference(self):
+49:         for d in (-8,-2,0,2,8):
+50:             for action in (0,1):
+51:                 x=np.array([d,0],np.float32);mask=np.ones(2,bool)
+52:                 g=selected_logp_derivative(x,mask,action)
+53:                 for col in (0,1):
+54:                     plus=x.copy();minus=x.copy();plus[col]+=.01;minus[col]-=.01
+55:                     fd=(float(scalar_policy(plus,mask).logp[action])-float(scalar_policy(minus,mask).logp[action]))/.02
+56:                     self.assertAlmostEqual(float(g[col]),fd,delta=5e-5)
+57:                 self.assertEqual(float(g.sum()),0)
+58: 
+59: if __name__=='__main__':unittest.main()
+60: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/binary-policy/test_loop.py
+1: import json
+2: from pathlib import Path
+3: import tempfile
+4: import unittest
+5: import jax
+6: import jax.numpy as jnp
+7: import numpy as np
+8: from pokemon_binary.loop import Executables, start, check_report, objective
+9: from pokemon_binary.policy import act, predict_kernel
+10: from pokemon_binary.checkpoint import Runner, save, load, state
+11: from pokemon_jax_learner.model import ActorInput
+12: from pokemon_jax_learner.collector import collect as reference_collect
+13: from pokemon_learner.checkpoint import digest
+14: 
+15: 
+16: def exact(a,b):
+17:     for x,y in zip(jax.tree.leaves(a),jax.tree.leaves(b)):np.testing.assert_array_equal(x,y)
+18: 
+19: 
+20: class LoopTests(unittest.TestCase):
+21:     @classmethod
+22:     def setUpClass(cls):
+23:         cls.exe=Executables();cls.exe.diagnostics()
+24: 
+25:     def test_collector_matches_compact_host_control(self):
+26:         for seed in (11,29,47):
+27:             l=start(seed)
+28:             # Also reproduce the constructed historical rare-tail case, both ways.
+29:             for bias in (np.array([0,0],np.float32),np.array([0,-27.038734],np.float32),np.array([-27.038734,0],np.float32)):
+30:                 p=dict(l.parameters,policy_w=jnp.zeros((59,2)),policy_b=jnp.array(bias))
+31:                 b,s=self.exe.compiled['collect'](p,l.next_game,jnp.uint32(seed));valid=np.asarray(b.valid)
+32:                 ref=reference_collect(p,0,np.arange(64,dtype=np.uint32),environment_seed=seed,action_seed=seed,actor_fn=act)
+33:                 for name in b.actor._fields:
+34:                     a=np.asarray(getattr(b.actor,name))[valid];other=getattr(ref.actor,name)
+35:                     if a.dtype.kind=='f':np.testing.assert_allclose(a,other,atol=3e-6,rtol=3e-5)
+36:                     else:np.testing.assert_array_equal(a,other)
+37:                 for name in ('rewards','terminal','advantages','returns'):
+38:                     np.testing.assert_allclose(np.asarray(getattr(b.targets,name))[valid],getattr(ref.targets,name),atol=3e-6,rtol=3e-5)
+39:                 to_compact=np.full(512,-1,np.int32);to_compact[valid]=np.arange(valid.sum())
+40:                 nxt=np.asarray(b.targets.next_index)[valid]
+41:                 np.testing.assert_array_equal(np.where(nxt<0,-1,to_compact[np.maximum(nxt,0)]),ref.targets.next_index)
+42:                 self.assertTrue(np.all(np.asarray(s.winner)>=0))
+43:                 _,m=objective(p,b.actor,b.targets,b.valid,self.exe.plan)
+44:                 self.assertLessEqual(float(m['max_ratio_error']),1e-5)
+45: 
+46:     def test_fused_split_update_and_padding(self):
+47:         l=start(31)
+48:         for _ in range(8):
+49:             b,_=self.exe.compiled['collect'](l.parameters,l.next_game,jnp.uint32(31))
+50:             split,m=self.exe.compiled['update'](l,b,jnp.uint32(31))
+51:             fused,r=self.exe(l,31);check_report(r)
+52:             for x,y in zip(jax.tree.leaves(split),jax.tree.leaves(fused)):
+53:                 np.testing.assert_allclose(x,y,atol=3e-6,rtol=3e-5)
+54:             poisoned=b._replace(actor=b.actor._replace(features=jnp.where(b.valid[:,None],b.actor.features,jnp.nan)))
+55:             clean=self.exe.compiled['update'](l,b,jnp.uint32(31))
+56:             dirty=self.exe.compiled['update'](l,poisoned,jnp.uint32(31));exact(clean,dirty)
+57:             empty=b._replace(valid=jnp.zeros(512,bool))
+58:             new,metrics=self.exe.compiled['update'](l,empty,jnp.uint32(31))
+59:             exact((new.parameters,new.m,new.v,new.step),(l.parameters,l.m,l.v,l.step))
+60:             self.assertFalse(np.any(metrics['optimizer_applied']))
+61:             l=fused
+62:         self.assertEqual(self.exe.traces,dict(collect=1,update=1,cycle=1))
+63: 
+64:     def test_checkpoint_identity_and_rollback(self):
+65:         with tempfile.TemporaryDirectory() as tmp:
+66:             path=Path(tmp)/'state.json';r=Runner(42,self.exe)
+67:             for _ in range(3):r.run()
+68:             save(path,r);s=state(r);restored=load(path,self.exe)
+69:             exact(r.run(),restored.run());self.assertEqual(state(r),state(restored))
+70:             for fault in ('after_collect','after_update'):
+71:                 broken=load(path,self.exe)
+72:                 with self.assertRaises(RuntimeError):broken.run(fault=fault)
+73:                 with self.assertRaises(ValueError):save(Path(tmp)/'broken.json',broken)
+74:                 again=load(path,self.exe);expected=load(path,self.exe)
+75:                 exact(again.run(),expected.run());self.assertEqual(state(again),state(expected))
+76:             original=path.read_bytes();doc=json.loads(original)
+77:             for key,value in (('format','fixed-loop-checkpoint-1'),('random_streams','old sampler'),('seed',-1)):
+78:                 changed=json.loads(original);changed['body'][key]=value;changed['sha256']=digest(changed['body']);path.write_text(json.dumps(changed))
+79:                 with self.assertRaises(ValueError):load(path,self.exe)
+80:             path.write_bytes(original)
+81:             with self.assertRaises(RuntimeError):save(path,r,interrupt_before_replace=True)
+82:             self.assertEqual(path.read_bytes(),original)
+83: 
+84: if __name__=='__main__':unittest.main()
+85: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

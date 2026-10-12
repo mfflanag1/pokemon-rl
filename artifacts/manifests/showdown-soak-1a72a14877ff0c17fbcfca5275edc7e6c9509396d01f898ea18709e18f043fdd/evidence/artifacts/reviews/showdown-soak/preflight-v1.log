@@ -1,0 +1,16 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Missing server team receipts
+    at campaign (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/campaign.mjs:130:7)
+    at async file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-soak/campaign.mjs:159:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v25.6.1

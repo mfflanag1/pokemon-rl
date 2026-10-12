@@ -1,0 +1,482 @@
+Pinned Showdown 942cda71d14bf0618bd57991708a2e2734b6daba: R5 information-source excerpts.
+
+SOURCE sim/pokemon.ts sha256=e36493e502858c7f7fa8e899f4b4439295fefa452f96c5017e974494f1c4a688
+522: 		const positionLetter = 'abcdef'.charAt(this.position + positionOffset);
+523: 		return (this.side.id + positionLetter) as PokemonSlot;
+524: 	}
+525: 
+526: 	getFieldPositionValue() {
+527: 		// p1a, p2a, p3a, ..., p1b, p2b, p3b, ...
+528: 		return this.side.n + this.battle.sides.length * this.position;
+529: 	}
+530: 
+531: 	toString() {
+532: 		const fullname = (this.illusion) ? this.illusion.fullname : this.fullname;
+533: 		return this.isActive ? this.getSlot() + fullname.slice(2) : fullname;
+534: 	}
+535: 
+536: 	getUpdatedDetails(level?: number) {
+537: 		let name = this.species.name;
+538: 		if (['Greninja-Bond', 'Rockruff-Dusk'].includes(name)) name = this.species.baseSpecies;
+539: 		if (!level) level = this.level;
+540: 		return name + (level === 100 ? '' : `, L${level}`) +
+541: 			(this.gender === '' ? '' : `, ${this.gender}`) + (this.set.shiny ? ', shiny' : '');
+542: 	}
+543: 
+544: 	getFullDetails = () => {
+545: 		const health = this.getHealth();
+546: 		let details = this.details;
+547: 		if (this.illusion) {
+548: 			details = this.illusion.getUpdatedDetails(
+549: 				this.battle.ruleTable.has('illusionlevelmod') ? this.illusion.level : this.level
+550: 			);
+551: 		}
+552: 		if (this.terastallized) details += `, tera:${this.terastallized}`;
+553: 		return { side: health.side, secret: `${details}|${health.secret}`, shared: `${details}|${health.shared}` };
+554: 	};
+555: 
+556: 	updateSpeed() {
+1153: 	getSwitchRequestData(forAlly?: boolean): PokemonSwitchRequestData {
+1154: 		const entry: PokemonSwitchRequestData = {
+1155: 			ident: this.fullname,
+1156: 			details: this.details,
+1157: 			condition: this.getHealth().secret,
+1158: 			active: this.position < this.side.active.length,
+1159: 			stats: {
+1160: 				atk: this.baseStoredStats['atk'],
+1161: 				def: this.baseStoredStats['def'],
+1162: 				spa: this.baseStoredStats['spa'],
+1163: 				spd: this.baseStoredStats['spd'],
+1164: 				spe: this.baseStoredStats['spe'],
+1165: 			},
+1166: 			moves: this[forAlly ? 'baseMoves' : 'moves'].map(move => {
+1167: 				if (move === 'hiddenpower') {
+1168: 					return `${move}${toID(this.hpType)}${this.battle.gen < 6 ? '' : this.hpPower}` as ID;
+1169: 				}
+1170: 				if (move === 'frustration' || move === 'return') {
+1171: 					const basePowerCallback = this.battle.dex.moves.get(move).basePowerCallback as (pokemon: Pokemon) => number;
+1172: 					return `${move}${basePowerCallback(this)}` as ID;
+1173: 				}
+1174: 				return move as ID;
+1175: 			}),
+1176: 			baseAbility: this.baseAbility,
+1177: 			item: this.item,
+1178: 			pokeball: this.pokeball,
+1179: 		};
+1180: 		if (this.battle.gen > 6) entry.ability = this.ability;
+1181: 		if (this.battle.gen >= 9) {
+1182: 			entry.commanding = !!this.volatiles['commanding'] && !this.fainted;
+1183: 			entry.reviving = this.isActive && !!this.side.slotConditions[this.position]['revivalblessing'];
+1184: 		}
+1185: 		if (this.battle.gen === 9 && !this.battle.dex.currentMod.startsWith('champions')) {
+1186: 			entry.teraType = this.teraType;
+1187: 			entry.terastallized = this.terastallized || '';
+1188: 		}
+1189: 		return entry;
+1190: 	}
+1191: 
+1192: 	isLastActive() {
+1193: 		if (!this.isActive) return false;
+1194: 		const allyActive = this.side.active;
+1195: 		for (let i = this.position + 1; i < allyActive.length; i++) {
+1196: 			if (allyActive[i] && !allyActive[i].fainted) return false;
+1197: 		}
+1198: 		return true;
+1199: 	}
+1270: 	transformInto(pokemon: Pokemon, effect?: Effect) {
+1271: 		const species = pokemon.species;
+1272: 		if (
+1273: 			pokemon.fainted || this.illusion || pokemon.illusion || (pokemon.volatiles['substitute'] && this.battle.gen >= 5) ||
+1274: 			(pokemon.transformed && this.battle.gen >= 2) || (this.transformed && this.battle.gen >= 5) ||
+1275: 			species.name === 'Eternatus-Eternamax' ||
+1276: 			(['Ogerpon', 'Terapagos'].includes(species.baseSpecies) && (this.terastallized || pokemon.terastallized)) ||
+1277: 			this.terastallized === 'Stellar'
+1278: 		) {
+1279: 			return false;
+1280: 		}
+1281: 
+1282: 		if (this.battle.dex.currentMod === 'gen1stadium' && (
+1283: 			species.name === 'Ditto' ||
+1284: 			(this.species.name === 'Ditto' && pokemon.moves.includes('transform'))
+1285: 		)) {
+1286: 			return false;
+1287: 		}
+1288: 
+1289: 		if (!this.setSpecies(species, effect, true)) return false;
+1290: 
+1291: 		this.transformed = true;
+1292: 		this.weighthg = pokemon.weighthg;
+1293: 
+1294: 		const types = pokemon.getTypes(true, true);
+1295: 		this.setType(pokemon.volatiles['roost'] ? pokemon.volatiles['roost'].typeWas : types, true);
+1296: 		this.addedType = pokemon.addedType;
+1297: 		this.knownType = this.isAlly(pokemon) && pokemon.knownType;
+1298: 		this.apparentType = pokemon.apparentType;
+1299: 
+1300: 		let statName: StatIDExceptHP;
+1301: 		for (statName in this.storedStats) {
+1302: 			this.storedStats[statName] = pokemon.storedStats[statName];
+1303: 			if (this.modifiedStats) this.modifiedStats[statName] = pokemon.modifiedStats![statName]; // Gen 1: Copy modified stats.
+1304: 		}
+1305: 		this.moveSlots = [];
+1306: 		this.hpType = (this.battle.gen >= 5 ? this.hpType : pokemon.hpType);
+1307: 		this.hpPower = (this.battle.gen >= 5 ? this.hpPower : pokemon.hpPower);
+1308: 		this.timesAttacked = pokemon.timesAttacked;
+1309: 		for (const [i, moveSlot] of pokemon.moveSlots.entries()) {
+1310: 			let moveName = moveSlot.move;
+1311: 			if (moveSlot.id === 'hiddenpower') {
+1312: 				moveName = 'Hidden Power ' + this.hpType;
+1313: 			}
+1314: 			const move = this.battle.dex.moves.get(moveSlot.id);
+1315: 			const pp = Math.min(5, move.pp);
+1316: 			this.moveSlots.push({
+1317: 				move: moveName,
+1318: 				id: moveSlot.id,
+1319: 				pp,
+1320: 				maxpp: this.battle.gen >= 5 ? pp : this.battle.calculatePP(move, this.ppUps[i] || 0),
+1321: 				target: moveSlot.target,
+1322: 				disabled: false,
+1323: 				used: false,
+1324: 				virtual: true,
+1325: 			});
+1326: 		}
+1327: 		let boostName: BoostID;
+1328: 		for (boostName in pokemon.boosts) {
+1329: 			this.boosts[boostName] = pokemon.boosts[boostName];
+1330: 		}
+1331: 		if (this.battle.gen >= 6) {
+1332: 			// we need to remove all of the overlapping crit volatiles before adding any of them
+1333: 			const volatilesToCopy = ['dragoncheer', 'focusenergy', 'gmaxchistrike', 'laserfocus'];
+1334: 			for (const volatile of volatilesToCopy) this.removeVolatile(volatile);
+1335: 			for (const volatile of volatilesToCopy) {
+1336: 				if (pokemon.volatiles[volatile]) {
+1337: 					this.addVolatile(volatile);
+1338: 					if (volatile === 'gmaxchistrike') this.volatiles[volatile].layers = pokemon.volatiles[volatile].layers;
+1339: 					if (volatile === 'dragoncheer') this.volatiles[volatile].hasDragonType = pokemon.volatiles[volatile].hasDragonType;
+1340: 				}
+1341: 			}
+1342: 		}
+1343: 		if (effect) {
+1344: 			this.battle.add('-transform', this, pokemon, '[from] ' + effect.fullname);
+1345: 		} else {
+1346: 			this.battle.add('-transform', this, pokemon);
+1347: 		}
+1348: 		if (this.terastallized) {
+1349: 			this.knownType = true;
+1350: 			this.apparentType = this.terastallized;
+1351: 		}
+1352: 		if (this.battle.gen > 2) this.setAbility(pokemon.ability, this, null, true, true);
+1353: 
+1354: 		// Change formes based on held items (for Transform)
+1355: 		// Only ever relevant in Generation 4 since Generation 3 didn't have item-based forme changes
+1356: 		if (this.battle.gen === 4) {
+1357: 			if (this.species.num === 487) {
+1358: 				// Giratina formes
+1359: 				if (this.species.name === 'Giratina' && this.item === 'griseousorb') {
+1360: 					this.formeChange('Giratina-Origin');
+1361: 				} else if (this.species.name === 'Giratina-Origin' && this.item !== 'griseousorb') {
+1362: 					this.formeChange('Giratina');
+1363: 				}
+1364: 			}
+1365: 			if (this.species.num === 493) {
+1366: 				// Arceus formes
+1367: 				const item = this.getItem();
+1368: 				const targetForme = (item?.onPlate ? 'Arceus-' + item.onPlate : 'Arceus');
+1369: 				if (this.species.name !== targetForme) {
+1370: 					this.formeChange(targetForme);
+2060: 	getHealth = () => {
+2061: 		if (!this.hp) return { side: this.side.id, secret: '0 fnt', shared: '0 fnt' };
+2062: 		let secret = `${this.hp}/${this.maxhp}`;
+2063: 		let shared;
+2064: 		if (this.battle.reportExactHP) {
+2065: 			shared = secret;
+2066: 		} else if (this.battle.dex.currentMod.startsWith('champions')) {
+2067: 			// Pokemon Champions mechanics
+2068: 			const percentage = Math.floor(100 * this.hp / this.maxhp) || 1;
+2069: 			shared = `${percentage}/100`;
+2070: 			if (percentage === 20) {
+2071: 				shared += this.hp * 5 > this.maxhp ? 'y' : 'r';
+2072: 			} else if (percentage === 50) {
+2073: 				shared += this.hp * 2 > this.maxhp ? 'g' : 'y';
+2074: 			}
+2075: 		} else if (this.battle.reportPercentages || this.battle.gen >= 7) {
+2076: 			// HP Percentage Mod mechanics
+2077: 			let percentage = Math.ceil(100 * this.hp / this.maxhp);
+2078: 			if (percentage === 100 && this.hp < this.maxhp) {
+2079: 				percentage = 99;
+2080: 			}
+2081: 			shared = `${percentage}/100`;
+2082: 		} else {
+2083: 			/**
+2084: 			 * In-game accurate pixel health mechanics
+2085: 			 * PS doesn't use pixels after Gen 6, but for reference:
+2086: 			 * - [Gen 7] SM uses 99 pixels
+2087: 			 * - [Gen 7] USUM uses 86 pixels
+2088: 			 * */
+2089: 			const pixels = Math.floor(48 * this.hp / this.maxhp) || 1;
+2090: 			shared = `${pixels}/48`;
+2091: 			if (this.battle.gen >= 5) {
+2092: 				if (pixels === 9) {
+2093: 					shared += this.hp * 5 > this.maxhp ? 'y' : 'r';
+2094: 				} else if (pixels === 24) {
+2095: 					shared += this.hp * 2 > this.maxhp ? 'g' : 'y';
+2096: 				}
+2097: 			}
+2098: 		}
+2099: 		if (this.status) {
+2100: 			secret += ` ${this.status}`;
+2101: 			shared += ` ${this.status}`;
+2102: 		}
+2103: 		return { side: this.side.id, secret, shared };
+2104: 	};
+2105: 
+2106: 	/**
+2107: 	 * Sets a type (except on Arceus, who resists type changes)
+2108: 	 */
+2109: 	setType(newType: string | string[], enforce = false) {
+2110: 		if (!enforce) {
+2111: 			// No Pokemon should be able to have Stellar as a base type
+2112: 			if (typeof newType === 'string' ? newType === 'Stellar' : newType.includes('Stellar')) return false;
+2113: 			// First type of Arceus, Silvally cannot be normally changed
+2114: 			if ((this.battle.gen >= 5 && (this.species.num === 493 || this.species.num === 773)) ||
+2115: 				(this.battle.gen === 4 && this.hasAbility('multitype'))) {
+
+SOURCE data/abilities.ts sha256=53d8558979e337c675907b76b5375185b28a0877f770d7456025b94535e1064d
+2056: 	illusion: {
+2057: 		onBeforeSwitchIn(pokemon) {
+2058: 			pokemon.illusion = null;
+2059: 			// yes, you can Illusion an active pokemon but only if it's to your right
+2060: 			for (let i = pokemon.side.pokemon.length - 1; i > pokemon.position; i--) {
+2061: 				const possibleTarget = pokemon.side.pokemon[i];
+2062: 				if (!possibleTarget.fainted) {
+2063: 					// If Ogerpon is in the last slot while the Illusion Pokemon is Terastallized
+2064: 					// Illusion will not disguise as anything
+2065: 					if (!pokemon.terastallized || !['Ogerpon', 'Terapagos'].includes(possibleTarget.species.baseSpecies)) {
+2066: 						pokemon.illusion = possibleTarget;
+2067: 					}
+2068: 					break;
+2069: 				}
+2070: 			}
+2071: 		},
+2072: 		onDamagingHit(damage, target, source, move) {
+2073: 			if (target.illusion) {
+2074: 				this.singleEvent('End', this.dex.abilities.get('Illusion'), target.abilityState, target, source, move);
+2075: 			}
+2076: 		},
+2077: 		onEnd(pokemon) {
+2078: 			if (pokemon.illusion && !pokemon.beingCalledBack) {
+2079: 				this.debug('illusion cleared');
+2080: 				pokemon.illusion = null;
+2081: 				const details = pokemon.getUpdatedDetails();
+2082: 				this.add('replace', pokemon, details);
+2083: 				this.add('-end', pokemon, 'Illusion');
+2084: 				if (this.ruleTable.has('illusionlevelmod')) {
+2085: 					this.hint("Illusion Level Mod is active, so this Pok\u00e9mon's true level was hidden.", true);
+2086: 				}
+2087: 			}
+2088: 		},
+2089: 		onFaint(pokemon) {
+2090: 			pokemon.illusion = null;
+2091: 		},
+2092: 		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1, failskillswap: 1 },
+2093: 		name: "Illusion",
+2094: 		rating: 4.5,
+2095: 		num: 149,
+2096: 	},
+2097: 	immunity: {
+2098: 		onUpdate(pokemon) {
+2099: 			if (pokemon.status === 'psn' || pokemon.status === 'tox') {
+2100: 				this.add('-activate', pokemon, 'ability: Immunity');
+
+SOURCE sim/SIM-PROTOCOL.md sha256=d4fea2abe286651a92aeecac54d9ac31b75ae6c2f0d5c667808e93e50a682f56
+208:   `, F` if it's female, `, shiny` if it's shiny.
+209:   In Gen 9, `, tera:TYPE` will be appended if the Pokemon has Terastallized.
+210: 
+211: So, for instance, `Deoxys-Speed` is a level 100 non-shiny genderless
+212: Deoxys (Speed forme). `Sawsbuck, L50, F, shiny` is a level 50 shiny female
+213: Sawsbuck (Spring form).
+214: 
+215: In Team Preview, `DETAILS` will not include information not available in
+216: Team Preview (in particular, level and shininess will be left off), and
+217: for Pokémon whose forme isn't revealed in Team Preview, it will be given as
+218: `-*`. So, for instance, an Arceus in Team Preview would have the details
+219: string `Arceus-*`, no matter what kind of Arceus it is.
+220: 
+221: For most commands, you can just use the position information in the
+222: Pokémon ID to identify the Pokémon. Only a few commands actually change the
+223: Pokémon in that position (`|switch|` switching, `|replace|` illusion dropping,
+224: `|drag|` phazing, and `|detailschange|` permanent forme changes), and these
+225: all specify `DETAILS` for you to perform updates with.
+226: 
+227: ### Major actions
+228: 
+229: In battle, most Pokémon actions come in the form `|ACTION|POKEMON|DETAILS`
+230: followed by a few messages detailing what happens after the action occurs.
+231: 
+232: Battle actions (especially minor actions) often come with tags such as
+233: `|[from] EFFECT|[of] SOURCE`. `EFFECT` will be an effect (move, ability,
+234: item, status, etc), and `SOURCE` will be a Pokémon. These can affect the
+235: message or animation displayed, but do not affect anything else. Other 
+236: tags include `|[still]` (suppress animation) and `|[silent]` (suppress
+237: message).
+238: 
+239: `|move|POKEMON|MOVE|TARGET`
+240: 
+241: > The specified Pokémon has used move `MOVE` at `TARGET`. If a move has
+242: > multiple targets or no target, `TARGET` should be ignored. If a move
+243: > targets a side, `TARGET` will be a (possibly fainted) Pokémon on that
+244: > side.
+245: >
+246: > If `|[miss]` is present, the move missed.
+247: >
+248: > If `|[still]` is present, the move should not animate 
+249: >
+250: > `|[anim] MOVE2` tells the client to use the animation of `MOVE2` instead
+251: > of `MOVE` when displaying to the client.
+252: 
+253: `|switch|POKEMON|DETAILS|HP STATUS` or `|drag|POKEMON|DETAILS|HP STATUS`
+254: 
+255: > A Pokémon identified by `POKEMON` has switched in (if there was an old
+256: > Pokémon in that position, it is switched out).
+257: >
+258: > For the DETAILS format, see "Identifying Pokémon" above.
+259: >
+260: > `POKEMON|DETAILS` represents all the information that can be used to tell
+261: > Pokémon apart. If two pokemon have the same `POKEMON|DETAILS` (which will
+262: > never happen in any format with Species Clause), you usually won't be able
+263: > to tell if the same pokemon switched in or a different pokemon switched
+264: > in.
+265: >
+266: > The switched Pokémon has HP `HP`, and status `STATUS`. `HP` is specified as
+267: > a fraction; if it is your own Pokémon then it will be `CURRENT/MAX`, if not,
+268: > it will be `/100` if HP Percentage Mod is in effect and `/48` otherwise.
+269: > `STATUS` can be left blank, or it can be `slp`, `par`, etc.
+270: >
+271: > `switch` means it was intentional, while `drag` means it was unintentional
+272: > (forced by Whirlwind, Roar, etc).
+273: 
+274: `|detailschange|POKEMON|DETAILS|HP STATUS` or 
+275: `|-formechange|POKEMON|SPECIES|HP STATUS`
+276: 
+277: > The specified Pokémon has changed formes (via Mega Evolution, ability, etc.) 
+278: > to `SPECIES`. If the forme change is permanent (Mega Evolution or a 
+279: > Shaymin-Sky that is frozen), then `detailschange` will appear; otherwise, 
+280: > the client will send `-formechange`.
+281: >
+282: > Syntax is the same as `|switch|` above.
+283: 
+284: `|replace|POKEMON|DETAILS|HP STATUS`
+285: 
+286: > Illusion has ended for the specified Pokémon. Syntax is the same as
+287: > `|switch|` above, but remember that everything you thought you knew about the
+288: > previous Pokémon is now wrong.
+289: >
+290: > `POKEMON` will be the NEW Pokémon ID - i.e. it will have the nickname of the
+291: > Zoroark (or other Illusion user).
+292: 
+293: `|swap|POKEMON|POSITION`
+330: `|-notarget|POKEMON`
+331: 
+332: > A move has failed due to their being no target Pokémon `POKEMON`. `POKEMON` is
+333: > not present in Generation 1. This action is specific to Generations 1-4 as in
+334: > later Generations a failed move will display using `-fail`.
+335: 
+336: `|-miss|SOURCE|TARGET`
+337: 
+338: > The move used by the `SOURCE` Pokémon missed (maybe absent) the `TARGET`
+339: > Pokémon.
+340: 
+341: `|-damage|POKEMON|HP STATUS`
+342: 
+343: > The specified Pokémon `POKEMON` has taken damage, and is now at
+344: > `HP STATUS` (see `|switch|` for details).
+345: >
+346: > If `HP` is 0, `STATUS` should be ignored. The current behavior is for
+347: > `STATUS` to be `fnt`, but this may change and should not be relied upon.
+348: 
+349: `|-heal|POKEMON|HP STATUS`
+350: 
+351: > Same as `-damage`, but the Pokémon has healed damage instead.
+352: 
+353: `|-sethp|POKEMON|HP`
+354: 
+355: > The specified Pokémon `POKEMON` now has `HP` hit points.
+356: 
+357: `|-status|POKEMON|STATUS`
+358: 
+359: > The Pokémon `POKEMON` has been inflicted with `STATUS`.
+360: 
+361: `|-curestatus|POKEMON|STATUS`
+362: 
+363: > The Pokémon `POKEMON` has recovered from `STATUS`.
+364: 
+365: `|-cureteam|POKEMON`
+480: 
+481: > The `POKEMON` was immune to a move.
+482: 
+483: `|-item|POKEMON|ITEM|[from]EFFECT`
+484: 
+485: > The `ITEM` held by the `POKEMON` has been changed or revealed due to a move or 
+486: > ability `EFFECT`.
+487: 
+488: `|-item|POKEMON|ITEM`
+489: 
+490: > `POKEMON` has just switched in, and its item `ITEM` is being announced to have a
+491: > long-term effect (will not use `[from]`). Air Balloon is the only current user of
+492: > this.
+493: 
+494: `|-enditem|POKEMON|ITEM|[from]EFFECT`
+495: 
+496: > The `ITEM` held by `POKEMON` has been destroyed by a move or ability (like
+497: > Knock Off), and it now holds no item.
+498: >
+499: > This will be silent `[silent]` if the item's ownership was changed (with a move
+500: > or ability like Thief or Trick), even if the move or ability would result in
+501: > a Pokémon without an item.
+502: 
+503: `|-enditem|POKEMON|ITEM`
+504: 
+505: > `POKEMON`'s `ITEM` has destroyed itself (consumed Berries, Air Balloon). If a
+506: > berry is consumed, it also has an additional modifier `|[eat]` to indicate
+507: > that it was consumed.
+508: >
+509: > Sticky Barb does not announce itself with this or any other message when it
+510: > changes hands.
+511: 
+512: `|-ability|POKEMON|ABILITY|[from]EFFECT`
+513: 
+514: > The `ABILITY` of the `POKEMON` has been changed due to a move/ability `EFFECT`.
+515: >
+516: > Note that Skill Swap does not send this message despite it changing abilities,
+517: > because it does not reveal abilities when used between allies in a Double or
+518: > Triple Battle.
+519: 
+520: `|-ability|POKEMON|ABILITY`
+521: 
+522: > `POKEMON` has just switched-in, and its ability `ABILITY` is being announced
+523: > to have a long-term effect (will not use `[from]`).
+524: >
+525: > Effects that start at switch-in include Mold Breaker and Neutralizing Gas. It
+526: > does not include abilities that activate once and don't have any long-term
+527: > effects, like Intimidate (Intimidate should use `-activate`).
+528: 
+529: `|-endability|POKEMON`
+530: 
+531: > The `POKEMON` has had its ability suppressed by Gastro Acid.
+532: 
+533: `|-transform|POKEMON|SPECIES`
+534: 
+535: > The Pokémon `POKEMON` has transformed into `SPECIES` by the move Transform or
+536: > the ability Imposter.
+537: 
+538: `|-mega|POKEMON|MEGASTONE`
+539: 
+540: > The Pokémon `POKEMON` used `MEGASTONE` to Mega Evolve.
+541: 
+542: `|-primal|POKEMON`
+543: 
+544: > The Pokémon `POKEMON` has reverted to its primal forme.
+545: 
+546: `|-burst|POKEMON|SPECIES|ITEM`
+547: 
+548: > The Pokémon `POKEMON` has used `ITEM` to Ultra Burst into `SPECIES`.

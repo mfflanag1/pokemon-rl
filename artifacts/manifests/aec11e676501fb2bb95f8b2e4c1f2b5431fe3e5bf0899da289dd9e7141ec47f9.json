@@ -1,0 +1,126 @@
+{
+  "schema_version": "r1-manifest-1",
+  "repository": "https://github.com/smogon/pokemon-showdown.git",
+  "commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "source_dirty": false,
+  "lock_sha256": "fd89ae0129d1855edb63f9d23d99bf67bc894a3f5be882f8c486041d8662b702",
+  "build": {
+    "commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+    "lock_sha256": "fd89ae0129d1855edb63f9d23d99bf67bc894a3f5be882f8c486041d8662b702",
+    "node": "v25.6.1",
+    "npm": "11.9.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "dist_sha256": "e65fb25c0aeed57ea58d81dc69a2185476975fb0984cc2d857e92277514724db",
+    "prng_dependency_sha256": "0617b3b17739402e75ad2d7ceaa160c078329dff78280bf20f28d5e356f48d60",
+    "build_command": "node build",
+    "dependency_install": "npm ci --omit=dev --ignore-scripts --no-audit --no-fund"
+  },
+  "harness_source_hashes": {
+    "provenance.mjs": "90d39dfdfab4739af374b276d7094d75e4be3f7dcc68d8ef48c4f1e5e0e8c090",
+    "engine.mjs": "22e64e0759027f50c74db0e4cf1b54f39e133921b7827d669555068e925f5886",
+    "observations.mjs": "8f2cda2cc71d688a7232e3aa66671335b5324f50f1783f44052995241faa1e8d",
+    "runner.mjs": "207d6cc1251ba2de96880fb2970e811522ae58b1886bddac023936169d83b243"
+  },
+  "format": {
+    "id": "gen9randombattle",
+    "name": "[Gen 9] Random Battle",
+    "mod": "gen9",
+    "game_type": "singles",
+    "team": "random",
+    "ruleset": [
+      "PotD",
+      "Obtainable",
+      "Species Clause",
+      "HP Percentage Mod",
+      "Cancel Mod",
+      "Sleep Clause Mod",
+      "Illusion Level Mod"
+    ],
+    "resolved_rules": [
+      [
+        "-nonexistent",
+        "Obtainable"
+      ],
+      [
+        "-tag:unobtainable",
+        "Obtainable"
+      ],
+      [
+        "-unreleased",
+        "Obtainable"
+      ],
+      [
+        "cancelmod",
+        ""
+      ],
+      [
+        "evlimit",
+        "Obtainable"
+      ],
+      [
+        "hppercentagemod",
+        ""
+      ],
+      [
+        "illusionlevelmod",
+        ""
+      ],
+      [
+        "obtainable",
+        ""
+      ],
+      [
+        "obtainableabilities",
+        "Obtainable"
+      ],
+      [
+        "obtainableformes",
+        "Obtainable"
+      ],
+      [
+        "obtainablemisc",
+        "Obtainable"
+      ],
+      [
+        "obtainablemoves",
+        "Obtainable"
+      ],
+      [
+        "potd",
+        ""
+      ],
+      [
+        "sleepclausemod",
+        ""
+      ],
+      [
+        "speciesclause",
+        ""
+      ]
+    ],
+    "value_rules": [
+      [
+        "evlimit",
+        "Auto"
+      ]
+    ]
+  },
+  "configuration": {
+    "potd": "",
+    "server_config_loaded": false,
+    "custom_formats": false
+  },
+  "source_hashes": {
+    "LICENSE": "b2002a9fd52ba8db3783a05fbdebfb09c34fd09513b90f6b390a2c0dfbc93ed0",
+    "config/formats.ts": "c10c80f8e8b32b618dcf8d15572f2573593d478ee8e7c6d6cfe22ab28cd5faea",
+    "data/rulesets.ts": "ec02d9a93f6d2fc7238bae31f2f1ec8518d331610d6167d48422ccfb5ef6aa12",
+    "sim/prng.ts": "faff50532b3fde14de1a544f759acf466649279f6640e1a3fd0f7dff6fa538bc",
+    "data/random-battles/gen9/teams.ts": "15141a127c310b4bc4ad6d4c25c34598edb425e65b7286f83d6b50aec00c1374",
+    "data/random-battles/gen9/sets.json": "2bbb7c374811791207c159d4537f586bc28be26829c20dc144bd16911a27dc09"
+  },
+  "seed_encoding": "sodium, followed by exactly 64 lower-case hex digits",
+  "observation_version": "r1-player-protocol-1",
+  "normalization_version": "r1-timestamps-1",
+  "manifest_id": "aec11e676501fb2bb95f8b2e4c1f2b5431fe3e5bf0899da289dd9e7141ec47f9"
+}

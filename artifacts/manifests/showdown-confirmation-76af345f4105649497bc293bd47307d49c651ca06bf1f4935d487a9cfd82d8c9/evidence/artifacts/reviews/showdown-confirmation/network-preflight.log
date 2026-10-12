@@ -1,0 +1,9 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+Error: Local server exited; inspect /Users/maxf/Documents/ChatGPT/Pokemon/artifacts/runs/showdown-tactical-network-preflight-v1/server/server.log
+    at startLocalServer (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-bot/local-server.mjs:44:25)
+    at async file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/showdown-confirmation/network.mjs:25:12
+
+Node.js v25.6.1

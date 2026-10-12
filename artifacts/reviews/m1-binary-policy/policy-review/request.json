@@ -1,0 +1,21 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review this additive binary-policy-1 fix for the historical FP32 inverse-CDF tail mismatch. Exact law is FP32 rare mass r>=2^-24 and real complement 1-r; sampler compares two uint32 words to exact r*2^64, logs use log(r)/log1p(-r), ordinary autodiff through floor-clipped sigmoid. Check integer mapping proof and boundary cases, log-gradient consistency (distinguish normal floating-point approximation from a mismatched sampling law), masking/leakage, fixed-loop integration and checkpoint isolation. Full G2/G3 stay open; this has only short qualification planned, no strength or two-hour requalification claim. Independent oracle source reference.py was salvaged from a failed Codex delegate; its pytest test candidate and bytecode were not integrated; current unittest tests are coordinator-written. Please independently QA that scalar reference as opposite-model review too. Report concrete correctness problems or unsupported claims. You cannot run tests; do not imply you did.",
+  "files_sha256": {
+    "contracts/binary-policy-v1/contract.json": "4e8dddf08fd264a5b881a3e81e1e688f987602512f0612f27f5df73433d9a230",
+    "contracts/binary-policy-v1/plan.json": "80f979c1ac97123c46fc33d42a05b0a1fa1787ec74218e71b7f796c47cc3e316",
+    "python/pokemon_binary/policy.py": "9d1d6a0cfab0636e418a165c5915331226e6c016d413d0c6327e5ff4192dc9d9",
+    "python/pokemon_binary/loss.py": "b8a3eb90ce9e6a8d4a9668857d39f409fca088bfacfc8d6424b17ab03cd09b47",
+    "python/pokemon_binary/loop.py": "ceb04a22b818cc47a48671e1b70a02407909142912ae7850b957a269d3d3b78a",
+    "python/pokemon_binary/checkpoint.py": "8cf139e3c31e4da20b7295cda4a5f8df2f6df179460ebaccf5c2d487f809f73d",
+    "python/pokemon_binary/reference.py": "aee0c2f6e4697f3d08071eb8b022c5818fdd938b4db4e51ee70481957fa76304",
+    "tests/binary-policy/test_policy.py": "1253cbb60e4ad35db1d45e255d4bf7ea2b193ac6c01f7218218264a759c97a1a",
+    "tests/binary-policy/test_reference.py": "5f6d67b5853c37c9d059aa82574d7e3b7650c9bfc75ff41ce4d1d7e2fac219ef",
+    "tests/binary-policy/test_loop.py": "df21b18174e65ca95ef11cfbe26b625af92171a5ff8f223e3900c11df9fec108"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

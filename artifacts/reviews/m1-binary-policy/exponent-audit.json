@@ -1,0 +1,26 @@
+[
+  {
+    "value": 0.25,
+    "biased_exponent": 125,
+    "fraction_bits": 0,
+    "admitted": true
+  },
+  {
+    "value": 0.4999999701976776,
+    "biased_exponent": 125,
+    "fraction_bits": 8388607,
+    "admitted": true
+  },
+  {
+    "value": 0.5,
+    "biased_exponent": 126,
+    "fraction_bits": 0,
+    "admitted": true
+  },
+  {
+    "value": 0.5000000596046448,
+    "biased_exponent": 126,
+    "fraction_bits": 1,
+    "admitted": false
+  }
+]

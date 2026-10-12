@@ -1,0 +1,37 @@
+[
+  {
+    "path": "packages/showdown-bot/protocol.mjs",
+    "reviewed": "11e811d67fa2969479eccf9caed06831fd6d81fd0522599d1d6a55ae9c6017eb",
+    "final": "5203d70b9891b97c7e0b79d77efd10fcaa3b7d651f1f982f8151efd55cbceb54"
+  },
+  {
+    "path": "packages/showdown-bot/client.mjs",
+    "reviewed": "8779f2d380d1f0a7efd18cd70ee2e3709c927fbf1c62388baba507a33630c716",
+    "final": "9cfbb0b85904953504399acf9e1c2643c6ad0bbc006b96d09b70eaadd5610c8c"
+  },
+  {
+    "path": "packages/showdown-bot/development.mjs",
+    "reviewed": "59ece1e1d5870c9d303f61dad76fad03a94c5ad243204a6526171b97bcfbaf62",
+    "final": "afe46cc1b427d8d2abd7e455af29174206b3887850067934a446dbb729f4be4c"
+  },
+  {
+    "path": "packages/showdown-bot/local-server.mjs",
+    "reviewed": "4004fc05eb6a0793349c76d357277e26c9072472545e887bf35276a9a5d1d5ee",
+    "final": "9e28a859d3f4f0f430f8bbe05a265a732fbc8f4bb31586bb53d202196d7b6d6e"
+  },
+  {
+    "path": "packages/showdown-bot/campaign.mjs",
+    "reviewed": "72717be75fbfeb3a6ee7e8b24abd11cd2f7d2b6aad9bacefa4513c52a15fbc72",
+    "final": "53f7828ceff894dd9c56204e540dd644be8e6f5fb146a7d0fa2022b0bef146ff"
+  },
+  {
+    "path": "packages/showdown-bot/network-smoke.mjs",
+    "reviewed": "9db90229e9c9d761845a6fd02537975555573347a1b7c1f38f5080fc9c440990",
+    "final": "ff4092d05b6bbf85c73fe3510e8928f4fa7c21ece20a170792184f62392c409d"
+  },
+  {
+    "path": "tests/showdown-bot/bot.test.mjs",
+    "reviewed": "4053cda001ab5ca7529e4ec2ee7445bc3df4c8ee1d3753baf0959168384af579",
+    "final": "d21cd03b5a8a9d11b640ffe90db7a7c233f8de70ae03cc1c6aa36b9ea23ee0ee"
+  }
+]

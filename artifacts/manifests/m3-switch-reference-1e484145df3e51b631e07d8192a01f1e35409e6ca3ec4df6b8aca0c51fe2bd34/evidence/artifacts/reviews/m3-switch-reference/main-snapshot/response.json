@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 150655,
+  "stop_reason": "end_turn",
+  "session_id": "b30f81a0-b98c-4af9-9d2d-76d5e1611d7a",
+  "total_cost_usd": 0.79674,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 16936,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 9160,
+    "output_tokens_details": {
+      "thinking_tokens": 7575
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16936,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 9160,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 16936,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 16936
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-fable-5-1": {
+      "inputTokens": 2,
+      "outputTokens": 9160,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 16936,
+      "webSearchRequests": 0,
+      "costUSD": 0.79674,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 7575,
+      "canonicalModel": "claude-fable-5-1",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Provisional verdict: findings (none blocking the stated node tests; several unverified claims and gaps).** Most important: the Python adapter and the 72/1152/1008/864/48 fixture figures are not covered by the seven stated tests, and there is no negative check that opponent HP is always masked.\n\n## Findings\n\n**1. Medium \u2014 Fixture/information counts are asserted in code but not run by any stated test.**\n`tests/switch-reference/session.test.mjs` never calls `generate()` or `information()` (fixtures.mjs:29\u2013102). The 1152/1008/864/48 numbers and the 72-game opposite-order replay (fixtures.mjs:59,64\u201368) exist only as runtime asserts; no `summary.json` is in the packet. Treat them as unverified until the generator run output (and its hash) is supplied. Also, the probe loop asserts `g.phase==='joint_move'` and that original B is switchable after one Tackle/Scratch turn (fixtures.mjs:51) \u2014 reasonable, but a turn\u20111 crit KO would abort the whole run rather than skip a probe.\n\n**2. Medium \u2014 `python/pokemon_switch/views.py` reuses frozen M1 codec helpers for a two-mon switch profile.**\n`request_phase`, `admissible_actions`, `action_mask` (views.py:2,19) were built for the one-mon Rattata duel. Nothing in the packet shows they accept two\u2011member `side.pokemon`, `forceSwitch` requests, or the four-action switch mapping; a mismatch would silently produce wrong masks in the \"diagnostic\" R5 tensors. Verify with a Python test replaying `golden[].mask` against `action_mask(view.request)` for all three phases.\n\n**3. Low/Medium \u2014 Leak checks are positive-only.**\n`coverage.masked_hp` (fixtures.mjs:94) only proves some `/100` opponent line exists. Add a negative invariant over every view: all `|switch|`/`|-damage|` lines for the *other* side use `/100`, none expose `x/y` with y\u2260100, and `request.side.id===view.side`. Also assert `|-heal|`, `|-status|`, `|-boost|` never appear (currently checked only via audit, not via the player channel).\n\n**4. Low \u2014 Chance contract omits accuracy-roll PRNG consumption.**\nprofile.json:27 lists crits/damage/ties/switch ordering. In Showdown, 100-accuracy moves still call `randomChance(accuracy,100)`, which advances the PRNG. Not a current correctness issue, but a future \"raw-stream parity\" port would diverge; verify against commit `942cda71\u2026` and add to the contract.\n\n**5. Low \u2014 `own_variant_observations` is tautological.**\nfixtures.mjs:45\u201347 compares the request's own `stats.spe` to the same simulator mon's `storedStats.spe`. It demonstrates nothing about information flow; don't cite it as a positive \"own private speed is an input\" result. A real test would show the two `plain`/`swift` own-variant views hash differently at turn 1.\n\n**6. Low \u2014 Damage oracle minor hygiene.**\ndamage.mjs:21 uses global `Dex.getActiveMove`, not `battle.dex`; equivalent for gen9 here but should be pinned. `battle.random` is replaced and not restored (acceptable since the session is closed). The three-HP threshold check (hp=\u230amax/3\u230b\u22121, \u230amax/3\u230b, +1) correctly brackets `hp <= maxhp/3` for both divisible and non-divisible maxhp; 18\u00d73\u00d72\u00d72\u00d716=3456 is arithmetically consistent.\n\n**7. Note \u2014 Fixture file bundles privileged data with views.**\n`snapshots[].audit` and `comparisons[].opponent_own_hash` sit alongside `golden` views in the same gz. README says to treat audit as privileged; downstream loaders must enforce this (views.py:7 does reject extra keys, which is good).\n\n## Reviewed and found consistent\nRequest binding (group, request_id, view_hash, exact-key check; stale/duplicate/extra rejected, partial-write `failed` latch), A/B mapping by ident suffix with 1-based current position, wait\u2192all-false, forceSwitch\u2192only non-active non-fainted, pending-choice leak assert between the two writes, truncation only at `joint_move` with turn>12 (replacement at turn 13 may still resolve, matching the stated cutoff), 1152/1008/864 key arithmetic.\n\n## Scope limitations\nNo execution; Showdown source not in packet; Python codec and regression explicitly incomplete; `engine.mjs`, `canonical.mjs`, `PlayerHistory` not reviewed.",
+  "ttft_ms": 126183,
+  "type": "result",
+  "duration_ms": 150692,
+  "uuid": "b6407acb-eb53-4179-8e6f-383606e7052c",
+  "ttft_stream_ms": 2760,
+  "time_to_request_ms": 37,
+  "first_content_frame_ms": 2760,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

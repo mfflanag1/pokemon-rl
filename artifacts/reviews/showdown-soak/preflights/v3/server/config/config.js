@@ -1,0 +1,22 @@
+Object.assign(exports, {
+  "port": 18030,
+  "bindaddress": "127.0.0.1",
+  "subprocesses": 0,
+  "noguestsecurity": true,
+  "noipchecks": true,
+  "nothrottle": true,
+  "watchconfig": false,
+  "repl": false,
+  "crashguard": false,
+  "usesqlite": false,
+  "wsdeflate": null,
+  "trustedproxies": [],
+  "loginserver": "http://127.0.0.1:9/",
+  "serverid": "local-baseline",
+  "logladderip": false,
+  "reportjoins": false,
+  "potd": "",
+  "consoleips": [],
+  "backdoor": false,
+  "nofswriting": true
+});

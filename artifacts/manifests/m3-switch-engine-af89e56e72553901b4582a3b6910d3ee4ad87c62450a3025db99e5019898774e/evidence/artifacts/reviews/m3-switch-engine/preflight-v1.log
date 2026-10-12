@@ -1,0 +1,17 @@
+file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/battle-contract/canonical.mjs:12
+    if (!Number.isSafeInteger(value)) throw new TypeError('Expected a safe integer');
+                                            ^
+
+TypeError: Expected a safe integer
+    at canonical (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/battle-contract/canonical.mjs:12:45)
+    at file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/battle-contract/canonical.mjs:25:44
+    at Array.map (<anonymous>)
+    at canonical (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/battle-contract/canonical.mjs:25:19)
+    at file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/battle-contract/canonical.mjs:25:44
+    at Array.map (<anonymous>)
+    at canonical (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/battle-contract/canonical.mjs:25:19)
+    at file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/battle-contract/canonical.mjs:25:44
+    at Array.map (<anonymous>)
+    at canonical (file:///Users/maxf/Documents/ChatGPT/Pokemon/packages/battle-contract/canonical.mjs:25:19)
+
+Node.js v25.6.1

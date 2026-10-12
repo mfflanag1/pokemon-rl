@@ -1,0 +1,15 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Focused follow-up on the concrete issues from review 20261011-075519-ca5c953c. We added check_gap using paired monotonic/time.time deltas each cycle, accepting the maximum of monotonic gap, wall gap and their absolute discrepancy under 30 seconds. Synthetic tests cover frozen monotonic/system sleep and backward wall-clock jumps. Timed elapsed is bounded target through target+30 in campaign and sealer. Final replay is explicitly outside timing but also gap-checked. Sealer --audit-smoke reuses telemetry, checkpoint roster, original next-cycle fingerprint and counter-linkage checks and returns before any qualification receipt. All other modes still require the frozen 7200-second summary gate. History preserves unsigned running stubs/missing reports instead of requiring their content_hash. Review only whether these repairs address the previous findings and introduce a concrete blocker. The independent gate candidate got Codex QA accept after two malformed-input exception repairs; its valid-input behavior is unchanged. No two-hour run has started yet.",
+  "files_sha256": {
+    "python/pokemon_soak/campaign.py": "13c3df8baa6fccaed1008063287d7ed2f62143885241b5045eb196224c41b6d3",
+    "scripts/seal-policy-soak.py": "ff895f25080f228f6b5b70adf1422f567f5fbbb730e4b20f72c4072394590dd9",
+    "tests/soak/test_campaign.py": "8c50a7f52771bb23896d21adce4e95fe1a75f036bde96e7832061ad23fbb8876",
+    "contracts/soak-v1/plan.json": "322f95704ca71dca3452c181f3ef63c8f338398eb5382af26e2930ff5a15f149"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

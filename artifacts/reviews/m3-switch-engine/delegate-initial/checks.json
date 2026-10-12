@@ -1,0 +1,9 @@
+[
+  {
+    "argv": [
+      "python3",
+      "tests/switch-engine/test_damage.py"
+    ],
+    "returncode": 1
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "status": "pass",
+  "probes": [
+    {
+      "probe": "failure marker",
+      "rejected": true,
+      "reason": "Failed run cannot be sealed"
+    },
+    {
+      "probe": "incomplete progress",
+      "rejected": true,
+      "reason": "Complete progress counters"
+    },
+    {
+      "probe": "incomplete replay",
+      "rejected": true,
+      "reason": "Complete replay progress"
+    },
+    {
+      "probe": "altered frozen plan",
+      "rejected": true,
+      "reason": "Frozen production source/plan"
+    },
+    {
+      "probe": "altered game digest",
+      "rejected": true,
+      "reason": "Game evidence binding"
+    },
+    {
+      "probe": "altered confirmation decision",
+      "rejected": true,
+      "reason": "Audit binding: report.json"
+    },
+    {
+      "probe": "altered network trace",
+      "rejected": true,
+      "reason": "Network audit binding: trace.json"
+    }
+  ],
+  "receipt_or_archive_writes": 0,
+  "elapsed_seconds": 8.680663083214313,
+  "method": "Validation uses the real sealer on temporary metadata copies and read-only game symlinks. A write guard fails any attempt to archive or create a receipt; no admission or validation function is mocked."
+}

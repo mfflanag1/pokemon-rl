@@ -1,0 +1,279 @@
+{
+  "status": "complete",
+  "cases": [
+    "before-choice",
+    "lost-write",
+    "accepted-choice",
+    "next-turn",
+    "forced-switch",
+    "double-drop"
+  ],
+  "records": [
+    {
+      "scenario": "before-choice",
+      "faults": 1,
+      "connections": 2,
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-1",
+          "winner": "RecoveryA",
+          "turns": 17,
+          "decisions": 19,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-1",
+          "winner": "RecoveryA",
+          "turns": 17,
+          "decisions": 23,
+          "retries": 0
+        }
+      ],
+      "restores": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-1",
+          "rqid": 2,
+          "turn": 1,
+          "committed": false,
+          "ended": false
+        }
+      ],
+      "reconnects": [
+        {
+          "attempt": 1,
+          "delayMs": 80,
+          "rooms": [
+            "battle-gen9botbaselinedevelopment-1"
+          ],
+          "reason": "Disconnected; no automatic replay of pending choices"
+        }
+      ],
+      "decisions": 19
+    },
+    {
+      "scenario": "lost-write",
+      "faults": 1,
+      "connections": 2,
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-2",
+          "winner": "RecoveryA",
+          "turns": 17,
+          "decisions": 20,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-2",
+          "winner": "RecoveryA",
+          "turns": 17,
+          "decisions": 23,
+          "retries": 0
+        }
+      ],
+      "restores": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-2",
+          "rqid": 2,
+          "turn": 1,
+          "committed": false,
+          "ended": false
+        }
+      ],
+      "reconnects": [
+        {
+          "attempt": 1,
+          "delayMs": 80,
+          "rooms": [
+            "battle-gen9botbaselinedevelopment-2"
+          ],
+          "reason": "Disconnected; no automatic replay of pending choices"
+        }
+      ],
+      "decisions": 20
+    },
+    {
+      "scenario": "accepted-choice",
+      "faults": 1,
+      "connections": 2,
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-3",
+          "winner": "RecoveryA",
+          "turns": 17,
+          "decisions": 19,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-3",
+          "winner": "RecoveryA",
+          "turns": 17,
+          "decisions": 23,
+          "retries": 0
+        }
+      ],
+      "restores": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-3",
+          "rqid": 2,
+          "turn": 1,
+          "committed": true,
+          "ended": false
+        }
+      ],
+      "reconnects": [
+        {
+          "attempt": 1,
+          "delayMs": 80,
+          "rooms": [
+            "battle-gen9botbaselinedevelopment-3"
+          ],
+          "reason": "Disconnected; no automatic replay of pending choices"
+        }
+      ],
+      "decisions": 19
+    },
+    {
+      "scenario": "next-turn",
+      "faults": 1,
+      "connections": 2,
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-4",
+          "winner": "RecoveryA",
+          "turns": 18,
+          "decisions": 20,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-4",
+          "winner": "RecoveryA",
+          "turns": 18,
+          "decisions": 24,
+          "retries": 0
+        }
+      ],
+      "restores": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-4",
+          "rqid": 4,
+          "turn": 2,
+          "committed": false,
+          "ended": false
+        }
+      ],
+      "reconnects": [
+        {
+          "attempt": 1,
+          "delayMs": 80,
+          "rooms": [
+            "battle-gen9botbaselinedevelopment-4"
+          ],
+          "reason": "Disconnected; no automatic replay of pending choices"
+        }
+      ],
+      "decisions": 20
+    },
+    {
+      "scenario": "forced-switch",
+      "faults": 1,
+      "connections": 2,
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-5",
+          "winner": "RecoveryA",
+          "turns": 19,
+          "decisions": 22,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-5",
+          "winner": "RecoveryA",
+          "turns": 19,
+          "decisions": 25,
+          "retries": 0
+        }
+      ],
+      "restores": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-5",
+          "rqid": 24,
+          "turn": 9,
+          "committed": false,
+          "ended": false
+        }
+      ],
+      "reconnects": [
+        {
+          "attempt": 1,
+          "delayMs": 80,
+          "rooms": [
+            "battle-gen9botbaselinedevelopment-5"
+          ],
+          "reason": "Disconnected; no automatic replay of pending choices"
+        }
+      ],
+      "decisions": 22
+    },
+    {
+      "scenario": "double-drop",
+      "faults": 2,
+      "connections": 3,
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-6",
+          "winner": "RecoveryA",
+          "turns": 18,
+          "decisions": 20,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-6",
+          "winner": "RecoveryA",
+          "turns": 18,
+          "decisions": 24,
+          "retries": 0
+        }
+      ],
+      "restores": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-6",
+          "rqid": 2,
+          "turn": 1,
+          "committed": false,
+          "ended": false
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-6",
+          "rqid": 2,
+          "turn": 1,
+          "committed": false,
+          "ended": false
+        }
+      ],
+      "reconnects": [
+        {
+          "attempt": 1,
+          "delayMs": 80,
+          "rooms": [
+            "battle-gen9botbaselinedevelopment-6"
+          ],
+          "reason": "Disconnected; no automatic replay of pending choices"
+        },
+        {
+          "attempt": 2,
+          "delayMs": 160,
+          "rooms": [
+            "battle-gen9botbaselinedevelopment-6"
+          ],
+          "reason": "Disconnected; no automatic replay of pending choices"
+        }
+      ],
+      "decisions": 20
+    }
+  ],
+  "failures": [],
+  "format": "gen9botbaselinedevelopment",
+  "team_source": "two development-partition teams, explicitly supplied",
+  "public_server_used": false,
+  "training_performed": false
+}

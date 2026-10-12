@@ -1,0 +1,12 @@
+{
+  "run": "artifacts/runs/m3-switch-screen-smoke-02",
+  "audit": {
+    "status": "verified",
+    "mode": "smoke",
+    "games": 48,
+    "checkpoint_replays": 2,
+    "reference_game_replays": 48,
+    "report_sha256": "6815a09dd89649f84b30b27a1845bd3a2c45a9b3221151b2dcc25832c15cd2e8",
+    "all_seed_screen_passed": false
+  }
+}

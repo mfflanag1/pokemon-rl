@@ -1,0 +1,22 @@
+{
+  "packages/showdown-soak/campaign.mjs": {
+    "reviewed": "31b6fdeefe161ec5c60afe71c9c287a750cee941e2d55b30666cd26c5fe1d2e6",
+    "current": "f461567a97c01752cf03c8361c606bc3ba84bc52c97dadf0e974f45117129b04"
+  },
+  "packages/showdown-soak/audit.mjs": {
+    "reviewed": "2599ed6d007acc46468e5fce7aa0505a4431225611ffd44d04cd4ea1a5cebbb1",
+    "current": "c984c0a8aede832dd7e52490456cd8b948db74f4a46e93ee15830504adc68f9a"
+  },
+  "packages/showdown-soak/teams.mjs": {
+    "reviewed": "083f297ec20e8019348ce4c4d0c179b46abcd7854f7ff34cbc02c1f77777f379",
+    "current": "76b3f92c6f090389bdcfc04d3e9c615172bd452b18f2361a61ae5b70a128d46a"
+  },
+  "packages/showdown-soak/plan.json": {
+    "reviewed": "5d5cd9a1bdba853ec9334c0575417cd974cde236da978fd8f37b8a6491b6af05",
+    "current": "6e0b415c43051647fa0fc736ed7304be1a340eb808a1efec8ca1e84f53ab40f4"
+  },
+  "scripts/seal-showdown-soak.py": {
+    "reviewed": "72302c14c574e8978e1ee55cb75a549e224caccb945dec12eaf122ce96c1b42f",
+    "current": "82b80cea4bb775065d46151e984badbec6f18d95d143d9c6b7ba690b6a97247c"
+  }
+}

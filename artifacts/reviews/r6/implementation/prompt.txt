@@ -1,0 +1,891 @@
+Task and review objective:
+Review the additive R6 implementation for consequential bugs and claims exceeding evidence. R6 is a conservative inventory/catalog, not an accelerated simulator or minimal reachability proof. All pinned base Dex entries remain unsupported; no reference case grants support. Audit whether AST call/callback enumeration, initial-form alternatives, source/hash cross-links, Python independent verification and fail-closed support gate are sound within this declared scope. Check concrete fixture assertions and replay handling. Do not demand a full engine or exact reachability proof. Identify actionable omissions/integrity gaps; distinguish them from disclosed coarse bounds. Three Node and eight Python focused tests passed before the latest expansion to retain all ordinary calls/constructors; final full tests are still pending. Prior bounded research timed out without output; this is a narrower implementation review, no research findings integrated.
+
+
+FILE contracts/mechanics-v1/README.md
+1: # R6 mechanics contract, major version 1
+2: 
+3: Producer: `packages/mechanics/`. Independent consumer and fail-closed boundary:
+4: `python/pokemon_reference/mechanics.py`. JSON uses the existing R1/R2 canonical
+5: UTF-8 sorted-key convention and SHA-256. Each document's `content_hash` hashes
+6: all fields except itself. File byte hashes include the trailing newline.
+7: 
+8: - `r6-mechanics-1`: profile and pin, source/file and fragment hashes with one-based
+9:   lines and zero-based half-open UTF-8 byte spans; generator alternatives; entries;
+10:   call/construction/identity-write sites; conservative domain bounds.
+11: - `r6-fixtures-1`: fixed teams, explicit RNG seed, full initialization/choice tape,
+12:   normalized protocol and selected state checkpoints; assertion and replay result.
+13: - `r6-catalog-1`: manifest/fixture hashes, owner tickets, family requirements and
+14:   individual callback obligations. Reference case links do not certify a family.
+15: - `r6-report-1`: file/producer hashes, inventory and reference-case counts.
+16: 
+17: An entry key is `domain:id`. Domains are moves, abilities, items, forms,
+18: conditions and core. Empty item ID means no held item; it is not an unknown ID.
+19: Cosmetic aliases reference their base source. Embedded conditions are indexed
+20: inside their owning move/ability/item, including nested callback paths.
+21: 
+22: Reachability is `witnessed-initial` or `conservative-envelope`. Initial evidence
+23: is independently `observed-initial`, `declared-candidate`, `not-established-initial`
+24: or `profile-runtime`. The full base Dex intentionally includes candidates from
+25: other generations, nonstandard entries and impossible combinations. It is a safe
+26: planning superset, not a proof that every entry can occur in this format. No
+27: unreachability exclusions or minimal closure are certified by version 1.
+28: 
+29: `unsupported` is the only valid engine support status in R6. Promoting an entry
+30: requires a new engine implementation/attestation contract; editing this JSON to
+31: `implemented-tested` cannot grant simulation access. `SupportGate.require()` and
+32: `require_profile()` always reject until that engine contract exists. The pinned
+33: Showdown reference remains usable. Unknown identities and empty profiles reject.
+34: 
+35: Every AST call and constructor in the five base tables, selected core modules
+36: and generator is recorded. Identity field assignments are additionally recorded.
+37: Known sinks use full-domain bounds. Other calls/constructors retain a
+38: `pinned-runtime` source obligation, including callback aliases; this classification
+39: is deliberately coarse, not a resolved call graph. All callback-valued properties
+40: in the five loaded tables must match the AST callback index, including arrays.
+41: The pinned runtime includes upstream/lib code and dependencies bound by R1's
+42: verified source/build receipt; those are not individually reimplemented by R6.
+43: Runtime active-move modifications and freshly constructed effect objects are
+44: covered by their source bodies, not a fictitious finite set of all object values.
+45: 
+46: A validator must reject unknown major versions, bad content/source hashes,
+47: missing initial corpus roots, duplicate identities, broken owner/pathway/catalog
+48: links, unclassified pathways, unknown families, invalid support claims and
+49: source paths escaping the project. Source validation is local and read-only;
+50: Python does not execute or reinterpret TypeScript. Validation is integrity and
+51: consistency checking, not an authenticity signature or an engine parity test.
+52: 
+53: Future fixtures must add failure paths, immunity/suppression, switching cleanup,
+54: random branch/draw-schedule coverage and cross-mechanic interactions. Neither
+55: scripted teams nor observer interventions are official generator witnesses.
+56: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/mechanics/source-index.mjs
+1: import {createRequire} from 'node:module';
+2: import {readFileSync} from 'node:fs';
+3: import path from 'node:path';
+4: import {ROOT, UPSTREAM, fileHash, sha256} from '../reference-node/provenance.mjs';
+5: 
+6: const require = createRequire(import.meta.url);
+7: export const ts = require(path.join(ROOT, 'tools/mechanics-deps/node_modules/typescript'));
+8: if (ts.version !== '5.9.3') throw new Error('R6 requires the separately locked TypeScript 5.9.3 parser');
+9: 
+10: export function parseSource(file) {
+11:   const text = readFileSync(path.join(UPSTREAM, file), 'utf8');
+12:   const ast = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+13:   if (ast.parseDiagnostics.length) throw new Error(`Cannot parse pinned source ${file}`);
+14:   const sourceHash = fileHash(path.join(UPSTREAM, file));
+15:   function ref(node) {
+16:     const start = node.getStart(ast), end = node.getEnd();
+17:     return {file, file_sha256: sourceHash, start_line: ast.getLineAndCharacterOfPosition(start).line + 1,
+18:       end_line: ast.getLineAndCharacterOfPosition(end).line + 1, start_byte: Buffer.byteLength(text.slice(0, start)),
+19:       end_byte: Buffer.byteLength(text.slice(0, end)), fragment_sha256: sha256(text.slice(start, end))};
+20:   }
+21:   return {file, text, ast, ref};
+22: }
+23: 
+24: export function walk(node, visit) { visit(node); ts.forEachChild(node, child => { walk(child, visit); }); }
+25: export const keyName = node => node && (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) ? node.text : null;
+26: 
+27: export function tableEntries(source, variable) {
+28:   let table;
+29:   walk(source.ast, n => {
+30:     if (ts.isVariableDeclaration(n) && keyName(n.name) === variable && n.initializer && ts.isObjectLiteralExpression(n.initializer)) table = n.initializer;
+31:   });
+32:   if (!table) throw new Error(`Missing ${variable} table`);
+33:   return new Map(table.properties.map(n => {
+34:     const key = keyName(n.name);
+35:     if (!key || !ts.isPropertyAssignment(n) || !ts.isObjectLiteralExpression(n.initializer)) throw new Error(`Nonliteral ${variable} entry`);
+36:     return [key, n];
+37:   }));
+38: }
+39: 
+40: export function methodNodes(source) {
+41:   const out = new Map();
+42:   walk(source.ast, n => { if (ts.isMethodDeclaration(n) && keyName(n.name)) out.set(keyName(n.name), n); });
+43:   return out;
+44: }
+45: 
+46: export function stringLiterals(node) {
+47:   const out = new Set();
+48:   walk(node, n => { if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) out.add(n.text); });
+49:   return [...out].sort();
+50: }
+51: 
+52: const SINKS = {
+53:   runMove: 'move-execution', useMove: 'move-execution', useMoveInner: 'move-execution', getActiveMove: 'active-move-construction',
+54:   transformInto: 'transform-copy', formeChange: 'form-change', setSpecies: 'form-change', setAbility: 'ability-change',
+55:   setItem: 'item-transfer', takeItem: 'item-transfer', useItem: 'item-consumption', eatItem: 'item-consumption',
+56:   addVolatile: 'condition-install', addSideCondition: 'condition-install', addSlotCondition: 'condition-install',
+57:   setWeather: 'condition-install', setTerrain: 'condition-install', addPseudoWeather: 'condition-install',
+58:   runEvent: 'event-dispatch', singleEvent: 'event-dispatch', eachEvent: 'event-dispatch', fieldEvent: 'event-dispatch', residualEvent: 'event-dispatch',
+59:   call: 'callback-invocation', apply: 'callback-invocation',
+60: };
+61: const STATE_FIELDS = new Set(['moveSlots', 'baseMoveSlots', 'moves', 'ability', 'baseAbility', 'item', 'lastItem', 'species', 'baseSpecies']);
+62: 
+63: export function pathways(source, root = source.ast) {
+64:   const out = [];
+65:   walk(root, n => {
+66:     let kind, selector, args = [];
+67:     if (ts.isCallExpression(n)) {
+68:       const expr = n.expression;
+69:       const name = ts.isPropertyAccessExpression(expr) ? keyName(expr.name) : ts.isIdentifier(expr) ? expr.text : null;
+70:       kind = Object.hasOwn(SINKS, name) ? SINKS[name] : undefined;
+71:       if (ts.isElementAccessExpression(expr)) kind = 'computed-call';
+72:       const target = expr.getText(source.ast);
+73:       if (name === 'get' && /\.(moves|abilities|items|species|conditions)\.get$/.test(target)) kind = 'dex-resolution';
+74:       // Retain every remaining call under the enclosing source obligation.
+75:       // Local aliases can themselves hold callbacks, so dropping ordinary
+76:       // identifier/property calls would hide potential dynamic dispatch.
+77:       if (!kind) kind = 'source-owned-call';
+78:       selector = target;
+79:       args = n.arguments.map(a => ({expression: a.getText(source.ast), literal: ts.isStringLiteral(a) ? a.text : null}));
+80:     } else if (ts.isNewExpression(n)) {
+81:       kind = 'source-owned-construction'; selector = n.expression.getText(source.ast);
+82:       args = (n.arguments ?? []).map(a => ({expression: a.getText(source.ast), literal: ts.isStringLiteral(a) ? a.text : null}));
+83:     } else if (ts.isBinaryExpression(n) && n.operatorToken.kind === ts.SyntaxKind.EqualsToken
+84:         && ts.isPropertyAccessExpression(n.left) && STATE_FIELDS.has(keyName(n.left.name))) {
+85:       kind = 'identity-state-write'; selector = n.left.getText(source.ast);
+86:       args = [{expression: n.right.getText(source.ast), literal: ts.isStringLiteral(n.right) ? n.right.text : null}];
+87:     } else return;
+88:     out.push({kind, selector, arguments: args, source: source.ref(n)});
+89:   });
+90:   return out;
+91: }
+92: 
+93: export function callbacks(source, entry) {
+94:   const out = [];
+95:   function visit(n, prefix) {
+96:     if (ts.isObjectLiteralExpression(n)) {
+97:       for (const p of n.properties) {
+98:         const key = keyName(p.name);
+99:         if (!key) throw new Error('Computed/spread effect property needs an explicit R6 rule');
+100:         const route = [...prefix, key];
+101:         if (ts.isMethodDeclaration(p) || (ts.isPropertyAssignment(p) && (ts.isArrowFunction(p.initializer) || ts.isFunctionExpression(p.initializer)))) {
+102:           out.push({path: route.join('.'), source: source.ref(p), pathways: pathways(source, p)});
+103:         } else if (ts.isPropertyAssignment(p)) visit(p.initializer, route);
+104:       }
+105:     } else if (ts.isArrayLiteralExpression(n)) n.elements.forEach((child, i) => visit(child, [...prefix, String(i)]));
+106:   }
+107:   visit(entry.initializer, []); return out;
+108: }
+109: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/mechanics/policy.mjs
+1: // R6 inventories a conservative envelope. These are implementation obligations,
+2: // never assertions that the accelerated engine already implements a callback.
+3: export const FAMILIES = {
+4:   'move-resolution': ['ENG-MOVE', 'accuracy, immunity, PP, damage, secondary effects, fail/no-target, RNG draw order'],
+5:   'ability-events': ['ENG-ABILITY', 'activation, suppression, event priority, source/target roles, switching'],
+6:   'item-events': ['ENG-ITEM', 'held/absent, removal, consumption, restoration, transfer, unremovable items'],
+7:   'species-state': ['ENG-FORM', 'stats, types, HP, identity, cosmetic forms, permanent and temporary changes'],
+8:   'conditions': ['ENG-CONDITION', 'installation, refresh, duration, residual order, removal, faint/switch cleanup'],
+9:   'callback-dispatch': ['ENG-EVENT', 'handler collection, ordering, cancellation, return-value semantics, nested events'],
+10:   'move-calling': ['ENG-CALL', 'selection pool, recursion guards, copied PP, external calls, failure branches'],
+11:   'identity-copy': ['ENG-COPY', 'Transform, ability copy/swap, item identity, persistence after switching'],
+12:   'tera': ['ENG-TERA', 'once-per-side, request legality, type/STAB, Stellar, Ogerpon and Terapagos forms'],
+13:   'battle-core': ['ENG-CORE', 'turn order, phases, switches, simultaneous fainting, targeting, PRNG, terminal rules'],
+14: };
+15: 
+16: export const DOMAIN_FAMILY = {moves: 'move-resolution', abilities: 'ability-events', items: 'item-events',
+17:   forms: 'species-state', conditions: 'conditions', core: 'battle-core'};
+18: 
+19: // Unknown sink classes fail generation. A dynamic expression is bounded by the
+20: // entire pinned domain, not incorrectly treated as a literal or as unreachable.
+21: export const PATHWAY_RULES = {
+22:   'source-owned-call': {bound: 'pinned-runtime', family: 'battle-core'},
+23:   'source-owned-construction': {bound: 'pinned-runtime', family: 'battle-core'},
+24:   'move-execution': {bound: 'moves', family: 'move-calling'},
+25:   'active-move-construction': {bound: 'moves', family: 'move-calling'},
+26:   'transform-copy': {bound: 'forms+moves+abilities', family: 'identity-copy'},
+27:   'form-change': {bound: 'forms', family: 'species-state'},
+28:   'ability-change': {bound: 'abilities', family: 'identity-copy'},
+29:   'item-transfer': {bound: 'items', family: 'item-events'},
+30:   'item-consumption': {bound: 'items', family: 'item-events'},
+31:   'condition-install': {bound: 'conditions+moves+abilities+items+core', family: 'conditions'},
+32:   'event-dispatch': {bound: 'pinned-source-callbacks', family: 'callback-dispatch'},
+33:   'callback-invocation': {bound: 'pinned-source-callbacks', family: 'callback-dispatch'},
+34:   'computed-call': {bound: 'pinned-source-callbacks', family: 'callback-dispatch'},
+35:   'dex-resolution': {bound: 'moves+abilities+items+forms+conditions', family: 'callback-dispatch'},
+36:   'identity-state-write': {bound: 'moves+abilities+items+forms', family: 'identity-copy'},
+37: };
+38: 
+39: export function classifyPathway(p) {
+40:   const rule = Object.hasOwn(PATHWAY_RULES, p.kind) ? PATHWAY_RULES[p.kind] : null;
+41:   if (!rule) throw new Error(`Unclassified pathway kind: ${p.kind}`);
+42:   return {...p, classification: p.arguments[0]?.literal !== null && p.arguments[0]?.literal !== undefined ?
+43:     'literal-with-conservative-envelope' : 'dynamic-conservative-envelope', ...rule};
+44: }
+45: 
+46: export const INDIRECT_AUDIT = [
+47:   ['moves', 'sleeptalk', 'Selects eligible current move slots; excludes banned callers and charging moves.'],
+48:   ['moves', 'transform', 'Copies target species, move slots, boosts and ability with special exclusions; HP/level are retained.'],
+49:   ['abilities', 'imposter', 'Calls Transform on the opposing active Pokemon at entry.'],
+50:   ['abilities', 'trace', 'Copies an eligible opposing ability; blacklist and later retry matter.'],
+51:   ['abilities', 'dancer', 'Core runMove repeats the current successful dance with external-call guard.'],
+52:   ['abilities', 'magicbounce', 'Reflects the current eligible move with hasBounced guard.'],
+53:   ['moves', 'struggle', 'Core request fallback when no move is usable; not an initial set move.'],
+54:   ...['metronome', 'assist', 'copycat', 'mimic', 'sketch', 'instruct', 'mefirst', 'mirrormove', 'naturepower',
+55:     'skillswap', 'entrainment', 'roleplay', 'simplebeam', 'worryseed'].map(id =>
+56:     ['moves', id, 'Not an observed/declarative initial move. Retained in the conservative envelope; no global unreachability proof is claimed.']),
+57:   ['moves', 'recycle', 'Restores the previously consumed item, with restrictions.'],
+58:   ['moves', 'trick', 'Transfers existing held items subject to removal/transfer restrictions.'],
+59:   ['moves', 'switcheroo', 'Transfers existing held items subject to removal/transfer restrictions.'],
+60:   ['abilities', 'harvest', 'Restores an eligible consumed berry with chance/weather rules.'],
+61:   ['abilities', 'zerotohero', 'Permanent Palafin form change after switching out.'],
+62:   ['abilities', 'disguise', 'Form and damage handling; not ordinary permanent ability replacement.'],
+63:   ['abilities', 'iceface', 'Form, physical damage, and weather restoration rules.'],
+64:   ['abilities', 'terashift', 'Terapagos entry form; Tera adds a further core form/ability transition.'],
+65: ];
+66: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/mechanics/manifest.mjs
+1: import assert from 'node:assert/strict';
+2: import {readFileSync, readdirSync} from 'node:fs';
+3: import path from 'node:path';
+4: import {Dex, Teams, seedFor, describe} from '../reference-node/engine.mjs';
+5: import {ROOT, UPSTREAM, pin, fileHash, hashJSON} from '../reference-node/provenance.mjs';
+6: import {sourceCatalog} from '../corpus/catalog.mjs';
+7: import {parseSource, tableEntries, methodNodes, stringLiterals, callbacks, pathways} from './source-index.mjs';
+8: import {DOMAIN_FAMILY, FAMILIES, INDIRECT_AUDIT, classifyPathway} from './policy.mjs';
+9: 
+10: export const INPUTS = {
+11:   frequencies: 'artifacts/runs/r3-gen9-random-100k-v2/inventory-final/frequencies.json',
+12:   r3_report: 'artifacts/reports/r3-corpus.json',
+13:   r4_index: 'artifacts/runs/r4-fixtures-v1/index.json',
+14:   r5_probes: 'artifacts/runs/r5-features-v1/live-probes.json',
+15: };
+16: const FREQUENCIES_HASH = '869d59aa23be70d0c87376f56744ef62824d58e80310e56a37adad52ebd909c3';
+17: const TABLES = {moves: ['data/moves.ts', 'Moves', 'Moves'], abilities: ['data/abilities.ts', 'Abilities', 'Abilities'],
+18:   items: ['data/items.ts', 'Items', 'Items'], forms: ['data/pokedex.ts', 'Pokedex', 'Pokedex'],
+19:   conditions: ['data/conditions.ts', 'Conditions', 'Conditions']};
+20: const sorted = values => [...new Set(values)].sort();
+21: const read = file => JSON.parse(readFileSync(path.join(ROOT, file), 'utf8'));
+22: 
+23: export function runtimeCallbacks(value, prefix = [], result = []) {
+24:   for (const [key, child] of Object.entries(value ?? {})) {
+25:     const route = [...prefix, key];
+26:     if (typeof child === 'function') result.push(route.join('.'));
+27:     else if (child && typeof child === 'object') runtimeCallbacks(child, route, result);
+28:   }
+29:   return result.sort();
+30: }
+31: 
+32: export function enumerateInitialForms(catalog) {
+33:   const generator = Teams.getGenerator(pin.format_id, seedFor('r6-generator-alternatives-v1'));
+34:   const originalSample = generator.sample;
+35:   const result = {};
+36:   try {
+37:     for (const id of Object.keys(catalog.entries).sort()) {
+38:       let options, calls = 0;
+39:       generator.sample = pool => { calls++; options = [...pool]; return pool[0]; };
+40:       const first = generator.getForme(Dex.species.get(id));
+41:       assert.ok(calls <= 1, 'getForme gained multiple sampling sites: update the enumeration');
+42:       const values = [first];
+43:       for (let i = 1; i < (options?.length ?? 0); i++) {
+44:         calls = 0;
+45:         generator.sample = pool => { calls++; assert.deepEqual(pool, options); return pool[i]; };
+46:         values.push(generator.getForme(Dex.species.get(id)));
+47:         assert.equal(calls, 1);
+48:       }
+49:       result[id] = sorted(values.map(name => { const s = Dex.species.get(name); assert.ok(s.exists); return s.id; }));
+50:     }
+51:   } finally { generator.sample = originalSample; }
+52:   return result;
+53: }
+54: 
+55: export function buildManifest() {
+56:   assert.equal(fileHash(path.join(ROOT, INPUTS.frequencies)), FREQUENCIES_HASH, 'R3 inventory changed');
+57:   const engine = describe(), catalog = sourceCatalog(), frequencies = read(INPUTS.frequencies);
+58:   assert.equal(hashJSON(catalog), '429570e57cb4e9f6442283d4eb2d929ed5f52f63d70b5290cdc61f0454c22b46');
+59:   const dex = Dex.forFormat(pin.format_id);
+60:   assert.equal(dex.currentMod, 'base'); assert.equal(dex.gen, 9);
+61:   const generator = parseSource('data/random-battles/gen9/teams.ts'), methods = methodNodes(generator);
+62:   const initialForms = enumerateInitialForms(catalog);
+63:   const declared = {moves: new Set(), abilities: new Set(), items: new Set(['']), forms: new Set(Object.values(initialForms).flat()), conditions: new Set()};
+64:   for (const e of Object.values(catalog.entries)) for (const set of e.sets) {
+65:     set.moves.forEach(id => declared.moves.add(id)); set.abilities.forEach(id => declared.abilities.add(id));
+66:   }
+67:   // This item set is a candidate set, not a complete branch-feasibility proof.
+68:   // The full item domain is retained below, so an overlooked expression cannot
+69:   // silently remove a required mechanic from the support gate.
+70:   for (const name of ['getPriorityItem', 'getItem']) for (const literal of stringLiterals(methods.get(name))) {
+71:     const item = dex.items.get(literal); if (item.exists) declared.items.add(item.id);
+72:   }
+73:   for (const id of Object.keys(catalog.entries)) for (const name of dex.species.get(id).requiredItems ?? []) declared.items.add(dex.items.get(name).id);
+74:   for (const berry of ['Aguav', 'Figy', 'Iapapa', 'Mago', 'Wiki']) declared.items.add(dex.items.get(`${berry} Berry`).id);
+75:   const observed = Object.fromEntries(Object.keys(TABLES).map(domain => [domain,
+76:     Object.fromEntries(Object.entries(frequencies[domain] ?? {}).map(([id, count]) => [id === '<none>' ? '' : id, count]))]));
+77:   for (const domain of ['moves', 'abilities', 'forms']) for (const id of Object.keys(observed[domain])) assert.ok(declared[domain].has(id), `Unexplained initial ${domain}:${id}`);
+78:   const sources = {}, entries = [], dispatch = [];
+79:   function addSource(source) { sources[source.file] = source.ref(source.ast).file_sha256; }
+80:   addSource(generator);
+81:   function addPathways(list, owner) {
+82:     const ids = [];
+83:     for (const raw of list) {
+84:       const p = classifyPathway(raw), id = hashJSON([owner, p.source.file, p.source.start_byte, p.kind]);
+85:       ids.push(id); dispatch.push({id, owner, ...p});
+86:     }
+87:     return ids;
+88:   }
+89:   for (const [domain, [file, variable, table]] of Object.entries(TABLES)) {
+90:     const source = parseSource(file); addSource(source);
+91:     for (const [id, node] of tableEntries(source, variable)) {
+92:       const cbs = callbacks(source, node), data = dex.data[table][id];
+93:       assert.deepEqual(cbs.map(c => c.path).sort(), runtimeCallbacks(data), `Unindexed callbacks: ${domain}:${id}`);
+94:       const key = `${domain}:${id}`, paths = addPathways(pathways(source, node), key);
+95:       const families = sorted([DOMAIN_FAMILY[domain], ...(cbs.length ? ['callback-dispatch'] : []),
+96:         ...pathways(source, node).map(p => classifyPathway(p).family)]);
+97:       if ((domain === 'moves' && ['terablast', 'terastarstorm'].includes(id)) ||
+98:           (domain === 'forms' && /^(ogerpon|terapagos)/.test(id))) families.push('tera');
+99:       entries.push({key, domain, id, source: source.ref(node), callback_paths: cbs.map(c => ({path: c.path, source: c.source})),
+100:         data_sha256: hashJSON(JSON.parse(JSON.stringify(data, (_, v) => typeof v === 'function' ? '<callback>' : v))),
+101:         observed_count: observed[domain][id] ?? 0,
+102:         initial_class: observed[domain][id] ? 'observed-initial' : declared[domain].has(id) ? 'declared-candidate' : 'not-established-initial',
+103:         reachability: observed[domain][id] ? 'witnessed-initial' : 'conservative-envelope',
+104:         support: 'unsupported', handler_id: key, ticket: FAMILIES[DOMAIN_FAMILY[domain]][0],
+105:         fixture_families: sorted(families), pathways: paths,
+106:         embedded_condition: Boolean(data.condition),
+107:       });
+108:     }
+109:   }
+110:   const byKey = new Map(entries.map(e => [e.key, e]));
+111:   // Dex materializes cosmetic forms from their base entry; do not invent a
+112:   // nonexistent TS definition for these aliases.
+113:   for (const name of Object.keys(catalog.resolvers.species)) {
+114:     const species = dex.species.get(name), key = `forms:${species.id}`;
+115:     if (byKey.has(key)) continue;
+116:     const parent = byKey.get(`forms:${dex.species.get(species.baseSpecies).id}`);
+117:     assert.ok(parent, `No base source for ${key}`);
+118:     const entry = {...parent, key, id: species.id, handler_id: key, derived_from: parent.key,
+119:       observed_count: observed.forms[species.id] ?? 0,
+120:       initial_class: observed.forms[species.id] ? 'observed-initial' : declared.forms.has(species.id) ? 'declared-candidate' : 'not-established-initial',
+121:       reachability: observed.forms[species.id] ? 'witnessed-initial' : 'conservative-envelope',
+122:       data_sha256: hashJSON({base: parent.data_sha256, id: species.id, name: species.name})};
+123:     entries.push(entry); byKey.set(key, entry);
+124:   }
+125:   const coreFiles = [...readdirSync(path.join(UPSTREAM, 'sim')).filter(f => f.endsWith('.ts')).map(f => `sim/${f}`),
+126:     'data/scripts.ts', 'data/rulesets.ts', 'data/typechart.ts', 'data/natures.ts', 'data/aliases.ts', 'data/formats-data.ts', 'config/formats.ts'];
+127:   for (const file of coreFiles.sort()) {
+128:     const source = parseSource(file); addSource(source);
+129:     const key = `core:${file}`;
+130:     entries.push({key, domain: 'core', id: file, source: source.ref(source.ast), callback_paths: [],
+131:       data_sha256: sources[file], observed_count: 0, initial_class: 'profile-runtime', reachability: 'conservative-envelope',
+132:       support: 'unsupported', handler_id: key, ticket: 'ENG-CORE', fixture_families: ['battle-core', 'callback-dispatch'],
+133:       pathways: addPathways(pathways(source), key), embedded_condition: false});
+134:   }
+135:   entries.push({key: 'items:', domain: 'items', id: '', source: entries.find(e => e.key === 'core:sim/pokemon.ts').source,
+136:     callback_paths: [], data_sha256: hashJSON('no-held-item'), observed_count: observed.items[''], initial_class: 'observed-initial',
+137:     reachability: 'witnessed-initial', support: 'unsupported', handler_id: 'items:', ticket: 'ENG-ITEM',
+138:     fixture_families: ['item-events'], pathways: [], embedded_condition: false});
+139:   addPathways(pathways(generator), 'generator');
+140:   for (const domain of Object.keys(TABLES)) for (const id of Object.keys(observed[domain])) assert.ok(entries.some(e => e.domain === domain && e.id === id), `Missing ${domain}:${id}`);
+141:   const body = {
+142:     schema_version: 'r6-mechanics-1', artifact_kind: 'mechanics-manifest', profile: pin.format_id, showdown_commit: pin.commit,
+143:     reference_manifest_id: engine.manifest_id,
+144:     scope: {kind: 'conservative-pinned-base-dex-envelope', minimal_reachability_proven: false,
+145:       includes_legacy_and_nonstandard_candidates: true, custom_engine_implemented: false,
+146:       dynamic_analysis: 'Syntactic sink inventory with whole-domain bounds; not a whole-program control-flow or reachability proof.',
+147:       generated_effects: 'Embedded conditions, active-move mutations and transient callback objects inherit their enclosing source and fixture family. Core modules own effect dispatch and fallback conditions.',
+148:       unknown_identity_policy: 'reject', external_plugins: false, custom_formats: false, server_config: false},
+149:     inputs: Object.fromEntries(Object.entries(INPUTS).map(([k, file]) => [k, {file, sha256: fileHash(path.join(ROOT, file))}])),
+150:     parser: {version: '5.9.3', lock_sha256: fileHash(path.join(ROOT, 'tools/mechanics-deps/package-lock.json'))},
+151:     sources,
+152:     generator_audit: {source: generator.ref(generator.ast), initial_forms: initialForms,
+153:       declared_moves: sorted(declared.moves), declared_abilities: sorted(declared.abilities), item_candidates: sorted(declared.items),
+154:       item_candidate_scope: 'Resolved literals, requiredItems and five Gluttony berries; conservative and not a branch-feasibility proof. All pinned items remain required by this envelope.',
+155:       methods: Object.fromEntries(['randomTeam', 'randomSet', 'getMoves' , 'getAbility', 'getPriorityItem', 'getItem', 'getForme'].filter(n => methods.has(n)).map(n => [n, generator.ref(methods.get(n))]))},
+156:     indirect_audit: INDIRECT_AUDIT.map(([domain, id, reason]) => ({entry: `${domain}:${id}`, reason,
+157:       initial: observed[domain][id] ? 'observed' : declared[domain].has(id) ? 'declared-candidate' : 'not-established',
+158:       reachability: observed[domain][id] ? 'witnessed-initial' : 'conservative-envelope'})),
+159:     entries: entries.sort((a, b) => a.key.localeCompare(b.key, 'en')), pathways: dispatch.sort((a, b) => a.id.localeCompare(b.id, 'en')),
+160:     unclassified_pathways: [],
+161:   };
+162:   return {...body, content_hash: hashJSON(body)};
+163: }
+164: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/mechanics/fixtures.mjs
+1: import assert from 'node:assert/strict';
+2: import {BattleStream, seedFor} from '../reference-node/engine.mjs';
+3: import {hashJSON} from '../reference-node/provenance.mjs';
+4: 
+5: const mon = (species, ability, moves, item = '', teraType = 'Normal') => ({species, name: species, ability, moves, item,
+6:   teraType, level: 100, nature: 'Serious', evs: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0},
+7:   ivs: {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31}});
+8: const idle = () => mon('Blissey', 'Natural Cure', ['Splash']);
+9: 
+10: export const SCENARIOS = [
+11:   {id: 'sleep-talk', teams: [[mon('Snorlax', 'Thick Fat', ['Sleep Talk', 'Tackle'])], [mon('Breloom', 'Technician', ['Spore'])]],
+12:     turns: [['move 1', 'move 1']], entries: ['moves:sleeptalk', 'moves:tackle', 'conditions:slp'], families: ['move-calling', 'conditions'],
+13:     check: (s, log) => { assert.equal(s[0][0].status, 'slp'); assert.ok(log.some(l => l.includes('|Tackle|') && l.includes('[from] move: Sleep Talk'))); }},
+14:   {id: 'imposter', teams: [[mon('Ditto', 'Imposter', ['Transform'])], [mon('Blissey', 'Natural Cure', ['Tackle', 'Soft-Boiled'])]],
+15:     turns: [], entries: ['abilities:imposter', 'moves:transform'], families: ['identity-copy', 'move-calling'],
+16:     check: s => { const [a, b] = s.map(t => t[0]); assert.equal(a.species, 'blissey'); assert.equal(a.transformed, true);
+17:       assert.equal(a.ability, 'naturalcure'); assert.deepEqual(a.moves.map(m => m.id), b.moves.map(m => m.id));
+18:       assert.ok(a.moves.every(m => m.pp === 5)); assert.equal(a.maxhp, 237); assert.equal(a.level, 100); }},
+19:   {id: 'magic-bounce', teams: [[mon('Smeargle', 'Own Tempo', ['Spore'])], [mon('Espeon', 'Magic Bounce', ['Splash'])]],
+20:     turns: [['move 1', 'move 1']], entries: ['abilities:magicbounce', 'moves:spore'], families: ['move-calling', 'callback-dispatch'],
+21:     check: (s, log) => { assert.equal(s[0][0].status, 'slp'); assert.equal(s[1][0].status, ''); assert.ok(log.some(l => l.includes('[from] ability: Magic Bounce'))); }},
+22:   {id: 'dancer', teams: [[mon('Butterfree', 'Compound Eyes', ['Quiver Dance'])], [mon('Oricorio', 'Dancer', ['Splash'])]],
+23:     turns: [['move 1', 'move 1']], entries: ['abilities:dancer', 'moves:quiverdance'], families: ['move-calling', 'callback-dispatch'],
+24:     check: (s, log) => { for (const team of s) for (const stat of ['spa', 'spd', 'spe']) assert.equal(team[0].boosts[stat], 1);
+25:       assert.ok(log.some(l => l.includes('[from] ability: Dancer'))); }},
+26:   {id: 'trace', teams: [[mon('Porygon2', 'Trace', ['Splash'])], [mon('Gyarados', 'Intimidate', ['Splash'])]],
+27:     turns: [], entries: ['abilities:trace', 'abilities:intimidate'], families: ['identity-copy', 'ability-events'],
+28:     check: s => { assert.equal(s[0][0].ability, 'intimidate'); assert.equal(s[0][0].base_ability, 'trace'); }},
+29:   {id: 'ogerpon-tera', teams: [[mon('Ogerpon-Wellspring', 'Water Absorb', ['Protect'], 'Wellspring Mask', 'Water')], [idle()]],
+30:     turns: [['move 1 terastallize', 'move 1']], entries: ['forms:ogerponwellspringtera', 'abilities:embodyaspectwellspring', 'items:wellspringmask'], families: ['tera', 'species-state'],
+31:     check: s => { assert.equal(s[0][0].species, 'ogerponwellspringtera'); assert.equal(s[0][0].ability, 'embodyaspectwellspring'); assert.equal(s[0][0].tera, 'Water'); }},
+32:   {id: 'recycle', teams: [[mon('Snorlax', 'Thick Fat', ['Rest', 'Recycle'], 'Chesto Berry')], [mon('Pikachu', 'Static', ['Tackle'])]],
+33:     turns: [['move 1', 'move 1'], ['move 2', 'move 1']], entries: ['moves:recycle', 'moves:rest', 'items:chestoberry'], families: ['item-events', 'conditions'],
+34:     check: (s, log) => { assert.equal(s[0][0].item, 'chestoberry'); assert.equal(s[0][0].status, '');
+35:       assert.ok(log.some(l => l.includes('|-enditem|') && l.includes('Chesto Berry')));
+36:       assert.ok(log.some(l => l.includes('|-item|') && l.includes('[from] move: Recycle'))); }},
+37:   {id: 'zero-to-hero', teams: [[mon('Palafin', 'Zero to Hero', ['Flip Turn']), idle()], [idle()]],
+38:     turns: [['move 1', 'move 1'], ['switch 2', null], ['switch 2', 'move 1']], entries: ['abilities:zerotohero', 'forms:palafinhero', 'moves:flipturn'], families: ['species-state', 'battle-core'],
+39:     check: s => { const p = s[0].find(p => p.base_species === 'palafinhero'); assert.ok(p); assert.equal(p.species, 'palafinhero'); assert.equal(p.active, true); }},
+40: ];
+41: 
+42: class CaptureStream extends BattleStream {
+43:   constructor() { super({noCatch: true, keepAlive: true}); this.messages = []; }
+44:   push(message) { this.messages.push(message); }
+45: }
+46: function snapshot(battle) {
+47:   return battle.sides.map(side => side.pokemon.map(p => ({species: p.species.id, base_species: p.baseSpecies.id,
+48:     hp: p.hp, maxhp: p.maxhp, level: p.level, status: p.status, item: p.item, last_item: p.lastItem,
+49:     ability: p.ability, base_ability: p.baseAbility, transformed: p.transformed, active: p.isActive,
+50:     tera: p.terastallized ?? null, boosts: {...p.boosts}, moves: p.moveSlots.map(m => ({id: m.id, pp: m.pp, maxpp: m.maxpp})),
+51:     volatiles: Object.keys(p.volatiles).sort()})));
+52: }
+53: 
+54: export async function runScenario(scenario, swap = false) {
+55:   const seed = seedFor(`r6-fixture-v1/${scenario.id}/${swap ? 'reverse' : 'forward'}`);
+56:   const teams = swap ? [...scenario.teams].reverse() : scenario.teams;
+57:   const tape = [`>start ${JSON.stringify({formatid: 'gen9randombattle', seed})}`,
+58:     ...teams.map((team, i) => `>player p${i + 1} ${JSON.stringify({name: `P${i + 1}`, team})}`)];
+59:   for (const actions of scenario.turns) {
+60:     const choices = swap ? [...actions].reverse() : actions;
+61:     tape.push(choices.flatMap((a, i) => a ? [`>p${i + 1} ${a}`] : []).join('\n'));
+62:   }
+63:   const stream = new CaptureStream();
+64:   try {
+65:     const checkpoints = [];
+66:     for (const command of tape) {
+67:       await stream.write(command);
+68:       if (stream.battle?.started) checkpoints.push({turn: stream.battle.turn, request: stream.battle.requestState,
+69:         seed: stream.battle.prng.getSeed(), state: snapshot(stream.battle)});
+70:     }
+71:     const protocol = stream.messages.flatMap(m => m.split('\n')).map(l => /^\|t:\|/.test(l) ? '|t:|<normalized>' : l);
+72:     assert.ok(!protocol.some(l => l.startsWith('|error|')), protocol.filter(l => l.startsWith('|error|')).join('\n'));
+73:     const state = snapshot(stream.battle);
+74:     scenario.check(swap ? [...state].reverse() : state, protocol);
+75:     return {id: `${scenario.id}/${swap ? 'reverse' : 'forward'}`, scenario: scenario.id,
+76:       profile: 'r6-constructed-fixed-teams-v1', evidence: 'constructed-scripted-reference', official_generator_witness: false,
+77:       seed, teams, tape, checkpoints, protocol, entries: scenario.entries, fixture_families: scenario.families,
+78:       assertions_passed: true, result_hash: hashJSON({checkpoints, protocol})};
+79:   } finally { stream.destroy(); }
+80: }
+81: 
+82: export async function captureFixtures() {
+83:   const cases = [];
+84:   for (const scenario of SCENARIOS) for (const swap of [false, true]) {
+85:     const first = await runScenario(scenario, swap), replay = await runScenario(scenario, swap);
+86:     assert.deepEqual(replay, first, `Reference replay mismatch: ${first.id}`);
+87:     cases.push({...first, replay_verified: true});
+88:   }
+89:   const body = {schema_version: 'r6-fixtures-1', artifact_kind: 'reference-fixtures', cases,
+90:     scope: 'Scripted fixed teams, two seats, initialization replay. Checkpoints are selected diagnostics, not restart states or custom-engine parity. These teams need not be generated by the official generator.'};
+91:   return {...body, content_hash: hashJSON(body)};
+92: }
+93: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/mechanics/catalog.mjs
+1: import {FAMILIES} from './policy.mjs';
+2: import {hashJSON} from '../reference-node/provenance.mjs';
+3: 
+4: export function fixtureCatalog(manifest, fixtures) {
+5:   const body = {
+6:     schema_version: 'r6-catalog-1', artifact_kind: 'fixture-catalog', manifest_hash: manifest.content_hash,
+7:     fixtures_hash: fixtures.content_hash,
+8:     families: Object.entries(FAMILIES).map(([id, [ticket, obligations]]) => ({id, ticket, obligations,
+9:       required_dimensions: ['positive and failure paths', 'both player seats', 'boundary and cleanup',
+10:         'interactions with suppression/immunity/targeting', 'random branches and draw schedule where applicable'],
+11:       reference_cases: fixtures.cases.filter(c => c.fixture_families.includes(id)).map(c => c.id),
+12:       differential_status: 'planned'})),
+13:     entries: manifest.entries.map(e => ({entry: e.key, ticket: e.ticket, fixture_families: e.fixture_families,
+14:       reference_cases: fixtures.cases.filter(c => c.entries.includes(e.key)).map(c => c.id),
+15:       required_checks: ['declarative data parity', ...e.callback_paths.map(c => `callback:${c.path}`),
+16:         ...(e.embedded_condition ? ['embedded condition lifecycle'] : [])],
+17:       differential_status: 'planned'})),
+18:     inherited_evidence: [
+19:       {input: 'r4_index', purpose: '13 request/phase fixtures: natural, truncation and constructed; retain their original evidence labels.'},
+20:       {input: 'r5_probes', purpose: '40 observer probes; information-boundary evidence, not official reachability or custom-engine parity.'},
+21:     ],
+22:     coverage_policy: 'A passing reference case is not a differential test. Family membership creates obligations; it does not cover every member. Promotion requires per-entry and interaction evidence against a separately versioned engine.',
+23:   };
+24:   return {...body, content_hash: hashJSON(body)};
+25: }
+26: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE scripts/mechanics-inventory.mjs
+1: import {mkdirSync, writeFileSync, existsSync, readFileSync} from 'node:fs';
+2: import path from 'node:path';
+3: import {buildManifest} from '../packages/mechanics/manifest.mjs';
+4: import {captureFixtures} from '../packages/mechanics/fixtures.mjs';
+5: import {fixtureCatalog} from '../packages/mechanics/catalog.mjs';
+6: import {canonical, hashJSON, ROOT, fileHash} from '../packages/reference-node/provenance.mjs';
+7: 
+8: const destination = path.resolve(process.argv[2] ?? 'artifacts/runs/r6-mechanics-v1');
+9: const manifest = buildManifest(), fixtures = await captureFixtures(), catalog = fixtureCatalog(manifest, fixtures);
+10: mkdirSync(destination, {recursive: true});
+11: function save(name, value) {
+12:   const file = path.join(destination, name), bytes = canonical(value) + '\n';
+13:   if (existsSync(file) && readFileSync(file, 'utf8') !== bytes) throw new Error(`Refusing to overwrite changed R6 artifact: ${file}`);
+14:   writeFileSync(file, bytes);
+15: }
+16: save('manifest.json', manifest); save('fixtures.json', fixtures); save('catalog.json', catalog);
+17: const body = {schema_version: 'r6-report-1', artifact_kind: 'mechanics-report', manifest_hash: manifest.content_hash,
+18:   counts: {entries: manifest.entries.length, pathways: manifest.pathways.length, unclassified_pathways: manifest.unclassified_pathways.length,
+19:     source_files: Object.keys(manifest.sources).length, fixture_families: catalog.families.length,
+20:     reference_cases: fixtures.cases.length, replay_verified: fixtures.cases.filter(c => c.replay_verified).length,
+21:     custom_engine_supported: manifest.entries.filter(e => e.support === 'implemented-tested').length,
+22:     by_domain: Object.fromEntries(['moves', 'abilities', 'items', 'forms', 'conditions', 'core'].map(d => [d,
+23:       {envelope: manifest.entries.filter(e => e.domain === d).length, observed_initial: manifest.entries.filter(e => e.domain === d && e.observed_count > 0).length}]))},
+24:   files: Object.fromEntries(['manifest.json', 'fixtures.json', 'catalog.json'].map(name => [name, fileHash(path.join(destination, name))])),
+25:   producer: Object.fromEntries(['packages/mechanics/source-index.mjs', 'packages/mechanics/policy.mjs', 'packages/mechanics/manifest.mjs',
+26:     'packages/mechanics/fixtures.mjs', 'packages/mechanics/catalog.mjs', 'scripts/mechanics-inventory.mjs',
+27:     'tools/mechanics-deps/package-lock.json'].map(file => [file, fileHash(path.join(ROOT, file))])),
+28:   scope: 'Conservative mechanics inventory and reference fixture catalog only; no accelerated-engine fidelity or minimal reachability claim.'};
+29: save('report.json', {...body, content_hash: hashJSON(body)});
+30: console.log(JSON.stringify({destination, ...body.counts, manifest_hash: manifest.content_hash}));
+31: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_reference/mechanics.py
+1: """R6 artifact verification and a fail-closed custom-engine boundary.
+2: 
+3: This module consumes Node's source inventory. It never parses TypeScript, derives
+4: actor features from diagnostics, or treats reference replay as engine support.
+5: """
+6: from pathlib import Path
+7: import argparse
+8: import hashlib
+9: import json
+10: 
+11: from .contract import hash_json, parse_json
+12: 
+13: DOMAINS = {'moves', 'abilities', 'items', 'forms', 'conditions', 'core'}
+14: FAMILIES = {'move-resolution', 'ability-events', 'item-events', 'species-state', 'conditions',
+15:             'callback-dispatch', 'move-calling', 'identity-copy', 'tera', 'battle-core'}
+16: KINDS = {'move-execution', 'active-move-construction', 'transform-copy', 'form-change',
+17:          'ability-change', 'item-transfer', 'item-consumption', 'condition-install',
+18:          'event-dispatch', 'callback-invocation', 'computed-call', 'dex-resolution', 'identity-state-write',
+19:          'source-owned-call', 'source-owned-construction'}
+20: 
+21: 
+22: def require(condition, message):
+23:     if not condition:
+24:         raise ValueError(message)
+25: 
+26: 
+27: def digest(data):
+28:     return hashlib.sha256(data).hexdigest()
+29: 
+30: 
+31: def sealed(document, version):
+32:     require(document.get('schema_version') == version, 'Unknown mechanics artifact version')
+33:     require(document.get('content_hash') == hash_json({k: v for k, v in document.items() if k != 'content_hash'}),
+34:             'Mechanics content hash mismatch')
+35: 
+36: 
+37: def confined(root, relative):
+38:     require(type(relative) is str and not Path(relative).is_absolute(), 'Expected relative source path')
+39:     full = (root / relative).resolve()
+40:     require(full.is_relative_to(root.resolve()), 'Source path escapes root')
+41:     return full
+42: 
+43: 
+44: def validate_manifest(manifest, root=None):
+45:     sealed(manifest, 'r6-mechanics-1')
+46:     require(manifest['artifact_kind'] == 'mechanics-manifest', 'Wrong artifact kind')
+47:     require(manifest['profile'] == 'gen9randombattle', 'Unknown mechanics profile')
+48:     require(manifest['scope']['kind'] == 'conservative-pinned-base-dex-envelope', 'Unsupported analysis scope')
+49:     require(manifest['scope']['minimal_reachability_proven'] is False, 'Invalid reachability claim')
+50:     require(manifest['scope']['custom_engine_implemented'] is False, 'R6 does not implement an engine')
+51:     require(manifest['unclassified_pathways'] == [], 'Unclassified pathways block the profile')
+52:     sources = manifest['sources']
+53:     contents = {}
+54:     if root is not None:
+55:         root = Path(root)
+56:         pin = parse_json((root / 'showdown.pin.json').read_bytes())
+57:         require(manifest['showdown_commit'] == pin['commit'], 'Showdown pin mismatch')
+58:         for file, expected in sources.items():
+59:             contents[file] = confined(root / 'vendor/pokemon-showdown', file).read_bytes()
+60:             require(digest(contents[file]) == expected, f'Source hash mismatch: {file}')
+61:         for spec in manifest['inputs'].values():
+62:             require(digest(confined(root, spec['file']).read_bytes()) == spec['sha256'], 'Input hash mismatch')
+63:         require(digest((root / 'tools/mechanics-deps/package-lock.json').read_bytes()) == manifest['parser']['lock_sha256'], 'Parser lock mismatch')
+64: 
+65:     def source_ref(ref):
+66:         require(ref['file'] in sources and ref['file_sha256'] == sources[ref['file']], 'Source reference mismatch')
+67:         require(type(ref['start_byte']) is int and type(ref['end_byte']) is int and 0 <= ref['start_byte'] < ref['end_byte'], 'Bad source span')
+68:         require(1 <= ref['start_line'] <= ref['end_line'], 'Bad source lines')
+69:         if contents:
+70:             data = contents[ref['file']]
+71:             require(ref['end_byte'] <= len(data), 'Source span outside file')
+72:             require(digest(data[ref['start_byte']:ref['end_byte']]) == ref['fragment_sha256'], 'Source fragment mismatch')
+73:             require(data[:ref['start_byte']].count(b'\n') + 1 == ref['start_line'], 'Source start line mismatch')
+74:             require(data[:ref['end_byte']].count(b'\n') + 1 == ref['end_line'], 'Source end line mismatch')
+75: 
+76:     entries = {}
+77:     for entry in manifest['entries']:
+78:         key = entry['key']
+79:         require(key not in entries, 'Duplicate mechanics entry')
+80:         require(entry['domain'] in DOMAINS and key == f"{entry['domain']}:{entry['id']}", 'Invalid mechanics identity')
+81:         require(entry['handler_id'] == key, 'Handler identity mismatch')
+82:         require(entry['support'] == 'unsupported', 'R6 cannot certify custom-engine support')
+83:         require(entry['ticket'].startswith('ENG-') and entry['fixture_families'] and
+84:                 set(entry['fixture_families']) <= FAMILIES, 'Missing ticket or fixture family')
+85:         require(type(entry['observed_count']) is int and entry['observed_count'] >= 0, 'Invalid observation count')
+86:         require(entry['reachability'] in {'witnessed-initial', 'conservative-envelope'}, 'Unsupported reachability classification')
+87:         require((entry['observed_count'] > 0) == (entry['reachability'] == 'witnessed-initial'), 'Witness classification mismatch')
+88:         source_ref(entry['source'])
+89:         callback_paths = []
+90:         for callback in entry['callback_paths']:
+91:             callback_paths.append(callback['path'])
+92:             source_ref(callback['source'])
+93:         require(len(callback_paths) == len(set(callback_paths)), 'Duplicate callback path')
+94:         entries[key] = entry
+95:     require(entries and {e['domain'] for e in entries.values()} == DOMAINS, 'Incomplete domain inventory')
+96:     paths = {}
+97:     for pathway in manifest['pathways']:
+98:         require(pathway['id'] not in paths, 'Duplicate pathway')
+99:         require(pathway['kind'] in KINDS and pathway['family'] in FAMILIES, 'Unknown pathway classification')
+100:         require(pathway['classification'] in {'literal-with-conservative-envelope', 'dynamic-conservative-envelope'} and pathway['bound'], 'Missing pathway bound')
+101:         require(pathway['owner'] in entries or pathway['owner'] == 'generator', 'Unknown pathway owner')
+102:         ref = pathway['source']
+103:         require(pathway['id'] == hash_json([pathway['owner'], ref['file'], ref['start_byte'], pathway['kind']]), 'Pathway identity mismatch')
+104:         source_ref(ref)
+105:         paths[pathway['id']] = pathway
+106:     for key, entry in entries.items():
+107:         for pid in entry['pathways']:
+108:             require(pid in paths and paths[pid]['owner'] == key, 'Pathway linkage mismatch')
+109:         require(set(entry['pathways']) == {pid for pid, p in paths.items() if p['owner'] == key}, 'Orphan pathway')
+110:         if 'derived_from' in entry:
+111:             require(entry['derived_from'] in entries, 'Missing base-form source')
+112:     for audit in manifest['indirect_audit']:
+113:         require(audit['entry'] in entries, 'Unknown indirect audit entry')
+114:     if root is not None:
+115:         frequencies = parse_json(confined(root, manifest['inputs']['frequencies']['file']).read_bytes())
+116:         for domain in DOMAINS - {'core', 'conditions'}:
+117:             expected = {('' if k == '<none>' else k): v for k, v in frequencies[domain].items()}
+118:             actual = {e['id']: e['observed_count'] for e in entries.values() if e['domain'] == domain and e['observed_count']}
+119:             require(actual == expected, f'Initial corpus coverage mismatch: {domain}')
+120:     return entries
+121: 
+122: 
+123: def validate_bundle(directory, root):
+124:     directory, root = Path(directory), Path(root)
+125:     docs = {name: parse_json((directory / f'{name}.json').read_bytes()) for name in ['manifest', 'fixtures', 'catalog', 'report']}
+126:     manifest, fixtures, catalog, report = (docs[n] for n in ['manifest', 'fixtures', 'catalog', 'report'])
+127:     entries = validate_manifest(manifest, root)
+128:     for name, version in [('fixtures', 'r6-fixtures-1'), ('catalog', 'r6-catalog-1'), ('report', 'r6-report-1')]:
+129:         sealed(docs[name], version)
+130:     require(catalog['manifest_hash'] == report['manifest_hash'] == manifest['content_hash'], 'Manifest linkage mismatch')
+131:     require(catalog['fixtures_hash'] == fixtures['content_hash'], 'Fixture linkage mismatch')
+132:     cases = {}
+133:     for case in fixtures['cases']:
+134:         require(case['id'] not in cases, 'Duplicate fixture ID')
+135:         require(case['profile'] == 'r6-constructed-fixed-teams-v1' and case['official_generator_witness'] is False, 'Fixture reachability overclaim')
+136:         require(case['assertions_passed'] is True and case['replay_verified'] is True, 'Unverified reference fixture')
+137:         require(case['result_hash'] == hash_json({k: case[k] for k in ['checkpoints', 'protocol']}), 'Fixture result mismatch')
+138:         require(set(case['entries']) <= entries.keys() and set(case['fixture_families']) <= FAMILIES, 'Unknown fixture linkage')
+139:         cases[case['id']] = case
+140:     require({f['id'] for f in catalog['families']} == FAMILIES, 'Incomplete family catalog')
+141:     require(len(catalog['entries']) == len(entries) and {e['entry'] for e in catalog['entries']} == entries.keys(), 'Catalog omission or duplicate')
+142:     for row in catalog['entries']:
+143:         entry = entries[row['entry']]
+144:         require(row['ticket'] == entry['ticket'] and row['fixture_families'] == entry['fixture_families'], 'Catalog ownership mismatch')
+145:         require(row['differential_status'] == 'planned', 'Reference evidence is not differential parity')
+146:         require(set(row['reference_cases']) == {key for key, c in cases.items() if row['entry'] in c['entries']}, 'Wrong reference evidence link')
+147:     for name, expected in report['files'].items():
+148:         require(digest(confined(directory, name).read_bytes()) == expected, 'Report file hash mismatch')
+149:     for file, expected in report['producer'].items():
+150:         require(digest(confined(root, file).read_bytes()) == expected, 'Producer source drift')
+151:     counts = report['counts']
+152:     require(counts['entries'] == len(entries) and counts['pathways'] == len(manifest['pathways']), 'Report counts mismatch')
+153:     require(counts['reference_cases'] == counts['replay_verified'] == len(cases), 'Report fixture count mismatch')
+154:     require(counts['custom_engine_supported'] == counts['unclassified_pathways'] == 0, 'Invalid promotion claim')
+155:     return {'manifest_hash': manifest['content_hash'], 'entries_verified': len(entries),
+156:             'pathways_verified': len(manifest['pathways']), 'reference_cases_verified': len(cases),
+157:             'custom_engine_gate': 'blocked-unsupported', 'verification': 'artifact/source integrity; reference assertions executed in Node'}
+158: 
+159: 
+160: class UnsupportedMechanic(RuntimeError):
+161:     pass
+162: 
+163: 
+164: class SupportGate:
+165:     """R6 has no custom engine. No JSON support flag can grant implementation."""
+166:     def __init__(self, manifest):
+167:         self.entries = validate_manifest(manifest)
+168: 
+169:     def require(self, keys):
+170:         keys = list(keys)
+171:         if not keys:
+172:             raise UnsupportedMechanic('Empty mechanics profile cannot authorize simulation')
+173:         unknown = [key for key in keys if key not in self.entries]
+174:         if unknown:
+175:             raise UnsupportedMechanic(f'Unknown mechanics: {unknown}')
+176:         first = self.entries[keys[0]]
+177:         raise UnsupportedMechanic(f"Unsupported {first['key']}; implement {first['ticket']} and its fixture obligations before custom-engine execution")
+178: 
+179:     def require_profile(self):
+180:         self.require(self.entries)
+181: 
+182: 
+183: def main():
+184:     parser = argparse.ArgumentParser()
+185:     parser.add_argument('directory')
+186:     parser.add_argument('--root', default=str(Path(__file__).resolve().parents[2]))
+187:     args = parser.parse_args()
+188:     print(json.dumps(validate_bundle(args.directory, args.root), sort_keys=True))
+189: 
+190: 
+191: if __name__ == '__main__':
+192:     main()
+193: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/mechanics/mechanics.test.mjs
+1: import test from 'node:test';
+2: import assert from 'node:assert/strict';
+3: import {readFileSync} from 'node:fs';
+4: import {buildManifest, runtimeCallbacks} from '../../packages/mechanics/manifest.mjs';
+5: import {captureFixtures} from '../../packages/mechanics/fixtures.mjs';
+6: import {classifyPathway} from '../../packages/mechanics/policy.mjs';
+7: import {callbacks, pathways, tableEntries, ts} from '../../packages/mechanics/source-index.mjs';
+8: 
+9: let manifest;
+10: test('all R3 roots have sources; conservative inventory contains unobserved generated effects', () => {
+11:   manifest = buildManifest();
+12:   const entries = new Map(manifest.entries.map(e => [e.key, e]));
+13:   for (const key of ['moves:struggle', 'forms:ogerponwellspringtera', 'forms:terapagosstellar', 'abilities:embodyaspectwellspring', 'moves:metronome']) {
+14:     assert.ok(entries.has(key)); assert.equal(entries.get(key).support, 'unsupported');
+15:     assert.equal(entries.get(key).observed_count, 0);
+16:   }
+17:   const f = JSON.parse(readFileSync('artifacts/runs/r3-gen9-random-100k-v2/inventory-final/frequencies.json'));
+18:   for (const domain of ['moves', 'abilities', 'items', 'forms']) for (const [id, n] of Object.entries(f[domain])) {
+19:     assert.equal(entries.get(`${domain}:${id === '<none>' ? '' : id}`).observed_count, n);
+20:   }
+21:   assert.equal(manifest.scope.minimal_reachability_proven, false);
+22:   assert.ok(manifest.pathways.some(p => p.kind === 'computed-call'));
+23:   assert.ok(manifest.pathways.some(p => p.kind === 'identity-state-write'));
+24:   assert.ok(manifest.generator_audit.initial_forms.pikachu.length > 1);
+25: });
+26: 
+27: test('AST indexes array callbacks and computed calls; ordinary inherited names are not sinks', () => {
+28:   const text = 'const Moves = {probe: {secondary: [{onHit() { this.actions[which](x); p.ability = v; x.toString(); }}]}};';
+29:   const ast = ts.createSourceFile('probe.ts', text, ts.ScriptTarget.Latest, true);
+30:   const s = {ast, ref: n => ({start_byte: n.getStart(ast)})};
+31:   const entry = tableEntries(s, 'Moves').get('probe');
+32:   assert.deepEqual(callbacks(s, entry).map(c => c.path), ['secondary.0.onHit']);
+33:   assert.deepEqual(pathways(s, entry).map(p => p.kind), ['computed-call', 'identity-state-write', 'source-owned-call']);
+34:   assert.deepEqual(runtimeCallbacks({secondary: [{onHit() {}}]}), ['secondary.0.onHit']);
+35:   assert.throws(() => classifyPathway({kind: 'new-sink'}), /Unclassified/);
+36:   assert.throws(() => classifyPathway({kind: 'toString'}), /Unclassified/);
+37: });
+38: 
+39: test('sixteen scripted reference cases satisfy semantic assertions and replay in both seats', async () => {
+40:   const fixtures = await captureFixtures();
+41:   assert.equal(fixtures.cases.length, 16);
+42:   assert.ok(fixtures.cases.every(c => c.replay_verified && c.assertions_passed && !c.official_generator_witness));
+43:   assert.equal(new Set(fixtures.cases.map(c => c.id)).size, 16);
+44: });
+45: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE tests/mechanics/test_mechanics.py
+1: import copy
+2: from pathlib import Path
+3: import unittest
+4: 
+5: from pokemon_reference.contract import hash_json, parse_json
+6: from pokemon_reference.mechanics import validate_manifest, validate_bundle, SupportGate, UnsupportedMechanic
+7: 
+8: ROOT = Path(__file__).resolve().parents[2]
+9: RUN = ROOT / 'artifacts/runs/r6-mechanics-v1'
+10: 
+11: 
+12: def reseal(value):
+13:     value['content_hash'] = hash_json({k: v for k, v in value.items() if k != 'content_hash'})
+14:     return value
+15: 
+16: 
+17: class MechanicsTest(unittest.TestCase):
+18:     @classmethod
+19:     def setUpClass(cls):
+20:         cls.manifest = parse_json((RUN / 'manifest.json').read_bytes())
+21: 
+22:     def mutate(self, edit, pattern):
+23:         m = copy.deepcopy(self.manifest)
+24:         edit(m)
+25:         with self.assertRaisesRegex(ValueError, pattern):
+26:             validate_manifest(reseal(m), ROOT)
+27: 
+28:     def test_independent_source_and_bundle_validation(self):
+29:         result = validate_bundle(RUN, ROOT)
+30:         self.assertEqual(result['reference_cases_verified'], 16)
+31:         self.assertEqual(result['custom_engine_gate'], 'blocked-unsupported')
+32: 
+33:     def test_unsupported_unknown_and_empty_fail_loudly(self):
+34:         gate = SupportGate(self.manifest)
+35:         for keys, message in [(['moves:sleeptalk'], 'ENG-MOVE'), (['moves:invented'], 'Unknown'), ([], 'Empty')]:
+36:             with self.assertRaisesRegex(UnsupportedMechanic, message):
+37:                 gate.require(keys)
+38:         with self.assertRaises(UnsupportedMechanic):
+39:             gate.require_profile()
+40: 
+41:     def test_support_cannot_be_granted_by_editing_json(self):
+42:         self.mutate(lambda m: m['entries'][0].update(support='implemented-tested'), 'cannot certify')
+43: 
+44:     def test_source_fragment_mutation_is_detected_after_resealing(self):
+45:         self.mutate(lambda m: m['entries'][0]['source'].update(fragment_sha256='0' * 64), 'fragment mismatch')
+46: 
+47:     def test_omitted_initial_entry_is_rejected_after_resealing(self):
+48:         self.mutate(lambda m: m['entries'].remove(next(e for e in m['entries'] if e['key'] == 'items:')), 'Initial corpus coverage')
+49: 
+50:     def test_unknown_dynamic_kind_is_rejected_after_resealing(self):
+51:         self.mutate(lambda m: m['pathways'][0].update(kind='unclassified-future-call'), 'Unknown pathway')
+52: 
+53:     def test_orphan_path_is_rejected_after_resealing(self):
+54:         def remove_link(m):
+55:             next(e for e in m['entries'] if e['pathways'])['pathways'].pop()
+56:         self.mutate(remove_link, 'Orphan pathway')
+57: 
+58:     def test_version_and_reachability_overclaim_fail(self):
+59:         self.mutate(lambda m: m.update(schema_version='r6-mechanics-2'), 'Unknown mechanics artifact version')
+60:         self.mutate(lambda m: m['scope'].update(minimal_reachability_proven=True), 'reachability claim')
+61: 
+62: 
+63: if __name__ == '__main__':
+64:     unittest.main()
+65: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

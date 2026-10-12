@@ -1,0 +1,15 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "task": "Review bounded in-memory WebSocket recovery for the stateless Showdown heuristic. Focus on duplicate accepted choices, stale-frame/timer races, recovering multiple pending rooms, request/history admission, and finite retries/fatal errors. The sealed baseline cannot be modified: fixes belong only in new showdown-session files. Twelve mocked failure/recovery tests pass; real loopback fault tests are running. The pinned server rooms.ts onConnect sends init+complete player-specific log first, then game.onConnect sends request plus sentchoice in ONE frame if a choice was accepted (see supplied excerpt). Do not require a new turn for forced-switch/re-request. Identify actionable consequential defects with concrete event sequences; do not claim executed tests. No recursive delegation.",
+  "files_sha256": {
+    "packages/showdown-session/client.mjs": "2ffca5f81816e42136e0f6692c75b39ccbec08ba1d463e138c3f9d40958a9ec8",
+    "tests/showdown-session/session.test.mjs": "896e373f571e3020a81690a1c32e51f8ebd8d1e3d882c004a8f1d1a57d375c71",
+    "packages/showdown-bot/client.mjs": "9cfbb0b85904953504399acf9e1c2643c6ad0bbc006b96d09b70eaadd5610c8c",
+    "packages/showdown-bot/protocol.mjs": "5203d70b9891b97c7e0b79d77efd10fcaa3b7d651f1f982f8151efd55cbceb54"
+  },
+  "model": null,
+  "effort": "medium",
+  "timeout": 600,
+  "claude": "/opt/homebrew/bin/claude",
+  "prepared_only": false
+}

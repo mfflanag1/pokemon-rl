@@ -1,0 +1,217 @@
+Compiling jit(<lambda>) with global shapes and types (ShapedArray(float32[3]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_threefry_seed) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_normal) with global shapes and types (ShapedArray(key<fry>[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(multiply) with global shapes and types (ShapedArray(float32[59,2]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(int32[]), ShapedArray(int32[]), ShapedArray(uint32[]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(uint32[]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(wrapped) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(int32[]), ShapedArray(int32[]), ShapedArray(uint32[]), ShapedArray(float32[512,59]), ShapedArray(bool[512,2]), ShapedArray(int32[512]), ShapedArray(float32[512]), ShapedArray(float32[512]), ShapedArray(float32[512]), ShapedArray(bool[512]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_threefry_fold_in) with global shapes and types (ShapedArray(uint32[2]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(copy) with global shapes and types (ShapedArray(float32[59,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(copy) with global shapes and types (ShapedArray(float32[2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(copy) with global shapes and types (ShapedArray(float32[59]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(copy) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(int32[2,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(int32[2,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(tile) with global shapes and types (ShapedArray(int32[1,2,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(int32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_view_one) with global shapes and types (ShapedArray(int32[64]), ShapedArray(int32[64,2]), ShapedArray(int32[64,2,2]), ShapedArray(int32[64]), ShapedArray(int32[64,8,6]), ShapedArray(int32[64]), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(stack) with global shapes and types (ShapedArray(int32[64,11]), ShapedArray(int32[64,11])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(reshape) with global shapes and types (ShapedArray(int32[64,2,11]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stack) with global shapes and types (ShapedArray(int32[64,8,6]), ShapedArray(int32[64,8,6])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(reshape) with global shapes and types (ShapedArray(int32[64,2,8,6]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(reshape) with global shapes and types (ShapedArray(int32[128,8,6]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(concatenate) with global shapes and types (ShapedArray(int32[128,11]), ShapedArray(int32[128,48])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(int32[128,59]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(true_divide) with global shapes and types (ShapedArray(float32[128,59]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(dynamic_slice) with global shapes and types (ShapedArray(int32[128,11]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(int32[128,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(int32[64]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_threefry_fold_in) with global shapes and types (ShapedArray(uint32[2]), ShapedArray(uint32[64])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_threefry_fold_in) with global shapes and types (ShapedArray(uint32[64,2]), ShapedArray(uint32[64])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_threefry_fold_in) with global shapes and types (ShapedArray(uint32[64,2]), ShapedArray(uint32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(stack) with global shapes and types (ShapedArray(key<fry>[64]), ShapedArray(key<fry>[64])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(transpose) with global shapes and types (ShapedArray(key<fry>[2,64]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(reshape) with global shapes and types (ShapedArray(key<fry>[64,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(action_kernel) with global shapes and types (ShapedArray(float32[2]), ShapedArray(float32[59,2]), ShapedArray(float32[]), ShapedArray(float32[59]), ShapedArray(float32[128,59]), ShapedArray(bool[128,2]), ShapedArray(key<fry>[128])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_sample) with global shapes and types (ShapedArray(key<fry>[]), ShapedArray(uint32[64]), ShapedArray(uint32[64])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_one) with global shapes and types (ShapedArray(int32[64]), ShapedArray(int32[64,2]), ShapedArray(int32[64,2,2]), ShapedArray(int32[64]), ShapedArray(int32[64,8,6]), ShapedArray(int32[64]), ShapedArray(int32[64,2]), ShapedArray(bool[64,2]), ShapedArray(int32[64,2]), ShapedArray(int32[64])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[64]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[64], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[64], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[64], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[22]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[22], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[22], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[22], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[7]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[7], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[7], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[7], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[398]), ShapedArray(float32[398]), ShapedArray(int32[398]), ShapedArray(float32[398]), ShapedArray(bool[398]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(bool[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512,1]), ShapedArray(float32[512,59]), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(matmul) with global shapes and types (ShapedArray(float32[512,59]), ShapedArray(float32[59,2])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(float32[512,2]), ShapedArray(float32[2])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(matmul) with global shapes and types (ShapedArray(float32[512,59]), ShapedArray(float32[59])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512,1]), ShapedArray(float32[512,2]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512,1]), ShapedArray(bool[512,2]), ShapedArray(bool[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512]), ShapedArray(int32[512]), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512]), ShapedArray(float32[512]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(bool[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_reduce_sum) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(maximum) with global shapes and types (ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_reduce_all) with global shapes and types (ShapedArray(bool[512,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(dynamic_slice) with global shapes and types (ShapedArray(float32[512,2]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(squeeze) with global shapes and types (ShapedArray(float32[512,1]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(subtract) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[512])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(greater_equal) with global shapes and types (ShapedArray(float32[512]), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(int32[512], weak_type=True),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(abs) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(negative) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(exp) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(add) with global shapes and types (ShapedArray(float32[]), ShapedArray(float32[512])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(true_divide) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[512])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(greater) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(iota) with global shapes and types (). Argument mapping: ().
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(int32[2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(int32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(equal) with global shapes and types (ShapedArray(int32[1,2]), ShapedArray(int32[512,1])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(subtract) with global shapes and types (ShapedArray(float32[]), ShapedArray(float32[512,1])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512,2]), ShapedArray(float32[512,1]), ShapedArray(float32[512,1])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(log) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(log1p) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(convert_element_type) with global shapes and types (ShapedArray(bool[512,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512,1]), ShapedArray(float32[512,2]), ShapedArray(float32[512,2])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(iota) with global shapes and types (). Argument mapping: ().
+Compiling jit(less) with global shapes and types (ShapedArray(int32[512]), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[512]), ShapedArray(int32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(select_n) with global shapes and types (ShapedArray(bool[512]), ShapedArray(int32[512]), ShapedArray(int32[512])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_broadcast_arrays) with global shapes and types (ShapedArray(int32[512]), ShapedArray(int32[512])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(concatenate) with global shapes and types (ShapedArray(int32[512,1]), ShapedArray(int32[512,1])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(gather) with global shapes and types (ShapedArray(float32[512,2]), ShapedArray(int32[512,2])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(broadcast_in_dim) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(clip) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(less_equal) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(greater_equal) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512]), ShapedArray(bool[512]), ShapedArray(bool[512])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[512]), ShapedArray(float32[512]), ShapedArray(float32[512])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[512])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(true_divide) with global shapes and types (ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(negative) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(multiply) with global shapes and types (ShapedArray(float32[512,2]), ShapedArray(float32[512,2])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_reduce_sum) with global shapes and types (ShapedArray(float32[512,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(square) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(multiply) with global shapes and types (ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(subtract) with global shapes and types (ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(subtract) with global shapes and types (ShapedArray(float32[512]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_reduce_max) with global shapes and types (ShapedArray(float32[512]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[21]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[21], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[21], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[21], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[4]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[4], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[4], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[4], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[392]), ShapedArray(float32[392]), ShapedArray(int32[392]), ShapedArray(float32[392]), ShapedArray(bool[392]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[26]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[26], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[26], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[26], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[11]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[11], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[11], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[11], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[406]), ShapedArray(float32[406]), ShapedArray(int32[406]), ShapedArray(float32[406]), ShapedArray(bool[406]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[17]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[17], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[17], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[17], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[5]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[5], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[5], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[5], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[394]), ShapedArray(float32[394]), ShapedArray(int32[394]), ShapedArray(float32[394]), ShapedArray(bool[394]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[63]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[63], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[63], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[63], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[24]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[24], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[24], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[24], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[396]), ShapedArray(float32[396]), ShapedArray(int32[396]), ShapedArray(float32[396]), ShapedArray(bool[396]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[10]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[10], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[10], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[10], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[402]), ShapedArray(float32[402]), ShapedArray(int32[402]), ShapedArray(float32[402]), ShapedArray(bool[402]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[6]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[6], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[6], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[6], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[23]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[23], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[23], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[23], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[31]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[31], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[31], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[31], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[404]), ShapedArray(float32[404]), ShapedArray(int32[404]), ShapedArray(float32[404]), ShapedArray(bool[404]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[32]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[32], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[32], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[32], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[9]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[9], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[9], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[9], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[12]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[12], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[12], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[12], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[408]), ShapedArray(float32[408]), ShapedArray(int32[408]), ShapedArray(float32[408]), ShapedArray(bool[408]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[18]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[18], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[18], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[18], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[27]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[27], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[27], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[27], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[16]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[16], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[16], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[16], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[13]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[13], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[13], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[13], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[410]), ShapedArray(float32[410]), ShapedArray(int32[410]), ShapedArray(float32[410]), ShapedArray(bool[410]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[29]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[29], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[29], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[29], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_where) with global shapes and types (ShapedArray(bool[8]), ShapedArray(int32[], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(multiply) with global shapes and types (ShapedArray(int32[8], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(floor_divide) with global shapes and types (ShapedArray(int32[8], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(add) with global shapes and types (ShapedArray(int32[8], weak_type=True), ShapedArray(int32[], weak_type=True)). Argument mapping: (UnspecifiedValue, UnspecifiedValue).
+Compiling jit(_gae_kernel) with global shapes and types (ShapedArray(float32[400]), ShapedArray(float32[400]), ShapedArray(int32[400]), ShapedArray(float32[400]), ShapedArray(bool[400]), ShapedArray(float32[]), ShapedArray(float32[])). Argument mapping: (UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue, UnspecifiedValue).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[59,2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[2]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[59]),). Argument mapping: (UnspecifiedValue,).
+Compiling jit(stage) with global shapes and types (ShapedArray(float32[]),). Argument mapping: (UnspecifiedValue,).
+{"status": "passed", "content_hash": "74b10a37c3cac44f80ac59e78b06be23d12fd63e25726725124a1ce246682c63", "soak": {"status": "passed", "target_seconds": 60, "elapsed_seconds": 60.00028191739693, "cycles": 56678, "games": 3627392, "decisions": 22730738, "executed_moves": 19948487, "cycle_seconds": 59.72870177589357, "decisions_per_second": 378843.8532887839, "minimum_exp_behavior_logp": 1.253128175449092e-06, "maximum_update_ratio_error": 0.2067192792892456, "unexpected_compilations": 0, "warmup_compilation_count": 216, "peak_process_rss_bytes": 562987008, "device_memory_headroom_certified": false, "telemetry_rows": 6}}

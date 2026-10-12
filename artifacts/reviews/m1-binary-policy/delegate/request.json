@@ -1,0 +1,39 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "codex",
+  "model": null,
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "python-correctness",
+  "task": "Follow artifacts/reviews/m1-binary-policy/oracle-task.md. Implement independent scalar oracle and tests only. You are not alone; do not revert others or recursively delegate.",
+  "criteria": "Exact dyadic thresholds via Python integer ratios; checked inputs; specified two-action clipped policy; analytic log-prob derivatives; meaningful independent tests pass. Own only reference.py and test_reference.py.",
+  "owned": [
+    "python/pokemon_binary/reference.py",
+    "tests/binary-policy/test_reference.py"
+  ],
+  "checks": [
+    [
+      "/usr/bin/env",
+      "PYTHONPATH=python",
+      "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/binary-policy",
+      "-p",
+      "test_reference.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/binary-policy-v1/contract.json": "4e8dddf08fd264a5b881a3e81e1e688f987602512f0612f27f5df73433d9a230",
+    "artifacts/reviews/m1-binary-policy/oracle-task.md": "b892cd6d7e168a47bf4668903c8f6b103df77fe1af389de264f3bd1e6e45e7ef",
+    "python/pokemon_binary/__init__.py": "7545888c2d47c3b3728ab6f151c097d16bcd9a53698dda973fc67f8d5f033fed"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "codex-cli 0.151.0",
+  "base_commit": "3ff8afaf874391b155a79cc73f88587e13a158e0",
+  "created_at": "2026-10-11T01:51:13.539015+00:00",
+  "test_run": false
+}

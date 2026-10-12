@@ -1,0 +1,1140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokemon-reference.local/contracts/episode-v1/schema.json",
+  "type": "object",
+  "properties": {
+    "episode": {
+      "$ref": "#/$defs/episode"
+    },
+    "raw_output": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "update",
+              "sideupdate",
+              "end"
+            ]
+          },
+          "data": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "data"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "raw_output_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "minLength": 64,
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "episode",
+    "raw_output",
+    "raw_output_hash"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "view": {
+      "type": "object",
+      "properties": {
+        "viewer": {
+          "enum": [
+            "p1",
+            "p2"
+          ]
+        },
+        "request_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "phase": {
+          "enum": [
+            "move",
+            "switch",
+            "wait"
+          ]
+        },
+        "request": {
+          "$ref": "https://pokemon-reference.local/contracts/battle-v1/schema.json#/$defs/request"
+        },
+        "protocol_start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "protocol_end": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "protocol_delta": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "protocol_prefix_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "admissible_actions": {
+          "type": "array",
+          "items": {
+            "$ref": "https://pokemon-reference.local/contracts/battle-v1/schema.json#/$defs/action"
+          }
+        },
+        "action_mask": {
+          "type": "array",
+          "items": {
+            "type": "boolean"
+          },
+          "minItems": 14,
+          "maxItems": 14
+        },
+        "view_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "viewer",
+        "request_id",
+        "turn",
+        "phase",
+        "request",
+        "protocol_start",
+        "protocol_end",
+        "protocol_delta",
+        "protocol_prefix_hash",
+        "admissible_actions",
+        "action_mask",
+        "view_id"
+      ],
+      "additionalProperties": false
+    },
+    "team_entry": {
+      "type": "object",
+      "properties": {
+        "seed": {
+          "type": "string",
+          "pattern": "^sodium,[0-9a-f]{64}$",
+          "minLength": 71,
+          "maxLength": 71
+        },
+        "team": {
+          "type": "array",
+          "items": {
+            "$ref": "https://pokemon-reference.local/contracts/battle-v1/schema.json#/$defs/generated_pokemon"
+          },
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "team_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "seed",
+        "team",
+        "team_hash"
+      ],
+      "additionalProperties": false
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "format_id": {
+          "const": "gen9randombattle"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/team_entry"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "mechanics_seed": {
+          "type": "string",
+          "pattern": "^sodium,[0-9a-f]{64}$",
+          "minLength": 71,
+          "maxLength": 71
+        },
+        "policy_seeds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sodium,[0-9a-f]{64}$",
+            "minLength": 71,
+            "maxLength": 71
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "policy_id": {
+          "const": "upstream-random-move-0.9-no-tera-r1"
+        },
+        "max_submissions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "format_id",
+        "teams",
+        "mechanics_seed",
+        "policy_seeds",
+        "policy_id",
+        "max_submissions"
+      ],
+      "additionalProperties": false
+    },
+    "audit_mon": {
+      "type": "object",
+      "properties": {
+        "ident": {
+          "type": "string"
+        },
+        "species": {
+          "type": "string"
+        },
+        "hp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxhp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "status": {
+          "type": "string"
+        },
+        "fainted": {
+          "type": "boolean"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "item": {
+          "type": "string"
+        },
+        "ability": {
+          "type": "string"
+        },
+        "tera": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "boosts": {
+          "type": "object",
+          "properties": {
+            "atk": {
+              "type": "integer",
+              "minimum": -6,
+              "maximum": 6
+            },
+            "def": {
+              "type": "integer",
+              "minimum": -6,
+              "maximum": 6
+            },
+            "spa": {
+              "type": "integer",
+              "minimum": -6,
+              "maximum": 6
+            },
+            "spd": {
+              "type": "integer",
+              "minimum": -6,
+              "maximum": 6
+            },
+            "spe": {
+              "type": "integer",
+              "minimum": -6,
+              "maximum": 6
+            },
+            "accuracy": {
+              "type": "integer",
+              "minimum": -6,
+              "maximum": 6
+            },
+            "evasion": {
+              "type": "integer",
+              "minimum": -6,
+              "maximum": 6
+            }
+          },
+          "required": [
+            "atk",
+            "def",
+            "spa",
+            "spd",
+            "spe",
+            "accuracy",
+            "evasion"
+          ],
+          "additionalProperties": false
+        },
+        "volatiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "moves": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "pp": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "maxpp": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "id",
+              "pp",
+              "maxpp"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 4
+        }
+      },
+      "required": [
+        "ident",
+        "species",
+        "hp",
+        "maxhp",
+        "status",
+        "fainted",
+        "active",
+        "item",
+        "ability",
+        "tera",
+        "boosts",
+        "volatiles",
+        "moves"
+      ],
+      "additionalProperties": false
+    },
+    "mechanics": {
+      "type": "object",
+      "properties": {
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rng_seed": {
+          "type": "string",
+          "pattern": "^sodium,[0-9a-f]{64}$",
+          "minLength": 71,
+          "maxLength": 71
+        },
+        "weather": {
+          "type": "string"
+        },
+        "terrain": {
+          "type": "string"
+        },
+        "pseudo_weather": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "queue": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "choice": {
+                "type": "string"
+              },
+              "actor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "move": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "choice",
+              "actor",
+              "move"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "sides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "enum": [
+                  "p1",
+                  "p2"
+                ]
+              },
+              "pokemon_left": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pokemon": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/audit_mon"
+                },
+                "minItems": 6,
+                "maxItems": 6
+              }
+            },
+            "required": [
+              "id",
+              "pokemon_left",
+              "conditions",
+              "pokemon"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "turn",
+        "rng_seed",
+        "weather",
+        "terrain",
+        "pseudo_weather",
+        "queue",
+        "sides"
+      ],
+      "additionalProperties": false
+    },
+    "frame": {
+      "type": "object",
+      "properties": {
+        "group": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "event": {
+          "enum": [
+            "initial",
+            "awaiting_choice",
+            "resolved",
+            "rerequest",
+            "terminal"
+          ]
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "phase": {
+          "enum": [
+            "joint_move",
+            "single_replacement",
+            "double_replacement",
+            "switch_continuation",
+            "revival",
+            "mixed_switch",
+            "terminal"
+          ]
+        },
+        "side_phases": {
+          "type": "object",
+          "properties": {
+            "p1": {
+              "enum": [
+                "move",
+                "wait",
+                "faint_replacement",
+                "switch_continuation",
+                "revival",
+                "terminal"
+              ]
+            },
+            "p2": {
+              "enum": [
+                "move",
+                "wait",
+                "faint_replacement",
+                "switch_continuation",
+                "revival",
+                "terminal"
+              ]
+            }
+          },
+          "required": [
+            "p1",
+            "p2"
+          ],
+          "additionalProperties": false
+        },
+        "requested_sides": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "p1",
+              "p2"
+            ]
+          },
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "pending_sides": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "p1",
+              "p2"
+            ]
+          },
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "commitments": {
+          "type": "object",
+          "properties": {
+            "p1": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "p2": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "p1",
+            "p2"
+          ],
+          "additionalProperties": false
+        },
+        "requests": {
+          "type": "object",
+          "properties": {
+            "p1": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "request_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$",
+                  "minLength": 64,
+                  "maxLength": 64
+                },
+                "protocol_length": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "request_id",
+                "request_hash",
+                "protocol_length"
+              ],
+              "additionalProperties": false
+            },
+            "p2": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "request_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$",
+                  "minLength": 64,
+                  "maxLength": 64
+                },
+                "protocol_length": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "request_id",
+                "request_hash",
+                "protocol_length"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "p1",
+            "p2"
+          ],
+          "additionalProperties": false
+        },
+        "audit": {
+          "type": "object",
+          "properties": {
+            "mechanics": {
+              "$ref": "#/$defs/mechanics"
+            },
+            "mechanics_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            "choices": {
+              "type": "object",
+              "properties": {
+                "p1": {
+                  "type": "string"
+                },
+                "p2": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "p1",
+                "p2"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "mechanics",
+            "mechanics_hash",
+            "choices"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "group",
+        "event",
+        "turn",
+        "phase",
+        "side_phases",
+        "requested_sides",
+        "pending_sides",
+        "commitments",
+        "requests",
+        "audit"
+      ],
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "decision_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "submission_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "side": {
+          "enum": [
+            "p1",
+            "p2"
+          ]
+        },
+        "frame_before": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "frame_after": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "view": {
+          "$ref": "#/$defs/view"
+        },
+        "action": {
+          "$ref": "https://pokemon-reference.local/contracts/battle-v1/schema.json#/$defs/action"
+        },
+        "command": {
+          "type": "string"
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "feedback": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "side": {
+                "enum": [
+                  "p1",
+                  "p2"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "side",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "sequence",
+        "decision_id",
+        "submission_id",
+        "side",
+        "frame_before",
+        "frame_after",
+        "view",
+        "action",
+        "command",
+        "accepted",
+        "feedback"
+      ],
+      "additionalProperties": false
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "decision"
+            },
+            "sequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            }
+          },
+          "required": [
+            "kind",
+            "sequence",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "terminal"
+            },
+            "frame": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "kind",
+            "frame"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "bootstrap"
+            },
+            "frame": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            }
+          },
+          "required": [
+            "kind",
+            "frame",
+            "id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "transition": {
+      "type": "object",
+      "properties": {
+        "decision_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "side": {
+          "enum": [
+            "p1",
+            "p2"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "terminal": {
+          "type": "boolean"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "reward_numerator": {
+          "enum": [
+            0,
+            1,
+            2
+          ]
+        },
+        "reward_denominator": {
+          "const": 2
+        }
+      },
+      "required": [
+        "decision_id",
+        "side",
+        "target",
+        "terminal",
+        "truncated",
+        "reward_numerator",
+        "reward_denominator"
+      ],
+      "additionalProperties": false
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "episode_key": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "spec": {
+          "$ref": "#/$defs/spec"
+        },
+        "fixture": {
+          "enum": [
+            null,
+            "single-faint-p1",
+            "single-faint-p2",
+            "double-faint",
+            "tie-after-first-choice",
+            "live-switch-p1",
+            "live-switch-p2",
+            "mixed-switch",
+            "revival-p1",
+            "revival-p2"
+          ]
+        },
+        "split": {
+          "const": "unassigned"
+        },
+        "initial_team_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "minLength": 64,
+            "maxLength": 64
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "input_tape": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "frames": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/frame"
+          },
+          "minItems": 1
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition"
+          }
+        },
+        "bootstrap_views": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "p1": {
+                  "$ref": "#/$defs/view"
+                },
+                "p2": {
+                  "$ref": "#/$defs/view"
+                }
+              },
+              "required": [
+                "p1",
+                "p2"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "terminal",
+                "truncated"
+              ]
+            },
+            "reason": {
+              "enum": [
+                "win",
+                "tie",
+                "decision_budget"
+              ]
+            },
+            "winner": {
+              "enum": [
+                null,
+                "p1",
+                "p2"
+              ]
+            },
+            "turn": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "status",
+            "reason",
+            "winner",
+            "turn"
+          ],
+          "additionalProperties": false
+        },
+        "protocol": {
+          "type": "object",
+          "properties": {
+            "p1": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "p2": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "p1",
+            "p2"
+          ],
+          "additionalProperties": false
+        },
+        "spectator": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "normalized_output_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "controller": {
+          "enum": [
+            "upstream-random-move-0.9-no-tera-r1",
+            "scripted-semantic-choices-r4"
+          ]
+        },
+        "submission_order": {
+          "enum": [
+            "p1-first",
+            "p2-first",
+            "external"
+          ]
+        }
+      },
+      "required": [
+        "episode_key",
+        "spec",
+        "fixture",
+        "split",
+        "initial_team_hashes",
+        "input_tape",
+        "frames",
+        "decisions",
+        "transitions",
+        "bootstrap_views",
+        "outcome",
+        "protocol",
+        "spectator",
+        "normalized_output_hash",
+        "controller",
+        "submission_order"
+      ],
+      "additionalProperties": false
+    },
+    "episode": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "artifact_kind": {
+          "const": "phase_episode"
+        },
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "payload": {
+          "$ref": "#/$defs/payload"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^phase_episode:[0-9a-f]{64}$",
+          "minLength": 78,
+          "maxLength": 78
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_kind",
+        "manifest_id",
+        "payload",
+        "content_hash",
+        "artifact_id"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

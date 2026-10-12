@@ -1,0 +1,15 @@
+{
+  "changed": [
+    "python/pokemon_fixed/math.py"
+  ],
+  "outside_owned": [],
+  "symlinks": [],
+  "output_hashes": {
+    "contracts/fixed-loop-v1/plan.json": "fb9de93cb7e18338fcb2a4341904d949a0ddb6a1e1bd8910f5d749f767c0ed1c",
+    "python/pokemon_fixed/__init__.py": "5ce0e28d586286386e2c6d9a1dbcc859b74c1b9bca35b6de0272f539c9520b27",
+    "python/pokemon_fixed/math.py": "2442da19684ece79e9aa11c0287ba722f2b31178b0ef67faa681b23c898e86fb",
+    "python/pokemon_jax_learner/__init__.py": "8582070d68847c641e165cbf273f515a72c40747d5f15285a592ad84f2be7212",
+    "python/pokemon_jax_learner/core.py": "0aecb281b433b16c68cd188b00e763b69f9b17b149f15f4e4e0f6804bb84f3ba",
+    "tests/fixed-loop/test_math.py": "cab6d37a9aab00dcb23d334da37e7551906aaf3df750cf37c48a980fac20f669"
+  }
+}

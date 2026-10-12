@@ -1,0 +1,31 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "scalar-damage",
+  "task": "Implement the bounded scalar damage helper specified in contracts/switch-engine-v1/damage-task.md. You are not alone: ownership is only python/pokemon_switch_engine/damage.py; do not edit other input files or delegate.",
+  "criteria": "Pure dependency-free functions with strict profile validation; match all 3456 sealed Showdown damage values and supplied independent stat/PP cases; all tests pass without changes.",
+  "owned": [
+    "python/pokemon_switch_engine/damage.py"
+  ],
+  "checks": [
+    [
+      "python3",
+      "tests/switch-engine/test_damage.py"
+    ]
+  ],
+  "files_sha256": {
+    "contracts/switch-engine-v1/damage-task.md": "10f19f86d1732466524fb3ee6a865d4c8075abcfcab5afc121ae1b167c264c48",
+    "python/pokemon_switch_engine/__init__.py": "07a03df3d700f45b8b9d25f291345695baa4366ec1e0095a44a4e05c0eb6415d",
+    "tests/switch-engine/test_damage.py": "651756875148e829747666874df8ec9fcdaaf573fa7631133aa0446d0e37ca5d",
+    "tests/switch-engine/fixtures/damage.json": "7976291fa3bf9031e22f432c4b59f5ef8de25a90c20f64f6be31a2ec068d7d55"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "2b1876d0d4efac3b991ee7f8031ec4db5a9924e9",
+  "created_at": "2026-10-11T20:27:32.580286+00:00",
+  "test_run": false
+}

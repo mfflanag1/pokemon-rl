@@ -1,0 +1,1008 @@
+Finished tracing stage for jit in 0.000164986 sec
+Finished jaxpr to MLIR module conversion jit(stage) in 0.008950949 sec
+Finished XLA compilation of jit(stage) in 0.004652023 sec
+Finished tracing _threefry_seed for jit in 0.000947952 sec
+Finished jaxpr to MLIR module conversion jit(_threefry_seed) in 0.000774860 sec
+Finished XLA compilation of jit(_threefry_seed) in 0.009171963 sec
+Finished tracing _normal for jit in 0.002016068 sec
+Finished jaxpr to MLIR module conversion jit(_normal) in 0.006999016 sec
+Finished XLA compilation of jit(_normal) in 0.059554100 sec
+Finished tracing convert_element_type for jit in 0.000083208 sec
+Finished jaxpr to MLIR module conversion jit(convert_element_type) in 0.000208855 sec
+Finished XLA compilation of jit(convert_element_type) in 0.002993822 sec
+Finished tracing multiply for jit in 0.000201941 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000421762 sec
+Finished XLA compilation of jit(multiply) in 0.009661913 sec
+Finished tracing broadcast_in_dim for jit in 0.000125170 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000285864 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.007591009 sec
+Finished tracing broadcast_in_dim for jit in 0.000131130 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000244856 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.008047819 sec
+Finished tracing broadcast_in_dim for jit in 0.000115156 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000248909 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.008142948 sec
+Finished tracing convert_element_type for jit in 0.000096798 sec
+Finished jaxpr to MLIR module conversion jit(convert_element_type) in 0.000163078 sec
+Finished XLA compilation of jit(convert_element_type) in 0.002451181 sec
+Finished tracing convert_element_type for jit in 0.000100136 sec
+Finished jaxpr to MLIR module conversion jit(convert_element_type) in 0.000232935 sec
+Finished XLA compilation of jit(convert_element_type) in 0.002650976 sec
+Finished tracing wrapped for jit in 0.111903906 sec
+Finished jaxpr to MLIR module conversion jit(wrapped) in 0.090123892 sec
+Finished XLA compilation of jit(wrapped) in 0.611922979 sec
+Finished tracing wrapped for jit in 0.003970146 sec
+Finished jaxpr to MLIR module conversion jit(wrapped) in 0.044785023 sec
+Finished XLA compilation of jit(wrapped) in 0.448856115 sec
+Finished tracing wrapped for jit in 0.016667843 sec
+Finished jaxpr to MLIR module conversion jit(wrapped) in 0.032531023 sec
+Finished XLA compilation of jit(wrapped) in 0.184651852 sec
+Finished tracing _where for jit in 0.000393152 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000468969 sec
+Finished XLA compilation of jit(_where) in 0.014551878 sec
+Finished tracing multiply for jit in 0.000176907 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000360250 sec
+Finished XLA compilation of jit(multiply) in 0.013248920 sec
+Finished tracing floor_divide for jit in 0.001177788 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001070738 sec
+Finished XLA compilation of jit(floor_divide) in 0.016420841 sec
+Finished tracing add for jit in 0.000149012 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000309706 sec
+Finished XLA compilation of jit(add) in 0.013220072 sec
+Finished tracing _where for jit in 0.000420094 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000391006 sec
+Finished XLA compilation of jit(_where) in 0.010440826 sec
+Finished tracing multiply for jit in 0.000150204 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000277042 sec
+Finished XLA compilation of jit(multiply) in 0.009147167 sec
+Finished tracing floor_divide for jit in 0.001160860 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001024961 sec
+Finished XLA compilation of jit(floor_divide) in 0.016741276 sec
+Finished tracing add for jit in 0.000224113 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000432014 sec
+Finished XLA compilation of jit(add) in 0.010329962 sec
+Finished tracing _where for jit in 0.000398159 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000345945 sec
+Finished XLA compilation of jit(_where) in 0.009633064 sec
+Finished tracing multiply for jit in 0.000217199 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.002195120 sec
+Finished XLA compilation of jit(multiply) in 0.009128809 sec
+Finished tracing floor_divide for jit in 0.001366138 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001037836 sec
+Finished XLA compilation of jit(floor_divide) in 0.016230106 sec
+Finished tracing add for jit in 0.000180960 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000324249 sec
+Finished XLA compilation of jit(add) in 0.009052753 sec
+Finished jaxpr to MLIR module conversion jit(_threefry_fold_in) in 0.004206657 sec
+Finished XLA compilation of jit(_threefry_fold_in) in 0.026821852 sec
+Finished tracing copy for jit in 0.000089169 sec
+Finished jaxpr to MLIR module conversion jit(copy) in 0.000324011 sec
+Finished XLA compilation of jit(copy) in 0.002828121 sec
+Finished tracing copy for jit in 0.000066042 sec
+Finished jaxpr to MLIR module conversion jit(copy) in 0.000225782 sec
+Finished XLA compilation of jit(copy) in 0.002255917 sec
+Finished tracing copy for jit in 0.000060320 sec
+Finished jaxpr to MLIR module conversion jit(copy) in 0.000197887 sec
+Finished XLA compilation of jit(copy) in 0.002030134 sec
+Finished tracing copy for jit in 0.000060797 sec
+Finished jaxpr to MLIR module conversion jit(copy) in 0.000200748 sec
+Finished XLA compilation of jit(copy) in 0.001917124 sec
+Finished tracing broadcast_in_dim for jit in 0.000063896 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000223160 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.008780003 sec
+Finished tracing broadcast_in_dim for jit in 0.000080109 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000271082 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.008772850 sec
+Finished tracing convert_element_type for jit in 0.000071287 sec
+Finished jaxpr to MLIR module conversion jit(convert_element_type) in 0.000170946 sec
+Finished XLA compilation of jit(convert_element_type) in 0.002433062 sec
+Finished tracing broadcast_in_dim for jit in 0.000069141 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.001493931 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002304077 sec
+Finished tracing tile for jit in 0.000062943 sec
+Finished jaxpr to MLIR module conversion jit(tile) in 0.000278950 sec
+Finished XLA compilation of jit(tile) in 0.009177685 sec
+Finished tracing broadcast_in_dim for jit in 0.000086069 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000308990 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.011106014 sec
+Finished jaxpr to MLIR module conversion jit(_view_one) in 0.003872871 sec
+Finished XLA compilation of jit(_view_one) in 0.031638145 sec
+Finished tracing stack for jit in 0.000083923 sec
+Finished jaxpr to MLIR module conversion jit(stack) in 0.000357866 sec
+Finished XLA compilation of jit(stack) in 0.013400793 sec
+Finished tracing reshape for jit in 0.000079870 sec
+Finished jaxpr to MLIR module conversion jit(reshape) in 0.000290155 sec
+Finished XLA compilation of jit(reshape) in 0.002922773 sec
+Finished tracing stack for jit in 0.000073910 sec
+Finished jaxpr to MLIR module conversion jit(stack) in 0.000318766 sec
+Finished XLA compilation of jit(stack) in 0.013847828 sec
+Finished tracing reshape for jit in 0.000087738 sec
+Finished jaxpr to MLIR module conversion jit(reshape) in 0.000362873 sec
+Finished XLA compilation of jit(reshape) in 0.003014088 sec
+Finished tracing reshape for jit in 0.000070810 sec
+Finished jaxpr to MLIR module conversion jit(reshape) in 0.000257015 sec
+Finished XLA compilation of jit(reshape) in 0.002389908 sec
+Finished tracing concatenate for jit in 0.000068188 sec
+Finished jaxpr to MLIR module conversion jit(concatenate) in 0.000267029 sec
+Finished XLA compilation of jit(concatenate) in 0.005237103 sec
+Finished tracing convert_element_type for jit in 0.000076056 sec
+Finished jaxpr to MLIR module conversion jit(convert_element_type) in 0.000277042 sec
+Finished XLA compilation of jit(convert_element_type) in 0.013191223 sec
+Finished jaxpr to MLIR module conversion jit(true_divide) in 0.001772165 sec
+Finished XLA compilation of jit(true_divide) in 0.023263931 sec
+Finished tracing dynamic_slice for jit in 0.000138044 sec
+Finished jaxpr to MLIR module conversion jit(dynamic_slice) in 0.000352859 sec
+Finished XLA compilation of jit(dynamic_slice) in 0.011034250 sec
+Finished tracing convert_element_type for jit in 0.000087976 sec
+Finished jaxpr to MLIR module conversion jit(convert_element_type) in 0.000370741 sec
+Finished XLA compilation of jit(convert_element_type) in 0.010545969 sec
+Finished tracing convert_element_type for jit in 0.000079155 sec
+Finished jaxpr to MLIR module conversion jit(convert_element_type) in 0.000786781 sec
+Finished XLA compilation of jit(convert_element_type) in 0.011031151 sec
+Finished jaxpr to MLIR module conversion jit(_threefry_fold_in) in 0.003355265 sec
+Finished XLA compilation of jit(_threefry_fold_in) in 0.043378115 sec
+Finished jaxpr to MLIR module conversion jit(_threefry_fold_in) in 0.003112078 sec
+Finished XLA compilation of jit(_threefry_fold_in) in 0.043503284 sec
+Finished jaxpr to MLIR module conversion jit(_threefry_fold_in) in 0.003451824 sec
+Finished XLA compilation of jit(_threefry_fold_in) in 0.044656038 sec
+Finished tracing stack for jit in 0.000069857 sec
+Finished jaxpr to MLIR module conversion jit(stack) in 0.000555038 sec
+Finished XLA compilation of jit(stack) in 0.011337042 sec
+Finished tracing transpose for jit in 0.000077009 sec
+Finished jaxpr to MLIR module conversion jit(transpose) in 0.000398159 sec
+Finished XLA compilation of jit(transpose) in 0.011248112 sec
+Finished tracing reshape for jit in 0.000078201 sec
+Finished jaxpr to MLIR module conversion jit(reshape) in 0.000428677 sec
+Finished XLA compilation of jit(reshape) in 0.002768040 sec
+Finished jaxpr to MLIR module conversion jit(action_kernel) in 0.008099079 sec
+Finished XLA compilation of jit(action_kernel) in 0.058794737 sec
+Finished jaxpr to MLIR module conversion jit(_sample) in 0.017735958 sec
+Finished XLA compilation of jit(_sample) in 0.157696009 sec
+Finished jaxpr to MLIR module conversion jit(_one) in 0.006666899 sec
+Finished XLA compilation of jit(_one) in 0.173561811 sec
+Finished tracing _gae_kernel for jit in 0.002943039 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.005277157 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.026015043 sec
+Finished tracing predict_kernel for jit in 0.004356861 sec
+Finished jaxpr to MLIR module conversion jit(predict_kernel) in 0.011870861 sec
+Finished XLA compilation of jit(predict_kernel) in 0.030156851 sec
+Finished jaxpr to MLIR module conversion jit(_threefry_seed) in 0.000569820 sec
+Finished XLA compilation of jit(_threefry_seed) in 0.008264065 sec
+Finished tracing convert_element_type for jit in 0.000086069 sec
+Finished jaxpr to MLIR module conversion jit(convert_element_type) in 0.000261068 sec
+Finished XLA compilation of jit(convert_element_type) in 0.007848024 sec
+Finished tracing iota for jit in 0.000073195 sec
+Finished jaxpr to MLIR module conversion jit(iota) in 0.000261068 sec
+Finished XLA compilation of jit(iota) in 0.010821819 sec
+Finished jaxpr to MLIR module conversion jit(_shuffle) in 0.006683111 sec
+Finished XLA compilation of jit(_shuffle) in 0.044989824 sec
+Finished jaxpr to MLIR module conversion jit(less) in 0.000429869 sec
+Finished XLA compilation of jit(less) in 0.014742613 sec
+Finished tracing add for jit in 0.000082970 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000336170 sec
+Finished XLA compilation of jit(add) in 0.009736061 sec
+Finished tracing select_n for jit in 0.000096798 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000342846 sec
+Finished XLA compilation of jit(select_n) in 0.015721798 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.001656055 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002509832 sec
+Finished tracing broadcast_in_dim for jit in 0.000082970 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000269175 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002178192 sec
+Finished tracing gather for jit in 0.000073910 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000288963 sec
+Finished XLA compilation of jit(gather) in 0.009783983 sec
+Finished tracing broadcast_in_dim for jit in 0.000085115 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000213146 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002459049 sec
+Finished jaxpr to MLIR module conversion jit(invert) in 0.000252724 sec
+Finished XLA compilation of jit(invert) in 0.017035723 sec
+Finished jaxpr to MLIR module conversion jit(argsort) in 0.000714064 sec
+Finished XLA compilation of jit(argsort) in 0.012349844 sec
+Finished tracing gather for jit in 0.000082016 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000307083 sec
+Finished XLA compilation of jit(gather) in 0.009940147 sec
+Finished tracing broadcast_in_dim for jit in 0.000083923 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000186920 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002490044 sec
+Finished tracing add for jit in 0.000068903 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000307798 sec
+Finished XLA compilation of jit(add) in 0.009897947 sec
+Finished tracing select_n for jit in 0.000084162 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000287056 sec
+Finished XLA compilation of jit(select_n) in 0.015442848 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000199080 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002535105 sec
+Finished tracing broadcast_in_dim for jit in 0.000077248 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.001531839 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002405882 sec
+Finished tracing gather for jit in 0.000072002 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000267029 sec
+Finished XLA compilation of jit(gather) in 0.018517971 sec
+Finished tracing broadcast_in_dim for jit in 0.000086069 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000225782 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002817869 sec
+Finished tracing gather for jit in 0.000082970 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000305891 sec
+Finished XLA compilation of jit(gather) in 0.010543108 sec
+Finished tracing broadcast_in_dim for jit in 0.000102043 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000271082 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.003345966 sec
+Finished tracing gather for jit in 0.000067949 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000257730 sec
+Finished XLA compilation of jit(gather) in 0.009102106 sec
+Finished tracing broadcast_in_dim for jit in 0.000077009 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000181913 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002456903 sec
+Finished tracing gather for jit in 0.000076771 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000299215 sec
+Finished XLA compilation of jit(gather) in 0.009438992 sec
+Finished tracing broadcast_in_dim for jit in 0.000104904 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000188828 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002346992 sec
+Finished tracing model_loss for jit in 0.007854939 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.005956173 sec
+Finished XLA compilation of jit(model_loss) in 0.063256025 sec
+Finished tracing _adam_kernel for jit in 0.002166033 sec
+Finished jaxpr to MLIR module conversion jit(_adam_kernel) in 0.002844095 sec
+Finished XLA compilation of jit(_adam_kernel) in 0.034596205 sec
+Finished tracing dynamic_slice for jit in 0.000135899 sec
+Finished jaxpr to MLIR module conversion jit(dynamic_slice) in 0.001997709 sec
+Finished XLA compilation of jit(dynamic_slice) in 0.009094238 sec
+Finished tracing squeeze for jit in 0.000118971 sec
+Finished jaxpr to MLIR module conversion jit(squeeze) in 0.000309944 sec
+Finished XLA compilation of jit(squeeze) in 0.002974987 sec
+Finished tracing add for jit in 0.000143051 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000304937 sec
+Finished XLA compilation of jit(add) in 0.009341240 sec
+Finished tracing select_n for jit in 0.000121832 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000339985 sec
+Finished XLA compilation of jit(select_n) in 0.011055946 sec
+Finished tracing _broadcast_arrays for jit in 0.000061035 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000216961 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002524137 sec
+Finished tracing broadcast_in_dim for jit in 0.000138998 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000238657 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002191067 sec
+Finished tracing gather for jit in 0.000123978 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000272036 sec
+Finished XLA compilation of jit(gather) in 0.019855022 sec
+Finished tracing broadcast_in_dim for jit in 0.000149012 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000206232 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002730131 sec
+Finished tracing gather for jit in 0.000126362 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000272989 sec
+Finished XLA compilation of jit(gather) in 0.009967804 sec
+Finished tracing broadcast_in_dim for jit in 0.000143051 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000205994 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002753019 sec
+Finished tracing gather for jit in 0.000117540 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000288963 sec
+Finished XLA compilation of jit(gather) in 0.010035992 sec
+Finished tracing broadcast_in_dim for jit in 0.000161171 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.001616955 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002567768 sec
+Finished tracing gather for jit in 0.000127077 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000330210 sec
+Finished XLA compilation of jit(gather) in 0.010403156 sec
+Finished tracing broadcast_in_dim for jit in 0.000162840 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000228882 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.003069878 sec
+Finished tracing model_loss for jit in 0.023217201 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.006412029 sec
+Finished XLA compilation of jit(model_loss) in 0.054172993 sec
+Finished tracing stage for jit in 0.000068903 sec
+Finished jaxpr to MLIR module conversion jit(stage) in 0.000233889 sec
+Finished XLA compilation of jit(stage) in 0.003077745 sec
+Finished tracing stage for jit in 0.000056982 sec
+Finished jaxpr to MLIR module conversion jit(stage) in 0.000177145 sec
+Finished XLA compilation of jit(stage) in 0.002584934 sec
+Finished tracing stage for jit in 0.000051975 sec
+Finished jaxpr to MLIR module conversion jit(stage) in 0.000162840 sec
+Finished XLA compilation of jit(stage) in 0.002192020 sec
+Finished tracing stage for jit in 0.000048876 sec
+Finished jaxpr to MLIR module conversion jit(stage) in 0.000155926 sec
+Finished XLA compilation of jit(stage) in 0.002170801 sec
+Finished tracing _where for jit in 0.000543118 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000466108 sec
+Finished XLA compilation of jit(_where) in 0.010222912 sec
+Finished tracing multiply for jit in 0.000166178 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000345707 sec
+Finished XLA compilation of jit(multiply) in 0.008958817 sec
+Finished tracing floor_divide for jit in 0.001167297 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001034975 sec
+Finished XLA compilation of jit(floor_divide) in 0.017288923 sec
+Finished tracing add for jit in 0.000174046 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.001950979 sec
+Finished XLA compilation of jit(add) in 0.009382963 sec
+Finished tracing _where for jit in 0.000396013 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000367165 sec
+Finished XLA compilation of jit(_where) in 0.008364916 sec
+Finished tracing multiply for jit in 0.000150919 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000301838 sec
+Finished XLA compilation of jit(multiply) in 0.008995771 sec
+Finished tracing floor_divide for jit in 0.001276970 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001275063 sec
+Finished XLA compilation of jit(floor_divide) in 0.012544632 sec
+Finished tracing add for jit in 0.000153065 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000291109 sec
+Finished XLA compilation of jit(add) in 0.008893967 sec
+Finished tracing _gae_kernel for jit in 0.002768993 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.003983021 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.025959253 sec
+Finished tracing add for jit in 0.000123978 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000353098 sec
+Finished XLA compilation of jit(add) in 0.010044098 sec
+Finished tracing select_n for jit in 0.000076056 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000324011 sec
+Finished XLA compilation of jit(select_n) in 0.009750843 sec
+Finished tracing _broadcast_arrays for jit in 0.000062227 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000200987 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002516985 sec
+Finished tracing broadcast_in_dim for jit in 0.000135899 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000247955 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002618790 sec
+Finished tracing gather for jit in 0.000131845 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000291824 sec
+Finished XLA compilation of jit(gather) in 0.019062042 sec
+Finished tracing broadcast_in_dim for jit in 0.000154972 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.001728058 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002589226 sec
+Finished tracing gather for jit in 0.000135899 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000298977 sec
+Finished XLA compilation of jit(gather) in 0.009938955 sec
+Finished tracing broadcast_in_dim for jit in 0.000138998 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000185966 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002418756 sec
+Finished tracing gather for jit in 0.000121117 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000286102 sec
+Finished XLA compilation of jit(gather) in 0.009634018 sec
+Finished tracing broadcast_in_dim for jit in 0.000137091 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000200987 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002493382 sec
+Finished tracing gather for jit in 0.000120163 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000335217 sec
+Finished XLA compilation of jit(gather) in 0.015552044 sec
+Finished tracing broadcast_in_dim for jit in 0.000156164 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000247955 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.027585030 sec
+Finished tracing model_loss for jit in 0.041696072 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.007658005 sec
+Finished XLA compilation of jit(model_loss) in 0.061898947 sec
+Finished tracing _where for jit in 0.000447989 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000435829 sec
+Finished XLA compilation of jit(_where) in 0.011013031 sec
+Finished tracing multiply for jit in 0.000162125 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000371933 sec
+Finished XLA compilation of jit(multiply) in 0.010008097 sec
+Finished tracing floor_divide for jit in 0.001235962 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001155853 sec
+Finished XLA compilation of jit(floor_divide) in 0.015591860 sec
+Finished tracing add for jit in 0.000168085 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.001690865 sec
+Finished XLA compilation of jit(add) in 0.009334087 sec
+Finished tracing _where for jit in 0.000430822 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000386238 sec
+Finished XLA compilation of jit(_where) in 0.008866787 sec
+Finished tracing multiply for jit in 0.000149965 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000295162 sec
+Finished XLA compilation of jit(multiply) in 0.008225918 sec
+Finished tracing floor_divide for jit in 0.001157284 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001040936 sec
+Finished XLA compilation of jit(floor_divide) in 0.016531944 sec
+Finished tracing add for jit in 0.000166893 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000334024 sec
+Finished XLA compilation of jit(add) in 0.009781361 sec
+Finished tracing _gae_kernel for jit in 0.002235174 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.003628731 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.025527000 sec
+Finished tracing add for jit in 0.000133753 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000329971 sec
+Finished XLA compilation of jit(add) in 0.010712862 sec
+Finished tracing select_n for jit in 0.000112057 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000296831 sec
+Finished XLA compilation of jit(select_n) in 0.010821104 sec
+Finished tracing _broadcast_arrays for jit in 0.000061750 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000210047 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002730846 sec
+Finished tracing broadcast_in_dim for jit in 0.000140190 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000268936 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002739191 sec
+Finished tracing gather for jit in 0.000171900 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000397921 sec
+Finished XLA compilation of jit(gather) in 0.019467115 sec
+Finished tracing broadcast_in_dim for jit in 0.000128984 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.001505852 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002446890 sec
+Finished tracing gather for jit in 0.000143051 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000308990 sec
+Finished XLA compilation of jit(gather) in 0.009812355 sec
+Finished tracing broadcast_in_dim for jit in 0.000144958 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000241041 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002381802 sec
+Finished tracing gather for jit in 0.000108242 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000257730 sec
+Finished XLA compilation of jit(gather) in 0.010510921 sec
+Finished tracing broadcast_in_dim for jit in 0.000143051 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000200987 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002606869 sec
+Finished tracing gather for jit in 0.000126123 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000296116 sec
+Finished XLA compilation of jit(gather) in 0.010515928 sec
+Finished tracing broadcast_in_dim for jit in 0.000144958 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000204086 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002499819 sec
+Finished tracing model_loss for jit in 0.025042057 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.006036997 sec
+Finished XLA compilation of jit(model_loss) in 0.058279991 sec
+Finished tracing _where for jit in 0.000435352 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000414848 sec
+Finished XLA compilation of jit(_where) in 0.010806084 sec
+Finished tracing multiply for jit in 0.000166893 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000323057 sec
+Finished XLA compilation of jit(multiply) in 0.009524107 sec
+Finished tracing floor_divide for jit in 0.001173019 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001065016 sec
+Finished XLA compilation of jit(floor_divide) in 0.016401052 sec
+Finished tracing add for jit in 0.000149012 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.001740932 sec
+Finished XLA compilation of jit(add) in 0.009538889 sec
+Finished tracing _where for jit in 0.000417709 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000402927 sec
+Finished XLA compilation of jit(_where) in 0.009888172 sec
+Finished tracing multiply for jit in 0.000165939 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000322104 sec
+Finished XLA compilation of jit(multiply) in 0.009640932 sec
+Finished tracing floor_divide for jit in 0.001186132 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001145840 sec
+Finished XLA compilation of jit(floor_divide) in 0.018675327 sec
+Finished tracing add for jit in 0.000164986 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000318050 sec
+Finished XLA compilation of jit(add) in 0.009273291 sec
+Finished tracing _where for jit in 0.000443697 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000411987 sec
+Finished XLA compilation of jit(_where) in 0.010213852 sec
+Finished tracing multiply for jit in 0.000183105 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000343084 sec
+Finished XLA compilation of jit(multiply) in 0.009393930 sec
+Finished tracing floor_divide for jit in 0.001144171 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.000993013 sec
+Finished XLA compilation of jit(floor_divide) in 0.017632961 sec
+Finished tracing add for jit in 0.000111103 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000220776 sec
+Finished XLA compilation of jit(add) in 0.008764982 sec
+Finished tracing _where for jit in 0.000476837 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000458956 sec
+Finished XLA compilation of jit(_where) in 0.011070013 sec
+Finished tracing multiply for jit in 0.000172853 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000341177 sec
+Finished XLA compilation of jit(multiply) in 0.009190083 sec
+Finished tracing floor_divide for jit in 0.001362324 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.002381086 sec
+Finished XLA compilation of jit(floor_divide) in 0.013794184 sec
+Finished tracing add for jit in 0.000239134 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000338793 sec
+Finished XLA compilation of jit(add) in 0.009982824 sec
+Finished tracing _where for jit in 0.000463724 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000400305 sec
+Finished XLA compilation of jit(_where) in 0.008877993 sec
+Finished tracing multiply for jit in 0.000193119 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000329018 sec
+Finished XLA compilation of jit(multiply) in 0.009193897 sec
+Finished tracing floor_divide for jit in 0.001183271 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.000968933 sec
+Finished XLA compilation of jit(floor_divide) in 0.013377905 sec
+Finished tracing add for jit in 0.000155926 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000310183 sec
+Finished XLA compilation of jit(add) in 0.008256912 sec
+Finished tracing _gae_kernel for jit in 0.002264023 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.004281044 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.025119781 sec
+Finished tracing add for jit in 0.000137091 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000360966 sec
+Finished XLA compilation of jit(add) in 0.009320974 sec
+Finished tracing select_n for jit in 0.000118017 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000298977 sec
+Finished XLA compilation of jit(select_n) in 0.010077953 sec
+Finished tracing _broadcast_arrays for jit in 0.000060320 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000183105 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002536297 sec
+Finished tracing broadcast_in_dim for jit in 0.000142813 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000311852 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002920151 sec
+Finished tracing gather for jit in 0.000131130 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.001743078 sec
+Finished XLA compilation of jit(gather) in 0.019675970 sec
+Finished tracing broadcast_in_dim for jit in 0.000144243 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000202894 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.003009081 sec
+Finished tracing gather for jit in 0.000180960 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000384092 sec
+Finished XLA compilation of jit(gather) in 0.010571957 sec
+Finished tracing broadcast_in_dim for jit in 0.000156164 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000180960 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002429008 sec
+Finished tracing gather for jit in 0.000117064 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000288963 sec
+Finished XLA compilation of jit(gather) in 0.009033918 sec
+Finished tracing broadcast_in_dim for jit in 0.000114918 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000154018 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002358913 sec
+Finished tracing gather for jit in 0.000138998 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000298977 sec
+Finished XLA compilation of jit(gather) in 0.009275913 sec
+Finished tracing broadcast_in_dim for jit in 0.000142097 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000206947 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002455711 sec
+Finished tracing model_loss for jit in 0.022669077 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.005898952 sec
+Finished XLA compilation of jit(model_loss) in 0.054994106 sec
+Finished tracing _where for jit in 0.000421762 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000398874 sec
+Finished XLA compilation of jit(_where) in 0.013617039 sec
+Finished tracing multiply for jit in 0.000212908 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000335217 sec
+Finished XLA compilation of jit(multiply) in 0.012866020 sec
+Finished tracing floor_divide for jit in 0.001146078 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.002498150 sec
+Finished XLA compilation of jit(floor_divide) in 0.016839981 sec
+Finished tracing add for jit in 0.000166893 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000372171 sec
+Finished XLA compilation of jit(add) in 0.012974977 sec
+Finished tracing _where for jit in 0.000441074 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000394106 sec
+Finished XLA compilation of jit(_where) in 0.010348082 sec
+Finished tracing multiply for jit in 0.000162125 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000329018 sec
+Finished XLA compilation of jit(multiply) in 0.009625196 sec
+Finished tracing floor_divide for jit in 0.001133919 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.000948906 sec
+Finished XLA compilation of jit(floor_divide) in 0.016313791 sec
+Finished tracing add for jit in 0.000181437 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000328064 sec
+Finished XLA compilation of jit(add) in 0.009762049 sec
+Finished tracing _gae_kernel for jit in 0.002485037 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.004229069 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.026164055 sec
+Finished tracing add for jit in 0.000142097 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000365019 sec
+Finished XLA compilation of jit(add) in 0.010564089 sec
+Finished tracing select_n for jit in 0.000122786 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000324965 sec
+Finished XLA compilation of jit(select_n) in 0.011100769 sec
+Finished tracing _broadcast_arrays for jit in 0.000064135 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000211000 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002693892 sec
+Finished tracing broadcast_in_dim for jit in 0.000146389 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000270128 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002461910 sec
+Finished tracing gather for jit in 0.000133038 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.001565933 sec
+Finished XLA compilation of jit(gather) in 0.020260811 sec
+Finished tracing broadcast_in_dim for jit in 0.000165939 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000221968 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.003050089 sec
+Finished tracing gather for jit in 0.000128031 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000283241 sec
+Finished XLA compilation of jit(gather) in 0.009761095 sec
+Finished tracing broadcast_in_dim for jit in 0.000151873 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000213146 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002686977 sec
+Finished tracing gather for jit in 0.000129700 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000298023 sec
+Finished XLA compilation of jit(gather) in 0.010460854 sec
+Finished tracing broadcast_in_dim for jit in 0.000187159 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000281096 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.003611803 sec
+Finished tracing gather for jit in 0.000138044 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000330925 sec
+Finished XLA compilation of jit(gather) in 0.010247231 sec
+Finished tracing broadcast_in_dim for jit in 0.000132799 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000178814 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002354860 sec
+Finished tracing model_loss for jit in 0.023287058 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.006418228 sec
+Finished XLA compilation of jit(model_loss) in 0.058329105 sec
+Finished tracing _where for jit in 0.000427008 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000416040 sec
+Finished XLA compilation of jit(_where) in 0.012539148 sec
+Finished tracing multiply for jit in 0.000267982 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000558138 sec
+Finished XLA compilation of jit(multiply) in 0.012436152 sec
+Finished tracing floor_divide for jit in 0.001197100 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.002634048 sec
+Finished XLA compilation of jit(floor_divide) in 0.017271996 sec
+Finished tracing add for jit in 0.000170946 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000344276 sec
+Finished XLA compilation of jit(add) in 0.009443045 sec
+Finished tracing _where for jit in 0.000447035 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000415802 sec
+Finished XLA compilation of jit(_where) in 0.009008884 sec
+Finished tracing multiply for jit in 0.000162125 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000314951 sec
+Finished XLA compilation of jit(multiply) in 0.008687973 sec
+Finished tracing floor_divide for jit in 0.001169205 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001002073 sec
+Finished XLA compilation of jit(floor_divide) in 0.016471148 sec
+Finished tracing add for jit in 0.000169992 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000398159 sec
+Finished XLA compilation of jit(add) in 0.009062767 sec
+Finished tracing _gae_kernel for jit in 0.002480984 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.003940821 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.026309729 sec
+Finished tracing add for jit in 0.000135899 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000354052 sec
+Finished XLA compilation of jit(add) in 0.010070086 sec
+Finished tracing select_n for jit in 0.000122786 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000312805 sec
+Finished XLA compilation of jit(select_n) in 0.011807919 sec
+Finished tracing _broadcast_arrays for jit in 0.000070333 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000232935 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002798796 sec
+Finished tracing broadcast_in_dim for jit in 0.000139952 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000262976 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002441883 sec
+Finished tracing gather for jit in 0.000126839 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.001622200 sec
+Finished XLA compilation of jit(gather) in 0.019098043 sec
+Finished tracing broadcast_in_dim for jit in 0.000166893 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000220060 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002634287 sec
+Finished tracing gather for jit in 0.000125885 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000302076 sec
+Finished XLA compilation of jit(gather) in 0.009881020 sec
+Finished tracing broadcast_in_dim for jit in 0.000144005 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000194073 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002690077 sec
+Finished tracing gather for jit in 0.000170946 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000332594 sec
+Finished XLA compilation of jit(gather) in 0.010478020 sec
+Finished tracing broadcast_in_dim for jit in 0.000133991 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000206232 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002613068 sec
+Finished tracing gather for jit in 0.000125885 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000295162 sec
+Finished XLA compilation of jit(gather) in 0.010918379 sec
+Finished tracing broadcast_in_dim for jit in 0.000151873 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000201225 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.003035069 sec
+Finished tracing model_loss for jit in 0.023919106 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.006335974 sec
+Finished XLA compilation of jit(model_loss) in 0.057927132 sec
+Finished tracing _where for jit in 0.000437975 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000436306 sec
+Finished XLA compilation of jit(_where) in 0.009836197 sec
+Finished tracing multiply for jit in 0.000184059 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000336885 sec
+Finished XLA compilation of jit(multiply) in 0.008586884 sec
+Finished tracing floor_divide for jit in 0.001204967 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.002460241 sec
+Finished XLA compilation of jit(floor_divide) in 0.015224934 sec
+Finished tracing add for jit in 0.000166178 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000332117 sec
+Finished XLA compilation of jit(add) in 0.008512020 sec
+Finished tracing _where for jit in 0.000447035 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000419855 sec
+Finished XLA compilation of jit(_where) in 0.011497021 sec
+Finished tracing multiply for jit in 0.000171900 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000345945 sec
+Finished XLA compilation of jit(multiply) in 0.010406733 sec
+Finished tracing floor_divide for jit in 0.001174927 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001015186 sec
+Finished XLA compilation of jit(floor_divide) in 0.014856100 sec
+Finished tracing add for jit in 0.000171900 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000353098 sec
+Finished XLA compilation of jit(add) in 0.009949923 sec
+Finished tracing _gae_kernel for jit in 0.002413034 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.003889084 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.026198149 sec
+Finished tracing add for jit in 0.000133038 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000344038 sec
+Finished XLA compilation of jit(add) in 0.010276794 sec
+Finished tracing select_n for jit in 0.000119925 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000301838 sec
+Finished XLA compilation of jit(select_n) in 0.010787010 sec
+Finished tracing _broadcast_arrays for jit in 0.000061750 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000212908 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002647877 sec
+Finished tracing broadcast_in_dim for jit in 0.000138044 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000241995 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002315044 sec
+Finished tracing gather for jit in 0.000125885 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.001582861 sec
+Finished XLA compilation of jit(gather) in 0.019206047 sec
+Finished tracing broadcast_in_dim for jit in 0.000144005 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000207186 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002825975 sec
+Finished tracing gather for jit in 0.000195265 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000422239 sec
+Finished XLA compilation of jit(gather) in 0.010324001 sec
+Finished tracing broadcast_in_dim for jit in 0.000118971 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000167370 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002578020 sec
+Finished tracing gather for jit in 0.000188828 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000405073 sec
+Finished XLA compilation of jit(gather) in 0.010910034 sec
+Finished tracing broadcast_in_dim for jit in 0.000142097 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000188828 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002669096 sec
+Finished tracing gather for jit in 0.000130177 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000315905 sec
+Finished XLA compilation of jit(gather) in 0.011510134 sec
+Finished tracing broadcast_in_dim for jit in 0.000172853 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000230074 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002644300 sec
+Finished tracing model_loss for jit in 0.024569988 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.006000042 sec
+Finished XLA compilation of jit(model_loss) in 0.056387901 sec
+Finished tracing _where for jit in 0.000419617 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000417233 sec
+Finished XLA compilation of jit(_where) in 0.010819197 sec
+Finished tracing multiply for jit in 0.000161171 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000321627 sec
+Finished XLA compilation of jit(multiply) in 0.009575129 sec
+Finished tracing floor_divide for jit in 0.001161098 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.002371073 sec
+Finished XLA compilation of jit(floor_divide) in 0.015396118 sec
+Finished tracing add for jit in 0.000149965 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000289917 sec
+Finished XLA compilation of jit(add) in 0.010141850 sec
+Finished tracing _where for jit in 0.000410795 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000354052 sec
+Finished XLA compilation of jit(_where) in 0.009565115 sec
+Finished tracing multiply for jit in 0.000159979 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000312805 sec
+Finished XLA compilation of jit(multiply) in 0.009748220 sec
+Finished tracing floor_divide for jit in 0.001072168 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.000926971 sec
+Finished XLA compilation of jit(floor_divide) in 0.017452955 sec
+Finished tracing add for jit in 0.000210047 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000424862 sec
+Finished XLA compilation of jit(add) in 0.009455919 sec
+Finished tracing _where for jit in 0.000437021 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000429153 sec
+Finished XLA compilation of jit(_where) in 0.011440039 sec
+Finished tracing multiply for jit in 0.000167847 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000360012 sec
+Finished XLA compilation of jit(multiply) in 0.010607958 sec
+Finished tracing floor_divide for jit in 0.001206160 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001013994 sec
+Finished XLA compilation of jit(floor_divide) in 0.014917135 sec
+Finished tracing add for jit in 0.000166893 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000335932 sec
+Finished XLA compilation of jit(add) in 0.010411024 sec
+Finished tracing _where for jit in 0.000416040 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000481129 sec
+Finished XLA compilation of jit(_where) in 0.009807110 sec
+Finished tracing multiply for jit in 0.000180006 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.002241135 sec
+Finished XLA compilation of jit(multiply) in 0.009200096 sec
+Finished tracing floor_divide for jit in 0.001178265 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001325130 sec
+Finished XLA compilation of jit(floor_divide) in 0.018419981 sec
+Finished tracing add for jit in 0.000174999 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000344276 sec
+Finished XLA compilation of jit(add) in 0.009200096 sec
+Finished tracing _gae_kernel for jit in 0.002364159 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.004086018 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.025632858 sec
+Finished tracing add for jit in 0.000149012 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000389099 sec
+Finished XLA compilation of jit(add) in 0.010808945 sec
+Finished tracing select_n for jit in 0.000117064 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000342131 sec
+Finished XLA compilation of jit(select_n) in 0.010877132 sec
+Finished tracing _broadcast_arrays for jit in 0.000065088 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000215054 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002578259 sec
+Finished tracing broadcast_in_dim for jit in 0.000138044 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000267029 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002418995 sec
+Finished tracing gather for jit in 0.000133991 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000283241 sec
+Finished XLA compilation of jit(gather) in 0.018728018 sec
+Finished tracing broadcast_in_dim for jit in 0.000133038 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000190973 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002538919 sec
+Finished tracing gather for jit in 0.000132084 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000281096 sec
+Finished XLA compilation of jit(gather) in 0.009553909 sec
+Finished tracing broadcast_in_dim for jit in 0.000128031 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.001571178 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002373695 sec
+Finished tracing gather for jit in 0.000117064 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000288963 sec
+Finished XLA compilation of jit(gather) in 0.010816097 sec
+Finished tracing broadcast_in_dim for jit in 0.000135899 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000176907 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002541065 sec
+Finished tracing gather for jit in 0.000115156 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000267744 sec
+Finished XLA compilation of jit(gather) in 0.010647774 sec
+Finished tracing broadcast_in_dim for jit in 0.000152111 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000220060 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002690792 sec
+Finished tracing model_loss for jit in 0.022596836 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.006086111 sec
+Finished XLA compilation of jit(model_loss) in 0.057319880 sec
+Finished tracing _where for jit in 0.000509977 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000442982 sec
+Finished XLA compilation of jit(_where) in 0.011611938 sec
+Finished tracing multiply for jit in 0.000170946 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000388861 sec
+Finished XLA compilation of jit(multiply) in 0.010190248 sec
+Finished tracing floor_divide for jit in 0.001157284 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001245022 sec
+Finished XLA compilation of jit(floor_divide) in 0.016156197 sec
+Finished tracing add for jit in 0.000165701 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000305891 sec
+Finished XLA compilation of jit(add) in 0.010177612 sec
+Finished tracing _where for jit in 0.000413895 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000394821 sec
+Finished XLA compilation of jit(_where) in 0.010698080 sec
+Finished tracing multiply for jit in 0.000222206 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.001836061 sec
+Finished XLA compilation of jit(multiply) in 0.009448767 sec
+Finished tracing floor_divide for jit in 0.001235008 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001213074 sec
+Finished XLA compilation of jit(floor_divide) in 0.017425776 sec
+Finished tracing add for jit in 0.000168324 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000319958 sec
+Finished XLA compilation of jit(add) in 0.009313107 sec
+Finished tracing _gae_kernel for jit in 0.002322912 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.003669977 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.025206089 sec
+Finished tracing add for jit in 0.000122070 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000302076 sec
+Finished XLA compilation of jit(add) in 0.009436131 sec
+Finished tracing select_n for jit in 0.000118017 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000311136 sec
+Finished XLA compilation of jit(select_n) in 0.010863781 sec
+Finished tracing _broadcast_arrays for jit in 0.000073195 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000259161 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.003278017 sec
+Finished tracing broadcast_in_dim for jit in 0.000159025 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000375032 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002471924 sec
+Finished tracing gather for jit in 0.000165224 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000387907 sec
+Finished XLA compilation of jit(gather) in 0.020648956 sec
+Finished tracing broadcast_in_dim for jit in 0.000142097 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000205040 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002686024 sec
+Finished tracing gather for jit in 0.000152826 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000310898 sec
+Finished XLA compilation of jit(gather) in 0.009955168 sec
+Finished tracing broadcast_in_dim for jit in 0.000143290 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.001728773 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002539158 sec
+Finished tracing gather for jit in 0.000127077 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000298023 sec
+Finished XLA compilation of jit(gather) in 0.010969877 sec
+Finished tracing broadcast_in_dim for jit in 0.000135899 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000206232 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002517939 sec
+Finished tracing gather for jit in 0.000114918 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000275135 sec
+Finished XLA compilation of jit(gather) in 0.010792017 sec
+Finished tracing broadcast_in_dim for jit in 0.000115871 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000157833 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002284050 sec
+Finished tracing model_loss for jit in 0.023870945 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.005967855 sec
+Finished XLA compilation of jit(model_loss) in 0.059030056 sec
+Finished tracing _where for jit in 0.000442982 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000435829 sec
+Finished XLA compilation of jit(_where) in 0.010946035 sec
+Finished tracing multiply for jit in 0.000172138 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000321627 sec
+Finished XLA compilation of jit(multiply) in 0.010293961 sec
+Finished tracing floor_divide for jit in 0.001154661 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001045942 sec
+Finished XLA compilation of jit(floor_divide) in 0.016929865 sec
+Finished tracing add for jit in 0.000169992 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000334740 sec
+Finished XLA compilation of jit(add) in 0.009585142 sec
+Finished tracing _where for jit in 0.000446081 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000411749 sec
+Finished XLA compilation of jit(_where) in 0.010267973 sec
+Finished tracing multiply for jit in 0.000165939 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.001784086 sec
+Finished XLA compilation of jit(multiply) in 0.008706093 sec
+Finished tracing floor_divide for jit in 0.001234055 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001083136 sec
+Finished XLA compilation of jit(floor_divide) in 0.017778873 sec
+Finished tracing add for jit in 0.000167131 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000380278 sec
+Finished XLA compilation of jit(add) in 0.009803772 sec
+Finished tracing _where for jit in 0.000457048 sec
+Finished jaxpr to MLIR module conversion jit(_where) in 0.000409842 sec
+Finished XLA compilation of jit(_where) in 0.009437084 sec
+Finished tracing multiply for jit in 0.000154018 sec
+Finished jaxpr to MLIR module conversion jit(multiply) in 0.000284910 sec
+Finished XLA compilation of jit(multiply) in 0.008648872 sec
+Finished tracing floor_divide for jit in 0.001090050 sec
+Finished jaxpr to MLIR module conversion jit(floor_divide) in 0.001010895 sec
+Finished XLA compilation of jit(floor_divide) in 0.015453815 sec
+Finished tracing add for jit in 0.000166178 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000319958 sec
+Finished XLA compilation of jit(add) in 0.008697987 sec
+Finished tracing _gae_kernel for jit in 0.002558947 sec
+Finished jaxpr to MLIR module conversion jit(_gae_kernel) in 0.003685951 sec
+Finished XLA compilation of jit(_gae_kernel) in 0.026363850 sec
+Finished tracing add for jit in 0.000141859 sec
+Finished jaxpr to MLIR module conversion jit(add) in 0.000349045 sec
+Finished XLA compilation of jit(add) in 0.009769917 sec
+Finished tracing select_n for jit in 0.000123024 sec
+Finished jaxpr to MLIR module conversion jit(select_n) in 0.000339985 sec
+Finished XLA compilation of jit(select_n) in 0.010685921 sec
+Finished tracing _broadcast_arrays for jit in 0.000059128 sec
+Finished jaxpr to MLIR module conversion jit(_broadcast_arrays) in 0.000192881 sec
+Finished XLA compilation of jit(_broadcast_arrays) in 0.002393246 sec
+Finished tracing broadcast_in_dim for jit in 0.000128031 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.001465082 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002507925 sec
+Finished tracing gather for jit in 0.000143051 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000300884 sec
+Finished XLA compilation of jit(gather) in 0.019861937 sec
+Finished tracing broadcast_in_dim for jit in 0.000135183 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000206232 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002981901 sec
+Finished tracing gather for jit in 0.000149012 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000322819 sec
+Finished XLA compilation of jit(gather) in 0.010396957 sec
+Finished tracing broadcast_in_dim for jit in 0.000139952 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000206947 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002868891 sec
+Finished tracing gather for jit in 0.000152111 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000443697 sec
+Finished XLA compilation of jit(gather) in 0.011279821 sec
+Finished tracing broadcast_in_dim for jit in 0.000131130 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000177145 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.002802134 sec
+Finished tracing gather for jit in 0.000127077 sec
+Finished jaxpr to MLIR module conversion jit(gather) in 0.000354052 sec
+Finished XLA compilation of jit(gather) in 0.010238886 sec
+Finished tracing broadcast_in_dim for jit in 0.000138998 sec
+Finished jaxpr to MLIR module conversion jit(broadcast_in_dim) in 0.000200272 sec
+Finished XLA compilation of jit(broadcast_in_dim) in 0.003130913 sec
+Finished tracing model_loss for jit in 0.023404837 sec
+Finished jaxpr to MLIR module conversion jit(model_loss) in 0.005878925 sec
+Finished XLA compilation of jit(model_loss) in 0.053719044 sec
+{"parity": "passed", "profile": "passed", "soak_seconds": 7200}
+{"report": "/Users/maxf/Documents/ChatGPT/Pokemon/artifacts/runs/m1-fixed-loop-v1/report.json", "status": "failed"}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_fixed/campaign.py", line 271, in <module>
+    parser=argparse.ArgumentParser();parser.add_argument('output');main(parser.parse_args().output)
+                                                                   ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_fixed/campaign.py", line 259, in main
+    result['soak']=soak(ex,out,compilation);write(out/'soak.json',result['soak'])
+                   ~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_fixed/campaign.py", line 206, in soak
+    t=time.perf_counter();r=runner.run();aggregate.add(r,time.perf_counter()-t)
+                            ~~~~~~~~~~^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_fixed/checkpoint.py", line 44, in run
+    r = check_report(report)  # includes device synchronization
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/python/pokemon_fixed/loop.py", line 232, in check_report
+    r = jax.device_get(report)
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2592, in device_get
+    return tree_map(_device_get, x)
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/lib/python3.14/site-packages/jax/_src/tree_util.py", line 406, in tree_map
+    return treedef.unflatten(f(*xs) for xs in zip(*all_leaves))
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/lib/python3.14/site-packages/jax/_src/tree_util.py", line 406, in <genexpr>
+    return treedef.unflatten(f(*xs) for xs in zip(*all_leaves))
+                             ~^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2553, in _device_get
+    return toarray()
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/lib/python3.14/site-packages/jax/_src/array.py", line 409, in __array__
+    return np.asarray(self._value, dtype=dtype, **kwds)  # pyrefly: ignore[no-matching-overload]
+                      ^^^^^^^^^^^
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/lib/python3.14/site-packages/jax/_src/profiler.py", line 420, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/maxf/Documents/ChatGPT/Pokemon/.venv/lib/python3.14/site-packages/jax/_src/array.py", line 637, in _value
+    npy_value, did_copy = self._single_device_array_to_np_array_did_copy()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+KeyboardInterrupt

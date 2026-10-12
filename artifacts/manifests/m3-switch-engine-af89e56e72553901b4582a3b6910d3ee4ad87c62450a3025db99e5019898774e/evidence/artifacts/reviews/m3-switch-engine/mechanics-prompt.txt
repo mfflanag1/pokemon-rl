@@ -1,0 +1,925 @@
+Task and review objective:
+Review this new additive scalar/JAX port and passive Showdown capture for concrete mechanics, hidden-information or false-parity bugs. Closed immutable switch-v1 roster only. 72 exact sealed reference replays and 24 fresh games currently pass full state/events/mask/player-view comparison; 1872 reference hidden-state comparisons plus positive controls pass. No production 10000-game run or training has started. Focus on switch priority/outgoing speed, faint replacement/turn advancement, low-HP damage rounding, public HP/memory and observer-only compact encoder, passive chance instrumentation and independent checker coverage. Source-root predecessor files are read-only. Identify actionable correctness gaps, distinguish missing evidence from bugs. Snapshot only; do not claim tests executed.
+
+
+FILE contracts/switch-v1/profile.json
+1: {
+2:   "version": "switch-reference-1",
+3:   "id": "gen9-starter-pairs-v1",
+4:   "predecessor": "daaa42457c61ba4ae79bbc9a2c7ba53d3ae1c1f376d3e7ab67d265e00803d7c1",
+5:   "showdown_commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+6:   "reference_format": "gen9anythinggoes@@@!Team Preview,Terastal Clause",
+7:   "team_size": 2,
+8:   "level": 50,
+9:   "gender": "M",
+10:   "nature": "Serious",
+11:   "item": "",
+12:   "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 31, "spd": 31, "spe": 31},
+13:   "variants": {
+14:     "plain": {"hp": 0, "atk": 0, "def": 0, "spa": 0, "spd": 0, "spe": 0},
+15:     "swift": {"hp": 0, "atk": 0, "def": 0, "spa": 0, "spd": 0, "spe": 252}
+16:   },
+17:   "species": [
+18:     {"id": "bulbasaur", "species": "Bulbasaur", "ability": "Overgrow", "moves": ["Vine Whip", "Tackle"], "teraType": "Grass"},
+19:     {"id": "squirtle", "species": "Squirtle", "ability": "Torrent", "moves": ["Water Gun", "Tackle"], "teraType": "Water"},
+20:     {"id": "fennekin", "species": "Fennekin", "ability": "Blaze", "moves": ["Incinerate", "Scratch"], "teraType": "Fire"}
+21:   ],
+22:   "names": ["A", "B"],
+23:   "actions": ["move-slot-1", "move-slot-2", "switch-original-A", "switch-original-B"],
+24:   "max_resolved_turns": 12,
+25:   "max_decisions": 64,
+26:   "cutoff": "truncate only at a fresh uncommitted joint-move boundary; never relabel as draw",
+27:   "chance_contract": "Pinned Showdown only; future port must cover crits, damage, speed ties and switch ordering. No common raw-stream claim.",
+28:   "hidden": ["unrevealed reserve species", "opponent speed EV variant", "opponent exact HP and remaining PP"],
+29:   "known": ["profile roster and all possible sets", "own complete team and exact stats", "both team sizes", "public species, moves, switches and rounded opponent HP once revealed"],
+30:   "excluded": ["items", "Terastallization", "status moves", "status conditions", "stat stages", "weather", "terrain", "hazards", "recoil", "healing", "pivot moves", "revival", "team preview", "duplicate species", "PP exhaustion", "Struggle"],
+31:   "production_ready": false,
+32:   "custom_engine_implemented": false
+33: }
+34: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/switch-engine-v1/README.md
+1: # switch-engine-1
+2: 
+3: The sealed `switch-v1` roster and twelve-turn cutoff remain the admitted scope.
+4: This port adds explicit conditional chance, independent scalar and JAX transitions,
+5: a bounded player-only observation and a four-action learner smoke after parity.
+6: No old implementation or receipt is edited.
+7: 
+8: Original member slots A/B never reorder internally. State holds species IDs 0/1/2,
+9: speed variants, HP, PP, active original slots, phase (0 joint, 1 replacement,
+10: 2 terminal), turn, group and winner (-1 live, otherwise absolute winning seat).
+11: Only the fainted side acts during replacement; -1 is the waiting action. A joint
+12: step resolves both commitments atomically. Switches precede moves; within the same
+13: priority class faster outgoing active Pokémon acts first, with explicit tie bit.
+14: A fainted actor does not execute or spend PP. Finish replacement before advancing
+15: the turn. Terminal/cutoff states are absorbing in the batched kernel; checked host
+16: submission rejects another active decision. Imported arbitrary states are not a
+17: supported resume format: checkpoints bind and restore the complete reachable state.
+18: 
+19: History has 32 padded rows of nine integers:
+20: `turn, actor, kind, member, species, move, affected_member, HP_after, crit`.
+21: Kind 0 is a switch, kind 1 an executed damaging move. Species is 0/1/2;
+22: move is 0/1 or -1 for a switch. HP is the switched-in member's HP for switches
+23: and the opponent target's HP for moves. Initial send-outs are represented in the
+24: initial observation, not in history. No damage roll is actor-visible. The player
+25: projection converts actor to relative 0=self/1=opponent and HP to exact own or
+26: ceil(100*HP/maxHP) for opponents (clamp 100 to 99 when HP is below max); unused history rows are -1. Faint is implicit in
+27: HP zero. Every reachable event fits: at most 24 joint actions plus two replacement
+28: switches. Terminal winner labels are absent from the actor input.
+29: 
+30: Compact PlayerView fields: own[2,9] = species+1, HP, maxHP, attack, defense,
+31: special attack, special defense, speed, active flag; pp[2,2]; opponent[2,4] =
+32: species+1 (0 unknown), public HP percent (-1 unknown), active flag, fainted flag;
+33: context[5] = turn, own phase (0 move,1 replacement,2 wait,3 terminal), own active
+34: original slot, opponent active original slot, history count; history[32,9]; mask[4].
+35: Both policy and value receive only this same projection. PP is reconstructed from
+36: the observer's executed moves, including while waiting; own HP incorporates private
+37: damage events after a stale last full roster request. Opponent reserve and speed
+38: variants must not enter initial input before they cause public evidence.
+39: 
+40: The learner collects whole capped games under one frozen actor, then updates.
+41: Transitions link only the same player and episode; waiting contributes no decision.
+42: Turn-13 cutoffs bootstrap from that player's fresh view under the collecting actor,
+43: then explicitly reset. They are never terminal draws or evaluation scores.
+44: The 64-update three-seed run is an engineering smoke, not a learning promotion.
+45: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE contracts/switch-engine-v1/plan.json
+1: {
+2:   "version": "switch-engine-1",
+3:   "profile": "gen9-starter-pairs-v1",
+4:   "namespace": "m3-switch-engine-v1",
+5:   "reference_receipt": "1e484145df3e51b631e07d8192a01f1e35409e6ca3ec4df6b8aca0c51fe2bd34",
+6:   "predecessor_receipt": "1a72a14877ff0c17fbcfca5275edc7e6c9509396d01f898ea18709e18f043fdd",
+7:   "fresh_games": 10000,
+8:   "passivity_games": 24,
+9:   "shard_size": 100,
+10:   "max_turns": 12,
+11:   "max_groups": 14,
+12:   "history_capacity": 32,
+13:   "chance": "Semantic events indexed by game/group/seat. Crit and damage use the sealed exact Showdown uint32 maps; ties use an unbiased bit between tied seats. Accuracy has no misses in this profile. No sodium stream or raw draw schedule equivalence claim.",
+14:   "view": "Own private roster and exact stats/HP/PP; opponent seen species, last public percentage HP and active member; complete bounded public move/switch action history with observer-relative actors. No opponent speed variant, exact HP/PP, reserve species before reveal, RNG, winner label or opponent action commitment.",
+15:   "learner": {
+16:     "seeds": [
+17:       101,
+18:       211,
+19:       307
+20:     ],
+21:     "batch_games": 32,
+22:     "updates": 64,
+23:     "epochs": 2,
+24:     "learning_rate": 0.001,
+25:     "gamma": 1.0,
+26:     "lambda": 0.95,
+27:     "clip": 0.2,
+28:     "entropy": 0.01,
+29:     "value_coefficient": 0.5
+30:   },
+31:   "cutoff": "Finish faint replacements, then truncate at the fresh turn-13 joint boundary. Bootstrap each player's last transition with its own turn-13 value under the frozen collecting actor, never call a cutoff a draw. Reset the truncated game explicitly. Terminal rewards win1/loss0; no dense reward.",
+32:   "acceptance": "Zero scalar/JAX/reference state, event, mask and compact player-view divergences; existing information counterfactuals and positive reveal controls pass; finite categorical PPO updates, no masked samples, same-player GAE, exact supported checkpoint replay. No strength threshold or full G2/G3/G4 closure.",
+33:   "scope": "New additive CPU-only modules; sealed predecessors unchanged. No public server, final reserved data, GPU or Prime. Learner smoke starts only after simulator and information parity pass. A separate sustained qualification and learning-strength evaluation remain future gates.",
+34:   "categorical_policy": "Four leaves of a two-level binary tree. Each node uses the sealed FP32 rare mass floor 2^-24 and exact 64-bit word threshold; leaves are products of root/child conditional masses. Stored and PPO log probabilities sum those same logs. Independent words per node. No rounded CDF or straight-through quantizer."
+35: }
+36: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/switch-reference/session.mjs
+1: import assert from 'node:assert/strict';
+2: import {BattleStream,checkSeed} from '../reference-node/engine.mjs';
+3: import {PlayerProjection} from '../reference-node/observations.mjs';
+4: import {hashJSON} from '../battle-contract/canonical.mjs';
+5: import {PROFILE,SIDES,team} from './profile.mjs';
+6: import {mask,command} from './actions.mjs';
+7: 
+8: // Profile-only oracle. Full simulator state is available solely to fixture audits.
+9: export class Session extends BattleStream {
+10:   constructor(){super({noCatch:true,keepAlive:true});this.projection=new PlayerProjection();this.group=0;this.tape=[];this.closed=false;}
+11:   push(message){const n=message.indexOf('\n');this.projection.ingest(message.slice(0,n),message.slice(n+1));}
+12:   views(){assert.equal(this.projection.errors.length,0);return SIDES.map(s=>this.projection.view(s));}
+13:   async start(spec){
+14:     assert.ok(!this.battle&&!this.closed);assert.deepEqual(Object.keys(spec).sort(),['seed','teams']);checkSeed(spec.seed);
+15:     assert.ok(Array.isArray(spec.teams)&&spec.teams.length===2);const teams=spec.teams.map(team);this.spec=structuredClone(spec);
+16:     await this.write(`>start ${JSON.stringify({formatid:PROFILE.reference_format,seed:spec.seed})}`);
+17:     for(let i=0;i<2;i++)await this.write(`>player p${i+1} ${JSON.stringify({name:`P${i+1}`,team:teams[i]})}`);
+18:     assert.equal(this.battle.reportExactHP,false);assert.equal(this.battle.debugMode,false);assert.equal(this.battle.turn,1);
+19:     this.initial=this.frame();return this.initial;
+20:   }
+21:   frame(){
+22:     assert.ok(this.battle&&!this.closed);const views=this.views();
+23:     const ended=this.battle.ended,winner=ended?({'P1':'p1','P2':'p2','':null})[this.battle.winner]:null;
+24:     assert.ok(!ended||winner!==undefined);
+25:     const requested=ended?[]:views.flatMap((v,i)=>!v.request.wait?[i]:[]);
+26:     const phase=ended?'terminal':requested.every(i=>views[i].request.forceSwitch)?'replacement':'joint_move';
+27:     if(!ended){assert.ok(requested.length);assert.ok(phase==='replacement'||requested.length===2);for(const v of views)mask(v.request);}
+28:     return {group:this.group,phase,turn:views[0].turn,requested,winner,views};
+29:   }
+30:   truncated(){const f=this.frame();return f.phase==='joint_move'&&f.turn>PROFILE.max_resolved_turns;}
+31:   async step(decisions,first=0){
+32:     assert.ok(!this.busy&&!this.failed,'Concurrent or failed session');this.busy=true;
+33:     const writes=this.tape.length;
+34:     try{return await this.stepOnce(decisions,first);}
+35:     catch(error){if(this.tape.length!==writes)this.failed=true;throw error;}
+36:     finally{this.busy=false;}
+37:   }
+38:   async stepOnce(decisions,first=0){
+39:     const before=this.frame();assert.ok(!this.truncated()&&before.phase!=='terminal');assert.ok(first===0||first===1);
+40:     assert.ok(Array.isArray(decisions));assert.equal(decisions.length,before.requested.length);
+41:     assert.ok(this.tape.length+decisions.length<=PROFILE.max_decisions);
+42:     const bySide=new Map();
+43:     for(const d of decisions){
+44:       assert.deepEqual(Object.keys(d).sort(),['action','group','request_id','side','view_hash']);assert.ok(SIDES.includes(d.side)&&!bySide.has(d.side));
+45:       const i=SIDES.indexOf(d.side),v=before.views[i];assert.ok(before.requested.includes(i));
+46:       assert.equal(d.group,before.group);assert.equal(d.request_id,v.request_id);assert.equal(d.view_hash,hashJSON(v));
+47:       bySide.set(d.side,{...d,command:command(v.request,d.action)});
+48:     }
+49:     const order=[first,1-first].filter(i=>before.requested.includes(i));
+50:     for(let j=0;j<order.length;j++){
+51:       const i=order[j],d=bySide.get(SIDES[i]);assert.ok(d);await this.write(`>${d.side} ${d.command}`);this.tape.push(d);
+52:       if(j===0&&order.length===2)assert.deepEqual(this.views(),before.views,'Pending choice leaked');
+53:     }
+54:     this.group++;return this.frame();
+55:   }
+56:   close(){this.closed=true;this.destroy();}
+57: }
+58: export function choices(frame,actions){return frame.requested.map(i=>({side:SIDES[i],group:frame.group,
+59:   request_id:frame.views[i].request_id,view_hash:hashJSON(frame.views[i]),action:actions[i]}));}
+60: export function audit(session){return {turn:session.battle.turn,seed:session.battle.prng.getSeed(),sides:session.battle.sides.map(s=>({
+61:   id:s.id,pokemon:s.pokemon.map(m=>({name:m.name,species:m.species.id,hp:m.hp,maxhp:m.maxhp,active:m.isActive,
+62:     fainted:m.fainted,ability:m.ability,item:m.item,status:m.status,stats:m.storedStats,
+63:     pp:m.moveSlots.map(m=>({id:m.id,pp:m.pp})),boosts:{...m.boosts},volatiles:Object.keys(m.volatiles)}))}))};}
+64: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE packages/switch-engine/reference.mjs
+1: // Passive instrumentation of the sealed oracle; never changes its random outcomes.
+2: import assert from 'node:assert/strict';
+3: import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+4: import {gzipSync,gunzipSync} from 'node:zlib';
+5: import {performance} from 'node:perf_hooks';
+6: import {pathToFileURL} from 'node:url';
+7: import {seedFor} from '../reference-node/engine.mjs';
+8: import {fileHash} from '../reference-node/provenance.mjs';
+9: import {canonical,hashJSON} from '../battle-contract/canonical.mjs';
+10: import {ROSTER,PROFILE,reference} from '../switch-reference/profile.mjs';
+11: import {Session,choices,audit} from '../switch-reference/session.mjs';
+12: import {mask} from '../switch-reference/actions.mjs';
+13: 
+14: const species=PROFILE.species.map(x=>x.id),member=p=>PROFILE.names.indexOf(p.name);
+15: export const PLAN=JSON.parse(readFileSync(new URL('../../contracts/switch-engine-v1/plan.json',import.meta.url)));
+16: 
+17: export function snapshot(session,history){
+18:   const frame=session.frame(),b=session.battle,ordered=b.sides.map(s=>PROFILE.names.map(n=>s.pokemon.find(p=>p.name===n)));
+19:   return {species:ordered.map(s=>s.map(p=>species.indexOf(p.species.id))),swift:ordered.map(s=>s.map(p=>Number(p.set.evs.spe===252))),
+20:     hp:ordered.map(s=>s.map(p=>p.hp)),pp:ordered.map(s=>s.map(p=>p.moveSlots.map(m=>m.pp))),active:b.sides.map(s=>member(s.active[0])),
+21:     phase:{joint_move:0,replacement:1,terminal:2}[frame.phase],turn:b.turn,group:session.group,
+22:     winner:frame.winner===null?-1:Number(frame.winner[1])-1,
+23:     seen:[0,1].map(side=>[0,1].map(m=>Number(m===0||history.some(e=>e[1]===side&&e[2]===0&&e[3]===m)))),history:structuredClone(history)};
+24: }
+25: 
+26: export async function battleCase(id,{instrument=true,smoke=false,spec:given,script,expected}={}){
+27:   const teamIDs=[id%24,Math.floor(id/24)%24];
+28:   const spec=given??{teams:teamIDs.map(i=>ROSTER[i].id),seed:seedFor(`${PLAN.namespace}/${smoke?'smoke':'fresh'}/${id}`)};
+29:   const s=new Session();let current=null,words=null,events=[],draws=[],history=[];
+30:   try{
+31:     await s.start(spec);const b=s.battle,initial={state:snapshot(s,history),views:s.views()},steps=[];
+32:     const raw=b.prng.rng.next.bind(b.prng.rng),shuffle=b.prng.shuffle.bind(b.prng);
+33:     const random=b.random.bind(b),crit=b.randomChance.bind(b),getDamage=b.actions.getDamage.bind(b.actions),switchIn=b.actions.switchIn.bind(b.actions);
+34:     if(instrument)b.prng.rng.next=()=>{const word=raw();if(words)words.push(word);return word;};
+35:     const traced=(role,detail,fn)=>{
+36:       if(!instrument)return fn();assert.equal(words,null);words=[];
+37:       try{const result=fn();assert.equal(words.length,1,`Unexpected ${role} draws`);draws.push({role,...detail,word:words[0],result});return result;}
+38:       finally{words=null;}
+39:     };
+40:     b.randomChance=(n,d)=>current&&n===1&&d===24?traced('crit',{side:current.side},()=>crit(n,d)):crit(n,d);
+41:     b.random=(...args)=>{
+42:       const value=current&&args.length===1&&args[0]===16?traced('roll',{side:current.side},()=>random(...args)):random(...args);
+43:       if(current&&args.length===1&&args[0]===16)current.roll=value;return value;
+44:     };
+45:     b.prng.shuffle=(items,start=0,end=items.length)=>{
+46:       const segment=items.slice(start,end),a=segment[0],z=segment[1];
+47:       if(segment.length!==2||!a.pokemon||!z.pokemon||a.choice!==z.choice||!['move','switch','instaswitch'].includes(a.choice))return shuffle(items,start,end);
+48:       const order=segment.map(x=>x.pokemon.side.n);assert.deepEqual([...order].sort(),[0,1]);
+49:       return traced('tie',{order},()=>{shuffle(items,start,end);return items[start].pokemon.side.n;});
+50:     };
+51:     b.actions.getDamage=(source,target,move,...args)=>{
+52:       assert.equal(current,null);current={side:source.side.n};
+53:       try{
+54:         const amount=getDamage(source,target,move,...args),critical=target.getMoveHitData(move).crit;
+55:         assert(Number.isInteger(amount)&&amount>0&&typeof critical==='boolean'&&Number.isInteger(current.roll));
+56:         const slot=source.moveSlots.findIndex(m=>m.id===move.id);assert(slot>=0&&slot<2);
+57:         const row=[b.turn,source.side.n,1,member(source),species.indexOf(source.species.id),slot,member(target),Math.max(0,target.hp-amount),Number(critical)];
+58:         events.push({row,roll:current.roll,amount});history.push(row);return amount;
+59:       }finally{current=null;}
+60:     };
+61:     b.actions.switchIn=(pokemon,...args)=>{
+62:       const result=switchIn(pokemon,...args);assert(pokemon.isActive&&pokemon.hp>0);
+63:       const row=[b.turn,pokemon.side.n,0,member(pokemon),species.indexOf(pokemon.species.id),-1,member(pokemon),pokemon.hp,0];
+64:       events.push({row});history.push(row);return result;
+65:     };
+66:     if(expected)assert.deepEqual({frame:s.frame(),audit:audit(s)},expected[0]);
+67:     while(!b.ended&&!s.truncated()){
+68:       assert(steps.length<PLAN.max_groups);const frame=s.frame();events=[];draws=[];
+69:       const actions=frame.views.map((v,side)=>{
+70:         if(!frame.requested.includes(side))return -1;
+71:         if(script)return script[frame.group][side];
+72:         const legal=mask(v.request).flatMap((ok,i)=>ok?[i]:[]),style=id%5;
+73:         if(style===0)return legal.includes(0)?0:legal[0];
+74:         if(style===1)return legal.includes(1)?1:legal[0];
+75:         if(style===2)return legal.find(a=>a>=2)??legal[0];
+76:         return legal[parseInt(hashJSON([PLAN.namespace,id,frame.group,side]).slice(0,8),16)%legal.length];
+77:       });
+78:       await s.step(choices(frame,actions),(id+frame.group)%2);
+79:       assert(events.length>0&&events.length<=2);
+80:       const chance={crit:[false,false],roll:[0,0],tie:events[0].row[1]};
+81:       for(const e of events)if(e.row[2]===1){chance.crit[e.row[1]]=Boolean(e.row[8]);chance.roll[e.row[1]]=e.roll;}
+82:       if(instrument)for(const d of draws){
+83:         if(d.role==='crit')assert.equal(d.result,Math.floor(d.word*24/2**32)===0);
+84:         if(d.role==='roll')assert.equal(d.result,d.word>>>28);
+85:         if(d.role==='tie')assert.equal(d.result,d.order[d.word>>>31]);
+86:       }
+87:       if(expected)assert.deepEqual({frame:s.frame(),audit:audit(s)},expected[steps.length+1]);
+88:       steps.push({actions,chance,draws,events:events.map(e=>e.row),state:snapshot(s,history),views:s.views()});
+89:     }
+90:     const result={id,spec,teams:spec.teams.map(t=>ROSTER.findIndex(r=>r.id===t)),initial,steps,
+91:       outcome:s.battle.ended?'terminal':'truncated'};
+92:     return result;
+93:   }finally{s.close();}
+94: }
+95: 
+96: export async function capture(directory,{smoke=false}={}){
+97:   mkdirSync(directory);const manifest=reference(),count=smoke?24:PLAN.fresh_games,started=performance.now();
+98:   const plan={plan:PLAN,smoke,count,reference:manifest};writeFileSync(`${directory}/plan.json`,JSON.stringify(plan)+'\n',{flag:'wx'});
+99:   const old=JSON.parse(gunzipSync(readFileSync('artifacts/runs/m3-switch-reference-v1/original/fixtures.json.gz'))),legacy=[];
+100:   for(const [id,c] of old.cases.entries()){
+101:     const script=c.snapshots.slice(0,-1).map((s,g)=>[0,1].map(side=>c.tape.find(d=>d.group===g&&d.side===`p${side+1}`)?.action??-1));
+102:     legacy.push(await battleCase(id,{spec:c.spec,script,expected:c.snapshots}));
+103:   }
+104:   writeFileSync(`${directory}/legacy.json.gz`,gzipSync(canonical(legacy)),{flag:'wx'});
+105:   let rows=[],shards=[];
+106:   for(let id=0;id<count;id++){
+107:     const row=await battleCase(id,{smoke});
+108:     if(id<PLAN.passivity_games){
+109:       const other=await battleCase(id,{smoke,instrument:false});
+110:       const strip=c=>({...c,steps:c.steps.map(({draws,...s})=>s)});assert.deepEqual(strip(row),strip(other),'Passive instrumentation changed battle');
+111:     }
+112:     rows.push(row);
+113:     if(rows.length===PLAN.shard_size||id+1===count){
+114:       const file=`cases-${String(shards.length).padStart(4,'0')}.json.gz`;writeFileSync(`${directory}/${file}`,gzipSync(canonical(rows)),{flag:'wx'});
+115:       shards.push({file,sha256:fileHash(`${directory}/${file}`),count:rows.length,first:id+1-rows.length});rows=[];
+116:       writeFileSync(`${directory}/progress.json`,JSON.stringify({completed:id+1,total:count}));
+117:     }
+118:   }
+119:   assert.deepEqual(reference(),manifest);
+120:   const report={status:'complete',plan_sha256:fileHash(`${directory}/plan.json`),count,shards,legacy:72,passivity:Math.min(count,PLAN.passivity_games),elapsed_ms:performance.now()-started};
+121:   writeFileSync(`${directory}/report.json`,JSON.stringify(report)+'\n',{flag:'wx'});console.log(JSON.stringify(report));
+122: }
+123: if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await capture(process.argv[2],{smoke:process.argv.includes('--smoke')});
+124: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/damage.py
+1: """Scalar Gen9 damage helper for the closed three-species, level-50 profile.
+2: 
+3: Pure, dependency-free functions. Every argument is strictly validated so the
+4: profile cannot be silently widened (bools are rejected where ints are required).
+5: """
+6: 
+7: _LEVEL = 50
+8: 
+9: # species -> (base stats HP/Atk/Def/SpA/SpD/Spe, types, signature type)
+10: _SPECIES = {
+11:     'bulbasaur': ((45, 49, 49, 65, 65, 45), ('grass', 'poison'), 'grass'),
+12:     'squirtle': ((44, 48, 65, 50, 64, 43), ('water',), 'water'),
+13:     'fennekin': ((40, 45, 40, 62, 60, 60), ('fire',), 'fire'),
+14: }
+15: 
+16: # species -> move0 (power, type, physical?); move1 is always physical 40 Normal
+17: _MOVE0 = {
+18:     'bulbasaur': (45, 'grass', True),   # Vine Whip
+19:     'squirtle': (40, 'water', False),   # Water Gun
+20:     'fennekin': (60, 'fire', False),    # Incinerate
+21: }
+22: _MOVE1 = (40, 'normal', True)           # Tackle / Scratch
+23: 
+24: # move0 PP after 8/5 boost; move1 PP is 35 * 8/5 = 56
+25: _PP0 = {'bulbasaur': 40, 'squirtle': 40, 'fennekin': 24}
+26: _PP1 = 56
+27: 
+28: # attacking type -> (resisted-by set, super-effective-against set)
+29: _CHART = {
+30:     'grass': ({'grass', 'poison', 'fire'}, {'water'}),
+31:     'water': ({'water', 'grass'}, {'fire'}),
+32:     'fire': ({'fire', 'water'}, {'grass'}),
+33:     'normal': (set(), set()),
+34: }
+35: 
+36: 
+37: def _check_species(species):
+38:     if not isinstance(species, str) or species not in _SPECIES:
+39:         raise ValueError('unsupported species: %r' % (species,))
+40: 
+41: 
+42: def _check_bool(value, name):
+43:     if not isinstance(value, bool):
+44:         raise TypeError('%s must be a bool' % name)
+45: 
+46: 
+47: def _check_int(value, name, low, high):
+48:     if isinstance(value, bool) or not isinstance(value, int):
+49:         raise TypeError('%s must be an int' % name)
+50:     if not low <= value <= high:
+51:         raise ValueError('%s must be in %d..%d' % (name, low, high))
+52: 
+53: 
+54: def _round(value, mult):
+55:     """Pokémon fixed-point rounding: value * mult/4096, round half down."""
+56:     return (value * mult + 2047) // 4096
+57: 
+58: 
+59: def stats(species, swift=False):
+60:     """Return a new [hp, atk, def, spa, spd, spe] list (L50, Serious, IV31)."""
+61:     _check_species(species)
+62:     _check_bool(swift, 'swift')
+63:     base = _SPECIES[species][0]
+64:     out = [(2 * base[0] + 31) * _LEVEL // 100 + _LEVEL + 10]
+65:     for i in range(1, 6):
+66:         ev = 252 if (swift and i == 5) else 0
+67:         out.append((2 * base[i] + 31 + ev // 4) * _LEVEL // 100 + 5)
+68:     return out
+69: 
+70: 
+71: def max_pp(species):
+72:     """Return a new [move0, move1] max-PP list."""
+73:     _check_species(species)
+74:     return [_PP0[species], _PP1]
+75: 
+76: 
+77: def damage(attacker, defender, hp, move, crit, roll):
+78:     """Damage dealt by attacker's move against defender, as an int.
+79: 
+80:     hp is the attacker's current HP (1..maxhp), move is 0/1, crit is a bool and
+81:     roll is Showdown's bounded draw 0..15 (damage factor 100-roll).
+82:     """
+83:     _check_species(attacker)
+84:     _check_species(defender)
+85:     _check_bool(crit, 'crit')
+86:     _check_int(move, 'move', 0, 1)
+87:     _check_int(roll, 'roll', 0, 15)
+88:     atk_stats = stats(attacker)
+89:     _check_int(hp, 'hp', 1, atk_stats[0])
+90: 
+91:     power, mtype, physical = _MOVE0[attacker] if move == 0 else _MOVE1
+92:     attack = atk_stats[1] if physical else atk_stats[3]
+93:     def_stats = stats(defender)
+94:     defense = def_stats[2] if physical else def_stats[4]
+95: 
+96:     signature = _SPECIES[attacker][2]
+97:     if mtype == signature and 3 * hp <= atk_stats[0]:
+98:         attack = _round(attack, 6144)  # Overgrow / Torrent / Blaze: 1.5x stat
+99: 
+100:     value = (2 * _LEVEL // 5 + 2) * power * attack // defense // 50 + 2
+101:     if crit:
+102:         value = value * 3 // 2
+103:     value = value * (100 - roll) // 100
+104:     if mtype == signature:
+105:         value = _round(value, 6144)  # STAB 1.5x
+106:     resisted, strong = _CHART[mtype]
+107:     for dtype in _SPECIES[defender][1]:
+108:         if dtype in resisted:
+109:             value //= 2  # each resistance halving floors separately
+110:         elif dtype in strong:
+111:             value *= 2
+112:     return max(value, 1)
+113: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/scalar.py
+1: """Independent integer state machine for the sealed two-member profile."""
+2: from copy import deepcopy
+3: from itertools import permutations, product
+4: from .damage import damage, stats, max_pp
+5: 
+6: SPECIES = ('bulbasaur', 'squirtle', 'fennekin')
+7: ROSTER = [(list(p), list(v)) for p in permutations(range(3), 2) for v in product(range(2), repeat=2)]
+8: ROSTER_IDS = ['_'.join(SPECIES[s] + '-' + ('swift' if v else 'plain') for s, v in zip(p, vs)) for p, vs in ROSTER]
+9: CAPACITY = 32
+10: 
+11: 
+12: def require(ok, message):
+13:     if not ok: raise ValueError(message)
+14: 
+15: 
+16: def initial(teams):
+17:     require(isinstance(teams, (list, tuple)) and len(teams) == 2, 'Two team IDs')
+18:     require(all(type(t) is int and 0 <= t < 24 for t in teams), 'Team ID')
+19:     species = [ROSTER[t][0][:] for t in teams]; swift = [ROSTER[t][1][:] for t in teams]
+20:     return {'species': species, 'swift': swift, 'hp': [[stats(SPECIES[s])[0] for s in p] for p in species],
+21:             'pp': [[max_pp(SPECIES[s]) for s in p] for p in species], 'active': [0, 0],
+22:             'phase': 0, 'turn': 1, 'group': 0, 'winner': -1, 'seen': [[1, 0], [1, 0]], 'history': []}
+23: 
+24: 
+25: def masks(state):
+26:     result = []
+27:     for side in range(2):
+28:         a = state['active'][side]
+29:         need = state['phase'] != 2 and (state['phase'] == 0 or state['hp'][side][a] == 0)
+30:         result.append([need and state['phase'] == 0 and state['pp'][side][a][m] > 0 for m in range(2)] +
+31:                       [need and m != a and state['hp'][side][m] > 0 for m in range(2)])
+32:     return result
+33: 
+34: 
+35: def validate_chance(chance):
+36:     require(isinstance(chance, dict) and set(chance) == {'crit', 'roll', 'tie'}, 'Chance fields')
+37:     require(type(chance['tie']) is int and chance['tie'] in (0, 1), 'Tie seat')
+38:     require(isinstance(chance['crit'], list) and len(chance['crit']) == 2 and all(type(x) is bool for x in chance['crit']), 'Critical outcomes')
+39:     require(isinstance(chance['roll'], list) and len(chance['roll']) == 2 and all(type(x) is int and 0 <= x < 16 for x in chance['roll']), 'Damage rolls')
+40: 
+41: 
+42: def step(state, actions, chance):
+43:     require(state['winner'] == -1 and state['turn'] <= 12, 'Terminal or cutoff submission')
+44:     validate_chance(chance); legal = masks(state)
+45:     require(isinstance(actions, list) and len(actions) == 2, 'Action pair')
+46:     for side, action in enumerate(actions):
+47:         require(type(action) is int and (0 <= action < 4 and legal[side][action] if any(legal[side]) else action == -1), 'Illegal action or wait')
+48:     s = deepcopy(state); start = len(s['history'])
+49:     speed = [stats(SPECIES[s['species'][p][s['active'][p]]], bool(s['swift'][p][s['active'][p]]))[5] for p in range(2)]
+50:     if s['phase'] == 1: first = next(p for p in range(2) if any(legal[p]))
+51:     elif (actions[0] >= 2) != (actions[1] >= 2): first = int(actions[1] >= 2)
+52:     elif speed[0] != speed[1]: first = int(speed[1] > speed[0])
+53:     else: first = chance['tie']
+54:     for side in (first, 1-first):
+55:         action = actions[side]; member = s['active'][side]; other = 1-side
+56:         if action < 0 or s['winner'] != -1: continue
+57:         if action >= 2:
+58:             member = action-2; s['active'][side] = member; s['seen'][side][member] = 1
+59:             event = [s['turn'], side, 0, member, s['species'][side][member], -1, member, s['hp'][side][member], 0]
+60:         elif s['hp'][side][member] > 0:
+61:             target = s['active'][other]; source_species = s['species'][side][member]
+62:             amount = damage(SPECIES[source_species], SPECIES[s['species'][other][target]], s['hp'][side][member], action, chance['crit'][side], chance['roll'][side])
+63:             s['hp'][other][target] = max(0, s['hp'][other][target]-amount)
+64:             s['pp'][side][member][action] -= 1
+65:             event = [s['turn'], side, 1, member, source_species, action, target, s['hp'][other][target], int(chance['crit'][side])]
+66:             if not any(s['hp'][other]): s['winner'] = side
+67:         else: continue
+68:         s['history'].append(event)
+69:     require(len(s['history']) <= CAPACITY, 'History capacity')
+70:     s['phase'] = 2 if s['winner'] != -1 else int(any(s['hp'][p][s['active'][p]] == 0 for p in range(2)))
+71:     if s['phase'] == 0: s['turn'] += 1
+72:     s['group'] += 1
+73:     return s, s['history'][start:]
+74: 
+75: 
+76: def percent(hp, maximum):
+77:     n = (100*hp + maximum-1)//maximum
+78:     return 99 if n == 100 and hp < maximum else n
+79: 
+80: 
+81: def view(state, side):
+82:     require(type(side) is int and side in (0, 1), 'Viewer')
+83:     other = 1-side; own = []; opponent = []; history = deepcopy(state['history'])
+84:     for m in range(2):
+85:         s = state['species'][side][m]; st = stats(SPECIES[s], bool(state['swift'][side][m]))
+86:         own.append([s+1, state['hp'][side][m], *st, int(state['active'][side] == m)])
+87:         s = state['species'][other][m]; seen = state['seen'][other][m]
+88:         opponent.append([s+1 if seen else 0, percent(state['hp'][other][m], stats(SPECIES[s])[0]) if seen else -1,
+89:                          int(state['active'][other] == m), int(state['hp'][other][m] == 0) if seen else 0])
+90:     for h in history:
+91:         actor = h[1]; affected = actor if h[2] == 0 else 1-actor
+92:         if affected != side: h[7] = percent(h[7], stats(SPECIES[state['species'][affected][h[6]]])[0])
+93:         h[1] = int(actor != side)
+94:     mask = masks(state)[side]
+95:     phase = 3 if state['phase'] == 2 else 0 if state['phase'] == 0 else 1 if any(mask) else 2
+96:     return {'own': own, 'pp': deepcopy(state['pp'][side]), 'opponent': opponent,
+97:             'context': [state['turn'], phase, state['active'][side], state['active'][other], len(history)],
+98:             'history': history + [[-1]*9 for _ in range(CAPACITY-len(history))], 'mask': mask}
+99: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/engine.py
+1: """Batched CPU JAX transitions, conditionally exact in the starter-pair scope."""
+2: from typing import NamedTuple
+3: import jax
+4: import jax.numpy as jnp
+5: import numpy as np
+6: from .scalar import ROSTER, require
+7: 
+8: STATS = jnp.array([[120,69,69,85,85,65], [119,68,85,70,84,63], [115,65,60,82,80,80]], jnp.int32)
+9: PP = jnp.array([[40,56],[40,56],[24,56]], jnp.int32)
+10: POWER = jnp.array([45,40,60], jnp.int32)
+11: TYPE = jnp.array([[-2,1,-1],[-1,-1,1],[1,-1,-1]], jnp.int32)
+12: 
+13: 
+14: class State(NamedTuple):
+15:     species: jax.Array
+16:     swift: jax.Array
+17:     hp: jax.Array
+18:     pp: jax.Array
+19:     active: jax.Array
+20:     phase: jax.Array
+21:     turn: jax.Array
+22:     group: jax.Array
+23:     winner: jax.Array
+24:     seen: jax.Array
+25:     history: jax.Array
+26:     count: jax.Array
+27: 
+28: 
+29: class Chance(NamedTuple):
+30:     crit: jax.Array
+31:     roll: jax.Array
+32:     tie: jax.Array
+33: 
+34: 
+35: class PlayerView(NamedTuple):
+36:     own: jax.Array
+37:     pp: jax.Array
+38:     opponent: jax.Array
+39:     context: jax.Array
+40:     history: jax.Array
+41:     mask: jax.Array
+42: 
+43: 
+44: def initial(team_ids):
+45:     require(jax.default_backend() == 'cpu' and not jax.config.x64_enabled, 'CPU int32/FP32 only')
+46:     ids = np.asarray(team_ids)
+47:     require(ids.ndim == 2 and ids.shape[1] == 2 and len(ids) > 0 and ids.dtype.kind in 'iu' and np.all((ids>=0)&(ids<24)), 'Batch team IDs')
+48:     return initial_kernel(jnp.asarray(ids,jnp.int32))
+49: 
+50: 
+51: @jax.jit
+52: def initial_kernel(ids):
+53:     species = jnp.array([r[0] for r in ROSTER],jnp.int32)[ids]
+54:     swift = jnp.array([r[1] for r in ROSTER],jnp.int32)[ids]; n = len(ids)
+55:     return State(species, swift, STATS[species,0], PP[species], jnp.zeros((n,2),jnp.int32),
+56:                  jnp.zeros(n,jnp.int32), jnp.ones(n,jnp.int32), jnp.zeros(n,jnp.int32), jnp.full(n,-1,jnp.int32),
+57:                  jnp.tile(jnp.array([[1,0],[1,0]],jnp.int32),(n,1,1)), jnp.full((n,32,9),-1,jnp.int32), jnp.zeros(n,jnp.int32))
+58: 
+59: 
+60: def damage(source, target, hp, move, crit, roll):
+61:     physical = (move == 1) | (source == 0)
+62:     attack = STATS[source,jnp.where(physical,1,3)]; defense = STATS[target,jnp.where(physical,2,4)]
+63:     attack = jnp.where((move==0)&(3*hp<=STATS[source,0]), (attack*6144+2047)//4096, attack)
+64:     power = jnp.where(move==0,POWER[source],40)
+65:     value = (22*power*attack)//defense//50+2
+66:     value = jnp.where(crit,value*3//2,value)*(100-roll)//100
+67:     value = jnp.where(move==0,(value*6144+2047)//4096,value)
+68:     effect = jnp.where(move==0,TYPE[source,target],0)
+69:     value = jnp.where(effect>0,value*2,jnp.where(effect==-2,value//4,jnp.where(effect==-1,value//2,value)))
+70:     return jnp.maximum(1,value)
+71: 
+72: 
+73: def _mask(s):
+74:     rows = jnp.arange(2); hp = s.hp[rows,s.active]
+75:     need = (s.phase!=2)&((s.phase==0)|(hp==0))
+76:     moves = need[:,None]&(s.phase==0)&(s.pp[rows,s.active]>0)
+77:     switches = need[:,None]&(jnp.arange(2)[None,:]!=s.active[:,None])&(s.hp>0)
+78:     return jnp.concatenate([moves,switches],axis=1)
+79: 
+80: 
+81: mask_kernel = jax.jit(jax.vmap(_mask))
+82: 
+83: 
+84: def _step(s, actions, chance):
+85:     live = (s.winner==-1)&(s.turn<=12)
+86:     rows = jnp.arange(2); speed = STATS[s.species[rows,s.active],5]+32*s.swift[rows,s.active]
+87:     switches = actions>=2
+88:     first = jnp.where(switches[0]!=switches[1], switches[1].astype(jnp.int32),
+89:                       jnp.where(speed[0]!=speed[1], (speed[1]>speed[0]).astype(jnp.int32),chance.tie))
+90:     first = jnp.where(s.phase==1,jnp.argmax(s.hp[rows,s.active]==0),first)
+91:     hp,pp,active,seen,history,count,winner = s.hp,s.pp,s.active,s.seen,s.history,s.count,s.winner
+92:     events=[]
+93:     for side in (first,1-first):
+94:         action=actions[side]; member=active[side]; other=1-side; target=active[other]
+95:         is_switch=action>=2; new_member=jnp.clip(action-2,0,1); move=jnp.clip(action,0,1)
+96:         execute=live&(winner==-1)&(action>=0)&(is_switch|(hp[side,member]>0))
+97:         do_switch=execute&is_switch; do_move=execute&~is_switch
+98:         source_species=s.species[side,member]
+99:         amount=damage(source_species,s.species[other,target],hp[side,member],move,chance.crit[side],chance.roll[side])
+100:         hp=hp.at[other,target].set(jnp.where(do_move,jnp.maximum(0,hp[other,target]-amount),hp[other,target]))
+101:         pp=pp.at[side,member,move].add(-do_move.astype(jnp.int32))
+102:         active=active.at[side].set(jnp.where(do_switch,new_member,member))
+103:         seen=seen.at[side,new_member].set(jnp.where(do_switch,1,seen[side,new_member]))
+104:         member=jnp.where(is_switch,new_member,member)
+105:         row=jnp.array([s.turn,side,jnp.where(is_switch,0,1),member,s.species[side,member],
+106:                        jnp.where(is_switch,-1,move),jnp.where(is_switch,member,target),
+107:                        jnp.where(is_switch,hp[side,member],hp[other,target]),
+108:                        jnp.where(is_switch,0,chance.crit[side])],jnp.int32)
+109:         index=jnp.minimum(count,31)
+110:         history=history.at[index].set(jnp.where(execute,row,history[index])); count+=execute.astype(jnp.int32)
+111:         winner=jnp.where(do_move&jnp.all(hp[other]==0),side,winner)
+112:         events.append(jnp.where(execute,row,jnp.full(9,-1,jnp.int32)))
+113:     phase=jnp.where(winner!=-1,2,jnp.any(hp[rows,active]==0).astype(jnp.int32))
+114:     phase=jnp.where(live,phase,s.phase)
+115:     return State(s.species,s.swift,hp,pp,active,phase,s.turn+(live&(phase==0)).astype(jnp.int32),
+116:                  s.group+live.astype(jnp.int32),winner,seen,history,count),jnp.stack(events)
+117: 
+118: 
+119: step_kernel = jax.jit(jax.vmap(_step))
+120: 
+121: 
+122: def step(state, actions, chance):
+123:     require(type(state) is State and type(chance) is Chance, 'Versioned state/chance')
+124:     n=len(state.turn); actions=np.asarray(actions)
+125:     require(actions.shape==(n,2) and actions.dtype.kind in 'iu', 'Action shape/dtype')
+126:     crit,roll,tie=map(np.asarray,chance)
+127:     require(crit.shape==(n,2) and crit.dtype==np.bool_, 'Crit shape/dtype')
+128:     require(roll.shape==(n,2) and roll.dtype.kind in 'iu' and np.all((roll>=0)&(roll<16)), 'Roll bounds')
+129:     require(tie.shape==(n,) and tie.dtype.kind in 'iu' and np.all((tie>=0)&(tie<=1)), 'Tie bounds')
+130:     legal=np.asarray(mask_kernel(state)); live=(np.asarray(state.winner)==-1)&(np.asarray(state.turn)<=12)
+131:     for i in range(n):
+132:         for side in range(2):
+133:             action=int(actions[i,side]); need=live[i] and legal[i,side].any()
+134:             require(0<=action<4 and legal[i,side,action] if need else action==-1, 'Illegal action or inactive wait')
+135:     require(np.all(np.asarray(state.count)<=26), 'Reachable history bound')
+136:     result,events=step_kernel(state,jnp.asarray(actions,jnp.int32),chance)
+137:     require(np.all(np.asarray(result.count)<=26), 'History overflow')
+138:     return result,events
+139: 
+140: 
+141: def _percent(hp,maximum):
+142:     n=(100*hp+maximum-1)//maximum
+143:     return jnp.where((n==100)&(hp<maximum),99,n)
+144: 
+145: 
+146: def _view(s,side):
+147:     other=1-side; members=jnp.arange(2); specs=s.species[side]; st=STATS[specs].at[:,5].add(32*s.swift[side])
+148:     own=jnp.concatenate([(specs+1)[:,None],s.hp[side,:,None],st,(members==s.active[side]).astype(jnp.int32)[:,None]],axis=1)
+149:     other_specs=s.species[other]; seen=s.seen[other].astype(bool)
+150:     opponent=jnp.stack([jnp.where(seen,other_specs+1,0),jnp.where(seen,_percent(s.hp[other],STATS[other_specs,0]),-1),
+151:                         (members==s.active[other]).astype(jnp.int32),jnp.where(seen,s.hp[other]==0,0)],axis=1)
+152:     h=s.history; used=jnp.arange(32)<s.count; actors=jnp.clip(h[:,1],0,1); affected=jnp.where(h[:,2]==0,actors,1-actors)
+153:     species=s.species[affected,jnp.clip(h[:,6],0,1)]
+154:     h=h.at[:,7].set(jnp.where(used&(affected!=side),_percent(h[:,7],STATS[species,0]),h[:,7]))
+155:     h=h.at[:,1].set(jnp.where(used,(actors!=side).astype(jnp.int32),-1))
+156:     mask=_mask(s)[side]; phase=jnp.where(s.phase==2,3,jnp.where(s.phase==0,0,jnp.where(jnp.any(mask),1,2)))
+157:     return PlayerView(own,s.pp[side],opponent,jnp.array([s.turn,phase,s.active[side],s.active[other],s.count],jnp.int32),h,mask)
+158: 
+159: 
+160: view_kernel = jax.jit(jax.vmap(_view,in_axes=(0,None)))
+161: 
+162: 
+163: def unpack(state,index):
+164:     result={k:np.asarray(v[index]).tolist() for k,v in state._asdict().items()}
+165:     result['history']=result['history'][:result.pop('count')]
+166:     return result
+167: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/views.py
+1: """Encode compact observations solely from one player's received reference wire."""
+2: from copy import deepcopy
+3: import json
+4: import re
+5: from pokemon_switch.contract import mask as request_mask
+6: from pokemon_switch.views import actor as checked_actor
+7: from .scalar import SPECIES, require
+8: 
+9: PP = [[40,56],[40,56],[24,56]]
+10: MOVES = [['Vine Whip','Tackle'],['Water Gun','Tackle'],['Incinerate','Scratch']]
+11: NAMES = ['Bulbasaur','Squirtle','Fennekin']
+12: 
+13: 
+14: def encode(view):
+15:     require(isinstance(view,dict) and set(view)=={'side','request_id','turn','request','protocol'}, 'Player-only view boundary')
+16:     require(view['side'] in ('p1','p2'), 'Player side')
+17:     lines=view['protocol']; terminal=any(l.startswith('|win|') or l=='|tie|' for l in lines)
+18:     if not terminal: checked_actor(view)
+19:     observer=int(view['side'][1])-1
+20:     own=None; own_pp=None; opponent=[[0,-1,0,0],[0,-1,0,0]]; active=[0,0]
+21:     history=[]; turn=0; pending=None; request=None; requests=0
+22: 
+23:     def identity(text):
+24:         match=re.fullmatch(r'p([12])a?: ([AB])',text)
+25:         require(match is not None, 'Member identity')
+26:         return int(match[1])-1,ord(match[2])-ord('A')
+27: 
+28:     def health(text,side):
+29:         if text=='0 fnt': return 0
+30:         pair=text.split('/');require(len(pair)==2 and all(p.isdecimal() for p in pair), 'Unadmitted HP/status')
+31:         if side!=observer: require(pair[1]=='100','Exact opponent HP leak')
+32:         return int(pair[0])
+33: 
+34:     for line in lines:
+35:         fields=line.split('|'); kind=fields[1] if len(fields)>1 else ''
+36:         if kind=='request':
+37:             request=json.loads(line[9:]);requests+=1
+38:             if request and 'side' in request:
+39:                 require(request['side']['id']==view['side'], 'Foreign request')
+40:                 if own is None: own=[[0]*9 for _ in range(2)];own_pp=[[0,0],[0,0]]
+41:                 for mon in request['side']['pokemon']:
+42:                     side,member=identity(mon['ident']);species=NAMES.index(mon['details'].split(',')[0]);st=mon['stats']
+43:                     maximum=int(mon['condition'].split('/')[1]) if '/' in mon['condition'] else own[member][2]
+44:                     if own[member][0]==0: own_pp[member]=PP[species][:]
+45:                     own[member]=[species+1,health(mon['condition'],side),maximum,*[st[k] for k in ('atk','def','spa','spd','spe')],int(mon['active'])]
+46:                     if mon['active']: active[side]=member
+47:                 if 'active' in request:
+48:                     require(own_pp[active[observer]]==[m['pp'] for m in request['active'][0]['moves']], 'Own PP reconstruction')
+49:         elif kind=='turn': turn=int(fields[2])
+50:         elif kind=='switch':
+51:             side,member=identity(fields[2]);species=NAMES.index(fields[3].split(',')[0]);hp=health(fields[4],side);active[side]=member
+52:             if side==observer and own is not None:
+53:                 own[member][1]=hp
+54:                 for m in range(2): own[m][8]=int(m==member)
+55:             if side!=observer:
+56:                 opponent[member]=[species+1,hp,1,int(hp==0)]
+57:                 opponent[1-member][2]=0
+58:             if turn>0: history.append([turn,int(side!=observer),0,member,species,-1,member,hp,0])
+59:         elif kind=='move':
+60:             require(pending is None and turn>0, 'Incomplete move history')
+61:             side,member=identity(fields[2]);target,target_member=identity(fields[4]);require(target==1-side,'Move target')
+62:             species=(own[member][0] if side==observer else opponent[member][0])-1
+63:             require(0<=species<3 and fields[3] in MOVES[species], 'Known revealed move')
+64:             move=MOVES[species].index(fields[3]);pending=[turn,int(side!=observer),1,member,species,move,target_member,None,0]
+65:             if side==observer: own_pp[member][move]-=1
+66:         elif kind=='-crit':
+67:             require(pending is not None, 'Crit without move');pending[8]=1
+68:         elif kind=='-damage':
+69:             side,member=identity(fields[2]);hp=health(fields[3],side)
+70:             require(pending is not None and pending[6]==member and pending[1]==int(side==observer),'Damage without matching move')
+71:             pending[7]=hp;history.append(pending);pending=None
+72:             if side==observer: own[member][1]=hp
+73:             else: opponent[member][1]=hp;opponent[member][3]=int(hp==0)
+74:         elif kind in ('-heal','-status','-boost','-unboost','-terastallize','error','split'):
+75:             raise ValueError('Unsupported protocol effect')
+76:     require(pending is None and own is not None and len(history)<=32, 'Complete bounded player history')
+77:     require(request==view['request'] and requests==view['request_id'] and turn==view['turn'], 'Player counters/request linkage')
+78:     mask=[False]*4 if terminal else request_mask(request)
+79:     phase=3 if terminal else 2 if request.get('wait') else 1 if request.get('forceSwitch') else 0
+80:     return {'own':own,'pp':own_pp,'opponent':opponent,'context':[turn,phase,active[observer],active[1-observer],len(history)],
+81:             'history':history+[[-1]*9 for _ in range(32-len(history))], 'mask':mask}
+82: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/parity.py
+1: """Independent scalar/JAX checks against passive real-Showdown evidence."""
+2: import argparse
+3: import gzip
+4: import hashlib
+5: import json
+6: from pathlib import Path
+7: import jax.numpy as jnp
+8: import numpy as np
+9: from . import scalar, engine
+10: from .views import encode
+11: 
+12: 
+13: def read(path): return json.loads(Path(path).read_text())
+14: def packed(path): return json.loads(gzip.decompress(Path(path).read_bytes()))
+15: def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+16: 
+17: 
+18: def compare(actual, expected, label):
+19:     if actual != expected:
+20:         keys = [k for k in expected if actual.get(k) != expected[k]] if isinstance(expected,dict) else []
+21:         raise AssertionError(f'{label}: {keys}; actual={actual!r}; expected={expected!r}')
+22: 
+23: 
+24: def check_batch(cases):
+25:     ss=[scalar.initial(c['teams']) for c in cases]; js=engine.initial(np.array([c['teams'] for c in cases],np.int32))
+26:     counts={'games':len(cases),'frames':0,'player_views':0,'decisions':0,'replacement_frames':0,'truncated':0,'terminal':0,'events':0,'chance_draws':0}
+27:     for group in range(max(len(c['steps']) for c in cases)+1):
+28:         jviews=[engine.view_kernel(js,side) for side in range(2)]
+29:         actions=[];crit=[];roll=[];tie=[]
+30:         for i,c in enumerate(cases):
+31:             if group<=len(c['steps']):
+32:                 frame=c['initial'] if group==0 else c['steps'][group-1];reference=frame['state']
+33:                 compare(ss[i],reference,f'Scalar state game {c["id"]} group {group}')
+34:                 compare(engine.unpack(js,i),reference,f'JAX state game {c["id"]} group {group}')
+35:                 for side in range(2):
+36:                     actual=encode(frame['views'][side]);expected=scalar.view(ss[i],side)
+37:                     compare(actual,expected,f'Reference view game {c["id"]} group {group} side {side}')
+38:                     jview={k:np.asarray(v[i]).tolist() for k,v in jviews[side]._asdict().items()}
+39:                     compare(jview,actual,f'JAX view game {c["id"]} group {group} side {side}')
+40:                     counts['player_views']+=1
+41:                 counts['frames']+=1;counts['replacement_frames']+=int(reference['phase']==1)
+42:             if group<len(c['steps']):
+43:                 row=c['steps'][group];chance=row['chance'];actions.append(row['actions'])
+44:                 crit.append(chance['crit']);roll.append(chance['roll']);tie.append(chance['tie'])
+45:                 ss[i],events=scalar.step(ss[i],row['actions'],chance)
+46:                 compare(events,row['events'],f'Executed events {c["id"]}/{group}')
+47:                 counts['decisions']+=sum(a>=0 for a in row['actions']);counts['events']+=len(events)
+48:                 for d in row['draws']:
+49:                     value=d['word'];scalar.require(type(value) is int and 0<=value<2**32,'Raw word')
+50:                     expected=(value*24//2**32==0) if d['role']=='crit' else value//2**28 if d['role']=='roll' else d['order'][value//2**31]
+51:                     compare(d['result'],expected,'Chance mapping');counts['chance_draws']+=1
+52:             else:actions.append([-1,-1]);crit.append([False,False]);roll.append([0,0]);tie.append(0)
+53:         if group<max(len(c['steps']) for c in cases):
+54:             js,_=engine.step(js,np.array(actions,np.int32),engine.Chance(jnp.array(crit,bool),jnp.array(roll,jnp.int32),jnp.array(tie,jnp.int32)))
+55:     for c in cases:counts[c['outcome']]+=1
+56:     return counts
+57: 
+58: 
+59: def information_checks(bundle):
+60:     data=packed(bundle);initial={};after={};own={};reveals={};n=0
+61:     for c in data['information']['comparisons']:
+62:         values={k:encode(c[k+'_view']) for k in ('initial','after','opponent_own')};n+=3
+63:         for key,table,view in [('initial_key',initial,values['initial']),('after_key',after,values['after'])]:
+64:             if c[key] in table:compare(view,table[c[key]],'Hidden-state invariance')
+65:             else:table[c[key]]=view
+66:         fields=c['opponent'].split('_');key=(c['observer'],c['own'],fields[0].split('-')[0],fields[1])
+67:         own.setdefault(key,[]).append(values['opponent_own'])
+68:     scalar.require(all(len(v)==2 and v[0]!=v[1] for v in own.values()),'Own speed positive controls')
+69:     for c in data['information']['probes']:
+70:         a,b=encode(c['after']['view']),encode(c['reveal']['view']);n+=2
+71:         scalar.require(a!=b,'Reveal positive control')
+72:         fields=c['spec']['teams'][1-c['observer']].split('_')
+73:         key=(c['observer'],fields[0],fields[1].split('-')[1]);reveals.setdefault(key,[]).append((a,b))
+74:     scalar.require(all(len(v)==2 and v[0][0]==v[1][0] and v[0][1]!=v[1][1] for v in reveals.values()),'Distinct reserve reveals')
+75:     return {'encoded_views':n,'hidden_initial_equal':1152-len(initial),'hidden_after_equal':1152-len(after),
+76:             'own_speed_positive':len(own),'reserve_reveal_pairs':len(reveals)}
+77: 
+78: 
+79: def audit(directory):
+80:     directory=Path(directory);report=read(directory/'report.json');plan=read(directory/'plan.json')
+81:     scalar.require(report['status']=='complete' and report['plan_sha256']==sha(directory/'plan.json'),'Capture binding')
+82:     scalar.require(report['count']==plan['count'] and report['legacy']==72,'Capture coverage')
+83:     legacy=check_batch(packed(directory/'legacy.json.gz'));total=None;seen=0
+84:     for shard in report['shards']:
+85:         scalar.require(shard['first']==seen and sha(directory/shard['file'])==shard['sha256'],'Shard identity/hash')
+86:         cases=packed(directory/shard['file']);scalar.require(len(cases)==shard['count'],'Shard length')
+87:         scalar.require([c['id'] for c in cases]==list(range(seen,seen+len(cases))),'Case grid')
+88:         counts=check_batch(cases);total=counts if total is None else {k:total[k]+v for k,v in counts.items()};seen+=len(cases)
+89:     scalar.require(seen==report['count'],'Complete reference campaign')
+90:     information=information_checks('artifacts/runs/m3-switch-reference-v1/original/fixtures.json.gz')
+91:     result={'status':'pass','legacy':legacy,'fresh':total,'information':information,'report_sha256':sha(directory/'report.json')}
+92:     (directory/'parity.json').write_text(json.dumps(result,indent=2)+'\n');return result
+93: 
+94: 
+95: if __name__=='__main__':
+96:     parser=argparse.ArgumentParser();parser.add_argument('directory');args=parser.parse_args();print(json.dumps(audit(args.directory)))
+97: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)
+
+FILE python/pokemon_switch_engine/chance.py
+1: """Event-addressed chance; exact pinned word maps, independently keyed events."""
+2: import jax
+3: import jax.numpy as jnp
+4: from pokemon_showdown.mapping import kernel as word_map
+5: from .engine import Chance
+6: 
+7: DOMAIN = 0x53574531
+8: 
+9: 
+10: @jax.jit
+11: def sample(master,game_ids,groups):
+12:     def words(game,group):
+13:         key=jax.random.fold_in(jax.random.fold_in(jax.random.fold_in(master,DOMAIN),game),group)
+14:         return jnp.stack([jax.random.bits(jax.random.fold_in(key,i),dtype=jnp.uint32) for i in range(5)])
+15:     raw=jax.vmap(words)(game_ids,groups);mapped=word_map(raw.reshape(-1))
+16:     return Chance(mapped['crit'].reshape(-1,5)[:,:2],100-mapped['roll'].reshape(-1,5)[:,2:4],mapped['tie0'].reshape(-1,5)[:,4])
+17: 
+DIFF AGAINST HEAD (empty for untracked/unchanged files):
+(No Git HEAD available; full snapshot only.)

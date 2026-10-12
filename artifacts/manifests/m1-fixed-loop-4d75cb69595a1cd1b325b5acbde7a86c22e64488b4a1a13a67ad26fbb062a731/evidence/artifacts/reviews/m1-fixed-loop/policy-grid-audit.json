@@ -1,0 +1,86 @@
+{
+  "actor_sha256": "2ce02061d9932bbbab287833be5302aa1f50d58dbdcb8344933045b033500b6e",
+  "actor_source_file": "python/pokemon_jax_learner/model.py",
+  "campaign_hash": "641472102f5c8e12a6914bd4438bc1971585853f9b0d38650d4d6e3a132df0f5",
+  "cases": [
+    {
+      "finite_grid_first_action_mass": 1.1920928955078125e-07,
+      "grid_points": 8388608,
+      "nominal_first_action_probability": 1.8081183252027788e-12,
+      "selecting_uniform_grid_points": 1
+    },
+    {
+      "finite_grid_first_action_mass": 1.0728836059570312e-06,
+      "grid_points": 8388608,
+      "nominal_first_action_probability": 9.999999974752427e-07,
+      "selecting_uniform_grid_points": 9
+    },
+    {
+      "finite_grid_first_action_mass": 0.5,
+      "grid_points": 8388608,
+      "nominal_first_action_probability": 0.5,
+      "selecting_uniform_grid_points": 4194304
+    }
+  ],
+  "distribution_source_sha256": "0aecb281b433b16c68cd188b00e763b69f9b17b149f15f4e4e0f6804bb84f3ba",
+  "grid_spacing": 1.1920928955078125e-07,
+  "interpretation": "Both old_logp and PPO ratios use nominal softmax probabilities. They are not exact probabilities/ratios of the finite-grid action-selection law in these constructed tails. This does not invalidate numerical parity to the unchanged sealed recipe or the measured finite-state soak; it blocks treating those checks as a certification of exact on-policy sampling or strength.",
+  "mantissa_bits": 23,
+  "mirrored_cases_with_actual_distribution_kernel": {
+    "cdf": [
+      [
+        1.8081183252027788e-12,
+        1.0
+      ],
+      [
+        1.0,
+        1.0
+      ]
+    ],
+    "first_tail_finite_mass": 1.1920928955078125e-07,
+    "first_tail_selected_grid_points": 1,
+    "grid_points": 8388608,
+    "last_tail_finite_mass": 0.0,
+    "last_tail_selected_grid_points": 0,
+    "log_probabilities": [
+      [
+        -27.038734436035156,
+        0.0
+      ],
+      [
+        0.0,
+        -27.038734436035156
+      ]
+    ],
+    "logits": [
+      [
+        -27.038734436035156,
+        0.0
+      ],
+      [
+        0.0,
+        -27.038734436035156
+      ]
+    ],
+    "probabilities": [
+      [
+        1.8081183252027788e-12,
+        1.0
+      ],
+      [
+        1.0,
+        1.8081183252027788e-12
+      ]
+    ]
+  },
+  "next": "Audit a versioned high-resolution action sampler or explicit exploration-floor recipe before strength promotion; retain current sealed recipe as a reference.",
+  "observed_minimum_nominal_sampled_probability": 1.8081183252027788e-12,
+  "scope": "Exhaustive FP32 uniform-grid enumeration conditional on uniform random words, matching installed JAX mantissa construction and the inherited inverse-CDF first-action rule. Not a frequency estimate from the soak and not an observed-row reconstruction. No sampler change was made.",
+  "source_file": ".venv/lib/python3.14/site-packages/jax/_src/random/core.py",
+  "source_lines": [
+    511,
+    550
+  ],
+  "source_sha256": "e1f4e22508d8aaebc3f86fb2e88b6ac3752cec960c7740275d725c56ea35821b",
+  "status": "verified-precision-limitation"
+}

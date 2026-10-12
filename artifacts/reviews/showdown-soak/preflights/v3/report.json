@@ -1,0 +1,379 @@
+{
+  "status": "complete",
+  "plan": {
+    "schema": "showdown-network-soak-plan-1",
+    "namespace": "showdown-network-soak-smoke-v1",
+    "sessions": 2,
+    "games_per_session": 4,
+    "fault_offsets": [
+      0,
+      1,
+      2
+    ],
+    "faults": [
+      "before-choice",
+      "lost-write",
+      "accepted-choice"
+    ],
+    "policies": {
+      "tactical": "tactical-v1",
+      "baseline": "public-matchup-heuristic-v1"
+    },
+    "decision_delay_ms": 2,
+    "accepted_opponent_control": "Hold at most one baseline action until tactical restoration; record its attempt and actual release separately. No fixed-delay race decides whether the accepted pending action is observed.",
+    "retry_delay_ms": 80,
+    "game_timeout_ms": 120000,
+    "intergame_delay_ms": 30,
+    "max_client_rss_mib": 768,
+    "design": "500 team pairs; keep teams in fixed simulator seats and swap policies. Twenty new login sessions, each with 50 sequential games. Add session parity to each fault offset so all three fault types occur in both tactical seats. Three recoveries per tactical session; baseline transport remains connected.",
+    "chance": "Real local-server battle seeds are not controlled or coupled. This is a functional soak, not a paired strength comparison or a fresh deterministic simulator replay campaign.",
+    "admission": "Regenerate official development teams in this namespace. Require no exact-team overlap with prior panel, confirmation, network and own smoke pools. Reject a collision; no pair replacement. The local format admits only this exact pool, bypassing constructed-team legality as the normal random format does; no official set values are changed.",
+    "stopping": "Complete every planned game and wire audit. Stop and preserve evidence on unexpected client/server errors, timeout, missing recovery, telemetry limit or audit mismatch. No replacement games, strength tuning, adaptive extension, public server, final data or training.",
+    "scope": "Pinned loopback server and frozen stateless clients. Sessions rotate before the inherited 64-room limit. All three tactical reconnects are intentionally consumed; any unplanned loss fails. No process-restart, unlimited-session, public protocol, custom-engine G2/G3/G4 or strength certification. Client RSS only; server/device memory is not qualified.",
+    "games": 8
+  },
+  "smoke": true,
+  "expected": {
+    "games": 8,
+    "sessions": 2,
+    "rematches": 6,
+    "faults": 6,
+    "tactical_connections": 8,
+    "baseline_connections": 2,
+    "tactical_p1": 4,
+    "tactical_p2": 4,
+    "scenarios": {
+      "normal": 2,
+      "before-choice": 2,
+      "lost-write": 2,
+      "accepted-choice": 2
+    }
+  },
+  "records": [
+    {
+      "index": 0,
+      "file": "game-0000.json.gz",
+      "sha256": "ed4a2729e690aacb91b5333573a31654cbf96f050898deafeada2299419ec8f1",
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-1",
+          "winner": "SoakTac0",
+          "turns": 15,
+          "decisions": 20,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-1",
+          "winner": "SoakTac0",
+          "turns": 15,
+          "decisions": 20,
+          "retries": 0
+        }
+      ],
+      "telemetry": {
+        "rss": 350027776,
+        "heap_used": 64270592,
+        "elapsed_ms": 10517.140041,
+        "roles": {
+          "tactical": {
+            "rooms": 1,
+            "finished": 1,
+            "generations": 2,
+            "reconnects": 1
+          },
+          "baseline": {
+            "rooms": 1,
+            "finished": 1,
+            "generations": 1,
+            "reconnects": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "file": "game-0001.json.gz",
+      "sha256": "6c4fd16b485650a63b220ee1ba905b5de51e892e402c43f3870c94db5888a62e",
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-2",
+          "winner": "SoakTac0",
+          "turns": 14,
+          "decisions": 19,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-2",
+          "winner": "SoakTac0",
+          "turns": 14,
+          "decisions": 19,
+          "retries": 0
+        }
+      ],
+      "telemetry": {
+        "rss": 351158272,
+        "heap_used": 71282352,
+        "elapsed_ms": 10832.262166,
+        "roles": {
+          "tactical": {
+            "rooms": 1,
+            "finished": 2,
+            "generations": 3,
+            "reconnects": 2
+          },
+          "baseline": {
+            "rooms": 2,
+            "finished": 2,
+            "generations": 1,
+            "reconnects": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "file": "game-0002.json.gz",
+      "sha256": "956f33b50cfcf48a7534101b9734bdeb74c52a8f51a679bb5aeec325873bb0b6",
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-3",
+          "winner": "SoakTac0",
+          "turns": 13,
+          "decisions": 15,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-3",
+          "winner": "SoakTac0",
+          "turns": 13,
+          "decisions": 18,
+          "retries": 0
+        }
+      ],
+      "telemetry": {
+        "rss": 352190464,
+        "heap_used": 77526200,
+        "elapsed_ms": 11293.905583,
+        "roles": {
+          "tactical": {
+            "rooms": 1,
+            "finished": 3,
+            "generations": 4,
+            "reconnects": 3
+          },
+          "baseline": {
+            "rooms": 3,
+            "finished": 3,
+            "generations": 1,
+            "reconnects": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "file": "game-0003.json.gz",
+      "sha256": "fe350d94a168c13d966fe99fc7e75fae1d895cfcc2dd920315b4f898d4184f2e",
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-4",
+          "winner": "SoakTac0",
+          "turns": 19,
+          "decisions": 23,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-4",
+          "winner": "SoakTac0",
+          "turns": 19,
+          "decisions": 24,
+          "retries": 0
+        }
+      ],
+      "telemetry": {
+        "rss": 351141888,
+        "heap_used": 57822760,
+        "elapsed_ms": 11483.508708,
+        "roles": {
+          "tactical": {
+            "rooms": 2,
+            "finished": 4,
+            "generations": 4,
+            "reconnects": 3
+          },
+          "baseline": {
+            "rooms": 4,
+            "finished": 4,
+            "generations": 1,
+            "reconnects": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "file": "game-0004.json.gz",
+      "sha256": "9b9cf02bc394464bb63e0ec20a2f8629af46c289fe51f958fe4a837b118c02ca",
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-5",
+          "winner": "SoakTac1",
+          "turns": 18,
+          "decisions": 23,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-5",
+          "winner": "SoakTac1",
+          "turns": 18,
+          "decisions": 23,
+          "retries": 0
+        }
+      ],
+      "telemetry": {
+        "rss": 352026624,
+        "heap_used": 66964272,
+        "elapsed_ms": 11665.532583,
+        "roles": {
+          "tactical": {
+            "rooms": 1,
+            "finished": 1,
+            "generations": 1,
+            "reconnects": 0
+          },
+          "baseline": {
+            "rooms": 1,
+            "finished": 1,
+            "generations": 1,
+            "reconnects": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "file": "game-0005.json.gz",
+      "sha256": "5e46b7e44bbf3dd89467289b2bb5bce829a2fafdd0043843c41578c3810a9966",
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-6",
+          "winner": "SoakTac1",
+          "turns": 19,
+          "decisions": 23,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-6",
+          "winner": "SoakTac1",
+          "turns": 19,
+          "decisions": 24,
+          "retries": 0
+        }
+      ],
+      "telemetry": {
+        "rss": 352993280,
+        "heap_used": 75716248,
+        "elapsed_ms": 11904.267916,
+        "roles": {
+          "tactical": {
+            "rooms": 1,
+            "finished": 2,
+            "generations": 2,
+            "reconnects": 1
+          },
+          "baseline": {
+            "rooms": 2,
+            "finished": 2,
+            "generations": 1,
+            "reconnects": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 6,
+      "file": "game-0006.json.gz",
+      "sha256": "623388c794978d2305140e2fe06bba8712cd5fdd5280978d384f3a2c4e828905",
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-7",
+          "winner": "SoakTac1",
+          "turns": 12,
+          "decisions": 15,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-7",
+          "winner": "SoakTac1",
+          "turns": 12,
+          "decisions": 17,
+          "retries": 0
+        }
+      ],
+      "telemetry": {
+        "rss": 354009088,
+        "heap_used": 81676616,
+        "elapsed_ms": 12187.851541,
+        "roles": {
+          "tactical": {
+            "rooms": 1,
+            "finished": 3,
+            "generations": 3,
+            "reconnects": 2
+          },
+          "baseline": {
+            "rooms": 3,
+            "finished": 3,
+            "generations": 1,
+            "reconnects": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 7,
+      "file": "game-0007.json.gz",
+      "sha256": "77650687e6625a5cad6a79e9e9d1eb994142d4f40e9d66ad795c66efb6c72537",
+      "results": [
+        {
+          "room": "battle-gen9botbaselinedevelopment-8",
+          "winner": "SoakBase1",
+          "turns": 16,
+          "decisions": 21,
+          "retries": 0
+        },
+        {
+          "room": "battle-gen9botbaselinedevelopment-8",
+          "winner": "SoakBase1",
+          "turns": 16,
+          "decisions": 20,
+          "retries": 0
+        }
+      ],
+      "telemetry": {
+        "rss": 356270080,
+        "heap_used": 88981880,
+        "elapsed_ms": 12649.303291,
+        "roles": {
+          "tactical": {
+            "rooms": 1,
+            "finished": 4,
+            "generations": 4,
+            "reconnects": 3
+          },
+          "baseline": {
+            "rooms": 4,
+            "finished": 4,
+            "generations": 1,
+            "reconnects": 0
+          }
+        }
+      }
+    }
+  ],
+  "failures": [],
+  "elapsed_ms": 12775.106541,
+  "public_server_used": false,
+  "training_performed": false,
+  "final_evaluation_used": false
+}

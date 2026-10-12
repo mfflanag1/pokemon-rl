@@ -1,0 +1,22 @@
+{
+  "version": "m1-g2-campaign-1",
+  "profile_id": "gen9-rattata-duel-v1",
+  "production_ready": false,
+  "backend": "cpu",
+  "prng": "threefry2x32",
+  "sampler_seed": 20261010,
+  "sampler_games": 262144,
+  "sampler_turns": "game_id modulo 4 plus 1",
+  "player_reference_games": 1000,
+  "conditional_reference_games": 10000,
+  "family_alpha": 0.01,
+  "family_test_count": 1184,
+  "tests_per_population": 592,
+  "populations": ["jax_sampler", "fresh_showdown_first_turn"],
+  "tests": "two-sided exact binomial cells: crit(2), roll(32), tie(1), crit-roll(64), cross-actor roll(256), cross-actor crit(4), each crit-tie(8), each roll-tie(64), adjacent disjoint pairs crit(8), tie(4); per turn crit(8), roll(128), tie(4); total 583 plus nine event probabilities: actor crit equality, roll equality, both low rolls, both high rolls, crit0 and roll1 low, crit1 and roll0 low, tie0 and roll0 low, tie0 and roll1 low, both crit and tie0. Empty turn groups skip with p=1. Showdown ties use only equal-priority cases; other cells use first-turn draws. Bonferroni across both populations.",
+  "maximum_disagreements": 0,
+  "benchmark_batch_sizes": [1, 64, 1024],
+  "benchmark_repetitions": 20,
+  "benchmark_label": "CPU JAX kernel only; includes four padded turn slots per game, excludes policy and learner update",
+  "scope": "Restricted batched port, chance law checks, semantic player views. Full G2 remains open; no full-format promotion, training-strength claim or GPU recommendation."
+}

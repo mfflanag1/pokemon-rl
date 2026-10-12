@@ -1,0 +1,31 @@
+{
+  "project": "/Users/maxf/Documents/ChatGPT/Pokemon",
+  "engine": "fable",
+  "model": "claude-fable-5-1",
+  "routine_batch": false,
+  "mode": "implement",
+  "category": "benchmark-statistics",
+  "task": "Implement ONLY packages/showdown-panel/statistics.mjs and tests/showdown-panel/statistics.test.mjs. You are not alone in this project; do not modify or revert others files. Do not recursively delegate. Provide named export summarizeMatrix(records, {policyIds, pairs, bootstrapSamples=10000, seed=73291}). Input records each have {a,b,pair,mirror,score}; score is policy a outcome 0,0.5,1 even when mirror=1. Edges are each unordered pair in policyIds order. Require exactly one record for each edge, pair 0..pairs-1 and mirror 0/1; reject duplicate/missing/foreign/nonfinite/invalid records and invalid options. Return array in lexicographic policyIds index edge order, entries {a,b,games,pairs,wins,draws,losses,mean_score,pair_scores,interval95:[low,high]}. Pair score averages both mirrors. Use deterministic seeded bootstrap of whole pairs, same resampled pair indices for all edges, not treating mirrored games as independent. Use an explicitly specified local uint32 PRNG (no dependency) and 2.5/97.5 percentile nearest rank or documented equivalent. Document descriptive intervals, degenerate intervals, no simultaneous/multiplicity or promotion interpretation. Preserve inputs. Meaningful tests cover exact 0/0.5/1 accounting, paired grouping, determinism, malformed grids, and a nontrivial independently calculated small bootstrap case. Runtime node v25.6.1. No project engine dependency needed.",
+  "criteria": "Pure dependency-free JS statistics implementation; complete pair/seat/edge validation; whole-pair resampling with shared indices across edges; deterministic documented quantiles; negative and known-answer tests pass; only the two owned files changed.",
+  "owned": [
+    "packages/showdown-panel/statistics.mjs",
+    "tests/showdown-panel/statistics.test.mjs"
+  ],
+  "checks": [
+    [
+      "node",
+      "--test",
+      "tests/showdown-panel/statistics.test.mjs"
+    ]
+  ],
+  "files_sha256": {
+    "package.json": "ba93b6ffe7fbf6c055175afea4bf1a9d9af09a18e4557ee26576b53694d56d9a",
+    "packages/showdown-panel/plan.json": "c18f0bcc2105d5704efdf67db10c371085602a8bb9c6cefd7bb6b3c0e57dd2b6"
+  },
+  "timeout": 600,
+  "check_timeout": 120,
+  "cli_version": "2.1.296 (Claude Code)",
+  "base_commit": "cc79bbaebde93d2d31aaee4bfd71da641ae69617",
+  "created_at": "2026-10-11T17:11:50.328145+00:00",
+  "test_run": false
+}

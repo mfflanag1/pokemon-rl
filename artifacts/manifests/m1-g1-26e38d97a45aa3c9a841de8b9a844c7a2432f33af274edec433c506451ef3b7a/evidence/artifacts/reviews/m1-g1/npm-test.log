@@ -1,0 +1,119 @@
+
+> pokemon-reference@0.1.0 test
+> node scripts/test.mjs
+
+✔ canonical bytes are portable, including Unicode scalar ordering and integer boundaries (124.427292ms)
+✔ strict wire decoders reject ambiguous numbers, duplicate keys, malformed Unicode and trailing data (122.281583ms)
+✔ shared artifact goldens validate independently and preserve all bytes through Python hashing (367.296292ms)
+✔ all 14 policy indices are bijective; pass and wait have no trainable index (124.194209ms)
+✔ captured and constructed requests agree across semantic, protocol and tensor codecs (212.722417ms)
+✔ known zero, absent item and unknown knowledge are distinct (131.370125ms)
+✔ malformed choices, unknown versions and unsupported phases fail in both languages (768.946875ms)
+✔ actor loader rejects privileged artifacts, wrong manifest, wrong viewer and inconsistent masks (33.3965ms)
+✔ natural hidden-trapping attempts and re-requests preserve semantic choices and history boundaries (1101.309833ms)
+✔ live semantic submission executes Tera, rejects stale requests and invalid visible actions before engine input (21.272208ms)
+✔ switch slot is the current request order after a live switch (6.450875ms)
+✔ constructed hidden-disabled live state resolves to Struggle before any re-request (4.366042ms)
+✔ pinned upstream AI includes slot zero in constructed revival target requests (4.406125ms)
+✔ vocabulary includes lazily resolved cosmetic forms and templates retain distinct identities (200.585667ms)
+✔ whole teams are complete, ordered, deterministic across shards, and replay exactly (601.119542ms)
+✔ failed shard is never committed or skipped; resume records the failure and reproduces content (734.391625ms)
+✔ wrong resume configuration and corrupt shards fail without rewriting a completed corpus (365.945667ms)
+✔ active writer lock prevents a second writer (58.338667ms)
+✔ checkpoint failure reports the durable prefix and resumes through an orphan shard (366.133625ms)
+✔ dead local writer is recovered only with exclusive recovery ownership (313.320875ms)
+✔ leftover recovery guard does not prevent a fresh exclusive writer acquisition (202.261458ms)
+✔ Node and independent Python agree on ordered team identities and full-digest partitions (479.833041ms)
+✔ partition edges use the entire 256-bit digest with exact rational thresholds (0.113542ms)
+✔ new mechanical fields reject and exposed/cross-role battle seeds fail before collection (0.365625ms)
+✔ campaign checkpoints replayed episodes, resumes exact indices and retains failure/orphan evidence (4760.659125ms)
+✔ complete R4 episode preserves R1 visible mechanics and replays after canonical serialization (1806.253542ms)
+✔ natural hidden re-requests preserve the already chosen opponent action and zero-reward linkage (1489.5495ms)
+✔ budget reached on a hidden rejection waits for a fresh group; IDs distinguish order and action content (2437.398375ms)
+✔ concurrent submissions serialize, exact retries are idempotent, stale or invalid choices fail before writes (50.612167ms)
+✔ actor view does not change when only the opponent has submitted its hidden choice (48.208417ms)
+✔ constructed single and double faint replacements enter, retain commitments, and exit correctly (571.190209ms)
+✔ a constructed reference tie cancels the unsubmitted request and yields terminal half reward (135.637917ms)
+✔ constructed live continuations, mixed requests and revival targets cover both player roles (725.089333ms)
+✔ explicit truncation finishes the current group and bootstraps each same-player trajectory (209.677167ms)
+✔ semantic corruption remains rejected after artifact hashes are recomputed (145.061625ms)
+✔ R5 live hidden-state, HP, Transform, Illusion and Node/Python codec probes (8779.797583ms)
+✔ all R3 roots have sources; conservative inventory contains unobserved generated effects (1009.447833ms)
+✔ form enumeration rejects hidden RNG channels and restores generator state (0.335875ms)
+✔ AST indexes array callbacks and computed calls; ordinary inherited names are not sinks (0.436792ms)
+✔ sixteen scripted reference cases satisfy semantic assertions and replay in both seats (44.372916ms)
+✔ fixed reference fingerprints remain stable across future harness changes (136.344709ms)
+✔ manifest identifies the exact source, lockfile and resolved rules (18.08725ms)
+✔ provenance refuses changed source and a tampered compiled tree (117.078125ms)
+✔ official whole teams regenerate exactly with their own random stream (2.197625ms)
+✔ a completed seeded battle and its input tape reproduce exactly (93.141042ms)
+✔ replay is independent of wall-clock time while raw evidence is retained (89.970958ms)
+✔ natural hidden-trapping rejections retain the action and updated request on replay (124.651ms)
+✔ explicit teams retain identity when seats and mechanics seed change (2.837792ms)
+✔ projection agrees with upstream getPlayerStreams for an entire recorded battle (15.632291ms)
+✔ private requests, split HP and terminal private teams do not cross player channels (0.190791ms)
+✔ real initial opponent-private mutation leaves the other player view unchanged (1.447417ms)
+✔ stale requests and injected control commands are rejected before simulation (2.654167ms)
+✔ observable choices exclude known-disabled moves without inspecting hidden legality (0.06225ms)
+✔ timestamps alone normalize; choice errors, HP and mechanics remain intact (0.030167ms)
+✔ tampered episode, raw trace and incompatible schemas fail replay (3.113083ms)
+✔ live replay detects divergent requests and results even with a valid envelope hash (90.827375ms)
+✔ a safety cap cannot be reported as a completed draw (20.568459ms)
+✔ JSONL worker processes multiple requests and reports malformed commands (384.104917ms)
+✔ artifact hash is independent of object key insertion order (0.140916ms)
+✔ restricted admission rejects items, abilities, Tera fields and extra team members (3.299583ms)
+✔ restricted reference replays exactly, cannot Tera, and enumerates damage (156.281042ms)
+ℹ tests 61
+ℹ suites 0
+ℹ pass 61
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32909.724708
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.589s
+
+OK
+..{"validated_teams": 4, "requested": 12}
+{"validated_teams": 8, "requested": 12}
+{"validated_teams": 12, "requested": 12}
+{"validated_teams": 4, "requested": 12}
+{"validated_teams": 8, "requested": 12}
+{"validated_teams": 12, "requested": 12}
+....
+----------------------------------------------------------------------
+Ran 6 tests in 1.912s
+
+OK
+...............
+----------------------------------------------------------------------
+Ran 15 tests in 7.100s
+
+OK
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 2.491s
+
+OK
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 16.079s
+
+OK
+...............
+----------------------------------------------------------------------
+Ran 15 tests in 5.989s
+
+OK
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.076s
+
+OK
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.005s
+
+OK

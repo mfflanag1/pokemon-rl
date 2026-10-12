@@ -1,0 +1,10 @@
+test_damage_rounding_and_all_outcomes (test_slice.SliceTest.test_damage_rounding_and_all_outcomes) ... ok
+test_duration_pp_bound (test_slice.SliceTest.test_duration_pp_bound) ... ok
+test_ko_cancels_second_move_no_pp_and_terminal_has_no_requests (test_slice.SliceTest.test_ko_cancels_second_move_no_pp_and_terminal_has_no_requests) ... ok
+test_priority_both_seats_and_tie_orders (test_slice.SliceTest.test_priority_both_seats_and_tie_orders) ... ok
+test_unsupported_config_action_stale_or_extra_event_rejects (test_slice.SliceTest.test_unsupported_config_action_stale_or_extra_event_rejects) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK
