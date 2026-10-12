@@ -1,0 +1,25 @@
+{
+  "started_at": "2026-10-12T02:26:23.268554+00:00",
+  "pid": 98471,
+  "commit": "f98b388ea9629adfe21936979114050989405dc8",
+  "command": [
+    "gh",
+    "release",
+    "create",
+    "snapshot-2026-10-12",
+    "--repo",
+    "mfflanag1/pokemon-rl",
+    "--target",
+    "f98b388ea9629adfe21936979114050989405dc8",
+    "--prerelease",
+    "--latest=false",
+    "--title",
+    "Project and run-data snapshot \u2014 2026-10-12",
+    "--notes-file",
+    "/private/tmp/pokemon-repository-backup-20261012/release-notes.md",
+    "/private/tmp/pokemon-repository-backup-20261012/pokemon-runs-20261012.tar.zst",
+    "/private/tmp/pokemon-repository-backup-20261012/SHA256SUMS"
+  ],
+  "archive_sha256": "a332e3d1d68515e88e0c7ab04c6d40486dd5583d06b61a6a2f0ec5b3a3e4cdad",
+  "archive_bytes": 572559891
+}

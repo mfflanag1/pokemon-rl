@@ -28,6 +28,20 @@ Inspect the existing release if a transfer fails; preserve diagnostics and do no
 claim a completed backup. Finish this initial verification before uploading the
 later screen supplement. No duplicate release or overwrite of a published asset.
 
+While the scientific audit continues, independently finish the initial transfer
+as soon as its launcher exits. The prepared read-only verifier is:
+
+```sh
+python3 artifacts/repository-backups/verify-initial.py
+```
+
+It checks the exact release tag/commit, private visibility, completed upload,
+both asset digests/sizes and the pushed main branch, then exclusively writes
+`initial-transfer-verification.json`. If that record already exists, inspect it
+instead of overwriting it. Commit/push the backup metadata and verification record
+without changing any frozen scientific source. A missing server digest requires
+the independent download/hash fallback described above, not relaxing the check.
+
 ## After the current M3 screen completes or fails
 
 Finish the frozen experiment's existing continuation first. On success require
