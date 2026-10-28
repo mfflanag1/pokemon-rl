@@ -4,11 +4,9 @@ A research implementation for Gen 9 Random Battles: a pinned Pokémon Showdown r
 
 ## Current status — 28 October 2026
 
-**F39 completed production training and evaluation, but its scientific workflow failed at independent verifier startup.** All three seeds produced 36,768 training games, 4,608 evaluation games and 6,144 new optimizer steps. The lifecycle wrapper triggered an overly broad import guard before independent replay, recovery or checkpoint comparison began. No successful completion receipt exists.
+**F40 re-verified the saved F39 production in a separate execution and recomputed its measured results, without repeating training.** All 66 prescribed replays, six saved-update recoveries and nine checkpoint comparisons passed. The replay execution reused the original verifier. A separate postcheck confirmed hashes, complete inventories, report accounting and preservation of the original F39 failure; F39 itself has not been relabeled successful.
 
-The recorded results are provisional: **the primary improvement gate is false for all three seeds**, and all twelve adjusted contrasts include or touch zero. Preservation and static accounting were checked; this does not substitute for independent scientific verification. See the [F39 handoff](docs/F39_ONLINE_CONTINUATION.md).
-
-**F40, a verifier-only repair, is in preparation.** It will address verification of the preserved F39 production output; no retraining or new learning result is claimed here. This status must be refreshed if that separate repair completes.
+The verified continuation covered all three seeds, 36,768 training games, 4,608 evaluation games and 6,144 new optimizer steps. **None of the three seeds passed the primary improvement gate.** Against the familiar, training-excluded baseline, wins per 512 games changed 252→269, 236→235 and 248→252. All twelve adjusted contrasts include or touch zero. This does not establish either a reliable improvement or an absence of benefit; no detected regression does not establish noninferiority. See the [F40 measured handoff](docs/F40_VERIFICATION_REPAIR.md) and preserved [F39 failure handoff](docs/F39_ONLINE_CONTINUATION.md).
 
 The [F34 structured-policy screen](docs/F34_POLICY_RESET.md) provides the working policy stack. [F35](docs/F35_TEACHER_ASSISTED.md), [F36](docs/F36_TEACHER_RUNTIME.md) and [F37](docs/F37_TEACHER_LEGALITY.md) failed during teacher acquisition. [F38](docs/F38_TEACHER_COMPATIBILITY.md) found no contained adapter-only repair for the pinned native teacher's revival boundary. That teacher-assisted comparison remains incomplete. Full G2/G3/G4 qualification and public ladder strength remain open; no policy promotion is claimed.
 
