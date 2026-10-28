@@ -1,0 +1,784 @@
+{
+  "p1": {
+    "request": {
+      "forceSwitch": [
+        true
+      ],
+      "side": {
+        "name": "Full p1",
+        "id": "p1",
+        "pokemon": [
+          {
+            "ident": "p1: Iron Valiant",
+            "details": "Iron Valiant, L78",
+            "condition": "0 fnt",
+            "active": true,
+            "stats": {
+              "atk": 248,
+              "def": 185,
+              "spa": 232,
+              "spd": 139,
+              "spe": 226
+            },
+            "moves": [
+              "closecombat",
+              "psychic",
+              "calmmind",
+              "moonblast"
+            ],
+            "baseAbility": "quarkdrive",
+            "item": "lifeorb",
+            "pokeball": "pokeball",
+            "ability": "quarkdrive",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Fairy",
+            "terastallized": ""
+          },
+          {
+            "ident": "p1: Dewgong",
+            "details": "Dewgong, L94, F",
+            "condition": "136/322",
+            "active": false,
+            "stats": {
+              "atk": 185,
+              "def": 204,
+              "spa": 185,
+              "spd": 232,
+              "spe": 185
+            },
+            "moves": [
+              "hydropump",
+              "icebeam",
+              "knockoff",
+              "encore"
+            ],
+            "baseAbility": "thickfat",
+            "item": "heavydutyboots",
+            "pokeball": "pokeball",
+            "ability": "thickfat",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Steel",
+            "terastallized": "Steel"
+          },
+          {
+            "ident": "p1: Crabominable",
+            "details": "Crabominable, L90, F",
+            "condition": "0 fnt",
+            "active": false,
+            "stats": {
+              "atk": 289,
+              "def": 190,
+              "spa": 163,
+              "spd": 172,
+              "spe": 129
+            },
+            "moves": [
+              "knockoff",
+              "drainpunch",
+              "earthquake",
+              "icehammer"
+            ],
+            "baseAbility": "ironfist",
+            "item": "choiceband",
+            "pokeball": "pokeball",
+            "ability": "ironfist",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Ground",
+            "terastallized": ""
+          },
+          {
+            "ident": "p1: Gardevoir",
+            "details": "Gardevoir, L83, M",
+            "condition": "0 fnt",
+            "active": false,
+            "stats": {
+              "atk": 112,
+              "def": 156,
+              "spa": 255,
+              "spd": 239,
+              "spe": 180
+            },
+            "moves": [
+              "healingwish",
+              "psychic",
+              "moonblast",
+              "mysticalfire"
+            ],
+            "baseAbility": "trace",
+            "item": "choicescarf",
+            "pokeball": "pokeball",
+            "ability": "trace",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Fairy",
+            "terastallized": ""
+          },
+          {
+            "ident": "p1: Sandaconda",
+            "details": "Sandaconda, L84, M",
+            "condition": "0 fnt",
+            "active": false,
+            "stats": {
+              "atk": 228,
+              "def": 258,
+              "spa": 157,
+              "spd": 166,
+              "spe": 167
+            },
+            "moves": [
+              "rockblast",
+              "earthquake",
+              "scaleshot",
+              "coil"
+            ],
+            "baseAbility": "shedskin",
+            "item": "loadeddice",
+            "pokeball": "pokeball",
+            "ability": "shedskin",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Dragon",
+            "terastallized": ""
+          },
+          {
+            "ident": "p1: Pelipper",
+            "details": "Pelipper, L86, M",
+            "condition": "150/243",
+            "active": false,
+            "stats": {
+              "atk": 135,
+              "def": 221,
+              "spa": 213,
+              "spd": 170,
+              "spe": 161
+            },
+            "moves": [
+              "roost",
+              "hurricane",
+              "hydropump",
+              "uturn"
+            ],
+            "baseAbility": "drizzle",
+            "item": "heavydutyboots",
+            "pokeball": "pokeball",
+            "ability": "drizzle",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Ground",
+            "terastallized": ""
+          }
+        ]
+      },
+      "noCancel": true
+    },
+    "ownEvents": [
+      [
+        "Crabominable",
+        {
+          "condition": "0 fnt",
+          "active": false,
+          "boosts": {}
+        }
+      ],
+      [
+        "Dewgong",
+        {
+          "condition": "136/322",
+          "active": false,
+          "boosts": {},
+          "tera": "Steel"
+        }
+      ],
+      [
+        "Sandaconda",
+        {
+          "condition": "0 fnt",
+          "active": false,
+          "boosts": {
+            "atk": 1,
+            "def": 1,
+            "accuracy": 1
+          }
+        }
+      ],
+      [
+        "Iron Valiant",
+        {
+          "condition": "0 fnt",
+          "active": true,
+          "boosts": {
+            "spa": 1,
+            "spd": 1
+          }
+        }
+      ],
+      [
+        "Pelipper",
+        {
+          "condition": "150/243",
+          "active": false,
+          "boosts": {}
+        }
+      ],
+      [
+        "Gardevoir",
+        {
+          "condition": "0 fnt",
+          "active": false,
+          "boosts": {}
+        }
+      ]
+    ],
+    "lastOwn": [
+      {
+        "ident": "Iron Valiant",
+        "species": "Iron Valiant",
+        "level": 78,
+        "condition": "0 fnt",
+        "active": true,
+        "moves": [
+          "closecombat",
+          "psychic",
+          "calmmind",
+          "moonblast"
+        ],
+        "ability": "quarkdrive",
+        "item": "lifeorb",
+        "tera": null,
+        "tera_type": "Fairy",
+        "stats": {
+          "atk": 248,
+          "def": 185,
+          "spa": 232,
+          "spd": 139,
+          "spe": 226
+        },
+        "reviving": false,
+        "boosts": {
+          "spa": 1,
+          "spd": 1
+        }
+      },
+      {
+        "ident": "Dewgong",
+        "species": "Dewgong",
+        "level": 94,
+        "condition": "136/322",
+        "active": false,
+        "moves": [
+          "hydropump",
+          "icebeam",
+          "knockoff",
+          "encore"
+        ],
+        "ability": "thickfat",
+        "item": "heavydutyboots",
+        "tera": "Steel",
+        "tera_type": "Steel",
+        "stats": {
+          "atk": 185,
+          "def": 204,
+          "spa": 185,
+          "spd": 232,
+          "spe": 185
+        },
+        "reviving": false,
+        "boosts": {}
+      },
+      {
+        "ident": "Crabominable",
+        "species": "Crabominable",
+        "level": 90,
+        "condition": "0 fnt",
+        "active": false,
+        "moves": [
+          "knockoff",
+          "drainpunch",
+          "earthquake",
+          "icehammer"
+        ],
+        "ability": "ironfist",
+        "item": "choiceband",
+        "tera": null,
+        "tera_type": "Ground",
+        "stats": {
+          "atk": 289,
+          "def": 190,
+          "spa": 163,
+          "spd": 172,
+          "spe": 129
+        },
+        "reviving": false,
+        "boosts": {}
+      },
+      {
+        "ident": "Gardevoir",
+        "species": "Gardevoir",
+        "level": 83,
+        "condition": "0 fnt",
+        "active": false,
+        "moves": [
+          "healingwish",
+          "psychic",
+          "moonblast",
+          "mysticalfire"
+        ],
+        "ability": "trace",
+        "item": "choicescarf",
+        "tera": null,
+        "tera_type": "Fairy",
+        "stats": {
+          "atk": 112,
+          "def": 156,
+          "spa": 255,
+          "spd": 239,
+          "spe": 180
+        },
+        "reviving": false,
+        "boosts": {}
+      },
+      {
+        "ident": "Sandaconda",
+        "species": "Sandaconda",
+        "level": 84,
+        "condition": "0 fnt",
+        "active": false,
+        "moves": [
+          "rockblast",
+          "earthquake",
+          "scaleshot",
+          "coil"
+        ],
+        "ability": "shedskin",
+        "item": "loadeddice",
+        "tera": null,
+        "tera_type": "Dragon",
+        "stats": {
+          "atk": 228,
+          "def": 258,
+          "spa": 157,
+          "spd": 166,
+          "spe": 167
+        },
+        "reviving": false,
+        "boosts": {
+          "atk": 1,
+          "def": 1,
+          "accuracy": 1
+        }
+      },
+      {
+        "ident": "Pelipper",
+        "species": "Pelipper",
+        "level": 86,
+        "condition": "150/243",
+        "active": false,
+        "moves": [
+          "roost",
+          "hurricane",
+          "hydropump",
+          "uturn"
+        ],
+        "ability": "drizzle",
+        "item": "heavydutyboots",
+        "tera": null,
+        "tera_type": "Ground",
+        "stats": {
+          "atk": 135,
+          "def": 221,
+          "spa": 213,
+          "spd": 170,
+          "spe": 161
+        },
+        "reviving": false,
+        "boosts": {}
+      }
+    ]
+  },
+  "p2": {
+    "request": {
+      "wait": true,
+      "side": {
+        "name": "Full p2",
+        "id": "p2",
+        "pokemon": [
+          {
+            "ident": "p2: Zoroark",
+            "details": "Zoroark-Hisui, L80, M",
+            "condition": "44/219",
+            "active": true,
+            "stats": {
+              "atk": 206,
+              "def": 142,
+              "spa": 246,
+              "spd": 142,
+              "spe": 222
+            },
+            "moves": [
+              "bittermalice",
+              "uturn",
+              "hypervoice",
+              "flamethrower"
+            ],
+            "baseAbility": "illusion",
+            "item": "choicespecs",
+            "pokeball": "pokeball",
+            "ability": "illusion",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Normal",
+            "terastallized": ""
+          },
+          {
+            "ident": "p2: Hawlucha",
+            "details": "Hawlucha, L80, M",
+            "condition": "0 fnt",
+            "active": false,
+            "stats": {
+              "atk": 193,
+              "def": 166,
+              "spa": 165,
+              "spd": 147,
+              "spe": 235
+            },
+            "moves": [
+              "swordsdance",
+              "bravebird",
+              "closecombat",
+              "stoneedge"
+            ],
+            "baseAbility": "unburden",
+            "item": "whiteherb",
+            "pokeball": "pokeball",
+            "ability": "unburden",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Flying",
+            "terastallized": ""
+          },
+          {
+            "ident": "p2: Latios",
+            "details": "Latios, L78, M",
+            "condition": "0 fnt",
+            "active": false,
+            "stats": {
+              "atk": 145,
+              "def": 170,
+              "spa": 248,
+              "spd": 217,
+              "spe": 217
+            },
+            "moves": [
+              "recover",
+              "psyshock",
+              "calmmind",
+              "dracometeor"
+            ],
+            "baseAbility": "levitate",
+            "item": "souldew",
+            "pokeball": "pokeball",
+            "ability": "levitate",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Steel",
+            "terastallized": ""
+          },
+          {
+            "ident": "p2: Cinderace",
+            "details": "Cinderace, L77, M",
+            "condition": "0 fnt",
+            "active": false,
+            "stats": {
+              "atk": 223,
+              "def": 160,
+              "spa": 145,
+              "spd": 160,
+              "spe": 228
+            },
+            "moves": [
+              "gunkshot",
+              "pyroball",
+              "uturn",
+              "highjumpkick"
+            ],
+            "baseAbility": "libero",
+            "item": "",
+            "pokeball": "pokeball",
+            "ability": "libero",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Fire",
+            "terastallized": ""
+          },
+          {
+            "ident": "p2: Lokix",
+            "details": "Lokix, L82, F",
+            "condition": "0 fnt",
+            "active": false,
+            "stats": {
+              "atk": 214,
+              "def": 175,
+              "spa": 132,
+              "spd": 137,
+              "spe": 198
+            },
+            "moves": [
+              "suckerpunch",
+              "knockoff",
+              "leechlife",
+              "swordsdance"
+            ],
+            "baseAbility": "tintedlens",
+            "item": "lifeorb",
+            "pokeball": "pokeball",
+            "ability": "tintedlens",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Dark",
+            "terastallized": ""
+          },
+          {
+            "ident": "p2: Toedscruel",
+            "details": "Toedscruel, L87, F",
+            "condition": "183/281",
+            "active": false,
+            "stats": {
+              "atk": 172,
+              "def": 163,
+              "spa": 189,
+              "spd": 259,
+              "spe": 224
+            },
+            "moves": [
+              "toxic",
+              "gigadrain",
+              "earthpower",
+              "rapidspin"
+            ],
+            "baseAbility": "myceliummight",
+            "item": "leftovers",
+            "pokeball": "pokeball",
+            "ability": "myceliummight",
+            "commanding": false,
+            "reviving": false,
+            "teraType": "Water",
+            "terastallized": ""
+          }
+        ]
+      }
+    },
+    "ownEvents": [
+      [
+        "Lokix",
+        {
+          "condition": "0 fnt",
+          "active": false,
+          "boosts": {}
+        }
+      ],
+      [
+        "Cinderace",
+        {
+          "condition": "0 fnt",
+          "active": false,
+          "boosts": {},
+          "tera": "Fire"
+        }
+      ],
+      [
+        "Latios",
+        {
+          "condition": "0 fnt",
+          "active": false,
+          "boosts": {}
+        }
+      ],
+      [
+        "Toedscruel",
+        {
+          "condition": "44/219",
+          "active": false,
+          "boosts": {
+            "spd": -1
+          }
+        }
+      ],
+      [
+        "Hawlucha",
+        {
+          "condition": "0 fnt",
+          "active": false,
+          "boosts": {}
+        }
+      ],
+      [
+        "Zoroark",
+        {
+          "active": true,
+          "boosts": {}
+        }
+      ]
+    ],
+    "lastOwn": [
+      {
+        "ident": "Toedscruel",
+        "species": "Toedscruel",
+        "level": 87,
+        "condition": "183/281",
+        "active": true,
+        "moves": [
+          "toxic",
+          "gigadrain",
+          "earthpower",
+          "rapidspin"
+        ],
+        "ability": "myceliummight",
+        "item": "leftovers",
+        "tera": null,
+        "tera_type": "Water",
+        "stats": {
+          "atk": 172,
+          "def": 163,
+          "spa": 189,
+          "spd": 259,
+          "spe": 224
+        },
+        "reviving": false,
+        "boosts": {}
+      },
+      {
+        "ident": "Hawlucha",
+        "species": "Hawlucha",
+        "level": 80,
+        "condition": "0 fnt",
+        "active": false,
+        "moves": [
+          "swordsdance",
+          "bravebird",
+          "closecombat",
+          "stoneedge"
+        ],
+        "ability": "unburden",
+        "item": "whiteherb",
+        "tera": null,
+        "tera_type": "Flying",
+        "stats": {
+          "atk": 193,
+          "def": 166,
+          "spa": 165,
+          "spd": 147,
+          "spe": 235
+        },
+        "reviving": false,
+        "boosts": {}
+      },
+      {
+        "ident": "Latios",
+        "species": "Latios",
+        "level": 78,
+        "condition": "0 fnt",
+        "active": false,
+        "moves": [
+          "recover",
+          "psyshock",
+          "calmmind",
+          "dracometeor"
+        ],
+        "ability": "levitate",
+        "item": "souldew",
+        "tera": null,
+        "tera_type": "Steel",
+        "stats": {
+          "atk": 145,
+          "def": 170,
+          "spa": 248,
+          "spd": 217,
+          "spe": 217
+        },
+        "reviving": false,
+        "boosts": {}
+      },
+      {
+        "ident": "Cinderace",
+        "species": "Cinderace",
+        "level": 77,
+        "condition": "0 fnt",
+        "active": false,
+        "moves": [
+          "gunkshot",
+          "pyroball",
+          "uturn",
+          "highjumpkick"
+        ],
+        "ability": "libero",
+        "item": "",
+        "tera": null,
+        "tera_type": "Fire",
+        "stats": {
+          "atk": 223,
+          "def": 160,
+          "spa": 145,
+          "spd": 160,
+          "spe": 228
+        },
+        "reviving": false,
+        "boosts": {}
+      },
+      {
+        "ident": "Lokix",
+        "species": "Lokix",
+        "level": 82,
+        "condition": "0 fnt",
+        "active": false,
+        "moves": [
+          "suckerpunch",
+          "knockoff",
+          "leechlife",
+          "swordsdance"
+        ],
+        "ability": "tintedlens",
+        "item": "lifeorb",
+        "tera": null,
+        "tera_type": "Dark",
+        "stats": {
+          "atk": 214,
+          "def": 175,
+          "spa": 132,
+          "spd": 137,
+          "spe": 198
+        },
+        "reviving": false,
+        "boosts": {}
+      },
+      {
+        "ident": "Zoroark",
+        "species": "Zoroark-Hisui",
+        "level": 80,
+        "condition": "219/219",
+        "active": false,
+        "moves": [
+          "bittermalice",
+          "uturn",
+          "hypervoice",
+          "flamethrower"
+        ],
+        "ability": "illusion",
+        "item": "choicespecs",
+        "tera": null,
+        "tera_type": "Normal",
+        "stats": {
+          "atk": 206,
+          "def": 142,
+          "spa": 246,
+          "spd": 142,
+          "spe": 222
+        },
+        "reviving": false,
+        "boosts": {}
+      }
+    ]
+  }
+}

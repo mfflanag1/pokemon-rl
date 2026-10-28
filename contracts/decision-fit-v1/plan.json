@@ -1,0 +1,31 @@
+{
+  "schema_version": "f7-decision-fit-plan-1",
+  "seeds": [7103, 8209, 9311],
+  "optimizer_steps": 1024,
+  "evaluation_steps": [0, 128, 1024],
+  "batch_rows": 128,
+  "learning_rate": 0.0003,
+  "max_gradient_norm": 1.0,
+  "loss": "mean negative log probability of unique F6 mechanics-probe maximizing legal action; unchanged F1 distribution",
+  "network": "unchanged F1 initialize/forward/distribution and F1 928-feature encoder; no value loss or entropy term",
+  "dataset": "artifacts/reviews/f6-decision-canary/mechanics-probe.json",
+  "predecessor_receipt": "artifacts/reports/f6-decision-canary.json",
+  "predecessor_content_hash": "9dfe7318fe681d82363e0971278aa5170b2953c8c611d6f7aa6cf679dac54852",
+  "splits": {
+    "fit_train": {"panel": "train", "episode_lower": 0, "episode_upper": 8, "rows": 128},
+    "probe_same": {"panel": "train", "episode_lower": 8, "episode_upper": 16, "rows": 128},
+    "probe_variant": {"panel": "variant", "episode_lower": 0, "episode_upper": 16, "rows": 256}
+  },
+  "thresholds": {
+    "fit_train": {"minimum_context_accuracy": 1.0, "minimum_context_target_probability": 0.95},
+    "probe_same": {"minimum_context_accuracy": 1.0, "minimum_context_target_probability": 0.90},
+    "probe_variant": {"minimum_context_accuracy": 0.90, "minimum_context_target_probability": 0.80}
+  },
+  "primary_result": "fit_train final threshold in every seed; same-context and variant checks reported separately",
+  "no_early_stopping": true,
+  "no_best_checkpoint_selection": true,
+  "no_new_games": true,
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "interpretation": "supervised finite-task representability witness only; failure does not prove architectural impossibility; no RL improvement or strength claim"
+}

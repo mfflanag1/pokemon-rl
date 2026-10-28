@@ -1,6 +1,6 @@
 # R4 review and verification
 
-R4 was reviewed through the authorized [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md)
+R4 was reviewed through the authorized claude-review skill
 using selected source snapshots, and bounded Python implementation was delegated.
 The review tools did not execute the main project's tests; checks described below
 were run by the coordinator unless explicitly attributed otherwise.

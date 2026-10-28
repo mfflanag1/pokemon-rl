@@ -1,0 +1,18 @@
+{
+  "version": "live-training-1",
+  "predecessor": "396dbfe9b01e7daba086b817fc7d2eac83b2ea8e39880d009584183fef91ece5",
+  "seeds": [431, 641, 853, 4001, 4019, 1103, 2207, 3301],
+  "windows_per_seed": 10000000,
+  "batch_games": 32,
+  "groups_per_window": 14,
+  "boundaries": [13, 25, 37, 49, 61],
+  "epochs": 2,
+  "learning_rate": 0.001,
+  "gamma": 1.0,
+  "lambda": 0.95,
+  "qualification": {"seed":4001,"seconds":7200,"warmup_windows":10,"telemetry_seconds":30,"checkpoint_seconds":1800,"maximum_host_gap_seconds":120,"maximum_peak_rss_bytes":4294967296,"maximum_rss_growth_bytes":536870912},
+  "preflight": {"seed":4019,"seconds":15,"telemetry_seconds":5,"checkpoint_seconds":7},
+  "screen": {"seeds":[1103,2207,3301],"windows_per_seed":500,"pairs_per_opponent":256,"evaluation_seed":7717,"frozen_policy_seed":6601,"opponents":["random","initialization","damage"],"alpha":0.05,"family_size":9,"other_opponent_regression_floor":-0.05},
+  "screen_preflight": {"seeds":[4019],"windows_per_seed":10,"pairs_per_opponent":32},
+  "scope": {"full_g2":"open","full_g3":"open","full_g4":"open","public_ladder_strength":"unmeasured","final_reserved_data_used":false,"public_server_used":false,"prime_used":false}
+}

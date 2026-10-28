@@ -135,7 +135,7 @@ It is not an Elo estimate, a trained-policy result, a full G2/G3 pass or evidenc
 competitiveness against good human players. No reserved final team or final episode
 was used. No GPU or Prime resources were used.
 
-The [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md) provided
+The claude-review skill provided
 independent protocol exploration and snapshot review. Verified review dispositions
 are in `artifacts/reviews/playable-baseline/review-dispositions.md`. The protocol
 research packet was rejected against its precise pinned-evidence criteria; useful

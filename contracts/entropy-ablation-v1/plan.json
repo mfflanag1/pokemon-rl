@@ -1,0 +1,60 @@
+{
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "families": [
+    "midgame",
+    "endgame"
+  ],
+  "cohorts": 32,
+  "selected_rows": 256,
+  "epochs": 2,
+  "chunk_games": 8,
+  "maximum_games_per_cohort": 128,
+  "rehearsal_coefficient": 0.1,
+  "evaluation_repeats": 4,
+  "max_turns": 120,
+  "version": "f14-entropy-ablation-v1",
+  "arms": {
+    "standard": 0.01,
+    "no_entropy": 0.0
+  },
+  "target_lambda": 0.95,
+  "predecessor_receipt": "artifacts/reports/f13-credit.json",
+  "predecessor_sha256": "aec5e689a55dc1f7fe2ce174bc2664e5bddfbbfd5da150b1360990621ba71a59",
+  "bank": "artifacts/runs/f13-credit-v1/bank/scenarios.json",
+  "oracle": "artifacts/runs/f10-long-transfer-v1/mechanics-probe.json",
+  "randomness": "Pass derived_seed(f14-continuation, initialization_seed) to the sealed F13 request/selection functions for both arms. New actor keys; simulator RNG after each sealed prefix remains fixed. The arms match optimizer/selected-row budgets, not consumed games; cursor paths can diverge on-policy.",
+  "initialization": "Same-seed F10 rehearsal final; zero Adam. Sealed F7 fit_train rehearsal coefficient .1, gamma1 lambda.95, 32x256-row cohorts, two epochs, LR.0003, clip.2, value coefficient.5, unchanged actor and observations. Control invokes the sealed .01 update exactly. Treatment removes only the entropy term.",
+  "expected": {
+    "evaluation_games": 864,
+    "selected_ppo_rows": 49152,
+    "optimizer_steps": 384,
+    "ppo_row_presentations": 98304,
+    "supervised_row_presentations": 49152,
+    "tactical_predictions": 4608
+  },
+  "statistics": {
+    "resamples": 20000,
+    "seed": 10242602,
+    "alpha": 0.05,
+    "family_cells": 18,
+    "practical_gain": 0.05
+  },
+  "tactical_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6,
+    "maximum_context_mass_drop": 0.05
+  },
+  "mechanism_minimum_switch_reduction": 0.02,
+  "gate": "Per seed: no_entropy must improve versus standard and initialization by at least five percentage points with adjusted-bootstrap lower>0 in both families, and retain all32 frozen tactical context cells. Overall benefit requires all3 seeds. Secondary descriptive mechanism threshold: standard minus no_entropy fixed-state switch probability >=.02, reported per seed, never a strength gate. Retain all18 contrasts, both retention outcomes and all3 seeds.",
+  "fixed_observation_probe": "All initial-policy probe suffix observations in phase move with both a move and a switch legal; identical features/masks evaluated at initialization and both final endpoints. Record probability arrays and entropy summaries. Probe rows never enter an optimizer.",
+  "retention": "Re-evaluate all512 already sealed F10 tactical probe records at each of9 endpoints. These are known one-decision templates, with supervised overlap measured previously, not a new generalization test. No new simulator branch campaign and no probe labels enter new updates.",
+  "interpretation": "Exploratory adaptive development ablation: reuses the F13 train-partition fit/probe bank after inspecting F13. Fresh actor keys do not make new teams, mechanics RNG or starting states. Twelve scenario clusters per family, four repeats; tiny-cluster adjusted percentile-bootstrap intervals have no guaranteed familywise coverage. Report conservative Hoeffding intervals and all raw results. No full-battle/public-strength promotion; retain F10 pending broader development evaluation. Full G2/G3/G4 remain open.",
+  "verification": "Source/runtime/plan frozen before one campaign. Fresh repeat of all suffix decisions, targets, selected batches, optimizer metrics, tactical predictions and fixed-state probability arrays. Check all initial/final states and resume six original before-last checkpoints to identical next updates. No restart, seed/budget change or checkpoint selection.",
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false
+}

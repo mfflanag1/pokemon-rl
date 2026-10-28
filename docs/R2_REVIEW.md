@@ -9,7 +9,7 @@ inspection and two executed probes. Its incomplete specification was rejected;
 the [audit disposition](R2_SEMANTICS_AUDIT.md) records exactly what was retained.
 
 The completed Fable implementation snapshot review is at
-`/Users/maxf/.local/state/claude-reviews/Pokemon-83aa7cb62b4e/20261010-115758-6d1f5398/review.md`.
+`local-review-archive/20261010-115758-6d1f5398/review.md`.
 It was a static review, not an executed test or blanket approval.
 
 * Its medium-severity Revival Blessing finding was false for the pin. Both source

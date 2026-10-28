@@ -1,0 +1,21 @@
+{
+  "version": "continuation-simulator-1",
+  "namespace": "m5-continuation-v1",
+  "predecessor": "2eee6c024a3dbcc0d2bb52a0275de76a561dc5ba09b6b127de9e10c328785640",
+  "profile": "gen9-starter-pairs-v1 with separately versioned 60-turn administrative ceiling",
+  "window_turns": 12,
+  "max_turns": 60,
+  "max_groups": 62,
+  "history_capacity": 128,
+  "max_events": 122,
+  "fresh_cases": 144,
+  "styles": ["attack", "normal", "switch", "delay_attack", "alternating", "mixed"],
+  "window_boundary": "Only a fresh joint move request at turns 13,25,37,49,61, after resolving faint replacements. Preserve state, group/event keys and complete player history. Never reset at an intermediate boundary.",
+  "administrative_ceiling": "At fresh turn61 stop without declaring a draw or terminal. No support beyond turn60; no game respawn or learner integration in this milestone.",
+  "history": "128 rows retain every event. At most120 move/switch events plus2 forced replacements; no overwriting, ring buffer or hidden-state features.",
+  "pp_scope": "Each member begins with at least80 total PP and uses at most60 moves; total PP exhaustion/Struggle cannot occur within this ceiling. Individual move disabling is inherited. No added moves, healing, recoil or statuses.",
+  "chance": "Preserve the sealed semantic uint32 maps and original game/group/seat addresses across windows; no raw-stream identity claim. Oracle instrumentation must be checked against unpatched replay for every fixture.",
+  "acceptance": "Zero state/event/mask/player-view mismatches across scalar/JAX/Showdown; uninterrupted versus serialized-window continuation exact; delayed attacks produce real outcomes after turn12; history beyond32; finite capacity and malformed carry rejection; both player seats and batch permutation checked.",
+  "scope": "CPU simulator/observation/carry correctness only. No policy updates, strength screen, public server, final reserved data or Prime. M4 policy encoding/checkpoints are incompatible with expanded history and are not reused as continuation learners.",
+  "full_g2": "open", "full_g3": "open", "full_g4": "open", "prime_used": false
+}

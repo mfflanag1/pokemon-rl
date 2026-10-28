@@ -1,0 +1,866 @@
+[
+  {
+    "content_hash": "d9329da76d8ea57c4e7e0f183db52d5e4e34920014ff89a0a3d6564a886c1e82",
+    "families": [
+      "tera_timing",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 0,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "cec27624926188159d3837463b61c61c4bde6d45ba9261b2ca773d369af2c3c1",
+    "families": [
+      "tera_timing",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 1,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "8f715025f2a4516e234beb7cc35de138f4ea3b817bf5d0ae1cb5b4ba0b8e72e8",
+    "families": [
+      "status_setup_recovery",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 2,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "5216c71e2d2c472f743211df76af5652744747460ffa2f3fea49a92747604c9d",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 3,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "2deb9710a52e302823da1eb56c34e67b7cc7fdc7f4b7efda178cfe2902152110",
+    "families": [
+      "voluntary_switch",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 4,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "8fd8184e07fad3ed0f9d267fc00932bf7ebdc86c4ea8cf41ae8c3d30a2506dbd",
+    "families": [
+      "tera_timing",
+      "status_setup_recovery"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 5,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "0dd1b2af22efb6b55f18514e1ea800c60b445077d06ca0865b6d3ea61c25112b",
+    "families": [
+      "tera_timing",
+      "status_setup_recovery"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 6,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "d7c0c30f281fe3339351ef578c5c0391dcaf35f2635fa4792cd3ecd9f401fa14",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 7,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "b02053290bf79567a6ff2af9c9317dbbe842f16d63940980970f35449eab0779",
+    "families": [
+      "status_setup_recovery"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 8,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "e7a5506a3fce3fed609e34e7a2565df47bfe8c952880df91df2abef3ae7c29c4",
+    "families": [
+      "damage_choice"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 9,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "ab0691137798e058d5ee9f8bd47673ad15d94599e28461a71c94667d087b3059",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 10,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "808ea2300fd76b33a1832fa881367ea0f8bb664aa5cdc8f97070485efbe737ab",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 11,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "beb4f77790e1d862e2e59b64fa1e11538d433f886ad0d964191eac4684efd1d4",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 12,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "400a1d0282ff6dff7e4f68c623d2c12725729dedc85db435a6fef393d2274d0a",
+    "families": [
+      "damage_choice"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 13,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "4100afc2f85c9b8235a1e009dba099b038e3543e3d5067c902aeea9ec715ed9e",
+    "families": [
+      "damage_choice"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 14,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "f512fc45c48c6f13383292eed213b5213bc0c0ff4f23ac808ed7857783f227f8",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 15,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "bd5130b09065e5c10134736c1b7ba89e9c509fb9e3c87c0add361655975ccda7",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 16,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "776ee931c7a651db79384182db6be2791ecd5f11eedc2a416afa1d773ea847a1",
+    "families": [
+      "damage_choice"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 17,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "ee0a4043e9429962c2ef8622790966c73e89d8b9281a4ee53989e033cfce3b51",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 18,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "003fed4a78f04563c662d360dbe834a7c170c95dee4d0a82090ac9d97b82ae61",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 19,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "fff7710da2045ff90d167cbda35726e979bf578dfd4ae6d134f8f85ff91ed801",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 20,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "52dab0b5537c292d3e0beaf649ad088b60d385eaf01836b253fb028372e331fa",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 21,
+      "run_seed": 908379957,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "ac55b8e7dc00be3abcf7d16bc7489bc817a9f9c0de60d3ecc406d828a59855d3",
+    "families": [
+      "tera_timing",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 0,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "c01b1f94cf31c0010542d6d9074fcd0c26f4e021666109a15efb9573613bbd7e",
+    "families": [
+      "damage_choice",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 1,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "2a80f956b5faeeb9bc71ed4f42cc162ea814ad47724629e8456e536bfd6a54b1",
+    "families": [
+      "status_setup_recovery",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 2,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "634a3c7ffbdd7cf28aad7c7b78aeb700e7e2cae786e28f0510a51e28cb3e4a7e",
+    "families": [
+      "tera_timing",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 3,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "dc7af9f8d0522f34b807c85d636f5f4f1cd6997d71cb398e88a39f196d0846aa",
+    "families": [
+      "damage_choice",
+      "tera_timing"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 4,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "a73a6578be6b752c4d3495a4cbbc5adb162f3d733a4b914bcd97c5a7623d91f8",
+    "families": [
+      "tera_timing"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 5,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "227ac4e3259cbda31af29bb62d0f207c083126e5944ad3bf51e9330643c3d4e8",
+    "families": [
+      "status_setup_recovery"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 6,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "c65350cbcc2098e65953b7e5dbe2d623fd62a1d698ab3c5f24f872e15206b651",
+    "families": [
+      "damage_choice",
+      "status_setup_recovery"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 7,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "e7750e06a0b5eac7353624eb21e3dc73b9f03984db86be87af22aa29ab4f112f",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 8,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "be2c84788ac37ad1eeb384b1d6cee6daa7d2eaf8b441a15f4b9de5f09a1ccfae",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 9,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "57dabfa3598dc27d602306f83de8b6b52ccb59095d73f018748129ebd4d8fdc5",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 10,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "b0909a11783c5c675534c3a0bccec2362e2fc5c7444f6dd4a86146b304d8d511",
+    "families": [
+      "damage_choice"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 11,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "24f76dd770d331075378ab3b1f08083b8f3ea9bb3f7fc727e20ba39f4d7e6de0",
+    "families": [
+      "status_setup_recovery"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 12,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "fd13b23dcd7db16d530a67b23a99efea77a05af592346d28139e6250993df0ff",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 13,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "1044aa463b50c33373598ff9743cae569201925d67178ae68b91f604cf809094",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 14,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "b946d10cd8351db34987597919cedd41769e4e014585ebf6176f99172c96ad6e",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 15,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "02cb56a65a27a78e42eb8b37b0033bad127ca378527165106b0b6730ca258877",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 16,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "ff724b42d8f62de026f987967fce55ec8f8d7ae07d1e0df9f89727cad3d9440a",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 17,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "250da1800baeda1908ed2a421d8419363878ba33302caeeb51db2015122e9338",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 20,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "667b29300effae89fecd941e35a7d33696ed39a7c4a53fb9dd1454cadc7b0ce5",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 21,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "ee5e9532f332f41e63fe1acf09f3835bfae50a8514c2e7ea72cc76c246c5384a",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 22,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "7f3a3e7684bb25c09072674e33a033e59b5bfe742f0e18a4f7d0a778a47e3763",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 23,
+      "run_seed": 1778736106,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "282d2092e2538e946264b1de1535fd23ec7b9830cf66850431b92b8602f2448f",
+    "families": [
+      "damage_choice",
+      "tera_timing",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 0,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "0638ae482014bd907db8561d852684aba18c4d987279bf9902d0166d04ca50c0",
+    "families": [
+      "voluntary_switch",
+      "status_setup_recovery",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 1,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "13a9d5b1cdacc075aa2d9783e8899e73592532d3c2a1d1b49601710f6bce26e6",
+    "families": [
+      "status_setup_recovery",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 2,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "f820237991cc4e3cedceeb00b25b112fc5d4e9205fda0bcc18badc61ba4bb76d",
+    "families": [
+      "tera_timing",
+      "hidden_information"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 3,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "29a8334802e80038a91eec561a234bdbf84b8562995dd85cd83e06de919696eb",
+    "families": [
+      "damage_choice"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 4,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "e8a5c4472b816f221fbc6a5d980e97e4061c8fc8ef5c7f7e5690e6e402a14b7c",
+    "families": [
+      "tera_timing",
+      "status_setup_recovery"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 5,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "f41d4e301ce79d3c2a29d60102435d0a5c00444541699192b8aaad769e50dcfb",
+    "families": [
+      "tera_timing"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 6,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "f08eb06ee6fad29cd3cf62819917eaeac79ecb6e3f39542b9d537711cc8f63cd",
+    "families": [
+      "damage_choice"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 7,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "7da96ff411563898de4e4bf74c1bb02cb5352612e5ca08de09c3bcb7b196c700",
+    "families": [
+      "damage_choice"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 8,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "62ddf61ebc2924e18402161cc56cd4b3cde9d13f1ce444d53fee1508279e2d6e",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 9,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "b4ec8a2f87944b224932ee350caeb06426ee3be45beafb638ccf055fa57913bd",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 10,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "66da304c11b591e4326b939e4e4b5ef8dbe7efacde094b5c67bb26d1ec1c1326",
+    "families": [
+      "status_setup_recovery"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 11,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "5f930fde10ced369260e12d624894c5d8aa2294da03d57558a8cd132fc1e409b",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 12,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "3d3f1a87950c1acb667a783b5244824b66d504c4823a322153029f1f0f34904c",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 13,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "914514c2e543a196bc3182c1734108a6bfd0783fdb3d0b23bcd4b2ffbf08d023",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 14,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "930ed54d993dd575bd2172662f507fc8c2e9552265e40db6574b15df30d9f0af",
+    "families": [
+      "voluntary_switch"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 15,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "9fff929e70202c79186fe849259b89127e59a7ef128b67f7f3db16bf075aae7f",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 16,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "e6c8719026e60140ce1e249bdf863fd8512d513c12b52b1049335c87391ad639",
+    "families": [
+      "forced_replacement"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 17,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "c805fa4bb569f912670fc4e486a9be6150a88c6260a824ec3db2ae9e7d00b51a",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 22,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "30a7eb3e2b6b39833ef6569b1c7122ed1a9bbabf3236ecb43c5c0fa0ed7564eb",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 23,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  },
+  {
+    "content_hash": "d5c506725f38f3ded71e55bd97af38b6d3c3bf13738242c26a7a34c5491bea8e",
+    "families": [
+      "hazards"
+    ],
+    "split": "train",
+    "start": {
+      "episode_index": 28,
+      "run_seed": 3286157400,
+      "split": "train",
+      "swap": false
+    }
+  }
+]

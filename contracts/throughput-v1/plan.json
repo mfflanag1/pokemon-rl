@@ -1,0 +1,15 @@
+{
+  "version": "f3-throughput-v1",
+  "training_seed": 731031,
+  "training_games": 32,
+  "development_pairs_per_opponent": 4,
+  "max_turns": 120,
+  "workers": [1, 2, 4, 8],
+  "repetitions": 3,
+  "update_parity_games": 8,
+  "profile_games": 8,
+  "policy": "F2 v2 seed 2207 final checkpoint, fixed throughout every collection",
+  "scope": "Matched-work throughput only. Replays are not new learning evidence. No final reserved data, public server or larger learning campaign.",
+  "correctness": "Exact actions, request IDs, features, outcomes, phases and row linkage across serial/batched collection. Float outputs atol/rtol 3e-6; original PPO update/Adam states atol 3e-6 rtol 3e-5. Fail rather than skip a mismatching game.",
+  "metal": "Separate Python 3.12, jax/jaxlib 0.4.34 and jax-metal 0.1.1 compatibility probe. Require actual Metal backend and matching policy/sampler/update outputs before full-game timing. No silent CPU fallback. CPU control must use the same isolated runtime for device-only comparisons."
+}

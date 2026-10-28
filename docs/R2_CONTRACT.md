@@ -41,7 +41,7 @@ This is a contract verification workload, not an RL throughput benchmark.
 ```sh
 npm run contract -- describe
 npm run contract -- export r2-demo artifacts/runs/r2-demo
-PYTHONPATH=python .venv/bin/python -m pokemon_reference artifacts/runs/r2-demo/artifacts.jsonl > /private/tmp/r2-validated.jsonl
+PYTHONPATH=python .venv/bin/python -m pokemon_reference artifacts/runs/r2-demo/artifacts.jsonl > /tmp/r2-validated.jsonl
 ```
 
 Choose a fresh output directory for each export. Export writes the R1 reference

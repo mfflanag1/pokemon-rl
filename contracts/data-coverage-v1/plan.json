@@ -1,0 +1,60 @@
+{
+  "version": "f18-data-coverage-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "arms": [
+    "original",
+    "expanded"
+  ],
+  "workers": 8,
+  "max_turns": 120,
+  "bc_steps": 2048,
+  "teacher_quota": [
+    32,
+    16,
+    8,
+    8
+  ],
+  "old_rows": 64,
+  "original_games": 512,
+  "additional_games": 1536,
+  "probe_games": 256,
+  "teacher_seed": 1025261801,
+  "probe_seed": 1025261802,
+  "predecessor_receipt": "artifacts/reports/f17-switch-representation.json",
+  "predecessor_sha256": "dbae61b400b04cc3bddc49095d7939c2faaa39b54195c19286609e8795f7eb64",
+  "predecessor_run": "artifacts/runs/f17-semantic-canary-v1",
+  "f16_run": "artifacts/runs/f16-balanced-imitation-v1",
+  "expected_updates": 12288,
+  "expected_presentations": 1572864,
+  "expected_new_games": 1792,
+  "checkpoint_comparisons": 18,
+  "checkpoint_recoveries": 6,
+  "coverage_thresholds": {
+    "voluntary_min_accuracy": 0.25,
+    "voluntary_min_gain": 0.1,
+    "maximum_other_accuracy_drop": 0.05,
+    "minimum_tera_rows": 64,
+    "minimum_tera_games": 32,
+    "minimum_voluntary_switch_rows": 32,
+    "minimum_voluntary_switch_games": 16
+  },
+  "tactical_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6,
+    "maximum_context_mass_drop": 0.05
+  },
+  "statistics": {
+    "seed": 1025261803,
+    "resamples": 5000,
+    "alpha": 0.05,
+    "contrasts": 12
+  },
+  "interpretation": "Preregistered development diagnostic chosen after F17. Compare original512 complete teacher games to their union with1536 fresh train games. Corpus size and diversity jointly change; this does not isolate either. Exact original928-feature model, F10 same-seed initialization/reset Adam, sealed NLL/action law,2048 updates and32/16/8/8 sampling plus64 rehearsal rows remain fixed. Fresh256 development teacher games, exact-team separated from F15/F16 development and all training; familiar mechanics/species/teacher remain. No outcome/label-driven game filtering, seed selection, continuation, PPO or policy promotion. Descriptive per-seed gate, all3 required; paired-game approximate Bonferroni bootstrap intervals for12 family contrasts and Hoeffding bounds are diagnostics, not ladder-strength evidence. Missing probe support fails without resampling. Reuse prior sealed original control as a bitwise final checkpoint check, not as a substitute for this run.",
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false
+}

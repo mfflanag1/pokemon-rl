@@ -1,0 +1,118 @@
+{
+  "schema_version": "f26-opponent-mix-plan-1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "arms": [
+    "self",
+    "mixed"
+  ],
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "workers": 8,
+  "max_turns": 120,
+  "cohorts": 128,
+  "endpoints": [
+    0,
+    64,
+    128
+  ],
+  "selected_rows_per_update": 1024,
+  "training_chunk_games": 8,
+  "maximum_games_per_update": 64,
+  "training_seed_namespace": "f26-self-tactical-training",
+  "optimizer_seed_namespace": "f26-ppo-update",
+  "evaluation_seed": 1025262601,
+  "evaluation_pairs_per_opponent": 128,
+  "evaluation_chunk_pairs": 4,
+  "selfplay_evaluation_seed": 1025262602,
+  "selfplay_pairs": 16,
+  "checkpoint_cohorts": [
+    0,
+    63,
+    64,
+    127,
+    128
+  ],
+  "recovery_indices": [
+    63,
+    127
+  ],
+  "ppo": {
+    "epochs": 2,
+    "minibatch_rows": 256,
+    "learning_rate": 0.0003,
+    "clip": 0.2,
+    "entropy": 0.01,
+    "value_coefficient": 0.5,
+    "gamma": 1.0,
+    "lambda": 0.95
+  },
+  "mastery_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6
+  },
+  "comparisons": [
+    "self_learning",
+    "mixed_learning",
+    "mixed_vs_self"
+  ],
+  "expected_counts": {
+    "cohorts": 768,
+    "optimizer_steps": 6144,
+    "selected_ppo_rows": 786432,
+    "ppo_row_presentations": 1572864,
+    "evaluation_games": 13824,
+    "selfplay_diagnostic_games": 576,
+    "checkpoint_comparisons": 30,
+    "original_next_update_recoveries": 12
+  },
+  "statistics": {
+    "method": "paired-cluster-percentile-bootstrap",
+    "family_cells": 27,
+    "alpha": 0.05,
+    "resamples": 20000,
+    "seed": 1025262603,
+    "practical_improvement": 0.05,
+    "max_final_cutoff_rate": 0.05
+  },
+  "initialization": "all three F25 final matchup checkpoints, preserve weights, reset Adam; candidate host not promoted winner",
+  "training": "128 cohorts per arm/seed. Control selects1024 self-play rows. Mixed collects complete self-play and frozen-tactical games in separately namespaced streams, selects512 current-policy rows from each after full same-player GAE, concatenates then applies unchanged8 PPO minibatch updates. Parameters stay frozen throughout both streams. Tactical learner seats alternate by episode parity. A global monotone episode cursor assigns disjoint ranges; each stratum records its start/end cursor and selection. Eight-game chunks, fixed64game cap per stream. Equal selected rows/updates, unequal games/compute. Advice and opponent rows never enter PPO.",
+  "evaluation": "Both arms at0,64,128 cohorts;128 fresh paired development schedules in both seats per opponent, common across arms/endpoints/seeds. Midpoints descriptive;27 final contrasts. Exclude admitted historical exactteams including F25. Separate selfplay diagnostic seed. No F10 rerun.",
+  "selfplay_diagnostics": "At each candidate endpoint,32 separate development self-play games (16 paired schedules), both actors frozen, no learner rows. Both-seat terminal-only value summaries versus constant0.5; cutoffs excluded. Exactteams disjoint from main battle panel and admitted histories. Supporting descriptive evidence, never optimizer data or checkpoint selection.",
+  "gates": "Learning and mixed-minus-self benefit gates: base-power cutoff-aware point gain>=.05, adjusted approximate bootstrap lower>0, no detected random/base-power regression and all final cutoff rates<=.05. Tactical adaptation uses the same criteria with tactical primary, reported separately as trained-on-heuristic performance, not opponent generalization. All three seeds required for all-seed claims. All27 contrasts retained, no promotion; mastery and values descriptive.",
+  "interpretation": "Opponent-distribution screen: exact512selfplay+512tactical learner rows per mixed cohort. Both arms use the same F25 matchup host, not a promoted winner. Base-power benefit is a familiar-development transfer check; tactical gains are trained-on-opponent adaptation. No heldout opponent or public-strength inference. Cutoffs unresolved; all three seeds/27 contrasts retained.",
+  "no_early_stopping": true,
+  "no_checkpoint_selection": true,
+  "no_budget_extension": true,
+  "promotion_authorized": false,
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false,
+  "catalog": "artifacts/reviews/f17-switch-audit/public-catalog.json",
+  "catalog_sha256": "e218bfd4f4dc377ef6654b2e859f01896d082e6a9a900eebe5bf80e4dcb29510",
+  "features": 1278,
+  "extra_features": 350,
+  "adapter_policy_parameters": 25,
+  "adapter_value_parameters": 350,
+  "features_contract": "Both arms use the unchanged F25 matchup encoder and residual network, all1278channels active and60806parameters. Same F25 terminal identity/public-type limitations. No new hidden information, opponent identity flag, advice or provenance in actor inputs. No feature ablation in F26.",
+  "player_schema": "full-showdown-player-v2",
+  "worker_schema": "opponent-mix-worker-v1",
+  "version": "opponent-mix-f26-v1",
+  "f25_receipt": "artifacts/reports/f25-terminal-matchup.json",
+  "f25_sha256": "0d4a158b84b45f24452fff7c604649c136f1ab26fc0ab4c123e70c6491f4c43f",
+  "training_distribution": {
+    "self": {
+      "self_play": 1024
+    },
+    "mixed": {
+      "self_play": 512,
+      "tactical": 512
+    }
+  }
+}

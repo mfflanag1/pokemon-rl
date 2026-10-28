@@ -1,0 +1,56 @@
+{
+  "schema_version": "training-curriculum-plan-1",
+  "version": "c1-training-curriculum-v1",
+  "namespace": "pokemon-c1-training-curriculum-v1",
+  "showdown_commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "r7_policy_sha256": "e9b5a8f6ab6048908f1eeb76baf96570ef9bd307c5c521498a7eaff8b407492a",
+  "catalog_sha256": "529821e4e48e1b2f6dcfb64042fbdfe999f60667ba50332bf4f0f50f6e6c19b0",
+  "split": "train",
+  "episode_budget": 3000,
+  "block_size": 20,
+  "official_team_candidate_budget": 128,
+  "scenario_ids": [
+    "switching-p1-v1",
+    "switching-p2-v1",
+    "hazards-p1-v1",
+    "hazards-p2-v1",
+    "status-p1-v1",
+    "status-p2-v1",
+    "tera-p1-v1",
+    "tera-p2-v1",
+    "hidden-reserve-a-v1",
+    "hidden-reserve-b-v1"
+  ],
+  "stages": [
+    {
+      "id": "stage-0",
+      "start": 0,
+      "end": 1000,
+      "targeted_per_block": 10,
+      "targeted_before": 0
+    },
+    {
+      "id": "stage-1",
+      "start": 1000,
+      "end": 2000,
+      "targeted_per_block": 5,
+      "targeted_before": 500
+    },
+    {
+      "id": "stage-2",
+      "start": 2000,
+      "end": 3000,
+      "targeted_per_block": 2,
+      "targeted_before": 750
+    }
+  ],
+  "expected_counts": {
+    "targeted": 850,
+    "official": 2150,
+    "per_scenario": 85,
+    "per_family": 170
+  },
+  "policy": "Fixed episode-index schedule; no outcomes or development/final records enter selection; no automatic extension past episode_budget.",
+  "synthetic_group_policy": "Mirrors and hidden counterfactuals are train-only family groups. Never split or promote their variants to development/final; use separately designed future families for transfer evaluation.",
+  "prefix_policy": "Replay ordinary validated player choices only; no private simulator mutations. Prefix actions are excluded from PPO and imitation targets; actors take over complete ongoing battles."
+}

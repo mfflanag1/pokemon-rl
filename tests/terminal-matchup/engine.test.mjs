@@ -1,0 +1,204 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {BattleStream, Dex, seedFor} from '../../packages/reference-node/engine.mjs';
+import {PlayerProjection, admissibleChoices} from '../../packages/reference-node/observations.mjs';
+import {TerminalRosterView} from '../../packages/terminal-matchup/view.mjs';
+import {TerminalMatchupSession} from '../../packages/terminal-matchup/session.mjs';
+
+const mon = (species, moves, ability) => ({species, name: species, moves, ability,
+  level: 100, item: '', teraType: 'Water'});
+const bench = () => ['Snorlax','Vaporeon','Umbreon','Espeon','Raichu'].map(s => mon(s, ['splash'], Dex.species.get(s).abilities[0]));
+
+async function fixture(a, b, reserves = bench(), foeReserves = bench()) {
+  const projection = new PlayerProjection();
+  const views = Object.fromEntries(['p1','p2'].map(side => [side,new TerminalRosterView(side)]));
+  const cursors = {p1:0,p2:0};
+  let outcome = null;
+  const stream = new class extends BattleStream {
+    constructor() { super({noCatch:true}); }
+    pushMessage(type, data) { projection.ingest(type, data); if(type==='end')outcome=JSON.parse(data); }
+  }();
+  const frames = () => Object.fromEntries(['p1','p2'].map(side => {
+    const p = projection.players[side];
+    while (cursors[side] < p.protocol.length) {
+      const line = p.protocol[cursors[side]++];
+      if (line.startsWith('|request|')) views[side].acceptRequest(JSON.parse(line.slice(9)));
+      else views[side].ingest(line);
+    }
+    return [side,views[side].withOwnTypes(views[side].observe(outcome ? null : p.request,p.request_id))];
+  }));
+  await stream.write(`>start ${JSON.stringify({formatid:'gen9anythinggoes@@@!Team Preview',seed:seedFor('f24-types-fixture')})}\n`+
+    `>player p1 ${JSON.stringify({name:'A',team:[a,...reserves]})}\n`+
+    `>player p2 ${JSON.stringify({name:'B',team:[b,...foeReserves]})}`);
+  frames();
+  return {stream, projection, frames, views, get outcome() {return outcome;}, async step(a,b) {
+    for (const [side, choice] of [['p1',a],['p2',b]]) {
+      const index = /^switch (\d+)$/.exec(choice)?.[1];
+      if (index) views[side].expectSwitch(projection.players[side].request.side.pokemon[Number(index)-1].ident.split(': ').slice(1).join(': '));
+    }
+    await stream.write(`>p1 ${a}\n>p2 ${b}`); assert.deepEqual(projection.errors, []); return frames();
+  }};
+}
+
+function currentTypes(player, side) {
+  const m = (side === player.side ? player.own : player.opponent).find(m => m?.active);
+  return m.tera && m.tera !== 'Stellar' ? [m.tera] : m.types ?? Dex.species.get(m.species).types;
+}
+
+test('pinned Double Shock, both player views, bench reset and reentry', async () => {
+  const f = await fixture(mon('Pawmot',['doubleshock','splash'],'Natural Cure'),mon('Regirock',['splash'],'Clear Body'));
+  try {
+    let p = await f.step('move 1','move 1');
+    assert.deepEqual(f.stream.battle.p1.active[0].getTypes(),['???','Fighting']);
+    for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p1'),['???','Fighting']);
+    p = await f.step('switch 2','move 1');
+    assert.equal(p.p1.own.find(m=>m.ident==='Pawmot').types,null);
+    assert.equal(p.p2.opponent.find(m=>m?.ident==='Pawmot').types,null);
+    p = await f.step('switch 2','move 1');
+    for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p1'),f.stream.battle.p1.active[0].getTypes());
+  } finally { f.stream.battle.destroy(); }
+});
+
+test('pinned Burn Up creates known monotype typeless state', async () => {
+  const f = await fixture(mon('Arcanine',['burnup','splash'],'Intimidate'),mon('Chansey',['splash'],'Natural Cure'));
+  try {
+    const p = await f.step('move 1','move 1');
+    assert.deepEqual(f.stream.battle.p1.active[0].getTypes(),['???']);
+    for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p1'),['???']);
+  } finally { f.stream.battle.destroy(); }
+});
+
+test('pinned added third type, replacement by second typeadd, then Soak reset', async () => {
+  const f = await fixture(mon('Mew',['forestscurse','trickortreat','soak'],'Synchronize'),mon('Dragonite',['splash'],'Inner Focus'));
+  try {
+    for (const [move, expected] of [[1,['Dragon','Flying','Grass']],[2,['Dragon','Flying','Ghost']],[3,['Water']]]) {
+      const p = await f.step(`move ${move}`,'move 1');
+      assert.deepEqual(f.stream.battle.p2.active[0].getTypes(),expected);
+      for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p2'),expected);
+    }
+  } finally { f.stream.battle.destroy(); }
+});
+
+test('Tera defense survives switching while ordinary temporary type resets', async () => {
+  const f = await fixture(mon('Pawmot',['doubleshock','splash'],'Natural Cure'),mon('Regirock',['splash'],'Clear Body'));
+  try {
+    await f.step('move 1','move 1');
+    let p = await f.step('move 2 terastallize','move 1');
+    for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p1'),['Water']);
+    await f.step('switch 2','move 1');
+    p = await f.step('switch 2','move 1');
+    assert.deepEqual(f.stream.battle.p1.active[0].getTypes(),['Water']);
+    assert.equal(p.p1.own.find(m=>m.ident==='Pawmot').types,null);
+    for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p1'),['Water']);
+  } finally { f.stream.battle.destroy(); }
+});
+
+test('production session v2 is player-only and keeps final split forbidden', async () => {
+  const s = new TerminalMatchupSession();
+  try {
+    await assert.rejects(s.start({episodeIndex:0,runSeed:73,split:'final'}),/never admitted/);
+    const f = await s.start({episodeIndex:0,runSeed:1025262497,split:'train'});
+    assert.equal(f.schema_version,'terminal-matchup-frame-v1');
+    for (const side of ['p1','p2']) {
+      assert.equal(f.players[side].schema_version,'full-showdown-player-v2');
+      assert(f.players[side].own.every(m=>Object.hasOwn(m,'types')));
+      assert(f.players[side].opponent.filter(Boolean).every(m=>!Object.hasOwn(m,'stats')));
+      assert(!Object.hasOwn(f.players[side],'provenance'));
+      assert.equal(f.players[side].mask.length,14);
+    }
+  } finally { s.close(); }
+});
+
+test('pinned Reflect Type copies Tera defense; Transform copies pre-Tera ordinary types', async () => {
+  for (const move of ['reflecttype','transform']) {
+    const f = await fixture(mon('Mew',[move],'Synchronize'),mon('Dragonite',['splash'],'Inner Focus'));
+    try {
+      const p = await f.step('move 1','move 1 terastallize');
+      const expected = move === 'reflecttype' ? ['Water'] : ['Dragon','Flying'];
+      assert.deepEqual(f.stream.battle.p1.active[0].getTypes(),expected);
+      for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p1'),expected);
+    } finally { f.stream.battle.destroy(); }
+  }
+});
+
+test('own Illusion uses known own species without contaminating bench or public foe', () => {
+  const own = new TerminalRosterView('p1'), foe = new TerminalRosterView('p2');
+  for (const view of [own,foe]) {
+    view.ingest('|switch|p1a: Pikachu|Pikachu, L100|100/100');
+    view.ingest("|-start|p1a: Pikachu|typeadd|Grass|[from] move: Forest's Curse");
+  }
+  const actual = own.withOwnTypes({own:[{ident:'Zoroark',species:'Zoroark',active:true},
+    {ident:'Pikachu',species:'Pikachu',active:false}]}).own;
+  assert.deepEqual(actual[0].types,['Dark','Grass']);
+  assert.equal(actual[1].types,null);
+  assert.deepEqual(foe.publicTypes.typesFor('p1a: Pikachu','Pikachu'),['Electric','Grass']);
+});
+
+test('pinned temporary Forecast forme is exposed even when own request keeps base species', async () => {
+  const f = await fixture(mon('Castform',['sunnyday','splash'],'Forecast'),mon('Regirock',['splash'],'Clear Body'));
+  try {
+    const p = await f.step('move 1','move 1');
+    assert.equal(p.p1.own.find(m=>m.active).species,'Castform');
+    assert.deepEqual(f.stream.battle.p1.active[0].getTypes(),['Fire']);
+    for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p1'),['Fire']);
+  } finally { f.stream.battle.destroy(); }
+});
+
+test('pinned Mimicry terrain-end clears both changed and added types', async () => {
+  const f = await fixture(mon('Stunfisk-Galar',['electricterrain','splash'],'Mimicry'),
+    mon('Mew',['forestscurse','splash'],'Synchronize'));
+  try {
+    await f.step('move 1','move 2');
+    let p = await f.step('move 2','move 1');
+    assert.deepEqual(f.stream.battle.p1.active[0].getTypes(),['Electric','Grass']);
+    for (let i=0;i<3;i++) p=await f.step('move 2','move 2');
+    assert.deepEqual(f.stream.battle.p1.active[0].getTypes(),['Ground','Steel']);
+    for (const side of ['p1','p2']) assert.deepEqual(currentTypes(p[side],'p1'),['Ground','Steel']);
+  } finally { f.stream.battle.destroy(); }
+});
+
+test('pinned Illusion entrant does not inherit its namesake Tera from a prior appearance', async () => {
+  const reserves=[...bench().slice(0,4),mon('Pikachu',['splash'],'Static')];
+  const f=await fixture(mon('Zoroark',['splash'],'Illusion'),mon('Regirock',['splash'],'Clear Body'),reserves);
+  try {
+    await f.step('switch 6','move 1');
+    let p=await f.step('move 1 terastallize','move 1');
+    assert.equal(p.p2.opponent.find(m=>m?.active).tera,'Water');
+    p=await f.step('switch 6','move 1');
+    assert.equal(f.stream.battle.p1.active[0].species.name,'Zoroark');
+    assert.equal(Boolean(f.stream.battle.p1.active[0].terastallized),false);
+    assert.equal(p.p2.opponent.find(m=>m?.active).species,'Pikachu');
+    assert.equal(p.p2.opponent.find(m=>m?.active).tera,null);
+    assert.equal(p.p1.own.find(m=>m.active).tera,null);
+    assert.equal(p.p1.own.find(m=>m.ident==='Pikachu').tera,'Water');
+  } finally { f.stream.battle.destroy(); }
+});
+
+test('real terminal Illusion battle preserves bench and exact own HP with no final request', async () => {
+  const low = s => ({...mon(s,['splash'],Dex.species.get(s).abilities[0]),level:1});
+  const reserves=[...bench().slice(0,4),mon('Mimikyu',['splash'],'Disguise')];
+  const f=await fixture(mon('Zoroark',['darkpulse','flamethrower'],'Illusion'),low('Magikarp'),
+    reserves,['Rattata','Caterpie','Weedle','Pidgey','Bidoof'].map(low));
+  try {
+    const initial=f.frames().p1.own.find(m=>m.ident==='Mimikyu');
+    for(let step=0;!f.outcome && step<100;step++) {
+      const commands=[];
+      for(const side of ['p1','p2']) {
+        const p=f.projection.players[side];if(!p.pending)continue;
+        const choice=admissibleChoices(p.request)[0];assert(choice);
+        const index=/^switch (\d+)$/.exec(choice)?.[1];
+        if(index)f.views[side].expectSwitch(p.request.side.pokemon[Number(index)-1].ident.split(': ').slice(1).join(': '));
+        p.pending=false;commands.push(`>${side} ${choice}`);
+      }
+      assert(commands.length);await f.stream.write(commands.join('\n'));f.frames();
+    }
+    assert(f.outcome);assert.deepEqual(f.projection.errors,[]);
+    const p=f.frames().p1;assert.deepEqual(p.own.filter(m=>m.active).map(m=>m.ident),['Zoroark']);
+    assert.equal(p.own.find(m=>m.ident==='Mimikyu').condition,initial.condition);
+    assert.equal(p.own.find(m=>m.active).condition,f.stream.battle.p1.active[0].getHealth().secret);
+    assert(p.mask.every(m=>!m));
+    const publicFoe=f.frames().p2.opponent.filter(Boolean);
+    assert(publicFoe.some(m=>m.species==='Mimikyu'));
+    assert(!publicFoe.some(m=>m.species==='Zoroark'));
+  } finally {f.stream.battle.destroy();}
+});

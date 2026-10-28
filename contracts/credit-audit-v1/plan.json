@@ -1,0 +1,68 @@
+{
+  "version": "f13-credit-continuation-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "predecessor_receipt": "artifacts/reports/f12-curriculum.json",
+  "predecessor_sha256": "7141536aa155b02450270eb89890a55ffcd56986f2a0cba97b63e7aacdfc1fd4",
+  "f12_run": "artifacts/runs/f12-curriculum-v1",
+  "f12_input_hash": "acac59e038e15c4b02d254ae28c9cce3c30be220f74cb8d77dd1d667a87166fe",
+  "diagnostic_games_per_endpoint_seed": 32,
+  "diagnostic_endpoints": [
+    "initial",
+    "official",
+    "curriculum"
+  ],
+  "teacher_games": 192,
+  "teacher_seed": 10242501,
+  "teacher_policy": "tactical-v1 both seats",
+  "families": [
+    "midgame",
+    "endgame"
+  ],
+  "roles": [
+    "fit",
+    "probe"
+  ],
+  "states_per_family_role": 12,
+  "selection": "Before outcome, nominated learner alternates p1/p2 by episode parity in four-game blocks. Assign family by episode%2, role by floor(episode/2)%2. First qualifying joint move with 8<=turn<120, own remaining>=foe public remaining. Midgame foe2..4, own3..6; endgame foe1..2, own1..4. One state per teacher game; first12 per family-role, scan all192 games. No outcome filter or budget extension. Unknown foe slots count alive; only public faint evidence removes them. Teacher policies use own player views only.",
+  "arms": {
+    "gae95": 0.95,
+    "lambda1": 1.0
+  },
+  "cohorts": 32,
+  "selected_rows": 256,
+  "epochs": 2,
+  "chunk_games": 8,
+  "maximum_games_per_cohort": 128,
+  "rehearsal_coefficient": 0.1,
+  "evaluation_repeats": 4,
+  "max_turns": 120,
+  "initialization": "Same-seed F10 rehearsal final parameters, zero Adam, same sealed F7 fit_train rehearsal in both arms. Prefix actions excluded. No change to reward, actor features, network, opponent or learning rate. Both arms train only on fit prefixes, alternating family with uniform state sampling. Probe states never enter optimizer batches; all originate from train team partition with different teacher episodes. Team overlap across fit/probe remains possible and reported.",
+  "statistics": {
+    "resamples": 20000,
+    "seed": 10242502,
+    "alpha": 0.05,
+    "family_cells": 18,
+    "practical_gain": 0.05
+  },
+  "gate": "Per seed require lambda1 vs gae95 and vs initial lower cutoff-aware point gain>=.05 and adjusted bootstrap lower>0 for each family; all3 seeds for overall benefit. Preserve all18 contrasts. This is an exploratory train-partition scenario canary, not full-battle or held-out-team generalization.",
+  "expected": {
+    "diagnostic_games": 288,
+    "teacher_games": 192,
+    "evaluation_games": 864,
+    "selected_ppo_rows": 49152,
+    "optimizer_steps": 384,
+    "ppo_row_presentations": 98304,
+    "supervised_row_presentations": 49152,
+    "virtual_gradient_steps": 30
+  },
+  "verification": "Freeze source/runtime and plan; independent lambda-return computation checked against sealed GAE on all diagnostic rows; paired fixed-state policy comparisons; fresh repeat of whole registered campaign with exact scientific-record equality, all learner/Adam checkpoints and next-update fingerprints. No seed/checkpoint selection, retry, restart or budget extension.",
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false,
+  "diagnostic_probes": "288 fresh train-partition games: 32 per endpoint and seed against tactical, shared game/actor namespace. Compare sealed GAE with independent forward-view lambda returns. Compare initial/official/curriculum switch probability on the same initial-policy move-phase observations with both moves and switches legal. On 256 rows sampled without outcome filtering from each initial diagnostic cohort, compare one zero-Adam cloned step for actor, value, entropy, rehearsal and joint components for each lambda: 30 virtual diagnostic steps, never promoted or continued. Probability deltas are not additive and do not establish the cause of F12 training changes.",
+  "interpretation": "Small exploratory train-partition continuation canary with recurring official teams, frozen tactical opponent and public material-advantaged starts. Fit/probe teacher episodes are disjoint, but teams can overlap. Four actor repeats per each of twelve scenarios per family; intervals resample scenarios. Lambda1 uses terminal outcomes only on terminal chains; cutoff tails remain bootstrapped. No full-battle strength promotion, held-out-team inference or public ladder claim; retain F10 pending broader evaluation. Full G2/G3/G4 remain open. The adjusted percentile bootstrap with only twelve clusters is exploratory and has no guaranteed familywise coverage; the reported Hoeffding interval is the conservative comparator. Budgets match selected rows and optimizer steps, not consumed games; scenario cursors can diverge after policies change."
+}

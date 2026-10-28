@@ -1,0 +1,77 @@
+{
+  "version": "f15-full-imitation-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "workers": 8,
+  "teacher_seed": 1024261501,
+  "probe_seed": 1024261502,
+  "teacher_games": 512,
+  "probe_games": 128,
+  "max_turns": 120,
+  "bc_steps": 2048,
+  "bc_teacher_rows": 64,
+  "bc_old_rows": 64,
+  "rl_cohorts": 32,
+  "selected_rows": 1024,
+  "chunk_games": 8,
+  "maximum_games_per_cohort": 128,
+  "epochs": 2,
+  "rehearsal_coefficient": 0.1,
+  "evaluation_seed": 1024261503,
+  "evaluation_pairs_per_opponent": 64,
+  "evaluation_chunk_pairs": 4,
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "endpoints": [
+    "initial",
+    "imitation",
+    "control_rl",
+    "imitation_rl"
+  ],
+  "predecessor_receipt": "artifacts/reports/f14-entropy.json",
+  "predecessor_sha256": "fc10b66c08a72bc9d5bea5515c456bd4d3ee4aca0703fbf1ad2a60ca8a25c80c",
+  "oracle": "artifacts/runs/f10-long-transfer-v1/mechanics-probe.json",
+  "statistics": {
+    "seed": 1024261504,
+    "resamples": 20000,
+    "alpha": 0.05,
+    "family_cells": 45,
+    "practical_improvement": 0.05,
+    "max_final_cutoff_rate": 0.05
+  },
+  "tactical_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6,
+    "maximum_context_mass_drop": 0.05
+  },
+  "expected": {
+    "teacher_games": 640,
+    "bc_steps": 6144,
+    "bc_row_presentations": 786432,
+    "new_teacher_row_presentations": 393216,
+    "old_bc_row_presentations": 393216,
+    "ppo_selected_rows": 196608,
+    "ppo_row_presentations": 393216,
+    "rl_rehearsal_row_presentations": 196608,
+    "rl_optimizer_steps": 1536,
+    "evaluation_games": 4608,
+    "tactical_predictions": 6144
+  },
+  "initialization": "Same-seed sealed F10 rehearsal final, reset Adam. BC trains actor/shared trunk only with the sealed NLL/Adam kernel, preserving value-head weights but not promising unchanged values. RL resets Adam for both control F10 and imitation endpoint. No architecture or observation changes.",
+  "teacher": "Frozen tactical-v1 plays both sides of 512 fresh official train games and 128 separate development probe games, at most120 turns. Every attempted decision/frame and unavailable feedback is retained; accepted actions only form supervised rows. No win/loss filtering. Each teacher is limited to its own projected protocol/request. Labels are demonstrations, not optimal action truth.",
+  "sampling": "Every BC batch samples64 train games uniformly with replacement, then one accepted decision per selected game; add64 uniformly sampled sealed F7 train rows. IDs/fingerprints/metrics stored each step. No development probe rows or outcomes enter BC or RL. Rehearsal during both RL arms uses the unchanged128-row F7 batch at .1.",
+  "rl": "Matched32 cohorts of1024 selected rows; complete official train battles against tactical, alternating learner side, eight-game chunks until quota, cap128 games/cohort. Complete GAE before uniform sampling without replacement; sealed PPO two epochs x four256-row minibatches. Same sampling namespaces for both arms; on-policy cursors/games can diverge.",
+  "evaluation": "Four frozen endpoints per seed, all64 fresh development team/mechanics pairs in both seats against three frozen opponents. Same coordinates/actor keys per endpoint. 128 separate development teacher games diagnose imitation agreement. All512 known F10 tactical probes at each endpoint assess retention.",
+  "gate": "Retain45 contrasts: imitation/initial, control_rl/initial, imitation_rl/initial, imitation_rl/control_rl, imitation_rl/imitation for3 opponents x3 seeds. Per-seed imitation benefit requires tactical >=5pp and adjusted-bootstrap lower>0 versus initial, no detected other-opponent regression, <=5% cutoff each cell, all32 tactical contexts retained. Pipeline benefit requires those same criteria versus initial AND control_rl. Incremental RL benefit requires those criteria versus imitation. Overall gates require all3 seeds. Teacher-agreement NLL/accuracy are descriptive, not strength gates.",
+  "interpretation": "Exploratory local full-battle development screen after F14. Fresh generated coordinates in existing R7 train/development partitions; current training/development whole-team hashes must be disjoint and teacher-probe/evaluation hashes must be disjoint. Species/mechanics recur; no public-ladder or final-heldout generalization claim. Small64-pair adjusted percentile bootstrap has approximate coverage; retain Hoeffding bounds and cutoffs as unresolved intervals. No seed/endpoint selection, restarts or budget extensions. F10 remains reference pending broader evidence.",
+  "verification": "Freeze source/runtime/plan, run one campaign then exhaustive fresh replay: teacher frames/actions/datasets, all BC/RL updates/batches/metrics, all evaluation games/policy values, probe probabilities, initial/final checkpoints and9 original-next-update recoveries.",
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false
+}

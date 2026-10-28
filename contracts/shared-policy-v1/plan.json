@@ -1,0 +1,85 @@
+{
+  "version": "f20-shared-policy-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "arms": [
+    "flat",
+    "shared"
+  ],
+  "endpoints": [
+    0,
+    2048,
+    8192
+  ],
+  "bc_steps": 8192,
+  "workers": 8,
+  "max_turns": 120,
+  "teacher_quota": [
+    32,
+    16,
+    8,
+    8
+  ],
+  "old_rows": 64,
+  "training_games": 2048,
+  "training_rows": 106149,
+  "new_training_games": 0,
+  "probe_games": 256,
+  "probe_seed": 1025262001,
+  "expected_updates": 49152,
+  "expected_presentations": 6291456,
+  "expected_new_games": 256,
+  "checkpoint_comparisons": 30,
+  "checkpoint_recoveries": 12,
+  "checkpoint_steps_per_arm": [
+    0,
+    2047,
+    2048,
+    8191,
+    8192
+  ],
+  "recovered_update_indices_per_arm": [
+    2047,
+    8191
+  ],
+  "parameter_counts": {
+    "flat": 60431,
+    "shared": 60479
+  },
+  "policy_parameter_counts": {
+    "flat": 60366,
+    "shared": 60318
+  },
+  "predecessor_receipt": "artifacts/reports/f19-learning-curve.json",
+  "predecessor_sha256": "5fcf9e1fbd06e7c25e9da7d65ff9e3a8d074a24497aef616320ebef8dce2680f",
+  "predecessor_run": "artifacts/runs/f19-learning-curve-v1",
+  "coverage_thresholds": {
+    "voluntary_min_accuracy": 0.25,
+    "voluntary_min_gain": 0.1,
+    "maximum_other_accuracy_drop": 0.05,
+    "minimum_tera_rows": 64,
+    "minimum_tera_games": 32,
+    "minimum_voluntary_switch_rows": 32,
+    "minimum_voluntary_switch_games": 16
+  },
+  "mastery_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6
+  },
+  "statistics": {
+    "seed": 1025262002,
+    "resamples": 5000,
+    "alpha": 0.05,
+    "contrasts": 12
+  },
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false,
+  "interpretation": "Two fresh architectures, same immutable928public features,106149teacher rows,128rehearsal rows,balanced32/16/8/8 teacher quotas and64rehearsal presentations per128batch. No learned checkpoint warm start. Flat is sealed928->64->14 network; shared reuses32wide mon/move/context embeddings and195->281->1 action scorer, masked means and active summaries, original14action law. Total parameters60431 versus60479; initialization distributions/functional depth differ, compute is measured, not matched. Seeds7103/8209/9311,8192updates perarm/seed,global sampler indices0..8191 identical across arms. Record0/2048/8192; only8192 shared-minus-flat is primary across12seed/family contrasts. Fresh256development teacher games exclude all train and F15/F16/F18/F19 development exact teams. No new training games, resampling, post-result extension, automatic PPO or policy promotion. Familiar32context mastery is absolute95%greedy and60%mass, not retention from a pretrained checkpoint. Descriptive gate: shared voluntary accuracy>=25%,gain>=10points overmatchedflat,nootherfamilydrop>5points,allknowncontexts mastered. No battle-strength or causal proof from teacher agreement. Whole-game paired intervals retained for all12contrasts. FullG2/G3/G4 and public strength open, F10 reference unchanged; final reserveddata/publicserver/Prime unused;GitHubheld. Rehearsal is intentionally half the fixed objective to isolate architecture under the preceding data mixture:3145728teacher and3145728rehearsal presentations, not unique examples. Mastery gate applies only to final shared model per seed and is familiar/rehearsed competence, not unseen context generalization. This is fixed-budget sample efficiency; identical inherited optimizer hyperparameters are not separately tuned to either new run. Descriptive10-point gate need not be interval-resolvable at minimum support.",
+  "teacher_presentations": 3145728,
+  "rehearsal_presentations": 3145728,
+  "mastery_gate_scope": "shared arm at8192 in each seed; flat and earlier endpoints descriptive"
+}

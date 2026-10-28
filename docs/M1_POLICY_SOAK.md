@@ -126,7 +126,7 @@ once. Verify the live and archived hashes and reseal idempotently. Do not modify
 sealed evidence afterward. An exit or failed report is a failure, not a completed
 two-hour qualification; preserve it for diagnosis.
 
-The [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md) is used for
+The claude-review skill is used for
 independent gate and harness review. The initial gate delegate failed two malformed-
 input exception checks; the rejection and repair evidence are retained. The [verified review dispositions](../artifacts/reviews/m1-policy-soak/review-dispositions.md)
 record the repaired timing checks, gate QA and smoke evidence. Production results

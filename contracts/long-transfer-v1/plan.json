@@ -1,0 +1,86 @@
+{
+  "schema_version": "f10-long-transfer-plan-1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "arms": [
+    "plain",
+    "rehearsal"
+  ],
+  "updates_per_arm": 128,
+  "selected_rows_per_update": 1024,
+  "epochs": 2,
+  "minibatch_rows": 256,
+  "workers": 8,
+  "training_chunk_games": 8,
+  "maximum_games_per_update": 64,
+  "max_turns": 120,
+  "coefficients": {
+    "plain": 0.0,
+    "rehearsal": 0.1
+  },
+  "supervised_rows_per_step": 128,
+  "training_seed_namespace": "f10-full-transfer-training",
+  "evaluation_seed": 10222027,
+  "evaluation_pairs_per_opponent": 256,
+  "evaluation_chunk_pairs": 4,
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "tactical_evaluation_seed": 10222028,
+  "tactical_evaluation_repeats": 16,
+  "predecessor_receipt": "artifacts/reports/f7-decision-fit.json",
+  "predecessor_content_hash": "dcd6caa4ae8c4f6cdb492ba7590ba6b639f7403b83ea75d57a4eb047c30081c5",
+  "predecessor_run": "artifacts/runs/f7-decision-fit-v1",
+  "predecessor_checkpoint": "step-1024",
+  "retention_receipt": "artifacts/reports/f8-decision-retention.json",
+  "retention_content_hash": "e3105df0f5973ef14421694297866d4c33ad00a28d0e7d4191ba82552dff1f4f",
+  "initialization": "same-seed sealed F7 step1024 for both arms; Adam reset; unchanged F1 network, observation encoder and categorical action law; critic starts at 0.5",
+  "sampling": "collect complete official train self-play episodes in batches of eight until at least1024 rows; full-trajectory GAE before deterministic uniform selection without replacement; hard failure above64 games; report excluded rows; no incomplete trajectory GAE",
+  "pairing": "shared train seed namespaces and initial episode cursors, selection/shuffle roots; on-policy trajectories and future cursors may diverge; equal new selected PPO row/Adam budgets, not equal games or total compute",
+  "objective": "unchanged full-battle PPO objective plus coefficient times mean F7 fit_train supervised NLL, combined before a single Adam/global-norm-clipping step; fixed supervised128 rows only; no probe labels in updates",
+  "tactical_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6,
+    "maximum_context_mass_drop": 0.05,
+    "minimum_mean_rehearsal_advantage": 0.02
+  },
+  "statistics": {
+    "method": "paired-cluster-percentile-bootstrap",
+    "family_cells": 27,
+    "alpha": 0.05,
+    "resamples": 20000,
+    "seed": 10222029,
+    "practical_improvement": 0.05,
+    "max_final_cutoff_rate": 0.05
+  },
+  "gates": "Primary full-battle learning per arm/seed: base_power cutoff-aware point gain>=0.05 and approximate familywise bootstrap lower>0; no detected initial-opponent regression; final cutoff rate<=0.05. Rehearsal-versus-plain comparisons retained for all9 cells. Tactical retention/rehearsal-benefit thresholds unchanged from F9 and secondary. Value diagnostics are descriptive, comparing each endpoint with constant0.5 on the same natural-terminal decisions, with equal-game and decision-weighted error, tie-aware baseline, fixed probability bins; no claim of held-out calibration or causal value learning.",
+  "evaluation": "Initial once per seed plus both final arms; 256 team/mechanics clusters in both seats per opponent =512 games/cell and13824 evaluation games total. Fresh development namespace. Same512 known-family tactical states at all endpoints with3584 legal branch checks. No intermediate policy evaluation/selection.",
+  "no_early_stopping": true,
+  "no_checkpoint_selection": true,
+  "no_budget_extension": true,
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false,
+  "interpretation": "Development learning comparison after F9 selected the fixed rehearsal setting. No new hyperparameter search. All3 seeds/2 arms/27 contrasts retained; same official R7 partitions and known opponents, not held-out-family or ladder generalization. Bootstrap coverage approximate even with256 paired clusters; Hoeffding bounds reported. Conditional-on-terminal value populations vary by policy. Equal PPO row/Adam budget, unequal games and added rehearsal supervision.",
+  "failed_attempt_receipt": "artifacts/reports/f9-full-transfer-failure.json",
+  "failed_attempt_content_hash": "dfea477d483ad4e81016e554183a8f1bf29b5b140c79b19987457805339b8787",
+  "amendment": "New preregistered longer comparison authorized after completed F9; both arms reset to the same sealed F7 checkpoint, not selected F9 endpoints. Reuse corrected feedback-preserving F9 collector and unchanged joint learner. Fresh train/development mechanics namespaces; no final reserved data.",
+  "checkpoint_every_updates": 16,
+  "optimizer_seed_namespace": "f10-update",
+  "transfer_receipt": "artifacts/reports/f9-full-transfer-v2.json",
+  "transfer_content_hash": "7d4d0c4db6718a8144e780601ed211c766fffea2d1f58a80c25d1533026bb9b8",
+  "expected_counts": {
+    "selected_ppo_rows": 786432,
+    "ppo_row_presentations": 1572864,
+    "rehearsal_row_presentations": 393216,
+    "optimizer_steps": 6144,
+    "evaluation_games": 13824,
+    "tactical_predictions": 4608,
+    "mechanics_probe_branches": 3584
+  }
+}

@@ -1,0 +1,4569 @@
+{
+  "schema_version": "training-curriculum-catalog-1",
+  "showdown_commit": "942cda71d14bf0618bd57991708a2e2734b6daba",
+  "team_admission_candidate_budget": 64,
+  "scenarios": [
+    {
+      "id": "switching-p1-v1",
+      "family": "switching",
+      "leakage_group": "training-curriculum-v1/family/switching",
+      "variant": "base",
+      "teams": [
+        {
+          "seed": "sodium,558b5cdea3068be94fe744268f2b032944a29bf1a048cd1d662ba30414f575e7",
+          "team": [
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "cd4944c287a54b8926ee6a9918857367cdeab131ecf7e8246679a532496431e5",
+          "partition": "train",
+          "team_key": "ec22ac3301a8d12478d6bcad9eec278010f054a73e88f00651e4731a8a2f4ce3",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,9739107dcb7e1fc746390fc25f63981526fd19fe67e7846816a5163fcf9ae550",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "e4d3b89422ffd6c64a5854c9e4cb9adc784e4e5d8548d1b7b49af62f7587c46d",
+          "partition": "train",
+          "team_key": "599de890c416e0d6e38e710f0ffc8bc4469cce6cc88eb701c1eabf849c2820f0",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p1": "move 1",
+          "p2": "move 1"
+        },
+        {
+          "p1": "switch 2"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "move",
+          "side": "p1",
+          "value": "U-turn"
+        },
+        {
+          "kind": "event",
+          "event": "switch",
+          "side": "p1",
+          "value": "Ting-Lu"
+        }
+      ]
+    },
+    {
+      "id": "switching-p2-v1",
+      "family": "switching",
+      "leakage_group": "training-curriculum-v1/family/switching",
+      "variant": "mirrored",
+      "teams": [
+        {
+          "seed": "sodium,9739107dcb7e1fc746390fc25f63981526fd19fe67e7846816a5163fcf9ae550",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "e4d3b89422ffd6c64a5854c9e4cb9adc784e4e5d8548d1b7b49af62f7587c46d",
+          "partition": "train",
+          "team_key": "599de890c416e0d6e38e710f0ffc8bc4469cce6cc88eb701c1eabf849c2820f0",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,558b5cdea3068be94fe744268f2b032944a29bf1a048cd1d662ba30414f575e7",
+          "team": [
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "cd4944c287a54b8926ee6a9918857367cdeab131ecf7e8246679a532496431e5",
+          "partition": "train",
+          "team_key": "ec22ac3301a8d12478d6bcad9eec278010f054a73e88f00651e4731a8a2f4ce3",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p2": "move 1",
+          "p1": "move 1"
+        },
+        {
+          "p2": "switch 2"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "move",
+          "side": "p2",
+          "value": "U-turn"
+        },
+        {
+          "kind": "event",
+          "event": "switch",
+          "side": "p2",
+          "value": "Ting-Lu"
+        }
+      ]
+    },
+    {
+      "id": "hazards-p1-v1",
+      "family": "hazards",
+      "leakage_group": "training-curriculum-v1/family/hazards",
+      "variant": "base",
+      "teams": [
+        {
+          "seed": "sodium,a4b030e071ce450290f2b36466769f9afadbcd592405333f76e9468447f21897",
+          "team": [
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "a02025e1f8ef8c2bf99918b08f01330ae25893cd98e8ee3a956ab055ea2dbee6",
+          "partition": "train",
+          "team_key": "8b08afd4339d1cf3cebec3a092e561dea3401c185e2cf382b93e0c7ea9e69bf2",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,3c4a125bf489008283892423881a77a5ac69885a03f11c44d9f14fe24f877be9",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "e4d3b89422ffd6c64a5854c9e4cb9adc784e4e5d8548d1b7b49af62f7587c46d",
+          "partition": "train",
+          "team_key": "599de890c416e0d6e38e710f0ffc8bc4469cce6cc88eb701c1eabf849c2820f0",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p1": "move 1",
+          "p2": "move 1"
+        },
+        {
+          "p1": "move 4",
+          "p2": "switch 2"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "-sidestart",
+          "side": "p2",
+          "value": "move: Stealth Rock"
+        },
+        {
+          "kind": "event",
+          "event": "-damage",
+          "side": "p2",
+          "contains": "[from] Stealth Rock"
+        }
+      ]
+    },
+    {
+      "id": "hazards-p2-v1",
+      "family": "hazards",
+      "leakage_group": "training-curriculum-v1/family/hazards",
+      "variant": "mirrored",
+      "teams": [
+        {
+          "seed": "sodium,3c4a125bf489008283892423881a77a5ac69885a03f11c44d9f14fe24f877be9",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "e4d3b89422ffd6c64a5854c9e4cb9adc784e4e5d8548d1b7b49af62f7587c46d",
+          "partition": "train",
+          "team_key": "599de890c416e0d6e38e710f0ffc8bc4469cce6cc88eb701c1eabf849c2820f0",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,a4b030e071ce450290f2b36466769f9afadbcd592405333f76e9468447f21897",
+          "team": [
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "a02025e1f8ef8c2bf99918b08f01330ae25893cd98e8ee3a956ab055ea2dbee6",
+          "partition": "train",
+          "team_key": "8b08afd4339d1cf3cebec3a092e561dea3401c185e2cf382b93e0c7ea9e69bf2",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p2": "move 1",
+          "p1": "move 1"
+        },
+        {
+          "p2": "move 4",
+          "p1": "switch 2"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "-sidestart",
+          "side": "p1",
+          "value": "move: Stealth Rock"
+        },
+        {
+          "kind": "event",
+          "event": "-damage",
+          "side": "p1",
+          "contains": "[from] Stealth Rock"
+        }
+      ]
+    },
+    {
+      "id": "status-p1-v1",
+      "family": "status",
+      "leakage_group": "training-curriculum-v1/family/status",
+      "variant": "base",
+      "teams": [
+        {
+          "seed": "sodium,376691257ef61833f4c31f7fd91f957f25b4d9ead375f9b2c5d36f5fe74e0677",
+          "team": [
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 4,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "c9e42d986a338922ec2600852a8669e45e29a192d6a27991425356a964b9fb4e",
+          "partition": "train",
+          "team_key": "e8c4f8449802a9c601ad7c18d637f12801312921c84b8756662b35db5099d515",
+          "source": "constructed",
+          "admission_candidate": 1
+        },
+        {
+          "seed": "sodium,471dab72897a0a9261ac48b1c1cd01cc7670c751688b41931dfc7518eff57c03",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "e4d3b89422ffd6c64a5854c9e4cb9adc784e4e5d8548d1b7b49af62f7587c46d",
+          "partition": "train",
+          "team_key": "599de890c416e0d6e38e710f0ffc8bc4469cce6cc88eb701c1eabf849c2820f0",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p1": "move 1",
+          "p2": "move 1"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "-status",
+          "side": "p2",
+          "value": "slp"
+        }
+      ]
+    },
+    {
+      "id": "status-p2-v1",
+      "family": "status",
+      "leakage_group": "training-curriculum-v1/family/status",
+      "variant": "mirrored",
+      "teams": [
+        {
+          "seed": "sodium,471dab72897a0a9261ac48b1c1cd01cc7670c751688b41931dfc7518eff57c03",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "e4d3b89422ffd6c64a5854c9e4cb9adc784e4e5d8548d1b7b49af62f7587c46d",
+          "partition": "train",
+          "team_key": "599de890c416e0d6e38e710f0ffc8bc4469cce6cc88eb701c1eabf849c2820f0",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,376691257ef61833f4c31f7fd91f957f25b4d9ead375f9b2c5d36f5fe74e0677",
+          "team": [
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 4,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "c9e42d986a338922ec2600852a8669e45e29a192d6a27991425356a964b9fb4e",
+          "partition": "train",
+          "team_key": "e8c4f8449802a9c601ad7c18d637f12801312921c84b8756662b35db5099d515",
+          "source": "constructed",
+          "admission_candidate": 1
+        }
+      ],
+      "prefix": [
+        {
+          "p2": "move 1",
+          "p1": "move 1"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "-status",
+          "side": "p1",
+          "value": "slp"
+        }
+      ]
+    },
+    {
+      "id": "tera-p1-v1",
+      "family": "tera",
+      "leakage_group": "training-curriculum-v1/family/tera",
+      "variant": "base",
+      "teams": [
+        {
+          "seed": "sodium,130d539c0b8895999db60d663afd2779fb50525e40d6cc89e3ae9daaffaed4da",
+          "team": [
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "07aacec75114a6588b408d24c83775460e07796340a88bc3d200ef668c440815",
+          "partition": "train",
+          "team_key": "f026127591a7517c884b26eaaf390bd183cdaa046b0ee4a769e9c452aa1da5e1",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,7495203409653cd43cfc05554a481da847a71df174d90765bafaa7716003b24a",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "e4d3b89422ffd6c64a5854c9e4cb9adc784e4e5d8548d1b7b49af62f7587c46d",
+          "partition": "train",
+          "team_key": "599de890c416e0d6e38e710f0ffc8bc4469cce6cc88eb701c1eabf849c2820f0",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p1": "move 4",
+          "p2": "move 1 terastallize"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "-terastallize",
+          "side": "p2",
+          "value": "Fire"
+        }
+      ]
+    },
+    {
+      "id": "tera-p2-v1",
+      "family": "tera",
+      "leakage_group": "training-curriculum-v1/family/tera",
+      "variant": "mirrored",
+      "teams": [
+        {
+          "seed": "sodium,7495203409653cd43cfc05554a481da847a71df174d90765bafaa7716003b24a",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "e4d3b89422ffd6c64a5854c9e4cb9adc784e4e5d8548d1b7b49af62f7587c46d",
+          "partition": "train",
+          "team_key": "599de890c416e0d6e38e710f0ffc8bc4469cce6cc88eb701c1eabf849c2820f0",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,130d539c0b8895999db60d663afd2779fb50525e40d6cc89e3ae9daaffaed4da",
+          "team": [
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "07aacec75114a6588b408d24c83775460e07796340a88bc3d200ef668c440815",
+          "partition": "train",
+          "team_key": "f026127591a7517c884b26eaaf390bd183cdaa046b0ee4a769e9c452aa1da5e1",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p2": "move 4",
+          "p1": "move 1 terastallize"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "-terastallize",
+          "side": "p1",
+          "value": "Fire"
+        }
+      ]
+    },
+    {
+      "id": "hidden-reserve-a-v1",
+      "family": "hidden-information",
+      "leakage_group": "training-curriculum-v1/family/hidden-reserve",
+      "counterfactual_group": "training-curriculum-v1/counterfactual/hidden-reserve-v1",
+      "variant": "a",
+      "teams": [
+        {
+          "seed": "sodium,138becbb5506f425b3862db0bf5bf847472d1976b86b790820b50076159ff5f9",
+          "team": [
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "cd4944c287a54b8926ee6a9918857367cdeab131ecf7e8246679a532496431e5",
+          "partition": "train",
+          "team_key": "ec22ac3301a8d12478d6bcad9eec278010f054a73e88f00651e4731a8a2f4ce3",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,f5dd2921a8b3b93bbf5cc38dbce4c1a6d3403cf11292382fbbee71168c369d22",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "protect"
+              ],
+              "ability": "Pressure",
+              "item": "Leftovers",
+              "teraType": "Steel",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "6b430f72edb03c6e20c9b42a8eab68db17bbcab31c45edd1af7c70b493bf78be",
+          "partition": "train",
+          "team_key": "58befbf3056d6e1bdf19418351da51322e69d9be4fe236a823e25fb7463d13fa",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p1": "move 2",
+          "p2": "move 1"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "move",
+          "side": "p2",
+          "value": "Slack Off"
+        },
+        {
+          "kind": "unrevealed",
+          "viewer": "p1",
+          "side": "p2",
+          "species": "Corviknight"
+        },
+        {
+          "kind": "revealed-count",
+          "side": "p2",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "hidden-reserve-b-v1",
+      "family": "hidden-information",
+      "leakage_group": "training-curriculum-v1/family/hidden-reserve",
+      "counterfactual_group": "training-curriculum-v1/counterfactual/hidden-reserve-v1",
+      "variant": "b",
+      "teams": [
+        {
+          "seed": "sodium,138becbb5506f425b3862db0bf5bf847472d1976b86b790820b50076159ff5f9",
+          "team": [
+            {
+              "name": "Scizor",
+              "species": "Scizor",
+              "speciesId": "scizor",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "uturn",
+                "swordsdance",
+                "bulletpunch",
+                "protect"
+              ],
+              "ability": "Technician",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Ting-Lu",
+              "species": "Ting-Lu",
+              "speciesId": "tinglu",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "stealthrock",
+                "ruination",
+                "earthquake",
+                "protect"
+              ],
+              "ability": "Vessel of Ruin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Amoonguss",
+              "species": "Amoonguss",
+              "speciesId": "amoonguss",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "spore",
+                "gigadrain",
+                "sludgebomb",
+                "protect"
+              ],
+              "ability": "Effect Spore",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Dragonite",
+              "species": "Dragonite",
+              "speciesId": "dragonite",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonclaw",
+                "roost",
+                "thunderwave",
+                "protect"
+              ],
+              "ability": "Inner Focus",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Blissey",
+              "species": "Blissey",
+              "speciesId": "blissey",
+              "gender": "F",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "calmmind",
+                "shadowball",
+                "softboiled",
+                "protect"
+              ],
+              "ability": "Natural Cure",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Gyarados",
+              "species": "Gyarados",
+              "speciesId": "gyarados",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "waterfall",
+                "dragondance",
+                "rest",
+                "protect"
+              ],
+              "ability": "Intimidate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "cd4944c287a54b8926ee6a9918857367cdeab131ecf7e8246679a532496431e5",
+          "partition": "train",
+          "team_key": "ec22ac3301a8d12478d6bcad9eec278010f054a73e88f00651e4731a8a2f4ce3",
+          "source": "constructed",
+          "admission_candidate": 0
+        },
+        {
+          "seed": "sodium,df75a15f540108e12e9c7aada6d9543397fd4dfdf03990cd2cdc37c7c04a663a",
+          "team": [
+            {
+              "name": "Slowbro",
+              "species": "Slowbro",
+              "speciesId": "slowbro",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "slackoff",
+                "surf",
+                "calmmind",
+                "protect"
+              ],
+              "ability": "Own Tempo",
+              "item": "",
+              "teraType": "Fire",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 252
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Snorlax",
+              "species": "Snorlax",
+              "speciesId": "snorlax",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "rest",
+                "sleeptalk",
+                "bodyslam",
+                "protect"
+              ],
+              "ability": "Thick Fat",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Garchomp",
+              "species": "Garchomp",
+              "speciesId": "garchomp",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "earthquake",
+                "dragonclaw",
+                "stealthrock",
+                "protect"
+              ],
+              "ability": "Rough Skin",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Rotom-Wash",
+              "species": "Rotom-Wash",
+              "speciesId": "rotomwash",
+              "gender": "N",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "voltswitch",
+                "hydropump",
+                "willowisp",
+                "protect"
+              ],
+              "ability": "Levitate",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Goodra",
+              "species": "Goodra",
+              "speciesId": "goodra",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "dragonpulse",
+                "thunderbolt",
+                "flamethrower",
+                "protect"
+              ],
+              "ability": "Sap Sipper",
+              "item": "",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 252,
+                "atk": 0,
+                "def": 0,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            },
+            {
+              "name": "Corviknight",
+              "species": "Corviknight",
+              "speciesId": "corviknight",
+              "gender": "",
+              "shiny": false,
+              "level": 80,
+              "moves": [
+                "roost",
+                "bravebird",
+                "uturn",
+                "irondefense"
+              ],
+              "ability": "Pressure",
+              "item": "Covert Cloak",
+              "teraType": "Water",
+              "role": "Constructed curriculum",
+              "evs": {
+                "hp": 0,
+                "atk": 0,
+                "def": 1,
+                "spa": 0,
+                "spd": 0,
+                "spe": 0
+              },
+              "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+              }
+            }
+          ],
+          "team_hash": "fccf54bf6e6cb8e40a903a39362c6fad25a5e4d9c5e24beced962e09279e821c",
+          "partition": "train",
+          "team_key": "7d8b9e7836f3279706fc32533e2ea4ab4c3a28606ac09d7baf7295567ce06a48",
+          "source": "constructed",
+          "admission_candidate": 0
+        }
+      ],
+      "prefix": [
+        {
+          "p1": "move 2",
+          "p2": "move 1"
+        }
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "event",
+          "event": "move",
+          "side": "p2",
+          "value": "Slack Off"
+        },
+        {
+          "kind": "unrevealed",
+          "viewer": "p1",
+          "side": "p2",
+          "species": "Corviknight"
+        },
+        {
+          "kind": "revealed-count",
+          "side": "p2",
+          "count": 1
+        }
+      ]
+    }
+  ]
+}

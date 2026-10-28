@@ -131,7 +131,7 @@ Draft v3 passed natural fixtures; v4 adds the damage grid and strict codec; v5
 retains all counterfactual views for independent reconstruction. Only
 the final source-bound run is the completion evidence.
 
-The [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md) was used.
+The claude-review skill was used.
 The delegated codec delivery failed because the coordinator repeated `--owned` and
 only its final argument was registered. No candidate was integrated; controller QA
 and adjudication are unavailable for a failed run. The local replacement and actor

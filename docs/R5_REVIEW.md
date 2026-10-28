@@ -1,8 +1,8 @@
 # R5 independent review and verified corrections
 
 Fable 5.1 reviewed a frozen implementation snapshot through the
-`/Users/maxf/.codex/skills/claude-review/SKILL.md` workflow. Run:
-`/Users/maxf/.local/state/claude-reviews/Pokemon-83aa7cb62b4e/20261010-145017-095fa85b`.
+`claude-review` workflow. Run:
+`local-review-archive/20261010-145017-095fa85b`.
 It completed in 213.23 seconds and reported findings, not an approval. The reviewer
 had no execution tools; the following dispositions are coordinator verification.
 

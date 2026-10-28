@@ -4,7 +4,7 @@
 unchanged after adjudication. Later implementation checks belong in R2_REVIEW.md.
 
 Delegated run:
-`/Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261010-114518-c67fa0a8`.
+`local-review-archive/20261010-114518-c67fa0a8`.
 Fable researched the selected pinned `side.ts`, `pokemon.ts`, and random AI source.
 Opposite-model Codex QA completed and requested revisions. Neither response alone
 was treated as verified evidence. The research result is **rejected as a complete

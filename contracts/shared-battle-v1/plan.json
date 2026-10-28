@@ -1,0 +1,77 @@
+{
+  "schema_version": "f21-shared-battle-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "arms": [
+    "flat",
+    "shared",
+    "reference"
+  ],
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "workers": 8,
+  "max_turns": 120,
+  "evaluation_seed": 1025262101,
+  "evaluation_pairs_per_opponent": 128,
+  "evaluation_chunk_pairs": 4,
+  "expected_games": 6912,
+  "optimizer_updates": 0,
+  "checkpoint_loads": 9,
+  "predecessor_receipt": "artifacts/reports/f20-shared-policy.json",
+  "predecessor_sha256": "f4276cf9a3a0b3120ae5b6e4a96d66a8ab7fc1860456c0c161d7917b6bebc2ad",
+  "predecessor_run": "artifacts/runs/f20-shared-policy-v1",
+  "reference_receipt": "artifacts/reports/f10-long-transfer.json",
+  "reference_sha256": "f8ef731093b06298cf2f9269c763d523c129c9dc4919847dad1817920154b95d",
+  "reference_run": "artifacts/runs/f10-long-transfer-v1",
+  "candidate_step": 8192,
+  "reference_checkpoint": "rehearsal/final",
+  "reference_cohorts": 128,
+  "reference_optimizer_step": 1024,
+  "statistics": {
+    "method": "paired-cluster-percentile-bootstrap",
+    "family_cells": 27,
+    "alpha": 0.05,
+    "resamples": 20000,
+    "seed": 1025262102,
+    "practical_improvement": 0.05,
+    "max_final_cutoff_rate": 0.05
+  },
+  "comparisons": [
+    [
+      "shared_vs_flat",
+      "flat",
+      "shared"
+    ],
+    [
+      "shared_vs_reference",
+      "reference",
+      "shared"
+    ],
+    [
+      "flat_vs_reference",
+      "reference",
+      "flat"
+    ]
+  ],
+  "mastery_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6
+  },
+  "gates": "Primary battle benefit per seed: shared-minus-flat tactical cutoff-aware point lower>=0.05, approximate adjusted bootstrap lower>0, no detected random/base-power regression, shared cutoff rates<=0.05. All three seeds required. Reference contrasts are contextual and never isolate architecture because training differs. Familiar mastery is reported separately and remains required before any promotion, which is not authorized by this screen.",
+  "selection": "All final F20 step8192 candidates and F10 rehearsal references included; no intermediate checkpoint selection, optimizer updates, resampling or extension.",
+  "pairing": "Identical paired official development team/mechanics schedules and actor random roots for every policy; both seats clustered. Chance streams may diverge after different actions. Shared schedules across seeds are not independent evaluation datasets.",
+  "scope": "Fresh exact teams excluding F20-relevant training/development roles and F10 training/evaluation roles; known species, formats, opponents and curriculum families recur. No held-out opponent or public ladder claim.",
+  "interpretation": "Frozen full-battle diagnostic of whether F20 teacher-imitation gains translate to play. F20 failed its architecture gate in all seeds. Full G2/G3/G4 remain open. No automatic promotion, further training or search.",
+  "no_early_stopping": true,
+  "no_checkpoint_selection": true,
+  "no_budget_extension": true,
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false
+}

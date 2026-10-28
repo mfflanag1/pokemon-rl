@@ -1,0 +1,71 @@
+{
+  "version": "opponent-mixture-f5-v1",
+  "profile": "production",
+  "seeds": [
+    4103,
+    5207,
+    6301
+  ],
+  "cohort_games": 8,
+  "workers": 8,
+  "max_turns": 120,
+  "evaluation_pairs_per_opponent": 256,
+  "evaluation_chunk_pairs": 16,
+  "evaluation_seed": 8522026,
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "ppo": {
+    "epochs": 2,
+    "minibatch_rows": 256,
+    "learning_rate": 0.0003,
+    "clip": 0.2,
+    "entropy": 0.01,
+    "value_coefficient": 0.5,
+    "gamma": 1.0,
+    "lambda": 0.95
+  },
+  "statistics": {
+    "method": "paired-cluster-percentile-bootstrap",
+    "resamples": 20000,
+    "alpha": 0.05,
+    "family_cells": 27,
+    "seed": 8522027,
+    "practical_improvement": 0.03,
+    "max_final_cutoff_rate": 0.05
+  },
+  "data": "Official R7 train/development whole-team partitions. New development seed8522026. No final reserved data.",
+  "curriculum": false,
+  "public_server": false,
+  "final_reserved_data": false,
+  "prime": false,
+  "arms": [
+    "self_play",
+    "mixture"
+  ],
+  "updates_per_arm": 128,
+  "selected_rows_per_update": 1024,
+  "max_games_per_stratum_update": 64,
+  "arm_weights": {
+    "self_play": {
+      "self_play": 1.0
+    },
+    "mixture": {
+      "self_play": 0.5,
+      "base_power": 0.25,
+      "tactical": 0.25
+    }
+  },
+  "endpoints": [
+    "initial",
+    "self_play",
+    "mixture"
+  ],
+  "budget": "786432 selected unique rows; 1572864 row presentations; 6144 Adam steps. 13824 evaluation games. Collection interactions differ and all overshoot is reported. No automatic restart or budget expansion.",
+  "model": "Frozen F1 architecture/encoder and F2 PPO; fresh matched initialization per seed and arm. No F4 warm start.",
+  "recovery": "Atomic full-update checkpoints and exact input pointers. Explicit unchanged-source resume only; no automatic production restart.",
+  "gate": "Every seed: mixture-v-control tactical bootstrap lower >0 and cutoff-aware point lower >=.03; mixture-v-init tactical bootstrap lower >0; no mixture-v-control opponent upper <0; every final cell cutoff rate <=.05. Exploratory only; no detected regression is not noninferiority.",
+  "statistics_scope": "27 paired contrasts: 18 arm-v-init plus 9 mixture-v-control. Same 256 team/mechanics clusters, both seats, shared actor RNG across endpoints. Bootstrap coverage approximate; rigorous Hoeffding bounds reported separately."
+}

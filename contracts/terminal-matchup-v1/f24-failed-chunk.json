@@ -1,0 +1,178 @@
+[
+  {
+    "spec": {
+      "seed": 1025262401,
+      "episode": 72,
+      "max_turns": 120,
+      "split": "development",
+      "swap": false,
+      "opponent": "tactical",
+      "learner_side": "p1",
+      "actor_seed": 1410298866
+    },
+    "teams": [
+      {
+        "team_key": "bae0ef63e57ce62861b4342f2368d9b5cab0f61fd67f9e843bdd5fdf4d6cda28",
+        "partition": "development"
+      },
+      {
+        "team_key": "90de8f17e544e27644e09b3cd56d6d65a7784a493b240f54cf90a6b8e5aa6ae2",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "seed": 1025262401,
+      "episode": 72,
+      "max_turns": 120,
+      "split": "development",
+      "swap": true,
+      "opponent": "tactical",
+      "learner_side": "p2",
+      "actor_seed": 1410298866
+    },
+    "teams": [
+      {
+        "team_key": "90de8f17e544e27644e09b3cd56d6d65a7784a493b240f54cf90a6b8e5aa6ae2",
+        "partition": "development"
+      },
+      {
+        "team_key": "bae0ef63e57ce62861b4342f2368d9b5cab0f61fd67f9e843bdd5fdf4d6cda28",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "seed": 1025262401,
+      "episode": 73,
+      "max_turns": 120,
+      "split": "development",
+      "swap": false,
+      "opponent": "tactical",
+      "learner_side": "p1",
+      "actor_seed": 1410298866
+    },
+    "teams": [
+      {
+        "team_key": "22a2d2deef617bfebd5896ef33b1de6583ac017604eac3797f6961401fa62c63",
+        "partition": "development"
+      },
+      {
+        "team_key": "7d72651356ad298437447940b9fbd0c77a3107b21f80128d9699ae3a3182879d",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "seed": 1025262401,
+      "episode": 73,
+      "max_turns": 120,
+      "split": "development",
+      "swap": true,
+      "opponent": "tactical",
+      "learner_side": "p2",
+      "actor_seed": 1410298866
+    },
+    "teams": [
+      {
+        "team_key": "7d72651356ad298437447940b9fbd0c77a3107b21f80128d9699ae3a3182879d",
+        "partition": "development"
+      },
+      {
+        "team_key": "22a2d2deef617bfebd5896ef33b1de6583ac017604eac3797f6961401fa62c63",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "seed": 1025262401,
+      "episode": 74,
+      "max_turns": 120,
+      "split": "development",
+      "swap": false,
+      "opponent": "tactical",
+      "learner_side": "p1",
+      "actor_seed": 1410298866
+    },
+    "teams": [
+      {
+        "team_key": "d8be496f255b9f9e63acfab16714918fdd9b7b9e7a75f622156086f79f6a7021",
+        "partition": "development"
+      },
+      {
+        "team_key": "feb5bb216a4d43071dd1c114053cb2c4606794dc46eb01b0b948a22368f72680",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "seed": 1025262401,
+      "episode": 74,
+      "max_turns": 120,
+      "split": "development",
+      "swap": true,
+      "opponent": "tactical",
+      "learner_side": "p2",
+      "actor_seed": 1410298866
+    },
+    "teams": [
+      {
+        "team_key": "feb5bb216a4d43071dd1c114053cb2c4606794dc46eb01b0b948a22368f72680",
+        "partition": "development"
+      },
+      {
+        "team_key": "d8be496f255b9f9e63acfab16714918fdd9b7b9e7a75f622156086f79f6a7021",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "seed": 1025262401,
+      "episode": 75,
+      "max_turns": 120,
+      "split": "development",
+      "swap": false,
+      "opponent": "tactical",
+      "learner_side": "p1",
+      "actor_seed": 1410298866
+    },
+    "teams": [
+      {
+        "team_key": "2fc12a67515c5f1423f7c4aab224e9dc0a84352160301c16cfb5c88cbd4d4f17",
+        "partition": "development"
+      },
+      {
+        "team_key": "be044ac9e03a52a419366dfb6e37066f6e74beaebf222e949ae6de822d2364eb",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "seed": 1025262401,
+      "episode": 75,
+      "max_turns": 120,
+      "split": "development",
+      "swap": true,
+      "opponent": "tactical",
+      "learner_side": "p2",
+      "actor_seed": 1410298866
+    },
+    "teams": [
+      {
+        "team_key": "be044ac9e03a52a419366dfb6e37066f6e74beaebf222e949ae6de822d2364eb",
+        "partition": "development"
+      },
+      {
+        "team_key": "2fc12a67515c5f1423f7c4aab224e9dc0a84352160301c16cfb5c88cbd4d4f17",
+        "partition": "development"
+      }
+    ]
+  }
+]

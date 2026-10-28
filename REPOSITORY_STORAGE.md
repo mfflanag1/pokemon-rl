@@ -1,11 +1,19 @@
 # Repository storage and restoration
 
-The private project repository is
+The project repository is
 [mfflanag1/pokemon-rl](https://github.com/mfflanag1/pokemon-rl).
-Git stores the source, contracts, dependency locks, documentation, review records,
-completion receipts and their sealed source/evidence archives. Larger raw run data
-are attached to a repository release; `.gitignore` remains unchanged because it is
-part of the frozen experiment's source manifest.
+The October 28 source publication covers source, tests, contracts, documentation,
+and root dependency configuration. It does not upload new experiment artifacts,
+raw run logs, checkpoints, external teacher data, vendor checkouts, or environments.
+Historical artifacts already committed on October 12 remain in Git history, and
+the original release remains available. This update does not delete those records
+or claim to be a complete current experiment backup.
+
+The working checkout retains frozen scientific input bytes. Publication copies
+of selected documentation replace machine-specific links and update the public
+status; those edited copies are not the original hash-bound experiment inputs.
+Newer handoffs may refer to evidence retained only in the local archive. Exact
+replay requires that separately preserved evidence and the pinned runtime.
 
 ## Initial snapshot
 
@@ -29,7 +37,7 @@ The release is a data backup, not a software release or a strength claim.
 
 ## Restore on another machine
 
-Use an account with access to the private repository. Install GitHub CLI and
+Install GitHub CLI and
 Zstandard, then:
 
 ```sh
@@ -72,7 +80,9 @@ that a different runtime can reproduce an old experiment.
 
 ## Current work
 
-See [the screen handoff](docs/M3_SWITCH_SCREEN.md) for current execution status.
-The original local audit remains authoritative until its production report,
-fresh-reference sealing, complete hash verification and identical reseal finish.
-Full G2/G3/G4 and public ladder strength remain open. Prime is unnecessary.
+See the [current status](README.md) and [F39 failure handoff](docs/F39_ONLINE_CONTINUATION.md).
+F39 completed production training and evaluation but failed before independent
+verification began; its three primary gates are provisionally false. F40 is a
+verifier-only repair in preparation, with no retraining. No successful F39/F40
+completion or policy promotion is claimed. Full G2/G3/G4 and public ladder
+strength remain open.

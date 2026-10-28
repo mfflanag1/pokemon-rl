@@ -141,7 +141,7 @@ lives outside the sealed review directory. Pause the quiet follow-up after
 reporting completion; no further production run is part of this qualification.
 
 Independent implementation/QA and harness review use the
-[claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md).
+claude-review skill.
 Snapshot reviews do not execute tests. Actual checks and verified dispositions
 are retained under the review directory before production starts.
 

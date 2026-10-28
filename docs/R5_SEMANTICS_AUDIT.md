@@ -3,7 +3,7 @@
 Date: 2026-10-10. Pin: `942cda71d14bf0618bd57991708a2e2734b6daba`.
 
 Bounded Fable 5.1 research run:
-`/Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261010-143114-84ebe47f`.
+`local-review-archive/20261010-143114-84ebe47f`.
 An independent Codex QA returned **revise**. Coordinator disposition: **rejected
 as a complete semantic specification**; use only independently verified facts.
 No implementation patch was produced or integrated. Research had no executable

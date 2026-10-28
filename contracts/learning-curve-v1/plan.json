@@ -1,0 +1,72 @@
+{
+  "version": "f19-learning-curve-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "endpoints": [
+    2048,
+    4096,
+    8192
+  ],
+  "start_step": 2048,
+  "final_step": 8192,
+  "workers": 8,
+  "max_turns": 120,
+  "teacher_quota": [
+    32,
+    16,
+    8,
+    8
+  ],
+  "old_rows": 64,
+  "training_games": 2048,
+  "new_training_games": 0,
+  "probe_games": 256,
+  "probe_seed": 1025261901,
+  "predecessor_receipt": "artifacts/reports/f18-data-coverage.json",
+  "predecessor_sha256": "78db86b6f0bc1aa70e1c466cca1154c2b091fe2852e165f1bc88d2b7cff18901",
+  "predecessor_run": "artifacts/runs/f18-data-coverage-v1",
+  "expected_new_updates": 18432,
+  "expected_new_presentations": 2359296,
+  "expected_accumulated_updates": 24576,
+  "expected_new_games": 256,
+  "checkpoint_comparisons": 15,
+  "checkpoint_recoveries": 6,
+  "coverage_thresholds": {
+    "voluntary_min_accuracy": 0.25,
+    "voluntary_min_gain": 0.1,
+    "maximum_other_accuracy_drop": 0.05,
+    "minimum_tera_rows": 64,
+    "minimum_tera_games": 32,
+    "minimum_voluntary_switch_rows": 32,
+    "minimum_voluntary_switch_games": 16
+  },
+  "tactical_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6,
+    "maximum_context_mass_drop": 0.05
+  },
+  "statistics": {
+    "seed": 1025261902,
+    "resamples": 5000,
+    "alpha": 0.05,
+    "contrasts": 12
+  },
+  "interpretation": "Fixed continuation on the frozen F18 expanded corpus. Resume all three sealed step2048 expanded checkpoints including Adam moments/counter. Keep original928-feature model, action law/NLL/optimizer, balanced32/16/8/8 teacher sampling and64 old rehearsal rows; resume sampling index2048, never reset Adam or namespaces. Record endpoints2048/4096/8192 without early stopping or selection. Primary comparison is8192 minus2048 only, across3 seeds and4 families. Intermediate4096 metrics are descriptive, with no inferential contrasts. Collect256 fresh development teacher games, exclude exact teams used in F15/F16/F18 development and all training. No new training games. All games/accepted decisions retained, including cutoffs; minimum support failure aborts without resampling. Gate requires25% final voluntary agreement and10-point gain, no other family drop over5points, all32 known contexts retained; all3 seeds required. Teacher imitation is not battle strength. Size/architecture/sampling remain fixed while optimization budget and example repetitions increase. No automatic follow-on, PPO or promotion. Final reserved data/public server/Prime remain unused; GitHub stays held.",
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false,
+  "checkpoint_steps_per_seed": [
+    2048,
+    4095,
+    4096,
+    8191,
+    8192
+  ],
+  "recovered_update_indices_per_seed": [
+    4095,
+    8191
+  ]
+}

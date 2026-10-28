@@ -1,0 +1,178 @@
+[
+  {
+    "spec": {
+      "actor_seed": 417533308,
+      "episode": 100,
+      "learner_side": "p1",
+      "max_turns": 120,
+      "opponent": "random",
+      "seed": 1025262301,
+      "split": "development",
+      "swap": false
+    },
+    "teams": [
+      {
+        "team_key": "eebe945fdb6deb2d5162578414df2b4b6bc9f57ef26c0769ce02fb6b8fad39e7",
+        "partition": "development"
+      },
+      {
+        "team_key": "15c805e49d4304c9f66784b8403106b4e490af391c0c97bdfbb7696400d1a41a",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "actor_seed": 417533308,
+      "episode": 100,
+      "learner_side": "p2",
+      "max_turns": 120,
+      "opponent": "random",
+      "seed": 1025262301,
+      "split": "development",
+      "swap": true
+    },
+    "teams": [
+      {
+        "team_key": "15c805e49d4304c9f66784b8403106b4e490af391c0c97bdfbb7696400d1a41a",
+        "partition": "development"
+      },
+      {
+        "team_key": "eebe945fdb6deb2d5162578414df2b4b6bc9f57ef26c0769ce02fb6b8fad39e7",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "actor_seed": 417533308,
+      "episode": 101,
+      "learner_side": "p1",
+      "max_turns": 120,
+      "opponent": "random",
+      "seed": 1025262301,
+      "split": "development",
+      "swap": false
+    },
+    "teams": [
+      {
+        "team_key": "d5b6a9c22b3cb8df60aee9875d8ce96bbb6e529dadc9f6ca4d8b79a66b3d4684",
+        "partition": "development"
+      },
+      {
+        "team_key": "7acfa23c5c8776ae07f81594f2fd581f84fd57b7ed1e641c4cdb027feb489ba3",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "actor_seed": 417533308,
+      "episode": 101,
+      "learner_side": "p2",
+      "max_turns": 120,
+      "opponent": "random",
+      "seed": 1025262301,
+      "split": "development",
+      "swap": true
+    },
+    "teams": [
+      {
+        "team_key": "7acfa23c5c8776ae07f81594f2fd581f84fd57b7ed1e641c4cdb027feb489ba3",
+        "partition": "development"
+      },
+      {
+        "team_key": "d5b6a9c22b3cb8df60aee9875d8ce96bbb6e529dadc9f6ca4d8b79a66b3d4684",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "actor_seed": 417533308,
+      "episode": 102,
+      "learner_side": "p1",
+      "max_turns": 120,
+      "opponent": "random",
+      "seed": 1025262301,
+      "split": "development",
+      "swap": false
+    },
+    "teams": [
+      {
+        "team_key": "b8d182d56f8a3d539a23ee0ac29e92a73a071e54076327d71d7c29b9189c0a84",
+        "partition": "development"
+      },
+      {
+        "team_key": "967ef21425ade3a30e2e531e3cea61524a7424afe332f3179738a04646bf6183",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "actor_seed": 417533308,
+      "episode": 102,
+      "learner_side": "p2",
+      "max_turns": 120,
+      "opponent": "random",
+      "seed": 1025262301,
+      "split": "development",
+      "swap": true
+    },
+    "teams": [
+      {
+        "team_key": "967ef21425ade3a30e2e531e3cea61524a7424afe332f3179738a04646bf6183",
+        "partition": "development"
+      },
+      {
+        "team_key": "b8d182d56f8a3d539a23ee0ac29e92a73a071e54076327d71d7c29b9189c0a84",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "actor_seed": 417533308,
+      "episode": 103,
+      "learner_side": "p1",
+      "max_turns": 120,
+      "opponent": "random",
+      "seed": 1025262301,
+      "split": "development",
+      "swap": false
+    },
+    "teams": [
+      {
+        "team_key": "971a2fc334868d720d11ccf94bd082a6a159dfc2075069f02c881afc0c91c27a",
+        "partition": "development"
+      },
+      {
+        "team_key": "8d06e9b4a214a7bd2a008ab4999b1b473a995661f5e223cb9853710c7a8352bd",
+        "partition": "development"
+      }
+    ]
+  },
+  {
+    "spec": {
+      "actor_seed": 417533308,
+      "episode": 103,
+      "learner_side": "p2",
+      "max_turns": 120,
+      "opponent": "random",
+      "seed": 1025262301,
+      "split": "development",
+      "swap": true
+    },
+    "teams": [
+      {
+        "team_key": "8d06e9b4a214a7bd2a008ab4999b1b473a995661f5e223cb9853710c7a8352bd",
+        "partition": "development"
+      },
+      {
+        "team_key": "971a2fc334868d720d11ccf94bd082a6a159dfc2075069f02c881afc0c91c27a",
+        "partition": "development"
+      }
+    ]
+  }
+]

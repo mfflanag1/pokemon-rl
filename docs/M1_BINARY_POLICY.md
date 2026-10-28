@@ -81,7 +81,7 @@ completed-update boundaries. Old rollout logs cannot be reused under the new law
 
 ## Review and reproduction
 
-The [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md) supplied
+The claude-review skill supplied
 independent review. Auto routing selected a Codex oracle delegate for exploration;
 that delivery failed ownership checks and used an incompatible test framework.
 The failure is retained. Only the inspected scalar source was salvaged; new local

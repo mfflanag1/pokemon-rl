@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pokemon:full-showdown-player-v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "side",
+    "request_id",
+    "turn",
+    "phase",
+    "own",
+    "opponent",
+    "active_moves",
+    "weather",
+    "terrain",
+    "side_conditions",
+    "mask"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "full-showdown-player-v2"
+    },
+    "side": {
+      "enum": [
+        "p1",
+        "p2"
+      ]
+    },
+    "request_id": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "turn": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "phase": {
+      "enum": [
+        "wait",
+        "move",
+        "replace",
+        "revival"
+      ]
+    },
+    "own": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "$ref": "#/$defs/own"
+      }
+    },
+    "opponent": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "anyOf": [
+          {
+            "type": "null"
+          },
+          {
+            "$ref": "#/$defs/public"
+          }
+        ]
+      }
+    },
+    "active_moves": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "pp",
+          "maxpp",
+          "disabled",
+          "base_power",
+          "type",
+          "category"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "pp": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "maxpp": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "base_power": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "weather": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "terrain": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "side_conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "own",
+        "opponent"
+      ],
+      "properties": {
+        "own": {
+          "$ref": "#/$defs/numbers"
+        },
+        "opponent": {
+          "$ref": "#/$defs/numbers"
+        }
+      }
+    },
+    "mask": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": {
+        "type": "boolean"
+      }
+    }
+  },
+  "$defs": {
+    "numbers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "base": {
+      "type": "object",
+      "required": [
+        "ident",
+        "species",
+        "level",
+        "condition",
+        "active",
+        "moves",
+        "ability",
+        "item",
+        "tera",
+        "boosts"
+      ],
+      "properties": {
+        "ident": {
+          "type": "string"
+        },
+        "species": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "condition": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "moves": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ability": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "item": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tera": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "boosts": {
+          "$ref": "#/$defs/numbers"
+        }
+      }
+    },
+    "public": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "unevaluatedProperties": false,
+      "required": [
+        "types"
+      ],
+      "properties": {
+        "types": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "own": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "unevaluatedProperties": false,
+      "required": [
+        "tera_type",
+        "stats",
+        "reviving",
+        "types"
+      ],
+      "properties": {
+        "tera_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stats": {
+          "$ref": "#/$defs/numbers"
+        },
+        "reviving": {
+          "type": "boolean"
+        },
+        "types": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

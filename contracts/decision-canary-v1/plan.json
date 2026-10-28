@@ -1,0 +1,28 @@
+{
+  "schema_version": "f6-decision-canary-plan-1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "updates_per_seed": 64,
+  "rows_per_update": 128,
+  "workers": 8,
+  "evaluation_repeats": 8,
+  "evaluation_seed": 8622026,
+  "mechanics_probe_seed": 8622027,
+  "mechanics_probe_repeats": 16,
+  "training_contexts": 16,
+  "variant_contexts": 16,
+  "minimum_probability_gain": 0.15,
+  "minimum_final_optimal_mass": 0.6,
+  "objective": "one-turn-exposed-member-HP-retention",
+  "reward": "clamp(post-turn HP fraction of exposed own member / its pre-action HP fraction, 0, 1)",
+  "learner": "unchanged F1 928x64x14 bounded-value network; unchanged F2 PPO; 2 Adam steps per 128-row update with valid padding",
+  "continuation": "one final-policy decision per context/panel/seed, followed by frozen base-power play to natural terminal or turn-120 cutoff",
+  "interpretation": "local contextual-bandit learnability diagnostic, not terminal-reward full-battle RL or curriculum-transfer evidence",
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "minimum_final_per_context": 0.6,
+  "gate_scope": "every family and panel plus every context, for all three seeds; diagnostic thresholds, not significance"
+}

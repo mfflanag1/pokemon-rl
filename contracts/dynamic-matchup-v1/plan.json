@@ -1,0 +1,115 @@
+{
+  "schema_version": "f24-dynamic-matchup-plan-1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "arms": [
+    "zero",
+    "matchup"
+  ],
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "workers": 8,
+  "max_turns": 120,
+  "cohorts": 512,
+  "endpoints": [
+    0,
+    128,
+    512
+  ],
+  "selected_rows_per_update": 1024,
+  "training_chunk_games": 8,
+  "maximum_games_per_update": 64,
+  "training_seed_namespace": "f24-self-play-training",
+  "optimizer_seed_namespace": "f24-ppo-update",
+  "evaluation_seed": 1025262401,
+  "evaluation_pairs_per_opponent": 128,
+  "evaluation_chunk_pairs": 4,
+  "selfplay_evaluation_seed": 1025262402,
+  "selfplay_pairs": 16,
+  "checkpoint_cohorts": [
+    0,
+    64,
+    127,
+    128,
+    256,
+    384,
+    511,
+    512
+  ],
+  "recovery_indices": [
+    127,
+    511
+  ],
+  "ppo": {
+    "epochs": 2,
+    "minibatch_rows": 256,
+    "learning_rate": 0.0003,
+    "clip": 0.2,
+    "entropy": 0.01,
+    "value_coefficient": 0.5,
+    "gamma": 1.0,
+    "lambda": 0.95
+  },
+  "mastery_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6
+  },
+  "comparisons": [
+    "zero_learning",
+    "matchup_learning",
+    "matchup_vs_zero",
+    "zero_vs_reference",
+    "matchup_vs_reference"
+  ],
+  "expected_counts": {
+    "cohorts": 3072,
+    "optimizer_steps": 24576,
+    "selected_ppo_rows": 3145728,
+    "ppo_row_presentations": 6291456,
+    "evaluation_games": 16128,
+    "selfplay_diagnostic_games": 576,
+    "checkpoint_comparisons": 48,
+    "original_next_update_recoveries": 12
+  },
+  "statistics": {
+    "method": "paired-cluster-percentile-bootstrap",
+    "family_cells": 45,
+    "alpha": 0.05,
+    "resamples": 20000,
+    "seed": 1025262403,
+    "practical_improvement": 0.05,
+    "max_final_cutoff_rate": 0.05
+  },
+  "initialization": "All three final F22 flat checkpoints at128cohorts; preserve every base policy/value weight. Add zero25-vector shared action-score adapter and zero350-vector value-logit adapter. Reset all Adam moments/counter identically in both arms. No rehearsal. F10 same-seed unchanged external reference.",
+  "training": "Pure full-battle self-play PPO;512cohorts per arm/seed, four times F22. Complete games8/chunk until1024rows, cap64games/cohort, same-player GAE before uniform selection;2epochs of4minibatches256. Same schedules/seeds/selection roots; on-policy games and cursors can diverge. Equal selected-row and update budget, not equal compute. All base and adapter weights train.",
+  "evaluation": "Both arms at0,128,512 cohorts plus fixed F10 reference once; each128 paired schedules in both seats per opponent. Fresh development seed, same schedules across endpoints/arms/seeds. Midpoints descriptive only;45 final contrasts. Pooled seed counts descriptive. Exactteams excluded from admitted historical train/development identities; not an exhaustive inventory of every historical project exposure. F23 committed failed-run development games and the failed chunk coordinates are historical exposure, excluded from new evaluation by exact team identity.",
+  "selfplay_diagnostics": "At each candidate endpoint,32 separate development self-play games (16 paired schedules), both actors frozen, no learner rows. Both-seat terminal-only value summaries versus constant0.5; cutoffs excluded. Exactteams disjoint from main battle panel and admitted histories. Supporting descriptive evidence, never optimizer data or checkpoint selection.",
+  "gates": "Per arm/seed learning: final-minus-own-initial base-power cutoff-aware gain>=.05, adjusted approximate bootstrap lower>0, no detected opponent regression, final cutoffrates<=.05. Feature benefit: final matchup-minus-zero tactical gain>=.05, adjusted lower>0, no detected random/base-power regression, cutoffrates<=.05. All seeds required for all-seed gates. Familiar mastery and value diagnostics descriptive; no automatic promotion.",
+  "interpretation": "Repaired F23 design after its preserved pre-training observation failure. Both arms use the same corrected dynamic player view and new fixed sampling namespaces; no completed F23 candidate exists to compare. Fourfold full-battle RL extension of all F22 final flat hosts, matched zero-input versus public matchup-residual intervention. Fresh development games against known heuristics/recurring official generator; not held-out-team or public ladder generalization.45final contrasts retain all seeds; midpoints and pooled rates descriptive. Bootstrap coverage approximate, Hoeffding retained. Supporting familiar mastery and terminal-conditioned self-play values, no promotion or adaptive budget. History, auxiliary heads and opponent-pool changes excluded.",
+  "no_early_stopping": true,
+  "no_checkpoint_selection": true,
+  "no_budget_extension": true,
+  "promotion_authorized": false,
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false,
+  "f22_receipt": "artifacts/reports/f22-shared-ppo.json",
+  "f22_sha256": "d44d701ba0e670fae0a2af39df0148164496fe3f9c1180b597e01d9f52a13c1f",
+  "catalog": "artifacts/reviews/f17-switch-audit/public-catalog.json",
+  "catalog_sha256": "e218bfd4f4dc377ef6654b2e859f01896d082e6a9a900eebe5bf80e4dcb29510",
+  "features": 1278,
+  "extra_features": 350,
+  "adapter_policy_parameters": 25,
+  "adapter_value_parameters": 350,
+  "features_contract": "14 action-local rows of25 nominal public matchup channels, appended to original928. Strict player-only projection and pinned static Dex catalog; own stats and known own moves allowed, opponent only public reveals. No opponent private stats/set, teacher scores, targets, future events or provenance. Nominal chart/STAB/pressure omit abilities/items/dynamic move and Stellar modifiers and are NOT simulator damage estimates; F24 player-v2 carries own and opponent ordinary dynamic types from public events; known typeless ??? is neutral and gives no STAB, added types are included, temporary changes reset on switching, Tera remains separate. Frozen v1 tactical probes retain historical limitations. Explicit unknown flags, revealed-move incoming risk, switch action uses its own member best nominal attack. Real arm sees channels; zero control computes and validates then masks all350. Same60806parameters; input activity/effective capacity and changed clipping trajectory are part of intervention, not isolated semantics.",
+  "failure_receipt": "artifacts/reports/f23-matchup-ppo-failure.json",
+  "failure_sha256": "801c0a8220daa12edcce8485bff5db40285b115b5031bc51c674802a14509366",
+  "player_schema": "full-showdown-player-v2",
+  "worker_schema": "dynamic-matchup-worker-v1"
+}

@@ -157,7 +157,7 @@ npm run jax:fixed-loop -- artifacts/runs/NEW-fixed-loop-run
 .venv/bin/python scripts/seal-fixed-loop.py artifacts/runs/NEW-fixed-loop-run
 ```
 
-Independent work used the [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md):
+Independent work used the claude-review skill:
 Fable implemented the bounded numerical helper; Codex reviewed it; local checks
 verified it before integration. A separate Fable audit covered the loop, recovery
 and measurement claims. Findings and executed dispositions are preserved in

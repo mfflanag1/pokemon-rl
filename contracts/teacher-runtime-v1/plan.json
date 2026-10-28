@@ -1,0 +1,139 @@
+{
+  "arms": [
+    "control",
+    "assisted"
+  ],
+  "checkpoint_utc": "2026-10-28T03:36:08Z",
+  "claims": {
+    "baseline_v1": "historically known local opponent excluded from F35 training/demonstrations; not unseen opponent family",
+    "causal_scope": "effect of one fixed offline demonstration auxiliary-loss package conditional on F34 states/shared corpus and schedules; shared-trunk feedback and extra compute not isolated",
+    "foul_play": "trained-on teacher adaptation",
+    "generalization": "fresh development games with recurring official generation, not held-out species/unordered teams/public strength; G2/G3/G4 remain open"
+  },
+  "cohorts_per_seed_arm": 256,
+  "deadline_utc": "2026-10-28T07:36:08Z",
+  "epochs": 2,
+  "evaluation_pairs": {
+    "base_power": 32,
+    "baseline-v1": 256,
+    "random": 32,
+    "tactical": 64
+  },
+  "execution": {
+    "failed_predecessor": {
+      "path": "artifacts/reports/f35-teacher-assisted-failure.json",
+      "sha256": "bfaf32e3fa1574c38c5e1f8bd60aee1c2347b403cc0a7c5e17601c70f888438c"
+    },
+    "runtime_qualification": {
+      "path": "artifacts/reviews/f36-teacher-runtime/runtime-qualification-v1.json",
+      "sha256": "6886c077c460c451cd2254aa5fffb4d28547715fd6aba690ec5ca778c07bacde"
+    },
+    "schema_version": "f36-teacher-runtime-execution-v1",
+    "scope": "One user-authorized fresh runtime replacement; identical scientific plan and original deadline. F35 remains failed; no partial acquisition reuse."
+  },
+  "expected_counts": {
+    "all_evaluation_games": 8064,
+    "checkpoint_comparisons": 18,
+    "cohorts": 1536,
+    "demonstration_presentations": 1572864,
+    "evaluation_games": 6912,
+    "external_evaluation_games": 1152,
+    "optimizer_steps": 12288,
+    "original_next_update_recoveries": 12,
+    "row_presentations": 3145728,
+    "selected_rows": 1572864,
+    "teacher_probe_games": 96,
+    "teacher_train_games": 384
+  },
+  "external_pairs_per_seed_state": 64,
+  "failure_policy": "Stop fixed scientific workflow on failure; no restart, stitch, dropped cell, game replacement, outcome-dependent budget change or substitute easier comparison. Preserve partial evidence. Stop launching at deadline.",
+  "final_reserved_data_used": false,
+  "github_publication_authorized": false,
+  "initialization": {
+    "adam": "reset-all-moments-and-step",
+    "architecture_changed": false,
+    "checkpoint_template": "artifacts/runs/f34-policy-reset-v1/{seed}/checkpoints/512",
+    "parameter_count": 261559,
+    "same_parameters_between_arms": true
+  },
+  "max_turns": 240,
+  "maximum_games_per_stream": 64,
+  "mechanism": {
+    "additional_optimizer_steps": 0,
+    "coefficient": 0.1,
+    "critic_teacher_target": false,
+    "demo_seed_namespace": "f35-demonstration-minibatches-v1",
+    "kind": "ppo-plus-offline-demo-ce",
+    "minibatch_rows": 256,
+    "sampling": "game-uniform-then-accepted-decision-uniform"
+  },
+  "minibatch_rows": 256,
+  "optimizer_steps_per_cohort": 8,
+  "public_server_used": false,
+  "quarantined_team_keys": [
+    "15da45d92542cf0178bd751f30cce0ba401bd2f45c0724993d0a6b2bc15c8979",
+    "bfc1483fa7faefa38bf114c4f449e21b3bb93e3e94dcad759226acbf62149873",
+    "c51b74266a5a93bf78777f551e95887f91eedaa6d4a0abd120d190c765f5c1fe",
+    "f295dfeed4765f9384be1de5bd89e30753e74aeade037a9a91b079daa8907dc9",
+    "6b77aaecfd4038905e369e7664e9d8a21e0dfbd6ee57647a5ff957fdbd043bcd"
+  ],
+  "sampled_update_cohorts": [
+    0,
+    255
+  ],
+  "schema_version": "f35-teacher-assisted-plan-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "selected_rows_per_cohort": 1024,
+  "start_utc": "2026-10-27T23:36:08Z",
+  "statistics": {
+    "alpha": 0.05,
+    "conservative_intervals": "also report bounded Hoeffding interval",
+    "diagnostic_family_cells": 39,
+    "family_cells": 6,
+    "gate": "cutoff-aware lower point gain>=0.05 and approximate family-adjusted bootstrap lower bound>0 and both final arm cutoff rates<=0.05",
+    "limitations": "low power; failure of the conjunction is not proof of no benefit; intervals and all contrasts retained",
+    "max_final_cutoff_rate": 0.05,
+    "overall_gate": "all three baseline primary per-seed gates; teacher adaptation separate",
+    "pairing": "common ordered team pair and mechanics seed across arms, both seats form one resampled cluster; unseeded teacher-search randomness remains",
+    "practical_improvement": 0.05,
+    "primary": "assisted-final minus control-final baseline-v1 separately for all three seeds",
+    "resamples": 20000,
+    "secondary": "assisted-final minus control-final Foul Play separately for all three seeds",
+    "seed": 1027273503
+  },
+  "stream_selected_rows": {
+    "frozen_f32": 256,
+    "self_play": 256,
+    "tactical": 512
+  },
+  "teacher_data": {
+    "accepted_teacher_actions_only": true,
+    "acquisition_cap_seconds": 4500,
+    "parallelism": 1,
+    "probe_games_per_host": 32,
+    "probe_namespace": "f35-teacher-probe-v1",
+    "rejected_action_policy": "restore pre-choice last_selected_move on exact feedback before next protocol ingestion; retain rejected attempt; never replace game",
+    "sampling_namespace": "f35-teacher-search-v1",
+    "search_threads": 1,
+    "search_time_ms": 100,
+    "shared_corpus_across_seeds": true,
+    "train_games_per_host": 128,
+    "train_namespace": "f35-teacher-train-v1",
+    "unsupported_active_action_policy": "fail closed, preserve whole failed execution; waiting frames are counted without labels"
+  },
+  "training_chunk_games": 8,
+  "verification": {
+    "external_recorded_action_replays": 18,
+    "fresh_local_evaluation_games": 48,
+    "fresh_training_games": 36,
+    "original_next_update_recoveries": 12,
+    "scope": "sampled fresh games/recorded accepted teacher actions, original-next-update and explicit unavailable-choice fixture; not exhaustive replay or repeated teacher search",
+    "teacher_recorded_action_replays": 12,
+    "unavailable_choice_fixture_required": true
+  },
+  "workers": 8
+}

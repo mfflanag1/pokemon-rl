@@ -1,0 +1,36 @@
+{
+  "schema_version": "f34-policy-reset-plan-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "max_turns": 240,
+  "quarantined_team_keys": [
+    "15da45d92542cf0178bd751f30cce0ba401bd2f45c0724993d0a6b2bc15c8979",
+    "bfc1483fa7faefa38bf114c4f449e21b3bb93e3e94dcad759226acbf62149873",
+    "c51b74266a5a93bf78777f551e95887f91eedaa6d4a0abd120d190c765f5c1fe",
+    "f295dfeed4765f9384be1de5bd89e30753e74aeade037a9a91b079daa8907dc9",
+    "6b77aaecfd4038905e369e7664e9d8a21e0dfbd6ee57647a5ff957fdbd043bcd"
+  ],
+  "deadline_utc": "2026-10-28T02:00:49Z",
+  "public_server_used": false,
+  "final_reserved_data_used": false,
+  "github_publication_authorized": false,
+  "kind": "fixed-external-opponent-panel",
+  "opponent": "Foul Play",
+  "pin": "packages/external-benchmark/pin.json",
+  "pairs_per_seed": 32,
+  "endpoints": [
+    "initial",
+    "final"
+  ],
+  "expected_games_per_endpoint": 192,
+  "expected_total_games": 384,
+  "search_time_ms": 100,
+  "parallelism": 1,
+  "search_threads": 1,
+  "search_budget_note": "Upstream uses two worlds at 100ms or four at 50ms: approximately 200ms engine search per decision, plus overhead.",
+  "randomness": "Recorded Python seed; unseeded Rust MCTS and wall-time stopping. Paired teams/seats, not bitwise repeatable opponent actions.",
+  "interpretation": "Held-out opponent during this screen only, local small-budget search benchmark, not public ladder Elo or held-out-team generalization."
+}

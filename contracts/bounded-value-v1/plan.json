@@ -1,0 +1,26 @@
+{
+  "version": "bounded-value-1",
+  "purpose": "CPU engineering canary, not a strength experiment or continuation fix",
+  "predecessor_receipt": "97962d20556b7fedf0fd203e854341df557a0d55a95503d7799a04046766493c",
+  "value": "sigmoid of the original linear value output; zero value weights/bias initialize to 0.5",
+  "actor": "Original M3 hidden layer, logits, exact binary-tree categorical law and word/key addresses; equality is at identical parameters, not after learning",
+  "targets": "Original same-player GAE; gamma=1, lambda=0.95; terminal win1/loss0; cutoff bootstrap is the bounded head; FP32 return range tolerance 2e-6",
+  "loss": "Original clipped PPO + 0.5 times half-MSE on bounded predictions - 0.01 entropy; stored targets detached; shared trunk retained",
+  "profile": "Unchanged gen9-starter-pairs-v1, 12 turns, 14 groups, 32 games per update; cutoff games reset",
+  "seeds": [431, 641, 853],
+  "updates_per_seed": 8,
+  "replay_audits": "Initial and final saved state per seed each checked against its original next update; audit outputs discarded, never counted as training progression",
+  "reference_domain": "Independent NumPy network and analytic PPO gradients only where every legal binary conditional is away from the rare-mass floor; actor-law floor/extreme behavior checked by exact inheritance and sampling parity",
+  "acceptance": {
+    "value_range": [0, 1],
+    "target_range_tolerance": 0.000002,
+    "forward_atol": 0.000002,
+    "gradient_atol": 0.000002,
+    "gradient_rtol": 0.0001,
+    "checkpoint_replay": "Exact learner/buffer/final-state/metric fingerprint equality",
+    "finite_updates": true,
+    "actor_input": "Only original ActorInput/player view, no privileged state"
+  },
+  "limitations": "Sigmoid can saturate; a bounded constant prediction can still be unanchored. No supervised turn-13 continuation, strength, calibration, two-hour qualification, full G2/G3/G4, public server or final reserved data use.",
+  "prime_used": false
+}

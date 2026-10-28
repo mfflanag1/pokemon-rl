@@ -1,0 +1,78 @@
+{
+  "version": "f16-balanced-imitation-v1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "workers": 8,
+  "max_turns": 120,
+  "bc_steps": 2048,
+  "teacher_quota": [
+    32,
+    16,
+    8,
+    8
+  ],
+  "old_rows": 64,
+  "probe_seed": 1024261601,
+  "probe_games": 128,
+  "evaluation_seed": 1024261602,
+  "evaluation_pairs_per_opponent": 128,
+  "evaluation_chunk_pairs": 4,
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "endpoints": [
+    "initial",
+    "uniform",
+    "balanced"
+  ],
+  "predecessor_receipt": "artifacts/reports/f15-full-imitation.json",
+  "predecessor_sha256": "d764f60eb14d6bdb37cbaf71469c81980ebb4f0e1fe6a3c3952181943fcd0223",
+  "predecessor_run": "artifacts/runs/f15-full-imitation-v1",
+  "statistics": {
+    "seed": 1024261603,
+    "resamples": 20000,
+    "alpha": 0.05,
+    "family_cells": 27,
+    "practical_improvement": 0.05,
+    "max_final_cutoff_rate": 0.05
+  },
+  "tactical_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6,
+    "maximum_context_mass_drop": 0.05
+  },
+  "coverage_thresholds": {
+    "tera_min_accuracy": 0.25,
+    "tera_min_accuracy_gain": 0.1,
+    "tera_min_target_mass": 0.15,
+    "voluntary_switch_min_accuracy": 0.25,
+    "maximum_other_accuracy_drop": 0.05,
+    "minimum_tera_rows": 64,
+    "minimum_tera_games": 32,
+    "minimum_voluntary_switch_rows": 16,
+    "minimum_voluntary_switch_games": 8
+  },
+  "expected": {
+    "new_teacher_probe_games": 128,
+    "bc_steps": 6144,
+    "bc_row_presentations": 786432,
+    "teacher_row_presentations": 393216,
+    "old_row_presentations": 393216,
+    "evaluation_games": 6912,
+    "tactical_predictions": 4608
+  },
+  "initialization": "Same-seed F10 rehearsal with reset Adam. Uniform control reuses the exact sealed F15 imitation checkpoint (2048 BC steps); it is not retrained. Balanced receives exactly2048 new steps from the same F10 initialization. Accumulated BC budgets,512-demo training corpus, old64-row sampling, architecture and NLL/Adam kernel match; only new-demo sampling differs. No PPO or value-only updates.",
+  "sampling": "In each128-row batch sample32 normal moves,16 Tera moves,8 voluntary switches and8 forced/revival switches from the sealed F15 train dataset. For each family choose games uniformly then one family row per selected game uniformly; shuffle64 rows and add64 old F7 samples using the same f15-old-sample keys as the sealed control. Outcome data never enter sampling. Classes derive only from teacher action ID and own-player request phase.",
+  "evaluation": "Fresh128 development teacher games and128 fresh paired team/mechanics clusters per opponent in both seats, three endpoints and three seeds. Probe/eval exact teams must be mutually disjoint, train/development partition separated, and disjoint from F15 probe/eval. No label-based balancing of evaluation; all outcomes retained. Teacher metrics use equal-game and decision weighting within each family. All512 familiar F10 tactical probes repeated at all9 endpoints.",
+  "gate": "Coverage is a descriptive operating-point screen, not a statistical strength claim: balanced Tera equal-game accuracy>=.25, gain over uniform>=.10, mass>=.15; voluntary switch accuracy>=.25; ordinary move and forced-switch accuracy drops<=.05; all32 known contexts retained. Missing minimum fresh probe support fails the run without resampling. Strength gate: balanced versus BOTH uniform and initial tactical >=5pp plus positive adjusted-bootstrap lower bound, no detected other-opponent regression, <=5% cutoff each final cell and known-context retention. Keep all27 paired contrasts. Each overall gate requires all3 seeds.",
+  "interpretation": "Exploratory development confirmation of an adaptively chosen rare-action balancing hypothesis. Fresh F16 coordinates and exact-team separation from F15 development, within existing R7 partitions; recurring mechanics/species and known opponents. Teacher agreement is not optimal action truth. 128-pair percentile bootstrap coverage is approximate; retain Hoeffding bounds and unresolved cutoffs. Uniform control has sealed historical training, but exact same corpus, initial weights, runtime/kernel and accumulated training budget. F10 remains reference pending broader evidence. No automatic second experiment or budget expansion.",
+  "verification": "Freeze sources/runtime/plan. Fresh replay of all128 new teacher games/data,6144 balanced updates,6912 evaluation games,4608 tactical predictions and9 teacher-probe endpoints;12 checkpoint comparisons,3 original next-update recoveries and3 sealed uniform-control load verifications. Reuse immutable F15 proof of uniform control training.",
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false
+}

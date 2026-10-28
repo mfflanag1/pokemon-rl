@@ -151,7 +151,7 @@ Python child waited for EOF. Its failed verification, log and native stack sampl
 are retained. A clean full rerun passed all 251 tests without a source change;
 the underlying transient pipe cause remains unconfirmed.
 
-Cross-model work uses the [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md).
+Cross-model work uses the claude-review skill.
 The initial statistics delegate was rejected after independent overflow probes;
 its repair is accepted for the explicitly bounded pilot workload, with the original
 QA resource-exhaustion caveat retained. The independent harness review found no

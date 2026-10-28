@@ -1,0 +1,148 @@
+{
+  "schema_version": "f29-nonlinear-policy-plan-1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "arms": [
+    "control",
+    "nonlinear"
+  ],
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "workers": 8,
+  "max_turns": 120,
+  "training_chunk_games": 8,
+  "training_seed_namespace": "f29-self-tactical-training",
+  "optimizer_seed_namespace": "f29-ppo-update",
+  "evaluation_seed": 1025262901,
+  "evaluation_pairs_per_opponent": 128,
+  "evaluation_chunk_pairs": 4,
+  "selfplay_evaluation_seed": 1025262902,
+  "selfplay_pairs": 16,
+  "ppo": {
+    "epochs": 2,
+    "minibatch_rows": 256,
+    "learning_rate": 0.0003,
+    "clip": 0.2,
+    "entropy": 0.01,
+    "value_coefficient": 0.5,
+    "gamma": 1.0,
+    "lambda": 0.95
+  },
+  "mastery_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6
+  },
+  "comparisons": [
+    "control_learning",
+    "nonlinear_learning",
+    "nonlinear_vs_control"
+  ],
+  "expected_counts": {
+    "cohorts": 1536,
+    "optimizer_steps": 12288,
+    "selected_ppo_rows": 1572864,
+    "ppo_row_presentations": 3145728,
+    "evaluation_games": 13824,
+    "selfplay_diagnostic_games": 576,
+    "checkpoint_comparisons": 30,
+    "original_next_update_recoveries": 12
+  },
+  "statistics": {
+    "method": "paired-cluster-percentile-bootstrap",
+    "family_cells": 27,
+    "alpha": 0.05,
+    "resamples": 20000,
+    "seed": 1025262903,
+    "practical_improvement": 0.05,
+    "max_final_cutoff_rate": 0.05
+  },
+  "initialization": "All three F25 final matchup hosts; identical Adam reset and deterministic new local/context weights, zero residual output. Both arms have identical 63,718-parameter inventories and exact same starting predictions. Control ignores new actor branch. No checkpoint selection or promoted host.",
+  "training": "Both arms:256 cohorts of1024 rows,512 self-play plus512 tactical controlled-player rows, frozen actor throughout each cohort, full-game GAE before selection,2epochs/256minibatches/8Adam steps.262144 selected rows,524288 presentations,2048 optimizer steps per seed/arm.8game chunks,64game cap per stream. Equal selected-row/update and refresh budgets; actual games, compute and resulting distributions may differ.",
+  "evaluation": "Endpoints0/131072/262144 selected rows (cohorts0/128/256).128 paired fresh development schedules in both seats per opponent; common schedules across arms/endpoints/seeds.27 final dependent contrasts, midpoint descriptive. All prior exact training/development teams through F28 admitted; new F29 preflight train history included. Separate self-play diagnostics; no reserved data.",
+  "selfplay_diagnostics": "At each candidate endpoint,32 separate development self-play games (16 paired schedules), both actors frozen, no learner rows. Both-seat terminal-only value summaries versus constant0.5; cutoffs excluded. Exactteams disjoint from main battle panel and admitted histories. Supporting descriptive evidence, never optimizer data or checkpoint selection.",
+  "gates": "Primary trained-on tactical learning for both arms and nonlinear-minus-control benefit: cutoff-aware point gain>=.05, adjusted bootstrap lower>0, no detected random/base-power regression, every final cutoff rate<=.05. All3seeds required. Secondary base-power learning and benefit reported with same27contrast family; no new test family or selecting a favorable seed. Values/mastery descriptive.",
+  "interpretation": "Actor capacity/interactions intervention using the same public matchup input. Nonlinear residual conditions each action on its25public channels and the64-dimensional existing public trunk. It adds2912parameters and potential gradients through the existing shared trunk; this does not isolate nonlinearity from capacity or shared-trunk feedback. Zero-output initialization preserves the base function, but optimization trajectory can diverge. No new critic branch. Tactical is trained on: wins show adaptation, not unseen-opponent/public strength. F28 failed strength gates; this hypothesis is not an established remedy.",
+  "no_early_stopping": true,
+  "no_checkpoint_selection": true,
+  "no_budget_extension": true,
+  "promotion_authorized": false,
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false,
+  "catalog": "artifacts/reviews/f17-switch-audit/public-catalog.json",
+  "catalog_sha256": "e218bfd4f4dc377ef6654b2e859f01896d082e6a9a900eebe5bf80e4dcb29510",
+  "features": 1278,
+  "extra_features": 350,
+  "adapter_policy_parameters": 25,
+  "adapter_value_parameters": 350,
+  "features_contract": "Existing F25 public1278channels unchanged:928base plus14x25matchup channels. Same catalogue, terminal identity/public-type limitations. Both arms carry63718parameters. Nonlinear action residual=tanh(extra@local_w+(base_hidden@context_w)[:,None,:]+residual_b)@residual_out; width32. Control disables new residual. Zero output initialization, identical old actor and critic. No new history, hidden state, opponent identity or advice.",
+  "player_schema": "full-showdown-player-v2",
+  "worker_schema": "opponent-mix-worker-v1",
+  "version": "nonlinear-policy-f29-v1",
+  "f25_receipt": "artifacts/reports/f25-terminal-matchup.json",
+  "f25_sha256": "0d4a158b84b45f24452fff7c604649c136f1ab26fc0ab4c123e70c6491f4c43f",
+  "arm_budgets": {
+    "control": {
+      "cohorts": 256,
+      "selected_rows": 1024,
+      "optimizer_steps_per_cohort": 8,
+      "maximum_games_per_stream": 64,
+      "endpoints": [
+        0,
+        128,
+        256
+      ],
+      "checkpoint_cohorts": [
+        0,
+        127,
+        128,
+        255,
+        256
+      ],
+      "recovery_indices": [
+        127,
+        255
+      ]
+    },
+    "nonlinear": {
+      "cohorts": 256,
+      "selected_rows": 1024,
+      "optimizer_steps_per_cohort": 8,
+      "maximum_games_per_stream": 64,
+      "endpoints": [
+        0,
+        128,
+        256
+      ],
+      "checkpoint_cohorts": [
+        0,
+        127,
+        128,
+        255,
+        256
+      ],
+      "recovery_indices": [
+        127,
+        255
+      ]
+    }
+  },
+  "f26_receipt": "artifacts/reports/f26-opponent-mix.json",
+  "f26_sha256": "e2e1ffaeda59e2e40614cfba9236993a8ed044dffdad011bbc0697a0befc1d04",
+  "f27_receipt": "artifacts/reports/f27-gradient-audit.json",
+  "f27_sha256": "7fdff85f391c0963706ada3105923533aca0999feed3152906da03a1386316ca",
+  "telemetry": "Per arm/seed/stream collected/selected/excluded rows, natural terminals/cutoffs, games, collection/update costs, final terminal-only value MSE vs0.5. Pre-update first-minibatch/final-epoch KL and clip descriptive; no full-batch post-update KL claim, stopping or selection.",
+  "residual_width": 32,
+  "parameter_count": 63718,
+  "added_policy_parameters": 2912,
+  "initialization_seed_namespace": "f29-residual-initialization",
+  "primary_opponent": "tactical",
+  "f28_receipt": "artifacts/reports/f28-batch-collection.json",
+  "f28_sha256": "98dd90f50fcfbd26294030e7c2af19bb5afe5a71e58264a3cdae1e666bb90e31"
+}

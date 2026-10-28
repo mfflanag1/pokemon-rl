@@ -1,0 +1,156 @@
+{
+  "schema_version": "f30-nonlinear-continuation-plan-1",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "arms": [
+    "control",
+    "nonlinear"
+  ],
+  "opponents": [
+    "random",
+    "base_power",
+    "tactical"
+  ],
+  "workers": 8,
+  "max_turns": 120,
+  "training_chunk_games": 8,
+  "training_seed_namespace": "f29-self-tactical-training",
+  "optimizer_seed_namespace": "f29-ppo-update",
+  "evaluation_seed": 1025263001,
+  "evaluation_pairs_per_opponent": 128,
+  "evaluation_chunk_pairs": 4,
+  "selfplay_evaluation_seed": 1025263002,
+  "selfplay_pairs": 16,
+  "ppo": {
+    "epochs": 2,
+    "minibatch_rows": 256,
+    "learning_rate": 0.0003,
+    "clip": 0.2,
+    "entropy": 0.01,
+    "value_coefficient": 0.5,
+    "gamma": 1.0,
+    "lambda": 0.95
+  },
+  "mastery_thresholds": {
+    "minimum_greedy_accuracy": 0.95,
+    "minimum_context_mass": 0.6
+  },
+  "comparisons": [
+    "control_learning",
+    "nonlinear_learning",
+    "nonlinear_vs_control"
+  ],
+  "expected_counts": {
+    "cohorts": 4608,
+    "optimizer_steps": 36864,
+    "selected_ppo_rows": 4718592,
+    "ppo_row_presentations": 9437184,
+    "evaluation_games": 13824,
+    "selfplay_diagnostic_games": 576,
+    "checkpoint_comparisons": 30,
+    "original_next_update_recoveries": 12
+  },
+  "statistics": {
+    "method": "paired-cluster-percentile-bootstrap",
+    "family_cells": 27,
+    "alpha": 0.05,
+    "resamples": 20000,
+    "seed": 1025263003,
+    "practical_improvement": 0.05,
+    "max_final_cutoff_rate": 0.05
+  },
+  "initialization": "Continue every same-seed same-arm sealed F29 final cohort256 checkpoint. Preserve parameters, Adam moments and step2048, and each arm-specific next_episode cursor. No reset, reinitialization, seed or checkpoint selection; arms no longer have identical initial predictions.",
+  "training": "Each seed/arm continues absolute cohorts256 through1023:768 additional cohorts x1024 selected rows,512 self-play+512 tactical each,8 Adam steps. Retain F29 training/optimizer/selection namespaces with absolute indices and preserved episode cursors.786432 new selected rows,1572864 presentations,6144 new optimizer steps per seed/arm; cumulative1024 cohorts/1048576 selected rows/8192 optimizer steps. Same model, PPO, GAE, mixture and chunk/cap rules. Games and compute differ and are measured.",
+  "evaluation": "Fresh fixed F30 development panels at absolute cohorts256,512,1024 (cumulative selected rows262144,524288,1048576). Reevaluate all six continuation starts on the same new schedules as later endpoints.128 paired schedules in both seats per opponent; no F29 evaluation reuse.27 dependent final contrasts: each arm final versus its own continuation start, plus nonlinear final versus control final. Midpoint descriptive; admit all prior exact-team histories including F29 and F30 engineering preflight.",
+  "selfplay_diagnostics": "At each candidate endpoint,32 separate development self-play games (16 paired schedules), both actors frozen, no learner rows. Both-seat terminal-only value summaries versus constant0.5; cutoffs excluded. Exactteams disjoint from main battle panel and admitted histories. Supporting descriptive evidence, never optimizer data or checkpoint selection.",
+  "gates": "Primary trained-on tactical learning for both arms and nonlinear-minus-control benefit: cutoff-aware point gain>=.05, adjusted bootstrap lower>0, no detected random/base-power regression, every final cutoff rate<=.05. All3seeds required. Secondary base-power learning and benefit reported with same27contrast family; no new test family or selecting a favorable seed. Values/mastery descriptive.",
+  "interpretation": "Bounded duration continuation, conditional on all F29 final states. Tests additional learning with unchanged model, reward, PPO and opponent mixture. Final nonlinear-versus-control advantage includes inherited F29 differences; it is not a difference-in-differences estimate of extra-training benefit or an independent architecture replication. Tactical is trained on; fresh recurring-generator development games do not establish unseen-opponent, held-out-team or public strength. Value errors remain descriptive on changing trajectories.",
+  "no_early_stopping": true,
+  "no_checkpoint_selection": true,
+  "no_budget_extension": true,
+  "promotion_authorized": false,
+  "final_reserved_data_used": false,
+  "public_server_used": false,
+  "prime_used": false,
+  "catalog": "artifacts/reviews/f17-switch-audit/public-catalog.json",
+  "catalog_sha256": "e218bfd4f4dc377ef6654b2e859f01896d082e6a9a900eebe5bf80e4dcb29510",
+  "features": 1278,
+  "extra_features": 350,
+  "adapter_policy_parameters": 25,
+  "adapter_value_parameters": 350,
+  "features_contract": "Existing F25 public1278channels unchanged:928base plus14x25matchup channels. Same catalogue, terminal identity/public-type limitations. Both arms carry63718parameters. Nonlinear action residual=tanh(extra@local_w+(base_hidden@context_w)[:,None,:]+residual_b)@residual_out; width32. Control disables new residual. Preserve each arm's learned F29 actor, critic and optimizer state; no new initialization. No new history, hidden state, opponent identity or advice.",
+  "player_schema": "full-showdown-player-v2",
+  "worker_schema": "opponent-mix-worker-v1",
+  "version": "nonlinear-continuation-f30-v1",
+  "f25_receipt": "artifacts/reports/f25-terminal-matchup.json",
+  "f25_sha256": "0d4a158b84b45f24452fff7c604649c136f1ab26fc0ab4c123e70c6491f4c43f",
+  "arm_budgets": {
+    "control": {
+      "start_cohort": 256,
+      "cohorts": 1024,
+      "additional_cohorts": 768,
+      "selected_rows": 1024,
+      "optimizer_steps_per_cohort": 8,
+      "maximum_games_per_stream": 64,
+      "endpoints": [
+        256,
+        512,
+        1024
+      ],
+      "checkpoint_cohorts": [
+        256,
+        511,
+        512,
+        1023,
+        1024
+      ],
+      "recovery_indices": [
+        511,
+        1023
+      ]
+    },
+    "nonlinear": {
+      "start_cohort": 256,
+      "cohorts": 1024,
+      "additional_cohorts": 768,
+      "selected_rows": 1024,
+      "optimizer_steps_per_cohort": 8,
+      "maximum_games_per_stream": 64,
+      "endpoints": [
+        256,
+        512,
+        1024
+      ],
+      "checkpoint_cohorts": [
+        256,
+        511,
+        512,
+        1023,
+        1024
+      ],
+      "recovery_indices": [
+        511,
+        1023
+      ]
+    }
+  },
+  "f26_receipt": "artifacts/reports/f26-opponent-mix.json",
+  "f26_sha256": "e2e1ffaeda59e2e40614cfba9236993a8ed044dffdad011bbc0697a0befc1d04",
+  "f27_receipt": "artifacts/reports/f27-gradient-audit.json",
+  "f27_sha256": "7fdff85f391c0963706ada3105923533aca0999feed3152906da03a1386316ca",
+  "telemetry": "Per arm/seed/stream collected/selected/excluded rows, natural terminals/cutoffs, games, collection/update costs, final terminal-only value MSE vs0.5. Pre-update first-minibatch/final-epoch KL and clip descriptive; no full-batch post-update KL claim, stopping or selection.",
+  "residual_width": 32,
+  "parameter_count": 63718,
+  "added_policy_parameters": 2912,
+  "initialization_seed_namespace": "f29-residual-initialization",
+  "primary_opponent": "tactical",
+  "f28_receipt": "artifacts/reports/f28-batch-collection.json",
+  "f28_sha256": "98dd90f50fcfbd26294030e7c2af19bb5afe5a71e58264a3cdae1e666bb90e31",
+  "start_cohort": 256,
+  "final_cohort": 1024,
+  "f29_receipt": "artifacts/reports/f29-nonlinear-policy.json",
+  "f29_sha256": "4d6f723b5efe7d8c60ec7f9a73d14d33c13736ba76fb8a3f98eb92f7836d8b24"
+}

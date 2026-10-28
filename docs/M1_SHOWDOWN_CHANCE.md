@@ -108,7 +108,7 @@ An independent inventory checks all 15,626 consecutive shuffle chains.
 
 The [review dispositions](../artifacts/reviews/m1-showdown-chance/review-dispositions.md)
 record independent review through the
-[claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md).
+claude-review skill.
 Fable implemented the bounded integer mapping; Codex checked its proof, source
 ownership, upstream fixtures and arbitrary-precision oracle tests before accepting
 it for the admitted CPU scope. Opposite-model QA flagged hypothetical mixed-device

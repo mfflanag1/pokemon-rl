@@ -1,0 +1,45 @@
+{
+  "arms": [
+    "zero",
+    "semantic"
+  ],
+  "audit_report": "artifacts/runs/f17-switch-audit-v1/report.json",
+  "audit_report_sha256": "149169cd00a79bd43578c070dc3286b6495c82377d7f3f37bc3813f8e60a1f8e",
+  "catalog": "artifacts/reviews/f17-switch-audit/public-catalog.json",
+  "catalog_sha256": "e218bfd4f4dc377ef6654b2e859f01896d082e6a9a900eebe5bf80e4dcb29510",
+  "checkpoint_recoveries": 6,
+  "coverage_thresholds": {
+    "maximum_other_accuracy_drop": 0.05,
+    "voluntary_min_accuracy": 0.25,
+    "voluntary_min_gain": 0.1
+  },
+  "expected_presentations": 1572864,
+  "expected_updates": 12288,
+  "extra_features": 847,
+  "final_reserved_data_used": false,
+  "learning_rate": 0.0003,
+  "max_gradient_norm": 1.0,
+  "new_games": 0,
+  "old_rows": 64,
+  "old_sampling_namespace": "f15-old-sample",
+  "predecessor_receipt": "artifacts/reports/f16-balanced-imitation.json",
+  "predecessor_sha256": "a554a3fa97780af19e25413e51a522bac790e57af1ec77f94dc1a2b63c3b87de",
+  "prime_used": false,
+  "public_server_used": false,
+  "sampling_namespace": "f16-balanced-sample",
+  "schema_version": "f17-switch-semantic-canary-v1",
+  "scope": "Fixed exploratory representation canary selected after the existing-game audit. Both arms use identical F10 initialization, same balanced batches and old rehearsal, same sealed action law/Adam and2048 updates per seed. New847x64 input weights initialize to zero in both arms; control supplies zero extra features, candidate supplies public species/type/move metadata. Different active input capacity is part of the intervention; this does not isolate feature semantics from effective capacity. Previously used F16 development probe is reused; no fresh confirmation, full battles or policy promotion. No teacher logits, labels, rewards or private opponent information enter features. Nonzero semantic gradients also change the global clipping scale and Adam trajectory; this is a test of the entire additive input block, not an isolated causal test of semantics. Nominal type chart features omit ability/item/dynamic-move modifiers and are not simulator damage estimates.",
+  "seeds": [
+    7103,
+    8209,
+    9311
+  ],
+  "steps": 2048,
+  "teacher_quota": [
+    32,
+    16,
+    8,
+    8
+  ],
+  "teacher_rows": 64
+}

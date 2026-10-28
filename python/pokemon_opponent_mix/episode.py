@@ -1,0 +1,121 @@
+"""Concurrent CPU simulators with fixed-shape, player-only JAX inference.
+
+Policy weights remain fixed throughout collect(). Results are returned in input
+order; worker assignment never contributes to RNG keys or trajectory identities.
+"""
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
+from pathlib import Path
+import time
+import jax
+import jax.numpy as jnp
+import numpy as np
+from pokemon_full.features import encode, FEATURES
+from pokemon_full.policy import act
+from pokemon_full.learner import finish_rows
+from pokemon_full_train.learning import SIDES, baseline as original_baseline, derived_seed
+from pokemon_terminal_matchup.features import legacy_player
+
+def baseline(player, kind, rng):
+    return original_baseline(legacy_player(player), kind, rng)
+
+from .transport import Worker
+from pokemon_throughput.collector import batched_actor, merge_rows
+
+
+
+
+class Episode:
+    def __init__(self, *, seed, episode, max_turns, split='train', swap=False,
+                 opponent=None, learner_side='p1', actor_seed=None):
+        if split not in ['train', 'development'] or (split == 'development' and opponent is None):
+            raise ValueError('Invalid collection role')
+        if split == 'train' and (opponent not in [None, 'tactical'] or swap):
+            raise ValueError('Training requires self-play or frozen tactical on unswapped train teams')
+        if learner_side not in SIDES or opponent not in [None, 'random', 'base_power', 'tactical']:
+            raise ValueError('Invalid opponent/seat')
+        if type(max_turns) is not int or not 2 <= max_turns <= 240:
+            raise ValueError('Invalid turn boundary')
+        self.start = dict(run_seed=seed, episode_index=episode, split=split, swap=swap)
+        self.start['tactical_side'] = ('p2' if learner_side == 'p1' else 'p1') if opponent == 'tactical' else None
+        self.episode, self.split, self.swap = episode, split, swap
+        self.max_turns, self.opponent, self.learner_side = max_turns, opponent, learner_side
+        actor_seed = seed if actor_seed is None else actor_seed
+        self.seeds = [derived_seed('actor', actor_seed, episode, swap, s) for s in SIDES]
+        self.rngs = [np.random.default_rng(derived_seed('opponent', actor_seed, episode, swap, s)) for s in SIDES]
+        self.counts, self.last = [0, 0], {s: None for s in SIDES}
+        self.rows, self.trace, self.values, self.phases = [], [], [], Counter()
+        self.decisions = self.rejections = 0
+        self.frame = self.provenance = self.result = None
+        self.bootstrap = None
+
+    def receive(self, op, frame):
+        self.frame = frame
+        if op == 'start':
+            self.provenance = frame['provenance']
+            if any(t['partition'] != self.split for t in self.provenance['teams']):
+                raise ValueError('Worker partition mismatch')
+        elif op == 'step':
+            self.rejections += sum(not r['accepted'] for r in frame['submitted'])
+        elif op == 'cutoff':
+            if frame['outcome']['kind'] != 'administrative_cutoff':
+                raise ValueError('Wrong cutoff boundary')
+            self.finish(self.bootstrap)
+
+    def finish(self, values):
+        outcome = self.frame['outcome']
+        finish_rows(self.rows, self.last, outcome, values)
+        terminal = outcome['kind'] == 'terminal'
+        self.result = (self.rows, {'episode': self.episode, 'split': self.split, 'swap': self.swap,
+            'learner_side': self.learner_side, 'opponent': self.opponent, 'provenance': self.provenance,
+            'outcome': outcome, 'decisions': self.decisions, 'phases': dict(self.phases),
+            'unavailable_choices': self.rejections, 'trace': self.trace,
+            'value_mean': float(np.mean([v for _, v in self.values])) if self.values else None,
+            'terminal_value_mse': float(np.mean([(v-outcome['rewards'][s])**2 for s,v in self.values]))
+                if terminal and self.values else None})
+
+    def advance(self, outputs):
+        if self.frame['outcome'] is not None:
+            self.finish([o[4] for o in outputs])
+            return None
+        joint = all(self.frame['players'][s]['phase'] == 'move' and outputs[i][1].any()
+                    for i,s in enumerate(SIDES))
+        if joint and self.frame['players']['p1']['turn'] >= self.max_turns:
+            self.bootstrap = [o[4] for o in outputs]
+            return 'cutoff', {}
+        if self.decisions >= 10000:
+            raise RuntimeError('Episode decision cap: no incomplete trajectory enters an update')
+        submission, ids = {}, {}
+        for i, side in enumerate(SIDES):
+            x, mask, action, logp, value = outputs[i]
+            if not mask.any():
+                continue
+            controlled = self.opponent is None or side == self.learner_side
+            if not controlled:
+                if self.opponent == 'tactical':
+                    action = self.frame['tactical_actions'][side]
+                    if type(action) is not int or not 0 <= action < 14 or not mask[action]:
+                        raise ValueError('Invalid frozen tactical advice')
+                else:
+                    action = baseline(self.frame['players'][side], self.opponent, self.rngs[i])
+            if self.split == 'train' and controlled:
+                index = len(self.rows)
+                if self.last[side] is not None:
+                    self.rows[self.last[side]]['next_index'] = index
+                self.rows.append({'features':x, 'mask':mask, 'action':action, 'old_logp':logp,
+                    'value':value, 'reward':0., 'next_index':-1, 'bootstrap':0.,
+                    'terminal':False, 'trajectory':i})
+                self.last[side] = index
+            if controlled:
+                self.values.append((side,value))
+            player = self.frame['players'][side]
+            self.trace.append([side,player['request_id'],action,value if controlled else None,
+                               hashlib.sha256(x.tobytes()).hexdigest()])
+            submission[side], ids[side] = action, player['request_id']
+            self.counts[i] += 1
+            self.decisions += 1
+            self.phases[player['phase']] += 1
+        if not submission:
+            raise RuntimeError('Nonterminal frame has no actionable player')
+        return 'step', dict(actions=submission, request_ids=ids)

@@ -4,7 +4,7 @@
 adjudication; later run results belong in R3_REVIEW.md.
 
 Research run:
-`/Users/maxf/.local/state/cross-model/Pokemon-83aa7cb62b4e/20261010-122038-87adf3a1`.
+`local-review-archive/20261010-122038-87adf3a1`.
 Fable audited selected pinned generator and Dex source plus a hash-labeled source
 table excerpt. Codex performed the required opposite-model QA. The complete
 proposed specification is **rejected**, although several verified facts were useful.

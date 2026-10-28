@@ -1,0 +1,37 @@
+{
+  "version": "live-learner-1",
+  "predecessor": "8736f61ba1e70a5a718c5299b4fb48e0633f2ca353ddf0c67c70ce5e371a07e7",
+  "seeds": [
+    431,
+    641,
+    853
+  ],
+  "windows_per_seed": 10,
+  "batch_games": 32,
+  "groups_per_window": 14,
+  "boundaries": [
+    13,
+    25,
+    37,
+    49,
+    61
+  ],
+  "features": 1187,
+  "hidden": 32,
+  "epochs": 2,
+  "learning_rate": 0.001,
+  "gamma": 1.0,
+  "lambda": 0.95,
+  "clip": 0.2,
+  "value_coefficient": 0.5,
+  "entropy": 0.01,
+  "encoder": "Exact continuation PlayerView only; flatten own, pp, opponent, context, full 128x9 history in that order; FP32 /128; separate four-action mask. No private State accepted.",
+  "actor": "Sealed four-leaf dyadic categorical law; fresh model with sigmoid value head, no M3/M4 weight migration.",
+  "collection": "Fixed cohort for five windows. Resolve faint replacements before every fresh joint boundary. Terminal lanes freeze; empty windows advance cursor but do not change model, Adam or update count. Refill entire cohort only on the transaction following fifth window.",
+  "targets": "On-policy current-window same-player GAE, skip forced-wait/padding; terminal win1 loss0 once on each player's final decision. Frozen collecting-policy afterstate bootstrap at intermediate boundaries and at turn61 administrative cutoff. No backpropagation or GAE trace across windows; later windows use updated policy on preserved environment.",
+  "checkpoint": "Completed-window-and-update boundary only. Bind all parameters, Adam moments/step, window/update/game allocation counters, master seed, game IDs and every live environment/history field. No partial rollout buffer; next transaction must exactly reproduce learner, buffer, final environment and metrics.",
+  "budget": "Three fixed seeds, two production cohorts per seed, ten production collection windows per seed. Generation checks 21 checkpoint pairs with 42 discarded audit-only transactions. Each final-checkpoint probe may allocate a third cohort solely for exact recovery comparison; its window11 session cannot be saved or used as production input. Each acceptance audit separately counts 30 trajectory plus21 checkpoint replay transactions. No strength screen or claim, sustained qualification, public server, final reserved data or Prime.",
+  "full_g2": "open",
+  "full_g3": "open",
+  "full_g4": "open"
+}

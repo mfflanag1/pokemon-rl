@@ -143,7 +143,7 @@ The earlier passing v1 is retained; numerical results, canary traces and final
 policy hashes are unchanged after the evidence/provenance tightening. To verify
 and seal this scope, run `.venv/bin/python scripts/seal-jax-learner.py artifacts/runs/m1-jax-learner-v2`.
 
-Cross-model work used the [claude-review skill](/Users/maxf/.codex/skills/claude-review/SKILL.md):
+Cross-model work used the claude-review skill:
 Fable implemented only the numerical core; Codex QA accepted it; independent executed
 checks confirmed parity before integration was recorded as accepted. A separate Fable
 review covers the actor/collector, training targets and checkpoint boundary. Original
